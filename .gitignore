@@ -31,3 +31,9 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+
+# Compiled stan code
+*.rda
+
+# Result pdf files generated from markdown
+*.pdf
