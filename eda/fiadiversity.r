@@ -15,14 +15,14 @@ library(vegan)
 fiasums_subplot <- fiapnw %>%
   filter(STATUSCD == 1) %>%
   mutate(ba = pi * (DIA/200)^2) %>% # basal area in m2.
-  group_by(STATECD, COUNTYCD, PLOT, SUBP, SPCD) %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT, SUBP, MEASYEAR, SPCD) %>%
   summarize(basalarea = sum(ba),
             n = n())
   
 # Calculate diversity at subplot level
 
 subplot_diversity <- fiasums_subplot %>% ungroup %>%
-  group_by(STATECD, COUNTYCD, PLOT, SUBP) %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT, SUBP, MEASYEAR) %>%
   summarize(richness = length(unique(SPCD)),
             shannon_basalarea = diversity(basalarea, index = 'shannon'),
             evenness_basalarea = shannon_basalarea/log(richness),
@@ -34,14 +34,14 @@ subplot_diversity <- fiasums_subplot %>% ungroup %>%
 fiasums_plot <- fiapnw %>%
   filter(STATUSCD == 1) %>%
   mutate(ba = pi * (DIA/200)^2) %>% # basal area in m2.
-  group_by(STATECD, COUNTYCD, PLOT, SPCD) %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT, MEASYEAR, SPCD) %>%
   summarize(basalarea = sum(ba),
             n = n())
 
 # Calculate diversity at plot level
 
 plot_diversity <- fiasums_plot %>% ungroup %>%
-  group_by(STATECD, COUNTYCD, PLOT) %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT, MEASYEAR) %>%
   summarize(richness = length(unique(SPCD)),
             shannon_basalarea = diversity(basalarea, index = 'shannon'),
             evenness_basalarea = shannon_basalarea/log(richness),
@@ -49,4 +49,23 @@ plot_diversity <- fiasums_plot %>% ungroup %>%
             evenness_n = shannon_n/log(richness)) 
 
 save(plot_diversity, subplot_diversity, file = file.path(fp, 'fia_diversitymetrics.RData'))
-   
+
+
+################################################################
+
+# 15 Feb. 2017: Make plots of FIA diversity.
+
+fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
+
+library(dplyr)
+load(file.path(fp, 'fia_diversitymetrics.RData'))
+
+# Relationships of diversity
+
+library(ggplot2)
+# Close-ish relationship for diversity
+ggplot(plot_diversity, aes(x=shannon_basalarea, y=shannon_n)) + 
+  geom_point() + theme_minimal() + coord_equal()
+# Very different when it comes to evenness
+ggplot(plot_diversity, aes(x=evenness_basalarea, y=evenness_n)) + 
+  geom_point() + theme_minimal() + coord_equal()
