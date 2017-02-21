@@ -69,3 +69,18 @@ ggplot(plot_diversity, aes(x=shannon_basalarea, y=shannon_n)) +
 # Very different when it comes to evenness
 ggplot(plot_diversity, aes(x=evenness_basalarea, y=evenness_n)) + 
   geom_point() + theme_minimal() + coord_equal()
+
+###############################################################
+
+# 21 Feb. 2017: Add the phylogenetic diversity columns to the FIA diversity data frames.
+
+fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
+
+library(dplyr)
+load(file.path(fp, 'fia_diversitymetrics.RData'))
+load(file.path(fp, 'fia_pd.r'))
+
+plot_diversity <- cbind(plot_diversity %>% ungroup, mpd_z = mpd_fia_plot$mpd.obs.z, mntd_z = mntd_fia_plot$mntd.obs.z)
+subplot_diversity <- cbind(subplot_diversity %>% ungroup, mpd_z = mpd_fia_subp$mpd.obs.z, mntd_z = mntd_fia_subp$mntd.obs.z)
+
+save(plot_diversity, subplot_diversity, file = file.path(fp, 'fia_diversitymetrics.RData'))
