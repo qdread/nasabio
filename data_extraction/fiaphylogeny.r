@@ -85,7 +85,7 @@ write.table(pnw_sppout, sep = '/', row.names = FALSE, quote = FALSE, file = file
 # Generated tree with phylomatic using phylogeny from Zanne et al. 2014
 fiatree <- read.newick(file.path(fp, 'fiatree_zanne.nwk'))
 fiatree <- collapse.singles(fiatree)
-fiatree$tip.label <- gsub('\\(spp\\.','\\(spp\\.\\)', fiatree$tip.label)
+#fiatree$tip.label <- gsub('\\(spp\\.','\\(spp\\.\\)', fiatree$tip.label)
 
 # Add species to the tree
 spp_not_in_tree <- pnw_sppout$Genus_species[!pnw_sppout$Genus_species %in% fiatree$tip.label]

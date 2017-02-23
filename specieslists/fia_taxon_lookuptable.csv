@@ -1,5 +1,5 @@
 Core ,East ,West ,woodland Caribbean,FIA Code,PLANTS Code,Common name,Genus ,Species 
-,E ,W ,,10,ABIES ,Fir spp. ,Abies ,(spp.) 
+,E ,W ,,10,ABIES ,Fir spp. ,Abies ,sp
 X ,,W ,,11,ABAM ,Pacific silver fir ,Abies ,amabilis 
 X ,E ,W ,,12,ABBA ,balsam fir ,Abies ,balsamea 
 X ,,W ,,14,ABBR ,"Santa Lucia fir,",Abies ,bracteata 
@@ -17,13 +17,13 @@ X ,,W ,,21,ABSH ,Shasta red fir ,Abies ,shastensis
 ,,,C ,6157,ARHE12 ,Norfolk Island pine,Araucaria ,heterophylla 
 ,,,C ,6331,CACO2 ,Callitris,Callitris ,columellaris 
 X ,,W ,,81,CADE27 ,incense-cedar ,Calocedrus ,decurrens 
-,E ,W ,,40,CHAMA4 ,cedar spp. ,Chamaecyparis ,(spp.) 
+,E ,W ,,40,CHAMA4 ,cedar spp. ,Chamaecyparis ,sp
 X ,,W ,,41,CHLA ,Port-Orford-cedar,Chamaecyparis ,lawsoniana 
 X ,,W ,,42,CHNO ,Alaska yellow-cedar,Chamaecyparis ,nootkatensis 
 X ,E ,,,43,CHTH2 ,Atlantic white-cedar,Chamaecyparis ,thyoides 
 ,,,C ,6786,CRJA3 ,Japanese cedar ,Cryptomeria ,japonica 
 ,,,C ,6788,CULA ,Chinese fir ,Cunninghamia ,lanceolata 
-,,W ,C ,50,CUPRE ,cypress ,Cupressus ,(spp.) 
+,,W ,C ,50,CUPRE ,cypress ,Cupressus ,sp
 X ,,W ,,51,CUAR ,Arizona cypress ,Cupressus ,arizonica 
 X ,,W ,,52,CUBA ,"Baker cypress,",Cupressus ,bakeri 
 X ,,W ,,53,CUFO2 ,tecate cypress ,Cupressus ,forbesii 
@@ -33,7 +33,7 @@ X ,,W ,,54,CUMA2 ,Monterey cypress,Cupressus ,macrocarpa
 ,,W ,,55,CUSA3 ,Sargent’s cypress ,Cupressus ,sargentii 
 ,,,C ,6796,CUSE2 ,Italian cypress ,Cupressus ,sempervirens 
 ,,,C ,6852,CYCI3 ,queen sago ,Cycas ,circinalis 
-,E ,W ,,57,JUNIP ,"redcedar, juniper spp.",Juniperus ,(spp.) 
+,E ,W ,,57,JUNIP ,"redcedar, juniper spp.",Juniperus ,sp
 X ,E ,,w ,61,JUAS ,Ashe juniper ,Juniperus ,ashei 
 X ,,W ,w ,62,JUCA7 ,California juniper ,Juniperus ,californica 
 X ,,W ,w ,59,JUCO11 ,redberry juniper ,Juniperus ,coahuilensis 
@@ -46,11 +46,11 @@ X ,,W ,w ,58,JUPI ,Pinchot juniper ,Juniperus ,pinchotii
 X ,E ,W ,w ,66,JUSC2 ,Rocky Mountain juniper,Juniperus ,scopulorum 
 X ,E ,,,68,JUVI ,eastern redcedar ,Juniperus ,virginiana 
 ,E ,,,67,JUVIS ,southern redcedar,Juniperus ,virginiana var. silicicola
-,E ,W ,,70,LARIX ,larch spp. ,Larix ,(spp.) 
+,E ,W ,,70,LARIX ,larch spp. ,Larix ,sp
 X ,E ,W ,,71,LALA ,tamarack (native),Larix ,laricina 
 X ,,W ,,72,LALY ,subalpine larch ,Larix ,lyallii 
 X ,,W ,,73,LAOC ,western larch ,Larix ,occidentalis 
-,E ,W ,,90,PICEA ,spruce spp. ,Picea ,(spp.) 
+,E ,W ,,90,PICEA ,spruce spp. ,Picea ,sp
 X ,E ,,,91,PIAB ,Norway spruce ,Picea ,abies 
 X ,,W ,,92,PIBR ,Brewer spruce ,Picea ,breweriana 
 X ,,W ,,93,PIEN ,Engelmann spruce,Picea ,engelmannii 
@@ -59,7 +59,7 @@ X ,E ,W ,,95,PIMA ,black spruce ,Picea ,mariana
 X ,E ,W ,,96,PIPU ,blue spruce ,Picea ,pungens 
 X ,E ,,,97,PIRU ,red spruce ,Picea ,rubens 
 X ,,W ,,98,PISI ,Sitka spruce ,Picea ,sitchensis 
-,E ,W ,C ,100,PINUS ,pine spp. ,Pinus ,(spp.) 
+,E ,W ,C ,100,PINUS ,pine spp. ,Pinus ,sp
 X ,,W ,,101,PIAL ,whitebark pine ,Pinus ,albicaulis 
 X ,,W ,,102,PIAR ,Rocky Mountain bristlecone pine,Pinus ,aristata 
 X ,,W ,,135,PIAR5 ,Arizona pine ,Pinus ,arizonica 
@@ -111,31 +111,31 @@ X ,E ,,,132,PIVI2 ,Virginia pine ,Pinus ,virginiana
 X ,,W ,,137,PIWA ,Washoe pine ,Pinus ,washoensis 
 ,,,C ,8249,PLOR80 ,Oriental arborvitae,Platycladus ,orientalis 
 ,,,C ,8273,POCO3 ,yucca plum pine ,Podocarpus ,coriaceus 
-,,W ,,200,PSEUD7 ,Douglas-fir spp. ,Pseudotsuga ,(spp.) 
+,,W ,,200,PSEUD7 ,Douglas-fir spp. ,Pseudotsuga ,sp
 X ,,W ,,201,PSMA ,bigcone Douglas-fir,Pseudotsuga ,macrocarpa 
 X ,,W ,,202,PSME ,Douglas-fir ,Pseudotsuga ,menziesii 
 X ,,W ,,211,SESE3 ,redwood ,Sequoia ,sempervirens 
 X ,,W ,,212,SEGI2 ,giant sequoia ,Sequoiadendron ,giganteum 
-,E ,,,220,TAXOD ,cypress spp. ,Taxodium ,(spp.) 
+,E ,,,220,TAXOD ,cypress spp. ,Taxodium ,sp
 X ,E ,,,222,TAAS ,pondcypress ,Taxodium ,ascendens 
 X ,E ,,,221,TADI2 ,baldcypress ,Taxodium ,distichum 
 ,E ,,,223,TAMU ,Montezuma baldcypress,Taxodium ,mucronatum 
-,E ,W ,,230,TAXUS ,yew spp. ,Taxus ,(spp.) 
+,E ,W ,,230,TAXUS ,yew spp. ,Taxus ,sp
 ,,W ,,231,TABR2 ,Pacific yew ,Taxus ,brevifolia 
 X ,E ,,,232,TAFL ,Florida yew ,Taxus ,floridana 
-,E ,W ,C ,240,THUJA ,Thuja spp. ,Thuja ,(spp.) 
+,E ,W ,C ,240,THUJA ,Thuja spp. ,Thuja ,sp
 X ,E ,,,241,THOC2 ,northern white-cedar,Thuja ,occidentalis 
 X ,,W ,,242,THPL ,western redcedar,Thuja ,plicata 
-,E ,W ,,250,TORRE ,torreya (nutmeg) spp.,Torreya ,(spp.) 
+,E ,W ,,250,TORRE ,torreya (nutmeg) spp.,Torreya ,sp
 X ,,W ,,251,TOCA ,California torreya (nutmeg),Torreya ,californica 
 X ,E ,,,252,TOTA ,Florida torreya (nutmeg),Torreya ,taxifolia 
-,E ,W ,,260,TSUGA ,hemlock spp. ,Tsuga ,(spp.) 
+,E ,W ,,260,TSUGA ,hemlock spp. ,Tsuga ,sp
 X ,E ,,,261,TSCA ,eastern hemlock ,Tsuga ,canadensis 
 X ,E ,,,262,TSCA2 ,Carolina hemlock ,Tsuga ,caroliniana 
 X ,,W ,,263,TSHE ,western hemlock ,Tsuga ,heterophylla 
 X ,,W ,,264,TSME ,mountain hemlock,Tsuga ,mertensiana 
 X ,E ,W ,C ,299,2TE ,unknown dead conifer,Tree ,evergreen 
-,E ,W ,w/C ,300,ACACI ,acacia spp. ,Acacia ,(spp.) 
+,E ,W ,w/C ,300,ACACI ,acacia spp. ,Acacia ,sp
 ,,,C ,6001,ACAN4 ,blackbrush wattle,Acacia ,anegadensis 
 ,E ,W ,w/C ,303,ACFA ,sweet acacia ,Acacia ,farnesiana 
 ,E ,W ,w ,304,ACGR ,catclaw acacia ,Acacia ,greggii 
@@ -145,7 +145,7 @@ X ,E ,W ,C ,299,2TE ,unknown dead conifer,Tree ,evergreen
 ,,,C ,6013,ACNI2 ,gum arabic tree ,Acacia ,nilotica 
 ,,,C ,6015,ACPO3 ,Acacia,Acacia ,polyacantha 
 ,,,C ,6018,ACTO ,poponax ,Acacia ,tortuosa 
-,E ,W ,,310,ACER ,maple spp. ,Acer ,(spp.) 
+,E ,W ,,310,ACER ,maple spp. ,Acer ,sp
 X ,E ,,,311,ACBA3 ,Florida maple ,Acer ,barbatum 
 ,,W ,w ,321,ACGL ,Rocky Mountain maple,Acer ,glabrum 
 ,,W ,w ,322,ACGR3 ,bigtooth maple ,Acer ,grandidentatum 
@@ -166,7 +166,7 @@ X ,E ,,,318,ACSA3 ,sugar maple ,Acer ,saccharum
 ,,,C ,6026,ADRI ,wild lime ,Adelia ,ricinella 
 ,,,C ,6028,ADPA ,red beadtree ,Adenanthera ,pavonina 
 ,,,C ,6032,AEMA ,Caribbean spiritweed,Aegiphila ,martinicensis 
-,E ,W ,,330,AESCU ,"buckeye, horsechestnut spp.",Aesculus ,(spp.) 
+,E ,W ,,330,AESCU ,"buckeye, horsechestnut spp.",Aesculus ,sp
 ,,W ,,333,AECA ,California buckeye,Aesculus ,californica 
 X ,E ,,,332,AEFL ,yellow buckeye ,Aesculus ,flava 
 X ,E ,,,331,AEGL ,Ohio buckeye ,Aesculus ,glabra 
@@ -185,20 +185,20 @@ X ,E ,W ,,345,ALJU ,mimosa/silktree ,Albizia ,julibrissin
 ,,,C ,6075,ALMO2 ,Indian walnut ,Aleurites ,moluccana 
 ,,,C ,6080,ALCR9 ,palo blanco ,Allophylus ,crassinervis 
 ,,,C ,6082,ALRA ,palo de caja ,Allophylus ,racemosus 
-,,W ,,350,ALNUS ,alder spp. ,Alnus ,(spp.) 
+,,W ,,350,ALNUS ,alder spp. ,Alnus ,sp
 X ,E ,,,355,ALGL2 ,European alder ,Alnus ,glutinosa 
 X ,,W ,,353,ALOB2 ,Arizona alder ,Alnus ,oblongifolia 
 X ,,W ,,352,ALRH2 ,white alder ,Alnus ,rhombifolia 
 X ,,W ,,351,ALRU2 ,red alder ,Alnus ,rubra 
 ,,,C ,6092,ALBR4 ,helecho gigante de la sierra,Alsophila ,bryophila 
 ,,,C ,6093,ALPO7 ,Alsophila,Alsophila ,portoricensis 
-,E ,W ,,356,AMELA ,serviceberry spp. ,Amelanchier ,(spp.) 
+,E ,W ,,356,AMELA ,serviceberry spp. ,Amelanchier ,sp
 ,E ,W ,,357,AMAR3 ,common serviceberry,Amelanchier ,arborea 
 ,E ,W ,,358,AMSA ,roundleaf serviceberry,Amelanchier ,sanguinea 
 ,,,C ,6101,AMLA4 ,black calabash ,Amphitecna ,latifolia 
 ,,,C ,6103,AMBA2 ,balsam torchwood,Amyris ,balsamifera 
 ,E ,,C ,852,AMEL ,torchwood ,Amyris ,elemifera 
-,,,C ,6106,ANACA ,anacardium ,Anacardium ,(spp.) 
+,,,C ,6106,ANACA ,anacardium ,Anacardium ,sp
 ,,,C ,6107,ANOC ,cashew ,Anacardium ,occidentale 
 ,,,C ,6111,ANPE13 ,Anadenanthera,Anadenanthera ,peregrina 
 ,,,C ,6114,ANIN ,cabbagebark tree ,Andira ,inermis 
@@ -217,7 +217,7 @@ X ,,W ,,351,ALRU2 ,red alder ,Alnus ,rubra
 ,,,C ,6150,ANOB2 ,quina roja ,Antirhea ,obtusifolia 
 ,,,C ,6151,ANPO3 ,Puerto Rico quina,Antirhea ,portoricensis 
 ,,,C ,6152,ANSI ,Sintenis' quina ,Antirhea ,sintenisii 
-,,W ,,360,ARBUT ,Madrone spp. ,Arbutus ,(spp.) 
+,,W ,,360,ARBUT ,Madrone spp. ,Arbutus ,sp
 X ,,W ,,362,ARAR2 ,Arizona madrone ,Arbutus ,arizonica 
 X ,,W ,,361,ARME ,Pacific madrone ,Arbutus ,menziesii 
 ,E ,W ,w ,363,ARXA80 ,Texas madrone ,Arbutus ,xalapensis 
@@ -244,7 +244,7 @@ X ,E ,,,367,ASTR ,Pawpaw ,Asimina ,triloba
 ,,,C ,6232,BAVA ,mountain ebony ,Bauhinia ,variegata 
 ,,,C ,6233,BEPE ,slugwood ,Beilschmiedia ,pendula 
 ,,,C ,6235,BEDI2 ,Caribbean myrtlecroton,Bernardia ,dichotoma 
-,E ,W ,,370,BETUL ,birch spp. ,Betula ,(spp.) 
+,E ,W ,,370,BETUL ,birch spp. ,Betula ,sp
 X ,E ,,,371,BEAL2 ,yellow birch ,Betula ,alleghaniensis 
 X ,E ,,,372,BELE ,sweet birch ,Betula ,lenta 
 X ,E ,,,373,BENI ,river birch ,Betula ,nigra 
@@ -278,7 +278,7 @@ X ,,W ,,378,BEUT ,northwestern paper birch,Betula ,Xutahensis
 ,,,C ,6311,BYLU ,Long Key locustberry,Byrsonima ,lucida 
 ,,,C ,6313,BYSP ,doncella ,Byrsonima ,spicata 
 ,,,C ,6315,BYWA ,almendrillo ,Byrsonima ,wadsworthii 
-,,,C ,6316,CAESA ,nicker ,Caesalpinia ,(spp.) 
+,,,C ,6316,CAESA ,nicker ,Caesalpinia ,sp
 ,,,C ,6317,CACO28 ,divi divi ,Caesalpinia ,coriaria 
 ,,,C ,6319,CAPU13 ,pride-of-Barbados,Caesalpinia ,pulcherrima 
 ,,,C ,6320,CASA28 ,sappanwood ,Caesalpinia ,sappan 
@@ -310,7 +310,7 @@ X ,,W ,,378,BEUT ,northwestern paper birch,Betula ,Xutahensis
 ,,,C ,6393,CAGU6 ,crabwood ,Carapa ,guianensis 
 ,,,C ,6395,CAPA23 ,papaya ,Carica ,papaya 
 X ,E ,,,391,CACA18 ,"American hornbeam, musclewood",Carpinus ,caroliniana 
-,E ,,,400,CARYA ,hickory spp. ,Carya ,(spp.) 
+,E ,,,400,CARYA ,hickory spp. ,Carya ,sp
 X ,E ,,,409,CAAL27 ,mockernut hickory,Carya ,alba 
 X ,E ,,,401,CAAQ2 ,water hickory ,Carya ,aquatica 
 X ,E ,,,413,CACA38 ,southern shagbark hickory,Carya ,carolinae-septentrionalis
@@ -334,19 +334,19 @@ X ,E ,,,408,CATE9 ,black hickory ,Carya ,texana
 ,,,C ,6418,CAJA3 ,apple blossom ,Cassia ,javanica 
 ,,,C ,6425,CAXY ,marbletree ,Cassine ,xylocarpa 
 ,,,C ,6427,CAGU3 ,goatwood ,Cassipourea ,guianensis 
-,E ,W ,,420,CASTA ,chestnut spp. ,Castanea ,(spp.) 
+,E ,W ,,420,CASTA ,chestnut spp. ,Castanea ,sp
 ,E ,,,421,CADE12 ,American chestnut,Castanea ,dentata 
 X ,E ,W ,,424,CAMO83 ,Chinese chestnut ,Castanea ,mollissima 
 X ,E ,,,422,CAPU9 ,Allegheny chinkapin,Castanea ,pumila 
 ,E ,,,423,CAPUO ,Ozark chinkapin ,Castanea ,pumila var. ozarkensis
 ,,,C ,6429,CAER3 ,goatbush ,Castela ,erecta 
 ,,,C ,6430,CAEL5 ,Panama rubbertree,Castilla ,elastica 
-,E ,,C ,855,CASUA ,sheoak spp. ,Casuarina ,(spp.) 
+,E ,,C ,855,CASUA ,sheoak spp. ,Casuarina ,sp
 ,,,C ,6433,CACU8 ,river sheoak ,Casuarina ,cunninghamiana 
 ,,,C ,6434,CAEQ ,beach sheoak ,Casuarina ,equisetifolia 
 X ,E ,,C ,856,CAGL11 ,gray sheoak ,Casuarina ,glauca 
 X ,E ,,C ,857,CALE28 ,Australian pine ,Casuarina ,lepidophloia 
-,E ,,C ,450,CATAL ,catalpa spp. ,Catalpa ,(spp.) 
+,E ,,C ,450,CATAL ,catalpa spp. ,Catalpa ,sp
 X ,E ,,,451,CABI8 ,southern catalpa ,Catalpa ,bignonioides 
 ,,,C ,6439,CALO8 ,Haitian catalpa ,Catalpa ,longissima 
 X ,E ,,,452,CASP8 ,northern catalpa ,Catalpa ,speciosa 
@@ -355,7 +355,7 @@ X ,E ,,,452,CASP8 ,northern catalpa ,Catalpa ,speciosa
 ,,,C ,6447,CEAC4 ,pochote ,Ceiba ,acuminata 
 ,,,C ,6448,CEAE2 ,pochote ,Ceiba ,aesculifolia 
 ,,,C ,6449,CEPE2 ,kapoktree ,Ceiba ,pentandra 
-,E ,W ,C ,460,CELTI ,hackberry spp. ,Celtis ,(spp.) 
+,E ,W ,C ,460,CELTI ,hackberry spp. ,Celtis ,sp
 X ,E ,W ,,461,CELA ,sugarberry ,Celtis ,laevigata 
 ,E ,W ,,463,CELAR ,netleaf hackberry,Celtis ,laevigata var. reticulata
 X ,E ,W ,,462,CEOC ,hackberry ,Celtis ,occidentalis 
@@ -393,7 +393,7 @@ X ,E ,,,471,CECA4 ,eastern redbud ,Cercis ,canadensis
 ,E ,,C ,859,CIFR ,fiddlewood ,Citharexylum ,fruticosum 
 ,,,C ,6567,CISP3 ,spiny fiddlewood ,Citharexylum ,spinosum 
 ,,,C ,6569,CITR7 ,threespike fiddlewood,Citharexylum ,tristachyum 
-,E ,,C ,860,CITRU2 ,citrus spp. ,Citrus ,(spp.) 
+,E ,,C ,860,CITRU2 ,citrus spp. ,Citrus ,sp
 ,,,C ,6581,CIMA5 ,Citrus maxima ,Citrus ,maxima 
 ,,,C ,6582,CIME3 ,Citrus medica ,Citrus ,medica 
 ,,,C ,6584,CIRE3 ,Citrus reticulata ,Citrus ,reticulata 
@@ -458,7 +458,7 @@ X ,E ,,,481,CLKE ,yellowwood ,Cladrastis ,kentukea
 ,,,C ,6739,CORU5 ,Puerto Rico manjack,Cordia ,rupicola 
 ,E ,,C ,865,COSE2 ,geiger tree ,Cordia ,sebestena 
 ,,,C ,6743,COSU3 ,mucilage manjack,Cordia ,sulcata 
-,E ,W ,,490,CORNU ,dogwood spp. ,Cornus ,(spp.) 
+,E ,W ,,490,CORNU ,dogwood spp. ,Cornus ,sp
 X ,E ,,,491,COFL2 ,flowering dogwood,Cornus ,florida 
 X ,,W ,,492,CONU4 ,Pacific dogwood ,Cornus ,nuttallii 
 ,,,C ,6746,COOB4 ,nigua ,Cornutia ,obovata 
@@ -466,7 +466,7 @@ X ,,W ,,492,CONU4 ,Pacific dogwood ,Cornus ,nuttallii
 ,,,C ,6750,COCI4 ,Corymbia,Corymbia ,citriodora 
 X ,E ,,,996,COOB2 ,smoketree ,Cotinus ,obovatus 
 ,,,C ,6756,COGU3 ,cannonball tree ,Couroupita ,guianensis 
-,E ,,,500,CRATA ,hawthorn spp. ,Crataegus ,(spp.) 
+,E ,,,500,CRATA ,hawthorn spp. ,Crataegus ,sp
 ,E ,,,503,CRBR3 ,Brainerd hawthorn,Crataegus ,brainerdii 
 ,E ,,,504,CRCA ,pear hawthorn ,Crataegus ,calpodendron 
 ,E ,,,505,CRCH ,fireberry hawthorn,Crataegus ,chrysocarpa 
@@ -508,7 +508,7 @@ X ,E ,,,996,COOB2 ,smoketree ,Cotinus ,obovatus
 ,,,C ,6889,DELA3 ,palo de vaca ,Dendropanax ,laurifolius 
 ,,,C ,6896,DIIN6 ,chulta ,Dillenia ,indica 
 ,,,C ,6899,DILO7 ,Dimocarpus,Dimocarpus ,longan 
-,E ,,C ,520,DIOSP ,persimmon spp. ,Diospyros ,(spp.) 
+,E ,,C ,520,DIOSP ,persimmon spp. ,Diospyros ,sp
 ,,,C ,6909,DIRE6 ,black apple ,Diospyros ,revoluta 
 ,,,C ,6912,DISI3 ,Chinese persimmon,Diospyros ,sintenisii 
 X ,E ,,,522,DITE3 ,Texas persimmon,Diospyros ,texana 
@@ -541,7 +541,7 @@ X ,E ,,,521,DIVI5 ,common persimmon,Diospyros ,virginiana
 ,,,C ,7021,ERRO3 ,ratwood ,Erythroxylum ,rotundifolium 
 ,,,C ,7022,ERRU4 ,rufous false cocaine,Erythroxylum ,rufum 
 ,,,C ,7024,ERUR4 ,Urban's false cocaine,Erythroxylum ,urbanii 
-,E ,W ,C ,510,EUCAL ,eucalyptus spp. ,Eucalyptus ,(spp.) 
+,E ,W ,C ,510,EUCAL ,eucalyptus spp. ,Eucalyptus ,sp
 X ,E ,,,512,EUCA2 ,river redgum ,Eucalyptus ,camaldulensis 
 ,,,C ,7034,EUDE2 ,Indonesian gum ,Eucalyptus ,deglupta 
 X ,,W ,,511,EUGL ,Tasmanian bluegum,Eucalyptus ,globulus 
@@ -612,7 +612,7 @@ X ,E ,,,531,FAGR ,American beech ,Fagus ,grandifolia
 ,,,C ,7196,FOSE ,Florida swampprivet,Forestiera ,segregata 
 ,,,C ,7198,FOMA2 ,oval kumquat ,Fortunella ,margarita 
 ,,,C ,7202,FRSPL ,West Indian buckthorn,Frangula ,sphaerosperma 
-,E ,W ,C ,540,FRAXI ,ash spp. ,Fraxinus ,(spp.) 
+,E ,W ,C ,540,FRAXI ,ash spp. ,Fraxinus ,sp
 X ,E ,,,541,FRAM2 ,white ash ,Fraxinus ,americana 
 ,E ,,,5491,FRBE ,Berlandier ash ,Fraxinus ,berlandieriana 
 X ,E ,,,548,FRCA3 ,Carolina ash ,Fraxinus ,caroliniana 
@@ -635,7 +635,7 @@ X ,,W ,,547,FRVE2 ,velvet ash ,Fraxinus ,velutina
 ,,,C ,7237,GEPE4 ,arbol de Navidad ,Gesneria ,pedunculosa 
 X ,E ,W ,,561,GIBI2 ,"Ginkgo,",Ginkgo ,biloba 
 ,,,C ,7239,GIRO ,bastard gregre ,Ginoria ,rohrii 
-,E ,,,550,GLEDI ,locust spp. ,Gleditsia ,(spp.) 
+,E ,,,550,GLEDI ,locust spp. ,Gleditsia ,sp
 X ,E ,,,551,GLAQ ,waterlocust ,Gleditsia ,aquatica 
 X ,E ,,,552,GLTR ,honeylocust ,Gleditsia ,triacanthos 
 ,,,C ,7245,GLSE2 ,quickstick ,Gliricidia ,sepium 
@@ -668,7 +668,7 @@ X ,E ,,,555,GOLA ,loblolly bay ,Gordonia ,lasianthus
 X ,E ,,,571,GYDI ,Kentucky coffeetree,Gymnocladus ,dioicus 
 ,,,C ,7321,HACA2 ,bloodwoodtree ,Haematoxylum ,campechianum 
 ,,,C ,7327,HASAO ,palo de hueso ,Haenianthus ,salicifolius 
-,E ,,,580,HALES ,silverbell spp. ,Halesia ,(spp.) 
+,E ,,,580,HALES ,silverbell spp. ,Halesia ,sp
 X ,E ,,,581,HACA3 ,Carolina silverbell,Halesia ,carolina 
 X ,E ,,,582,HADI3 ,two-wing silverbell,Halesia ,diptera 
 X ,E ,,,583,HAPA2 ,little silverbell ,Halesia ,parviflora 
@@ -704,7 +704,7 @@ X ,E ,,,591,ILOP ,American holly ,Ilex ,opaca
 ,,,C ,7463,ILSI2 ,Sintenis' holly ,Ilex ,sintenisii 
 ,,,C ,7465,ILUR ,Urban's holly ,Ilex ,urbaniana 
 ,,,C ,7466,ILURR ,Ilex urbaniana ,Ilex ,urbaniana var. riedlaei
-,,,C ,7467,INGA ,inga ,Inga ,(spp.) 
+,,,C ,7467,INGA ,inga ,Inga ,sp
 ,,,C ,7470,INLA ,sacky sac bean ,Inga ,laurina 
 ,,,C ,7471,INNOQ ,Inga nobilis ,Inga ,nobilis 
 ,,,C ,7474,INVE ,river koko ,Inga ,vera 
@@ -717,7 +717,7 @@ X ,E ,,,591,ILOP ,American holly ,Ilex ,opaca
 ,,,C ,7491,JACU2 ,Barbados nut ,Jatropha ,curcas 
 ,,,C ,7492,JAHE ,wild oilnut ,Jatropha ,hernandiifolia 
 ,,,C ,7493,JAMU ,coralbush ,Jatropha ,multifida 
-,E ,W ,C ,600,JUGLA ,walnut spp. ,Juglans ,(spp.) 
+,E ,W ,C ,600,JUGLA ,walnut spp. ,Juglans ,sp
 X ,,W ,,604,JUCA ,Southern California black walnue,Juglans ,californica 
 X ,E ,,,601,JUCI ,butternut ,Juglans ,cinerea 
 ,,W ,,603,JUHI ,Northern California black walnut,Juglans ,hindsii 
@@ -752,7 +752,7 @@ X ,,W ,,631,LIDE3 ,tanoak ,Lithocarpus ,densiflorus
 ,,,C ,7591,LOGL2 ,geno ,Lonchocarpus ,glaucifolius 
 ,,,C ,7592,LOHE7 ,broadleaf lancepod,Lonchocarpus ,heptaphyllus 
 ,,,C ,7600,LUSP11 ,luehea ,Luehea ,speciosa 
-,,,C ,7604,LUNAN ,lunania ,Lunania ,(spp.) 
+,,,C ,7604,LUNAN ,lunania ,Lunania ,sp
 ,,,C ,7606,LUEK ,Lunania ekmanii ,Lunania ,ekmanii 
 ,,,C ,7608,LYRU2 ,St. Thomas staggerbush,Lyonia ,rubiginosa 
 ,E ,,C ,884,LYLA3 ,false tamarind ,Lysiloma ,latisiliquum 
@@ -761,7 +761,7 @@ X ,,W ,,631,LIDE3 ,tanoak ,Lithocarpus ,densiflorus
 X ,E ,,,641,MAPO ,Osage-orange ,Maclura ,pomifera 
 ,,,C ,7632,MATI3 ,Maclura tinctoria ,Maclura ,tinctoria 
 ,,,C ,7633,MAEM2 ,umbrella-tree ,Maesopsis ,eminii 
-,E ,,C ,650,MAGNO ,magnolia spp. ,Magnolia ,(spp.) 
+,E ,,C ,650,MAGNO ,magnolia spp. ,Magnolia ,sp
 X ,E ,,,651,MAAC ,cucumbertree ,Magnolia ,acuminata 
 X ,E ,,,655,MAFR ,"mountain magnolia, Fraser magnolia",Magnolia ,fraseri 
 X ,E ,,,652,MAGR4 ,southern magnolia,Magnolia ,grandiflora 
@@ -777,7 +777,7 @@ X ,E ,,,653,MAVI2 ,sweetbay ,Magnolia ,virginiana
 ,,,C ,7646,MAGL6 ,wild crapemyrtle ,Malpighia ,glabra 
 ,,,C ,7647,MAIN5 ,cowhage cherry ,Malpighia ,infestissima 
 ,,,C ,7648,MALI2 ,bastard cherry ,Malpighia ,linearis 
-,E ,W ,,660,MALUS ,apple spp. ,Malus ,(spp.) 
+,E ,W ,,660,MALUS ,apple spp. ,Malus ,sp
 X ,E ,,,662,MAAN3 ,southern crabapple,Malus ,angustifolia 
 X ,E ,,,663,MACO5 ,sweet crabapple ,Malus ,coronaria 
 X ,,W ,,661,MAFU ,Oregon crabapple,Malus ,fusca 
@@ -827,13 +827,13 @@ X ,E ,,C ,993,MEAZ ,chinaberry ,Melia ,azedarach
 ,,,C ,7828,MIGA ,caimitillo verde ,Micropholis ,garciniifolia 
 ,,,C ,7829,MIGU2 ,Micropholis,Micropholis ,guyanensis 
 ,,,C ,7833,MIAR4 ,elegant mimosa ,Mimosa ,arenosa 
-,,,C ,7839,MONOD ,monodora ,Monodora ,(spp.) 
+,,,C ,7839,MONOD ,monodora ,Monodora ,sp
 ,,,C ,7845,MOCE2 ,Morella cerifera ,Morella ,cerifera 
 ,,,C ,7847,MOHO3 ,Morella,Morella ,holdridgeana 
 ,,,C ,7849,MOCI3 ,Indian mulberry ,Morinda ,citrifolia 
 ,,,C ,7855,MOOL ,horseradishtree ,Moringa ,oleifera 
 ,,,C ,7857,MOAM ,ratapple ,Morisonia ,americana 
-,E ,,C ,680,MORUS ,mulberry spp. ,Morus ,(spp.) 
+,E ,,C ,680,MORUS ,mulberry spp. ,Morus ,sp
 X ,E ,,C ,681,MOAL ,white mulberry ,Morus ,alba 
 ,E ,W ,,683,MOMI ,Texas mulberry ,Morus ,microphylla 
  X ,E ,,C ,684,MONI ,black mulberry ,Morus ,nigra 
@@ -864,7 +864,7 @@ X ,E ,,,682,MORU2 ,red mulberry ,Morus ,rubra
 ,,,C ,7944,NECA7 ,kadam ,Neolamarckia ,cadamba 
 ,,,C ,7946,NERE2 ,aquilon ,Neolaugeria ,resinosa 
 ,,,C ,7956,NEOL ,oleander ,Nerium ,oleander 
-,E ,,,690,NYSSA ,tupelo spp. ,Nyssa ,(spp.) 
+,E ,,,690,NYSSA ,tupelo spp. ,Nyssa ,sp
 X ,E ,,,691,NYAQ2 ,water tupelo ,Nyssa ,aquatica 
 X ,E ,,,694,NYBI ,swamp tupelo ,Nyssa ,biflora 
 X ,E ,,,692,NYOG ,Ogeechee tupelo ,Nyssa ,ogeche 
@@ -896,7 +896,7 @@ X ,E ,,,711,OXAR ,sourwood ,Oxydendrum ,arboreum
 ,,,C ,8051,PAGU ,showy cappel ,Palicourea ,guianensis 
 ,,,C ,8088,PAUT ,common screwpine,Pandanus ,utilis 
 ,,,C ,8099,PACR2 ,scratchthroat ,Parathesis ,crenulata 
-,,,C ,8106,PARKI3 ,parkia ,Parkia ,(spp.) 
+,,,C ,8106,PARKI3 ,parkia ,Parkia ,sp
 ,,,C ,8110,PATI5 ,Parkia timoriana ,Parkia ,timoriana 
 ,,,C ,8111,PAAC3 ,Jerusalem thorn ,Parkinsonia ,aculeata 
 ,,,C ,8113,PAAC13 ,cuachilote ,Parmentiera ,aculeata 
@@ -905,7 +905,7 @@ X ,E ,,,712,PATO2 ,"paulownia,",Paulownia ,tomentosa
 ,,,C ,8121,PEPT3 ,Peltophorum,Peltophorum ,pterocarpum 
 ,,,C ,8125,PEBU4 ,butter tree ,Pentadesma ,butyracea 
 ,,,C ,8127,PEBU2 ,jiqi ,Pera ,bumeliifolia 
-,E ,W ,C ,720,PERSE ,bay spp. ,Persea ,(spp.) 
+,E ,W ,C ,720,PERSE ,bay spp. ,Persea ,sp
 X ,,W ,C ,7211,PEAM3 ,avocado ,Persea ,americana 
 X ,E ,,,721,PEBO ,redbay ,Persea ,borbonia 
 ,,,C ,8134,PEKR ,canela ,Persea ,krugii 
@@ -939,7 +939,7 @@ X ,E ,,,721,PEBO ,redbay ,Persea ,borbonia
 ,,,C ,8220,PIDU ,monkeypod ,Pithecellobium ,dulce 
 ,,,C ,8223,PIUN ,catclaw blackbead,Pithecellobium ,unguis-cati 
 X ,E ,,,722,PLAQ ,"water-elm, planertree",Planera ,aquatica 
-,E ,W ,,729,PLATA ,sycamore spp. ,Platanus ,(spp.) 
+,E ,W ,,729,PLATA ,sycamore spp. ,Platanus ,sp
 X ,E ,,,731,PLOC ,American sycamore,Platanus ,occidentalis 
 X ,,W ,,730,PLRA ,California sycamore,Platanus ,racemosa 
 X ,,W ,,732,PLWR2 ,Arizona sycamore,Platanus ,wrightii 
@@ -953,7 +953,7 @@ X ,,W ,,732,PLWR2 ,Arizona sycamore,Platanus ,wrightii
 ,,,C ,8279,POCO5 ,violet tree ,Polygala ,cowellii 
 ,,,C ,8280,POPE13 ,crevajosa ,Polygala ,penaea 
 ,,,C ,8284,POGU ,geranium aralia ,Polyscias ,guilfoylei 
-,E ,W ,,740,POPUL ,cottonwood and poplar spp.,Populus ,(spp.) 
+,E ,W ,,740,POPUL ,cottonwood and poplar spp.,Populus ,sp
 X ,E ,,,752,POAL7 ,silver poplar ,Populus ,alba 
 X ,,W ,,749,POAN3 ,narrowleaf cottonwood,Populus ,angustifolia 
 X ,E ,W ,,741,POBA2 ,balsam poplar ,Populus ,balsamifera 
@@ -971,13 +971,13 @@ X ,E ,W ,,746,POTR5 ,quaking aspen ,Populus ,tremuloides
 ,,,C ,8305,POSA13 ,mammee sapote ,Pouteria ,sapota 
 ,,,C ,8311,PRACM ,Prestoea acuminata,Prestoea ,acuminata 
 ,,,C ,8340,PRCR2 ,guasimilla ,Prockia ,crucis 
-,E ,W ,w/C ,755,PROSO ,mesquite spp. ,Prosopis ,(spp.) 
+,E ,W ,w/C ,755,PROSO ,mesquite spp. ,Prosopis ,sp
 ,,,C ,8342,PRCI4 ,jand ,Prosopis ,cineraria 
 X ,E ,W ,w ,756,PRGL2 ,honey mesquite,Prosopis ,glandulosa 
 ,,,C ,8344,PRPA4 ,kiawe ,Prosopis ,pallida 
 X ,E ,W ,w ,758,PRPU ,screwbean mesquite,Prosopis ,pubescens 
 X ,E ,W ,w ,757,PRVE ,velvet mesquite ,Prosopis ,velutina 
-,E ,W ,C ,760,PRUNU ,cherry and plum spp.,Prunus ,(spp.) 
+,E ,W ,C ,760,PRUNU ,cherry and plum spp.,Prunus ,sp
 ,E ,,,769,PRAL5 ,Allegheny plum ,Prunus ,alleghaniensis 
 X ,E ,,,766,PRAM ,American plum ,Prunus ,americana 
 ,E ,W ,,770,PRAN3 ,Chickasaw plum ,Prunus ,angustifolia 
@@ -1016,7 +1016,7 @@ X ,E ,,,762,PRSE2 ,black cherry ,Prunus ,serotina
 ,,,C ,8410,PTOF ,dragonsblood tree,Pterocarpus ,officinalis 
 ,,,C ,8419,PUGR2 ,pomegranate ,Punica ,granatum 
 ,,,C ,8422,QUTU ,swizzlestick tree ,Quararibea ,turbinata 
-,E ,W ,,800,QUERC ,oak spp. ,Quercus ,(spp.) 
+,E ,W ,,800,QUERC ,oak spp. ,Quercus ,sp
 X ,,W ,,801,QUAG ,California live oak,Quercus ,agrifolia 
 X ,E ,,,802,QUAL ,white oak ,Quercus ,alba 
 X ,,W ,w ,803,QUAR ,Arizona white oak,Quercus ,arizonica 
@@ -1086,14 +1086,14 @@ X ,E ,W ,,901,ROPS ,black locust ,Robinia ,pseudoacacia
 ,,,C ,8483,ROIN4 ,cordobancillo ,Rondeletia ,inermis 
 ,,,C ,8484,ROPI3 ,cordobancillo peludo,Rondeletia ,pilosa 
 ,,,C ,8485,ROPO ,Juan Tomas ,Rondeletia ,portoricensis 
-,E ,,C ,909,ROYST ,royal palm spp. ,Roystonea ,(spp.) 
+,E ,,C ,909,ROYST ,royal palm spp. ,Roystonea ,sp
 ,,,C ,8489,ROBO ,Puerto Rico royal palm,Roystonea ,borinquena 
 ,,,C ,8490,ROEL ,Roystonea elata ,Roystonea ,elata 
 ,,,C ,8494,SACA ,Puerto Rico palmetto,Sabal ,causiarum 
 ,E ,,,911,SAME8 ,Mexican palmetto,Sabal ,mexicana 
 X ,E ,,,912,SAPA ,cabbage palmetto,Sabal ,palmetto 
 ,,,C ,8499,SAUM3 ,white hogwood ,Sagraea ,umbrosa 
-,E ,W ,C ,920,SALIX ,willow spp. ,Salix ,(spp.) 
+,E ,W ,C ,920,SALIX ,willow spp. ,Salix ,sp
 ,E ,W ,,927,SAAL2 ,white willow ,Salix ,alba 
 ,E ,W ,,921,SAAM2 ,peachleaf willow ,Salix ,amygdaloides 
 ,E ,W ,,923,SABE2 ,Bebb willow ,Salix ,bebbiana 
@@ -1139,11 +1139,11 @@ X ,E ,,,931,SAAL5 ,sassafras ,Sassafras ,albidum
 ,,,C ,8613,SIOB ,breakbill ,Sideroxylon ,obovatum 
 ,,,C ,8614,SIPO3 ,Puerto Rico bully ,Sideroxylon ,portoricense 
 ,E ,,C ,891,SISA6 ,"white bully,",Sideroxylon ,salicifolium 
-,,,C ,8617,SIMAR ,simarouba ,Simarouba ,(spp.) 
+,,,C ,8617,SIMAR ,simarouba ,Simarouba ,sp
 ,E ,,,895,SIGL3 ,paradise tree ,Simarouba ,glauca 
 ,,,C ,8619,SITU ,aceitillo falso ,Simarouba ,tulae 
 ,,,C ,8620,SIDE6 ,hoja menuda ,Siphoneugena ,densiflora 
-,,,C ,8622,SLOAN ,bullwood ,Sloanea ,(spp.) 
+,,,C ,8622,SLOAN ,bullwood ,Sloanea ,sp
 ,,,C ,8623,SLAM ,motillo ,Sloanea ,amygdalina 
 ,,,C ,8624,SLBE ,bullwood ,Sloanea ,berteriana 
 ,,,C ,8626,SOBAB ,Solanum,Solanum ,bahamense 
@@ -1154,7 +1154,7 @@ X ,E ,,,931,SAAL5 ,sassafras ,Sassafras ,albidum
 ,,,C ,8634,SORU ,tabacon aspero ,Solanum ,rugosum 
 ,,,C ,8636,SOTO4 ,turkey berry ,Solanum ,torvum 
 ,E ,,,870,SOAF ,Texas sophora ,Sophora ,affinis 
-,E ,,,934,SORBU ,mountain ash spp.,Sorbus ,(spp.) 
+,E ,,,934,SORBU ,mountain ash spp.,Sorbus ,sp
 ,E ,,,935,SOAM3 ,American mountain ash,Sorbus ,americana 
 X ,E ,,,936,SOAU ,European mountain ash,Sorbus ,aucuparia 
 X ,E ,,,937,SODE3 ,northern mountain ash,Sorbus ,decora 
@@ -1167,7 +1167,7 @@ X ,E ,,,937,SODE3 ,northern mountain ash,Sorbus ,decora
 ,,,C ,8666,STFO2 ,hazel sterculia ,Sterculia ,foetida 
 ,,,C ,8674,STPO3 ,palo de jazmin ,Styrax ,portoricensis 
 ,,,C ,8676,SUMA2 ,bay cedar ,Suriana ,maritima 
-,,,C ,8678,SWIET ,mahogany ,Swietenia ,(spp.) 
+,,,C ,8678,SWIET ,mahogany ,Swietenia ,sp
 ,,,C ,8679,SWMA ,Honduras mahogany,Swietenia ,macrophylla 
 ,E ,,C ,940,SWMA2 ,mahogany ,Swietenia ,mahagoni 
 ,,,C ,8683,SYLA2 ,nispero cimarron ,Symplocos ,lanata 
@@ -1185,11 +1185,11 @@ X ,E ,,,937,SODE3 ,northern mountain ash,Sorbus ,decora
 ,,,C ,8717,TASC2 ,roble colorado ,Tabebuia ,schumanniana 
 ,,,C ,8720,TACI ,milkwood ,Tabernaemontana ,citrifolia 
 ,E ,,C ,897,TAIN2 ,tamarind ,Tamarindus ,indica 
-,E ,W ,C ,991,TAMAR2 ,saltcedar ,Tamarix ,(spp.) 
+,E ,W ,C ,991,TAMAR2 ,saltcedar ,Tamarix ,sp
 ,,,C ,8727,TAAP ,Athel tamarisk ,Tamarix ,aphylla 
 ,,,C ,8743,TEST ,yellow trumpetbush,Tecoma ,stans 
 ,,,C ,8744,TEGR ,teak ,Tectona ,grandis 
-,,,C ,8748,TERMI ,tropical almond ,Terminalia ,(spp.) 
+,,,C ,8748,TERMI ,tropical almond ,Terminalia ,sp
 ,,,C ,8750,TECA ,troipical almond ,Terminalia ,catappa 
 ,,,C ,8754,TEIV2 ,Ivory Coast almond,Terminalia ,ivorensis 
 ,,,C ,8756,TEMY ,East Indian almond,Terminalia ,myriocarpa 
@@ -1214,11 +1214,11 @@ X ,E ,,,937,SODE3 ,northern mountain ash,Sorbus ,decora
 ,E ,,C ,913,THMO4 ,key thatch palm ,Thrinax ,morrisii 
 ,E ,,,914,THRA2 ,Florida thatch palm,Thrinax ,radiata 
 ,,,C ,8803,TIGR3 ,Brazilian glorytree,Tibouchina ,granulosa 
-,E ,,,950,TILIA ,basswood spp. ,Tilia ,(spp.) 
+,E ,,,950,TILIA ,basswood spp. ,Tilia ,sp
 X ,E ,,,951,TIAM ,American basswood,Tilia ,americana 
 ,E ,,,953,TIAMC ,Carolina basswood,Tilia ,americana var. caroliniana
 ,E ,,,952,TIAMH ,white basswood ,Tilia ,americana var. heterophylla
-,,,C ,8811,TOONA ,redcedar ,Toona ,(spp.) 
+,,,C ,8811,TOONA ,redcedar ,Toona ,sp
 ,,,C ,8812,TOCI ,Australian redcedar,Toona ,ciliata 
 ,,,C ,8816,TOCU ,boje ,Torralbasia ,cuneifolia 
 ,,,C ,8825,TOFI ,cold withe ,Tournefortia ,filiflora 
@@ -1229,11 +1229,11 @@ X ,E ,,,994,TRSE6 ,Chinese tallowtree,Triadica ,sebifera
 ,,,C ,8834,TRPA2 ,gaita ,Trichilia ,pallida 
 ,,,C ,8836,TRTR8 ,bariaco ,Trichilia ,triacantha 
 ,,,C ,8842,TRTR7 ,limeberry ,Triphasia ,trifolia 
-,,,C ,8843,TRIPL5 ,Triplaris spp. ,Triplaris ,(spp.) 
+,,,C ,8843,TRIPL5 ,Triplaris spp. ,Triplaris ,sp
 ,,,C ,8844,TRCU6 ,ant tree ,Triplaris ,cumingiana 
 ,,,C ,8848,TRRA4 ,white ramoon ,Trophis ,racemosa 
 ,,,C ,8850,TUOC ,muttonwood ,Turpinia ,occidentalis 
-,E ,,,970,ULMUS ,elm spp. ,Ulmus ,(spp.) 
+,E ,,,970,ULMUS ,elm spp. ,Ulmus ,sp
 X ,E ,,,971,ULAL ,winged elm ,Ulmus ,alata 
 X ,E ,,,972,ULAM ,American elm ,Ulmus ,americana 
 X ,E ,,,973,ULCR ,cedar elm ,Ulmus ,crassifolia 
