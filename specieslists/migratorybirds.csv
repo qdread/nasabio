@@ -1,0 +1,422 @@
+Order,Common name,Latin name,ESA,Watchlist/
+,,,,Concern
+Anseriformes,,,,
+,Fulvous Whistling-Duck,Dendrocygna bicolor ,,
+,Greater White-fronted Goose,Anser albifrons,,
+,Snow Goose,Chen caerulescens ,,
+,Ross's Goose,Chen rossii ,,
+,Brant,Branta bernicla ,,
+,Cackling Goose,Branta hutchinsii,,
+,Canada Goose,Branta canadensis ,,
+,Wood Duck,Aix sponsa,,
+,Gadwall,Anas strepera ,,
+,American Wigeon,Anas americana ,,
+,Mallard,Anas platyrhynchos ,,
+,Blue-winged Teal,Anas discors ,,
+,Cinnamon Teal,Anas cyanoptera ,,
+,Northern Shoveler,Anas clypeata  ,,
+,Northern Pintail,Anas acuta ,,
+,Green-winged Teal,Anas crecca  ,,
+,Canvasback,Aythya valisineria ,,
+,Redhead,Aythya americana ,,
+,Ring-necked Duck,Aythya collaris ,,
+,Lesser Scaup,Aythya affinis ,,
+,Surf Scoter,Melanitta perspicillata ,,
+,Bufflehead,Bucephala albeola ,,
+,Common Goldeneye,Bucephala clangula ,,
+,Common Merganser,Mergus merganser ,,
+,Red-breasted Merganser,Mergus serrator ,,
+,Ruddy Duck,Oxyura jamaicensis ,,
+Gaviiformes,,,,
+,Red-throated Loon,Gavia stellata ,,
+,Pacific Loon,Gavia pacifica ,,
+,Common Loon,Gavia immer ,,
+Podicipediformes,,,,
+,Pied-billed Grebe,Podilymbus podiceps,,
+,Eared Grebe,Podiceps nigricollis ,,
+,Western Grebe,Aechmophorus occidentalis ,,
+,Clark's Grebe,Aechmophorus clarkii ,,X
+Procellariiformes,,,,
+,Leach's Storm-Petrel,Oceanodroma leucorhoa ,,
+,Ashy Storm-Petrel,Oceanodroma homochroa ,,X
+,Black Storm-Petrel,Oceanodroma melania ,,X
+Pelecaniformes,,,,
+,American White Pelican,Pelecanus erythrorhynchos ,,
+,Double-crested Cormorant,Phalacrocorax auritus ,,
+,Anhinga,Anhinga anhinga ,,
+Ciconiiformes,,,,
+,American Bittern,Botaurus lentiginosus,,
+,Least Bittern,Ixobrychus exilis ,,
+,Great Blue Heron,Ardea herodias ,,
+,Great Egret,Ardea alba ,,
+,Snowy Egret,Egretta thula ,,
+,Little Blue Heron,Egretta caerulea ,,
+,Tricolored Heron,Egretta tricolor ,,
+,Reddish Egret *,Egretta rufescens  *,,X
+,Cattle Egret,Bubulcus ibis ,,
+,Green Heron,Butorides virescens ,,
+,Black-crowned Night-Heron,Nycticorax nycticorax ,,
+,Yellow-crowned Night-Heron,Nyctanassa violacea ,,
+,White Ibis,Eudocimus albus ,,
+,Glossy Ibis,Plegadis falcinellus ,,
+,White-faced Ibis,Plegadis chihi ,,
+,Roseate Spoonbill,Platalea ajaja ,,
+,Wood Stork,Mycteria americana ,E,
+Falconiformes,,,,
+,Black Vulture,Coragyps atratus ,,
+,Turkey Vulture,Cathartes aura ,,
+,Osprey,Pandion haliaetus ,,
+,Swallow-tailed Kite,Elanoides forficatus ,,X
+,Mississippi Kite,Ictinia mississippiensis ,,
+,Northern Harrier,Circus cyaneus ,,
+,Sharp-shinned Hawk,Accipiter striatus ,,
+,Cooper's Hawk,Accipiter cooperii ,,
+,Common Black-Hawk,Buteogallus anthracinus ,,
+,Red-shouldered Hawk,Buteo lineatus ,,
+,Broad-winged Hawk,Buteo platypterus ,,
+,Gray Hawk,Buteo nitidus ,,
+,Swainson's Hawk,Buteo swainsoni ,,X
+,Zone-tailed Hawk,Buteo albonotatus ,,
+,Red-tailed Hawk,Buteo jamaicensis ,,
+,Ferruginous Hawk,Buteo regalis ,,
+,Golden Eagle,Aquila chrysaetos ,,
+,American Kestrel,Falco sparverius ,,
+,Merlin,Falco columbarius ,,
+,Peregrine Falcon,Falco peregrinus ,,X
+,Prairie Falcon,Falco mexicanus  ,,
+Gruiformes,,,,
+,Black Rail,Laterallus jamaicensis ,,X
+,King Rail,Rallus elegans ,,X
+,Virginia Rail,Rallus limicola ,,
+,Sora,Porzana carolina ,,
+,Purple Gallinule,Porphyrio martinica ,,
+,Common Moorhen,Gallinula chloropus ,,
+,American Coot,Fulica americana ,,
+,Sandhill Crane,Grus canadensis ,(e),
+Charadriiformes,,,,
+,Black-bellied Plover,Pluvialis squatarola ,,
+,American Golden-Plover,Pluvialis dominica ,,X
+,Snowy Plover,Charadrius alexandrinus ,(t),X
+,Wilson's Plover,Charadrius wilsonia ,,X
+,Semipalmated Plover,Charadrius semipalmatus ,,
+,Piping Plover,Charadrius melodus ,"T,E",
+,Killdeer,Charadrius vociferus ,,
+,Mountain Plover *,Charadrius montanus  *,,X
+,American Oystercatcher,Haematopus palliatus ,,X
+,Black-necked Stilt,Himantopus mexicanus ,,
+,American Avocet,Recurvirostra americana ,,
+,Spotted Sandpiper,Actitis macularius,,
+,Solitary Sandpiper,Tringa solitaria  ,,X
+,Wandering Tattler,Tringa incana ,,X
+,Greater Yellowlegs,Tringa melanoleuca ,,
+,Willet,Tringa semipalmata,,
+,Lesser Yellowlegs,Tringa flavipes ,,X
+,Upland Sandpiper,Bartramia longicauda ,,X
+,Eskimo Curlew,Numenius borealis ,E,
+,Whimbrel,Numenius phaeopus ,,X
+,Long-billed Curlew *,Numenius americanus  *,,X
+,Hudsonian Godwit *,Limosa haemastica  *,,X
+,Marbled Godwit,Limosa fedoa ,,X
+,Ruddy Turnstone,Arenaria interpres ,,
+,Black Turnstone,Arenaria melanocephala ,,X
+,Surfbird,Aphriza virgata ,,X
+,Red Knot *,Calidris canutus  *,,X
+,Sanderling,Calidris alba ,,X
+,Semipalmated Sandpiper,Calidris pusilla ,,X
+,Western Sandpiper,Calidris mauri ,,X
+,Least Sandpiper,Calidris minutilla ,,
+,White-rumped Sandpiper,Calidris fuscicollis ,,X
+,Baird's Sandpiper,Calidris bairdii ,,
+,Pectoral Sandpiper,Calidris melanotos ,,
+,Dunlin,Calidris alpina ,,X
+,Stilt Sandpiper,Calidris himantopus ,,X
+,Buff-breasted Sandpiper *,Tryngites subruficollis  *,,X
+,Short-billed Dowitcher,Limnodromus griseus ,,X
+,Long-billed Dowitcher,Limnodromus scolopaceus ,,
+,Wilson's Snipe,Gallinago delicata ,,
+,Wilson's Phalarope,Phalaropus tricolor ,,
+,Red-necked Phalarope,Phalaropus lobatus ,,
+,Red Phalarope,Phalaropus fulicarius ,,
+,Laughing Gull,Larus atricilla ,,
+,Franklin's Gull,Larus pipixcan ,,
+,Bonaparte's Gull,Larus philadelphia ,,
+,Ring-billed Gull,Larus delawarensis ,,
+,California Gull,Larus californicus ,,
+,Herring Gull,Larus argentatus ,,
+,Western Gull,Larus occidentalis ,,
+,Glaucous-winged Gull,Larus glaucescens ,,
+,Sabine's Gull,Xema sabini ,,
+,Black-legged Kittiwake,Rissa tridactyla ,,
+,Least Tern,Sternula antillarum ,(e),X
+,Gull-billed Tern,Gelochelidon nilotica,,X
+,Caspian Tern,Hydroprogne caspia,,
+,Black Tern,Chlidonias niger ,,
+,Roseate Tern,Sterna dougallii ,"T,E",
+,Common Tern,Sterna hirundo ,,
+,Arctic Tern,Sterna paradisaea ,,
+,Forster's Tern,Sterna forsteri ,,
+,Royal Tern,Thalasseus maximus,,
+,Sandwich Tern,Thalasseus sandvicensis ,,
+,Elegant Tern,Thalasseus elegans ,,X
+,Black Skimmer,Rynchops niger ,,X
+,Pomarine Jaeger,Stercorarius pomarinus ,,
+,Parasitic Jaeger,Stercorarius parasiticus ,,
+,Long-tailed Jaeger,Stercorarius longicaudus ,,
+,Xantus's Murrelet,Synthliboramphus hypoleucus ,,X
+,Rhinoceros Auklet,Cerorhinca monocerata ,,
+Columbiformes,,,,
+,White-crowned Pigeon,Patagioenas leucocephala ,,X
+,Red-billed Pigeon,Patagioenas flavirostris ,,
+,Band-tailed Pigeon,Patagioenas fasciata ,,
+,White-winged Dove,Zenaida asiatica ,,
+,Mourning Dove,Zenaida macroura ,,
+Cuculiformes,,,,
+,Yellow-billed Cuckoo,Coccyzus americanus ,,X
+,Mangrove Cuckoo,Coccyzus minor ,,X
+,Black-billed Cuckoo,Coccyzus erythropthalmus ,,
+Strigiformes,,,,
+,Flammulated Owl,Otus flammeolus ,,X
+,Elf Owl,Micrathene whitneyi ,,X
+,Burrowing Owl,Athene cunicularia ,,
+,Long-eared Owl,Asio otus ,,
+,Short-eared Owl,Asio flammeus ,,X
+Caprimulgiformes,,,,
+,Lesser Nighthawk,Chordeiles acutipennis ,,
+,Common Nighthawk,Chordeiles minor ,,
+,Antillean Nighthawk,Chordeiles gundlachii ,,X
+,Common Poorwill,Phalaenoptilus nuttallii ,,
+,Chuck-will's-widow,Caprimulgus carolinensis ,,
+,Buff-collared Nighjar,Caprimulgus ridgwayi,,
+,Eastern Whip-poor-will,Caprimulgus vociferus ,,
+,Mexican Whip-poor-will,Caprimulgus arizonae,,
+Apodiformes,,,,
+,Black Swift,Cypseloides niger ,,X
+,Chimney Swift,Chaetura pelagica ,,
+,Vaux's Swift,Chaetura vauxi ,,
+,White-throated Swift,Aeronautes saxatalis ,,
+,Broad-billed Hummingbird,Cynanthus latirostris ,,
+,Buff-bellied Hummingbird,Amazilia yucatanensis ,,
+,Violet-crowned Hummingbird,Amazilia violiceps ,,
+,Blue-throated Hummingbird,Lampornis clemenciae ,,X
+,Magnificent Hummingbird,Eugenes fulgens ,,
+,Lucifer Hummingbird,Calothorax lucifer ,,
+,Ruby-throated Hummingbird,Archilochus colubris ,,
+,Black-chinned Hummingbird,Archilochus alexandri ,,
+,Anna's Hummingbird,Calypte anna ,,
+,Costa's Hummingbird,Calypte costae ,,X
+,Calliope Hummingbird,Stellula calliope ,,X
+,Broad-tailed Hummingbird,Selasphorus platycercus ,,
+,Rufous Hummingbird,Selasphorus rufus ,,X
+,Allen's Hummingbird,Selasphorus sasin ,,X
+Trogoniformes,,,,
+,Elegant Trogon,Trogon elegans ,,X
+Coraciiformes,,,,
+,Belted Kingfisher,Megaceryle alcyon ,,
+Piciformes,,,,
+,Williamson's Sapsucker,Sphyrapicus thyroideus ,,X
+,Yellow-bellied Sapsucker,Sphyrapicus varius ,,
+,Red-naped Sapsucker,Sphyrapicus nuchalis ,,
+,Red-breasted Sapsucker,Sphyrapicus ruber ,,
+,Northern Flicker,Colaptes auratus ,,
+Passeriformes,,,,
+,Northern Beardless-Tyrannulet,Camptostoma imberbe ,,
+,Olive-sided Flycatcher,Contopus cooperi ,,X
+,Greater Pewee,Contopus pertinax ,,
+,Western Wood-Pewee,Contopus sordidulus ,,
+,Eastern Wood-Pewee,Contopus virens ,,
+,Yellow-bellied Flycatcher,Empidonax flaviventris ,,
+,Acadian Flycatcher,Empidonax virescens ,,
+,Alder Flycatcher,Empidonax alnorum ,,
+,Willow Flycatcher,Empidonax traillii ,(e),X
+,Least Flycatcher,Empidonax minimus ,,
+,Hammond's Flycatcher,Empidonax hammondii ,,
+,Gray Flycatcher,Empidonax wrightii ,,
+,Dusky Flycatcher,Empidonax oberholseri ,,
+,Pacific-slope Flycatcher,Empidonax difficilis ,,
+,Cordilleran Flycatcher,Empidonax occidentalis ,,
+,Buff-breasted Flycatcher,Empidonax fulvifrons ,,
+,Eastern Phoebe,Sayornis phoebe ,,
+,Say's Phoebe,Sayornis saya ,,
+,Vermilion Flycatcher,Pyrocephalus rubinus ,,
+,Dusky-capped Flycatcher,Myiarchus tuberculifer ,,
+,Ash-throated Flycatcher,Myiarchus cinerascens ,,
+,Great Crested Flycatcher,Myiarchus crinitus ,,
+,Brown-crested Flycatcher,Myiarchus tyrannulus ,,
+,Sulphur-bellied Flycatcher,Myiodynastes luteiventris ,,
+,Tropical Kingbird,Tyrannus melancholicus ,,
+,Couch's Kingbird,Tyrannus couchii ,,
+,Cassin's Kingbird,Tyrannus vociferans ,,
+,Thick-billed Kingbird,Tyrannus crassirostris ,,X
+,Western Kingbird,Tyrannus verticalis ,,
+,Eastern Kingbird,Tyrannus tyrannus ,,
+,Gray Kingbird,Tyrannus dominicensis ,,
+,Scissor-tailed Flycatcher,Tyrannus forficatus ,,
+,Rose-throated Becard,Pachyramphus aglaiae,,
+,,,,
+,Loggerhead Shrike,Lanius ludovicianus ,(e),X
+,,,,
+,White-eyed Vireo,Vireo griseus ,,
+,Bell's Vireo,Vireo bellii ,(e),X
+,Black-capped Vireo,Vireo atricapilla,E,
+,Gray Vireo,Vireo vicinior ,,X
+,Yellow-throated Vireo,Vireo flavifrons ,,
+,Plumbeous Vireo,Vireo plumbeus ,,
+,Cassin's Vireo,Vireo cassinii ,,
+,Blue-headed Vireo,Vireo solitarius ,,
+,Warbling Vireo,Vireo gilvus ,,
+,Philadelphia Vireo,Vireo philadelphicus ,,
+,Red-eyed Vireo,Vireo olivaceus ,,
+,Yellow-green Vireo,Vireo flavoviridis ,,
+,Black-whiskered Vireo,Vireo altiloquus ,,
+,,,,
+,Purple Martin,Progne subis ,,
+,Tree Swallow,Tachycineta bicolor ,,
+,Violet-green Swallow,Tachycineta thalassina ,,
+,Northern Rough-winged Swallow,Stelgidopteryx serripennis ,,
+,Bank Swallow,Riparia riparia ,,
+,Cliff Swallow,Petrochelidon pyrrhonota ,,
+,Cave Swallow,Petrochelidon fulva ,,
+,Barn Swallow,Hirundo rustica ,,
+,,,,
+,House Wren,Troglodytes aedon ,,
+,Sedge Wren,Cistothorus platensis ,,
+,Marsh Wren,Cistothorus palustris ,,
+,,,,
+,Golden-crowned Kinglet,Regulus satrapa ,,
+,Ruby-crowned Kinglet,Regulus calendula ,,
+,,,,
+,Blue-gray Gnatcatcher,Polioptila caerulea ,,
+,,,,
+,Eastern Bluebird,Sialia sialis ,,
+,Western Bluebird,Sialia mexicana ,,
+,Mountain Bluebird,Sialia currucoides ,,
+,Townsend's Solitaire,Myadestes townsendi ,,
+,Veery,Catharus fuscescens ,,
+,Gray-cheeked Thrush,Catharus minimus ,,
+,Bicknell's Thrush *,Catharus bicknelli  *,,X
+,Swainson's Thrush,Catharus ustulatus ,,
+,Hermit Thrush,Catharus guttatus ,,
+,Wood Thrush,Hylocichla mustelina ,,X
+,American Robin,Turdus migratorius ,,
+,,,,
+,Gray Catbird,Dumetella carolinensis ,,
+,Sage Thrasher,Oreoscoptes montanus ,,
+,Bendire's Thrasher,Toxostoma bendirei ,,X
+,,,,
+,American Pipit,Anthus rubescens ,,
+,Sprague's Pipit *,Anthus spragueii  *,,X
+,,,,
+,Cedar Waxwing,Bombycilla cedrorum ,,
+,Phainopepla,Phainopepla nitens ,,
+,,,,
+,Bachman's Warbler,Vermivora bachmanii  ,E,
+,Blue-winged Warbler,Vermivora pinus ,,X
+,Golden-winged Warbler *,Vermivora chrysoptera  *,,X
+,Tennessee Warbler,Vermivora peregrina ,,
+,Orange-crowned Warbler,Vermivora celata ,,
+,Nashville Warbler,Vermivora ruficapilla ,,
+,Virginia's Warbler,Vermivora virginiae ,,X
+,Colima Warbler,Vermivora crissalis ,,X
+,Lucy's Warbler,Vermivora luciae  ,,X
+,Northern Parula,Parula americana ,,
+,Tropical Parula,Parula pitiayumi ,,
+,Yellow Warbler,Dendroica petechia ,,
+,Chestnut-sided Warbler,Dendroica pensylvanica ,,
+,Magnolia Warbler,Dendroica magnolia ,,
+,Cape May Warbler,Dendroica tigrina ,,
+,Black-throated Blue Warbler,Dendroica caerulescens ,,
+,Yellow-rumped Warbler,Dendroica coronata ,,
+,Black-throated Gray Warbler,Dendroica nigrescens ,,
+,Golden-cheeked Warbler *,Dendroica chrysoparia  *,E,
+,Black-throated Green Warbler,Dendroica virens ,,
+,Townsend's Warbler,Dendroica townsendi ,,
+,Hermit Warbler,Dendroica occidentalis ,,X
+,Blackburnian Warbler,Dendroica fusca ,,
+,Yellow-throated Warbler,Dendroica dominica ,,
+,Grace's Warbler,Dendroica graciae ,,X
+,Pine Warbler,Dendroica pinus ,,
+,Kirtland's Warbler *,Dendroica kirtlandii  *,E,
+,Prairie Warbler,Dendroica discolor ,,X
+,Palm Warbler,Dendroica palmarum ,,
+,Bay-breasted Warbler,Dendroica castanea ,,X
+,Blackpoll Warbler,Dendroica striata ,,
+,Cerulean Warbler *,Dendroica cerulea  *,,X
+,Black-and-white Warbler,Mniotilta varia ,,
+,American Redstart,Setophaga ruticilla ,,
+,Prothonotary Warbler,Protonotaria citrea ,,X
+,Worm-eating Warbler,Helmitheros vermivorum,,X
+,Swainson's Warbler,Limnothlypis swainsonii ,,X
+,Ovenbird,Seiurus aurocapilla,,
+,Northern Waterthrush,Seiurus noveboracensis ,,
+,Louisiana Waterthrush,Seiurus motacilla ,,
+,Kentucky Warbler,Oporornis formosus ,,X
+,Connecticut Warbler,Oporornis agilis ,,
+,Mourning Warbler,Oporornis philadelphia ,,
+,MacGillivray's Warbler,Oporornis tolmiei ,,
+,Common Yellowthroat,Geothlypis trichas ,,
+,Hooded Warbler,Wilsonia citrina ,,
+,Wilson's Warbler,Wilsonia pusilla ,,
+,Canada Warbler,Wilsonia canadensis ,,X
+,Red-faced Warbler,Cardellina rubrifrons ,,X
+,Painted Redstart,Myioborus pictus ,,
+,Yellow-breasted Chat,Icteria virens ,,
+,,,,
+,Hepatic Tanager,Piranga flava,,
+,Summer Tanager,Piranga rubra,,
+,Scarlet Tanager,Piranga olivacea,,
+,Western Tanager,Piranga ludoviciana,,
+,,,,
+,Green-tailed Towhee,Pipilo chlorurus ,,
+,Spotted Towhee,Pipilo maculatus ,,
+,Cassin's Sparrow,Aimophila cassinii ,,
+,Chipping Sparrow,Spizella passerina ,,
+,Clay-colored Sparrow,Spizella pallida ,,
+,Brewer's Sparrow,Spizella breweri ,,X
+,Field Sparrow,Spizella pusilla ,,
+,Black-chinned Sparrow,Spizella atrogularis ,,X
+,Vesper Sparrow,Pooecetes gramineus ,,
+,Lark Sparrow,Chondestes grammacus ,,
+,Black-throated Sparrow,Amphispiza bilineata ,,
+,Sage Sparrow,Amphispiza belli ,(t),X
+,Lark Bunting,Calamospiza melanocorys ,,X
+,Savannah Sparrow,Passerculus sandwichensis ,,
+,Grasshopper Sparrow,Ammodramus savannarum ,(e),
+,Baird's Sparrow,Ammodramus bairdii ,,X
+,Fox Sparrow,Passerella iliaca ,,
+,Song Sparrow,Melospiza melodia ,,
+,Lincoln's Sparrow,Melospiza lincolnii ,,
+,Swamp Sparrow,Melospiza georgiana ,,
+,White-crowned Sparrow,Zonotrichia leucophrys ,,
+,Golden-crowned Sparrow,Zonotrichia atricapilla ,,
+,Dark-eyed Junco,Junco hyemalis ,,
+,McCown's Longspur,Calcarius mccownii ,,X
+,Chestnut-collared Longspur,Calcarius ornatus,,X
+,,,,
+,Rose-breasted Grosbeak,Pheucticus ludovicianus ,,
+,Black-headed Grosbeak,Pheucticus melanocephalus ,,
+,Blue Grosbeak,Passerina caerulea ,,
+,Lazuli Bunting,Passerina amoena ,,
+,Indigo Bunting,Passerina cyanea ,,
+,Varied Bunting,Passerina versicolor ,,X
+,Painted Bunting *,Passerina ciris  *,,X
+,Dickcissel,Spiza americana ,,X
+,,,,
+,Bobolink,Dolichonyx oryzivorus ,,
+,Red-winged Blackbird,Agelaius phoeniceus ,,
+,Eastern Meadowlark,Sturnella magna ,,
+,Western Meadowlark,Sturnella neglecta ,,
+,Yellow-headed Blackbird,Xanthocephalus xanthocephalus ,,
+,Brewer's Blackbird,Euphagus cyanocephalus ,,
+,Bronzed Cowbird,Molothrus aeneus ,,
+,Brown-headed Cowbird,Molothrus ater ,,
+,Orchard Oriole,Icterus spurius ,,
+,Hooded Oriole,Icterus cucullatus ,,
+,Bullock's Oriole,Icterus bullockii ,,
+,Baltimore Oriole,Icterus galbula ,,
+,Scott's Oriole,Icterus parisorum ,,
+,,,,
+,Cassin's Finch,Carpodacus cassinii ,,
+,Pine Siskin,Carduelis pinus ,,
+,Lesser Goldfinch,Carduelis psaltria ,,
+,Lawrence's Goldfinch,Carduelis lawrencei ,,X
+,American Goldfinch,Carduelis tristis ,,

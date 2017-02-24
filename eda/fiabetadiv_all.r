@@ -25,7 +25,52 @@ pnw_species <- subset(pnw_species, !grepl('Tree', sciname)) # unidentified speci
 #pnw_species$sciname <- gsub('_', ' ', pnw_species$sciname)
 pnw_species <- pnw_species[order(pnw_species$sciname), ]
 
+# Calculate basal area at plot level
 library(dplyr)
+
+fiasums_plot <- fiapnw %>%
+  filter(STATUSCD == 1) %>%
+  mutate(ba = pi * (DIA/200)^2) %>% # basal area in m2.
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT, MEASYEAR, SPCD) %>%
+  summarize(basalarea = sum(ba),
+            n = n())
+
+fiacoords <- fiapnw %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
+  summarize(lat = LAT_FUZZSWAP[1],
+            lon = LON_FUZZSWAP[1])
+
+# Reproject FIA plots and calculate the distance in m from each plot to all other plots.
+library(rgdal)
+
+aea_crs <- '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0'
+wgs_crs <- '+proj=longlat +ellps=WGS84 +no_defs'
+
+fiaspatial <- SpatialPointsDataFrame(coords = data.frame(x=fiacoords$lon, y=fiacoords$lat),
+                                     data = as.data.frame(fiacoords[,1:4]),
+                                     proj4string = CRS(wgs_crs)
+)
+
+fiaalbers <- spTransform(fiaspatial, CRSobj = CRS(aea_crs))
+
+# Fast function to get neighbor distances
+# Refer to http://gis.stackexchange.com/questions/132384/distance-to-nearest-point-for-every-point-same-spatialpointsdataframe-in-r
+getNeighbors <- function(dat, radius) {
+  library(spdep)
+  idlist <- dnearneigh(coordinates(dat), 0, radius)
+  distlist <- nbdists(idlist, coordinates(dat))
+  dflist <- list()
+  for (i in 1:length(idlist)) {
+    if (any(distlist[[i]] <= radius)) {
+      dflist[[i]] <- data.frame(idx = idlist[[i]], dist = distlist[[i]][distlist[[i]] <= radius])
+    }
+    else {
+      dflist[[i]] <- NA
+    }
+  }
+  dflist
+}
+
 
 radii <- c(1000,2000,3000,4000,5000,10000)
 # Initialize data structures for observed metrics
@@ -121,4 +166,4 @@ for (r in 1:length(radii)) {
 
 close(pb2)
 
-save(fia_shannonbetadiv, fia_nneighb, file = file.path(fp, 'fia_taxonomicbetadiv.RData'))
+save(list = grep('fia_', ls(), value=TRUE), file = file.path(fp, 'fia_taxonomicbetadiv.RData'))
