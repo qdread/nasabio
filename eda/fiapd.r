@@ -33,6 +33,14 @@ pnw_species <- pnw_species[order(pnw_species$sciname), ]
 
 library(dplyr)
 
+area_by_sp <- function(dat, sppids) {
+  areas <- numeric(length(sppids))
+  for (i in 1:length(sppids)) {
+    areas[i] <- sum(dat$basalarea[dat$SPCD == sppids[i]])
+  }
+  areas
+}
+
 # Subplot level
 fiasums_subplot <- fiapnw %>%
   filter(STATUSCD == 1) %>%
@@ -43,12 +51,18 @@ fiasums_subplot <- fiapnw %>%
 
 sppids <- sort(unique(fiasums_subplot$SPCD))
 
-fiasubpmat <- fiasums_subplot %>% do(x = sapply(sppids, function(z) sum(.$basalarea[.$SPCD == z])))
-fiasubpmat <- do.call('rbind', fiasubpmat$x)
+idx <- match(sppids, fiataxa$FIA.Code)
+fiataxa$sciname <- paste(gsub(' ', '', fiataxa$Genus), gsub(' ', '', fiataxa$Species), sep = '_')
+fiataxa$sciname[fiataxa$sciname == 'Chrysolepis_chrysophyllavar.chrysophylla'] <- 'Chrysolepis_chrysophylla'
+fiataxa$sciname[fiataxa$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_trichocarpa'
+
+
+fiasubplist <- fiasums_subplot %>% do(x = area_by_sp(., sppids))
+fiasubpmat <- do.call('rbind', fiasubplist$x)
 
 # Get the species names from the lookup table that go with the numerical codes.
-sppnames <- pnw_species$sciname[match(sppids, pnw_codes)]
-dimnames(fiasubpmat)[[2]] <- sppnames
+#sppnames <- pnw_species$sciname[match(sppids, pnw_codes)]
+dimnames(fiasubpmat)[[2]] <- fiataxa$sciname[idx]
 
 # Get rid of the unknown species.
 fiasubpmat <- fiasubpmat[, dimnames(fiasubpmat)[[2]] %in% fiaphytophylo$tip.label]
@@ -64,15 +78,19 @@ fiasums_plot <- fiapnw %>%
 
 sppids <- sort(unique(fiasums_plot$SPCD))
 
-fiaplotmat <- fiasums_plot %>% do(x = sapply(sppids, function(z) sum(.$basalarea[.$SPCD == z])))
-fiaplotmat <- do.call('rbind', fiaplotmat$x)
+idx <- match(sppids, fiataxa$FIA.Code)
+
+fiaplotlist <- fiasums_plot %>% do(x = area_by_sp(., sppids))
+fiaplotmat <- do.call('rbind', fiaplotlist$x)
 
 # Get the species names from the lookup table that go with the numerical codes.
-sppnames <- pnw_species$sciname[match(sppids, pnw_codes)]
-dimnames(fiaplotmat)[[2]] <- sppnames
+#sppnames <- pnw_species$sciname[match(sppids, pnw_codes)]
+dimnames(fiaplotmat)[[2]] <- fiataxa$sciname[idx]
 
 # Get rid of the unknown species.
 fiaplotmat <- fiaplotmat[, dimnames(fiaplotmat)[[2]] %in% fiaphytophylo$tip.label]
+
+save(fiaplotmat, fiasubpmat, fiaplotlist, fiasubplist, file = file.path(fp, 'data/fia/fiamatrices.RData'))
 
 ##################################
 # Actual calculation of PD for plot and subplot
@@ -89,4 +107,4 @@ pd_fia_subp <- pd(fiasubpmat, fiaphytophylo, include.root = TRUE)
 mpd_fia_subp <- ses.mpd(fiasubpmat, fiadist, null.model = 'independentswap', abundance.weighted = TRUE, runs = 999, iterations = 1000)
 mntd_fia_subp <- ses.mntd(fiasubpmat, fiadist, null.model = 'independentswap', abundance.weighted = TRUE, runs = 999, iterations = 1000)
 
-save(pd_fia_plot, mpd_fia_plot, mntd_fia_plot, pd_fia_subp, mpd_fia_subp, mntd_fia_subp, file = file.path(fp, 'data/fia/fia_pd.r'))
+save(fiaplotmat, fiasubpmat, fiaplotlist, fiasubplist, pd_fia_plot, mpd_fia_plot, mntd_fia_plot, pd_fia_subp, mpd_fia_subp, mntd_fia_subp, file = file.path(fp, 'data/fia/fia_pd.r'))
