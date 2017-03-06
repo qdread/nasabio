@@ -12,22 +12,7 @@ load(file.path(fp, 'data/fia/phytophylo_fia.r'))
 # Get FIA species code to scientific name lookup table, and find which ones are in the tree.
 fiataxa <- read.csv(file.path(fp, 'data/fia/fia_taxon_lookuptable.csv'), stringsAsFactors = FALSE)
 pnw_codes <- unique(fiapnw$SPCD)
-all(pnw_codes %in% fiataxa$FIA.Code) #yes
-
-# Scientific names of FIA species in PNW plots.
-pnw_species <- fiataxa[match(pnw_codes, fiataxa$FIA.Code), c('Genus','Species')]
-pnw_scinames <- paste(pnw_species$Genus, pnw_species$Species, sep = '_')
-pnw_scinames <- gsub(' ', '', pnw_scinames) #Remove extraneous spaces
-
-# Correction for subspecies that are not in the tree.
-pnw_species$sciname <- pnw_scinames
-pnw_species$sciname[pnw_species$sciname == 'Chrysolepis_chrysophyllavar.chrysophylla'] <- 'Chrysolepis_chrysophylla'
-pnw_species$sciname[pnw_species$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_trichocarpa'
-
-pnw_species <- subset(pnw_species, !grepl('Tree', sciname)) # unidentified species
-#pnw_species$sciname <- gsub('_', ' ', pnw_species$sciname)
-pnw_species <- pnw_species[order(pnw_species$sciname), ]
-
+#all(pnw_codes %in% fiataxa$FIA.Code) #yes
 
 # Convert fiapnw into a site x species matrix, at both subplot and plot level
 
