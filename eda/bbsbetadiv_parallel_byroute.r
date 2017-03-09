@@ -1,20 +1,12 @@
 # Beta-diversity calculation for breeding bird survey data
 # Run in parallel on HPCC (array job with a different radius for each task)
-# QDR, 07 Mar 2017
+# ROUTE-AGGREGATED VERSION!
+# QDR, 08 Mar 2017
 # Project: NASABioXGeo
 
-# Modification 08 Mar 2017: Make doubly parallel by giving a different radius to each task
-# but then also splitting the loop into 10 chunks since it will take forever to run otherwise.
-
-radii <- c(1000,2000,3000,4000,5000,10000,15000,20000)
-task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-
-combos <- data.frame(slice = rep(1:10, times = length(radii)), radius = rep(radii, each = 10))
-
-r <- combos$radius[task]
-slice <- combos$slice[task]
-
 # 1. Define community either as aggregated route or by stop
+
+# Route (must edit some lines in other spots in the code)
 
 # Start with by-stop diversity.
 
@@ -29,7 +21,7 @@ fixedbbsmat[, which(sppids == 6960)] <- 0
 
 # 3. Project lat-long to Albers. (Already done in another script, just load coordinates)
 
-bbsalbers <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbs_aea_coords.csv')
+bbsalbers <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbs_aea_coords_byroute.csv')
 
 # 4. Create cophenetic distance matrix from bird phylogeny. Use average branch lengths from the ten trees.
 
@@ -75,7 +67,7 @@ for (i in 1:length(sppids)) {
 	if (length(names_i)>0) dimnames_matrix[i] <- names_i[1]
 }
 
-dimnames(fixedbbsmat)[[2]] <- dimnames_matrix
+dimnames(fixedbbsmat_byroute)[[2]] <- dimnames_matrix
 
 tlabel1 <- erictree[[treeids[1]]]$tip.label
 tlabel1 <- gsub('_', ' ', tlabel1)
@@ -96,13 +88,13 @@ for (i in 1:length(tlabelaou)) {
 dimnames(ericdist)[[1]] <- dimnames(ericdist)[[2]] <- dimnames_tlabel
 
 # Remove nocturnal species, rows without coordinates, and rows and columns with zero sum.
-ns <- colSums(fixedbbsmat)
-rs <- rowSums(fixedbbsmat)
+ns <- colSums(fixedbbsmat_byroute)
+rs <- rowSums(fixedbbsmat_byroute)
 nocturnalbirds <- birdtrait$Latin_Name[birdtrait$Nocturnal == 1]
-fixedbbsmat <- fixedbbsmat[has_coords & rs != 0, !(dimnames(fixedbbsmat)[[2]] %in% nocturnalbirds) & ns != 0]
+fixedbbsmat_byroute <- fixedbbsmat_byroute[has_coords & rs != 0, !(dimnames(fixedbbsmat_byroute)[[2]] %in% nocturnalbirds) & ns != 0]
 
 bbsalbers <- bbsalbers[has_coords & rs != 0, ]
-bbsgrps <- bbsgrps[has_coords & rs != 0, ]
+bbsgrps_byroute <- bbsgrps_byroute[has_coords & rs != 0, ]
 
 # 6. For the given radius, get pairwise distances among stops and the list of all neighbors. Calculation can be sped up by limiting stop-level beta-diversity to stops that share a route.
 
@@ -116,7 +108,7 @@ getNeighbors <- function(dat, radius) {
   dflist <- list()
   for (i in 1:length(idlist)) {
     if (any(distlist[[i]] <= radius)) {
-      dflist[[i]] <- data.frame(idx = idlist[[i]], Stop = dat$Stop[idlist[[i]]], dist = distlist[[i]][distlist[[i]] <= radius])
+      dflist[[i]] <- data.frame(idx = idlist[[i]], rteNo = dat$rteNo[idlist[[i]]], dist = distlist[[i]][distlist[[i]] <= radius])
     }
     else {
       dflist[[i]] <- NA
@@ -125,35 +117,32 @@ getNeighbors <- function(dat, radius) {
   dflist
 }
 
+radii <- c(50000, 75000, 100000, 125000, 150000) # Must use larger radii for routes than for stops. Do large increments for now, beginning with 50km
+task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+r <- radii[task]
+
 library(dplyr)
 
-bbscov <- cbind(bbsgrps, bbsalbers)
-bbsnhb_list <- bbscov %>% group_by(year, rteNo) %>% do(l = getNeighbors(., radius = r)) # Takes approx 8min on hpcc
-# Flatten this into one list
+bbscov <- cbind(bbsgrps_byroute, bbsalbers)
+bbsnhb_list <- bbscov %>% group_by(year) %>% do(l = getNeighbors(., radius = r)) 
 bbsnhb_r <- do.call('c', bbsnhb_list$l)
 
 # 7. Run all the presence-only metrics with appropriate null models using d, vegdist, and comdist.
 
-# Determine row indices for the slice of the matrix to be used.
-rowidx <- round(seq(0,nrow(fixedbbsmat),length.out=11))
-rowidxmin <- rowidx[slice]+1
-rowidxmax <- rowidx[slice+1]
-n <- length(rowidxmin:rowidxmax)
-
 # Initialize data structures for observed metrics (presence only)
-bbs_meanpairwisedissim_pa <- rep(NA, n)
-bbs_phypairwise_pa <- rep(NA, n)
-bbs_phynt_pa <- rep(NA, n)
-bbs_phypairwise_pa_z <- rep(NA, n)
-bbs_phynt_pa_z <- rep(NA, n)
-bbs_funcpairwise_pa <- rep(NA, n)
-bbs_funcnt_pa <- rep(NA, n)
-bbs_funcpairwise_pa_z <- rep(NA, n)
-bbs_funcnt_pa_z <- rep(NA, n)
+bbs_meanpairwisedissim_pa <- rep(NA, nrow(bbsalbers))
+bbs_phypairwise_pa <- rep(NA, nrow(bbsalbers))
+bbs_phynt_pa <- rep(NA, nrow(bbsalbers))
+bbs_phypairwise_pa_z <- rep(NA, nrow(bbsalbers))
+bbs_phynt_pa_z <- rep(NA, nrow(bbsalbers))
+bbs_funcpairwise_pa <- rep(NA, nrow(bbsalbers))
+bbs_funcnt_pa <- rep(NA, nrow(bbsalbers))
+bbs_funcpairwise_pa_z <- rep(NA, nrow(bbsalbers))
+bbs_funcnt_pa_z <- rep(NA, nrow(bbsalbers))
 
-bbs_nneighb <- rep(NA, n)
+bbs_nneighb <- rep(NA, nrow(bbsalbers))
 
-pb2 <- txtProgressBar(0, n, style = 3)
+pb2 <- txtProgressBar(0, nrow(bbsalbers), style = 3)
 
 # Number of simulations for null model
 nnull <- 999
@@ -163,16 +152,12 @@ library(vegetarian)
 
 source('~/code/fia/fixpicante.r')
 
-i <- 0
-
-for (p in rowidxmin:rowidxmax) {
-  i <- i + 1
+for (p in 1:nrow(bbsalbers)) {
   if (class(bbsnhb_r[[p]]) == 'data.frame') {
     # Subset out the data frame with the nearest neighbors
 	year_p <- bbscov$year[p]
-	route_p <- bbscov$rteNo[p]
-	stops_p <- c(as.character(bbscov$Stop[p]), as.character(bbsnhb_r[[p]]$Stop))
-    dat_p <- fixedbbsmat[bbscov$year == year_p & bbscov$rteNo == route_p & bbscov$Stop %in% stops_p, ]
+	routes_p <- c(as.character(bbscov$rteNo[p]), as.character(bbsnhb_r[[p]]$rteNo))
+    dat_p <- fixedbbsmat_byroute[bbscov$year == year_p & bbscov$rteNo %in% routes_p, ]
     # Get rid of empty columns
     mat_p <- dat_p[, apply(dat_p, 2, sum) > 0]
     
@@ -183,14 +168,14 @@ for (p in rowidxmin:rowidxmax) {
         
         # Calculate beta-diversity for that matrix.
         
-        bbs_meanpairwisedissim_pa[i] <- mean(vegdist(x = mat_p, binary = TRUE, method = 'jaccard'))
+        bbs_meanpairwisedissim_pa[p] <- mean(vegdist(x = mat_p, binary = TRUE, method = 'jaccard'))
         
         # Must catch errors in comdist for when the number of columns is zero
         if (ncol(mat_p) > 1) {
-          bbs_phypairwise_pa[i] <- mean(comdist(comm = mat_p, dis = ericdist, abundance.weighted = FALSE))
-          bbs_phynt_pa[i] <- mean(comdistnt(comm = mat_p, dis = ericdist, abundance.weighted = FALSE))
-          bbs_funcpairwise_pa[i] <- mean(comdist(comm = mat_p, dis = birdtraitdist, abundance.weighted = FALSE))
-          bbs_funcnt_pa[i] <- mean(comdistnt(comm = mat_p, dis = birdtraitdist, abundance.weighted = FALSE))
+          bbs_phypairwise_pa[p] <- mean(comdist(comm = mat_p, dis = ericdist, abundance.weighted = FALSE))
+          bbs_phynt_pa[p] <- mean(comdistnt(comm = mat_p, dis = ericdist, abundance.weighted = FALSE))
+          bbs_funcpairwise_pa[p] <- mean(comdist(comm = mat_p, dis = birdtraitdist, abundance.weighted = FALSE))
+          bbs_funcnt_pa[p] <- mean(comdistnt(comm = mat_p, dis = birdtraitdist, abundance.weighted = FALSE))
 		  
           # Null models by scrambling distance matrix
           phypairwise_pa_null <- phynt_pa_null <- rep(NA, nnull)
@@ -214,29 +199,29 @@ for (p in rowidxmin:rowidxmax) {
             funcnt_pa_null[sim] <- mean(comdistnt(comm = mat_p, dis = birdtraitdistnull, abundance.weighted = FALSE))
           }
           
-          bbs_phypairwise_pa_z[i] <- (bbs_phypairwise_pa[i] - mean(phypairwise_pa_null, na.rm=T))/sd(phypairwise_pa_null, na.rm=T)
-          bbs_phynt_pa_z[i] <- (bbs_phynt_pa[i] - mean(phynt_pa_null, na.rm=T))/sd(phynt_pa_null, na.rm=T)
+          bbs_phypairwise_pa_z[p] <- (bbs_phypairwise_pa[p] - mean(phypairwise_pa_null, na.rm=T))/sd(phypairwise_pa_null, na.rm=T)
+          bbs_phynt_pa_z[p] <- (bbs_phynt_pa[p] - mean(phynt_pa_null, na.rm=T))/sd(phynt_pa_null, na.rm=T)
 		  
-          bbs_funcpairwise_pa_z[i] <- (bbs_funcpairwise_pa[i] - mean(funcpairwise_pa_null, na.rm=T))/sd(funcpairwise_pa_null, na.rm=T)
-          bbs_funcnt_pa_z[i] <- (bbs_funcnt_pa[i] - mean(funcnt_pa_null, na.rm=T))/sd(funcnt_pa_null, na.rm=T)
+          bbs_funcpairwise_pa_z[p] <- (bbs_funcpairwise_pa[p] - mean(funcpairwise_pa_null, na.rm=T))/sd(funcpairwise_pa_null, na.rm=T)
+          bbs_funcnt_pa_z[p] <- (bbs_funcnt_pa[p] - mean(funcnt_pa_null, na.rm=T))/sd(funcnt_pa_null, na.rm=T)
         }
         else {
-          bbs_phypairwise_pa[i] <- 0
-          bbs_phynt_pa[i] <- 0
-          bbs_phypairwise_pa_z[i] <- 0
-          bbs_phynt_pa_z[i] <- 0
-          bbs_funcpairwise_pa[i] <- 0
-          bbs_funcnt_pa[i] <- 0
-          bbs_funcpairwise_pa_z[i] <- 0
-          bbs_funcnt_pa_z[i] <- 0
+          bbs_phypairwise_pa[p] <- 0
+          bbs_phynt_pa[p] <- 0
+          bbs_phypairwise_pa_z[p] <- 0
+          bbs_phynt_pa_z[p] <- 0
+          bbs_funcpairwise_pa[p] <- 0
+          bbs_funcnt_pa[p] <- 0
+          bbs_funcpairwise_pa_z[p] <- 0
+          bbs_funcnt_pa_z[p] <- 0
         }
-        bbs_nneighb[i] <- nrow(mat_p) - 1
+        bbs_nneighb[p] <- nrow(mat_p) - 1
         
         
       }
     }
   }
-  setTxtProgressBar(pb2, i)
+  setTxtProgressBar(pb2, p)
 }
 
 close(pb2)
@@ -249,4 +234,4 @@ bbs_betadiv <- data.frame(nneighb = bbs_nneighb,
 						  beta_fd_pairwise_presence_z = bbs_funcpairwise_pa_z,
 						  beta_fd_nearesttaxon_presence_z = bbs_funcnt_pa_z)
 
-write.csv(bbs_betadiv, file = paste0('/mnt/research/nasabio/data/bbs/bbs_allbetadiv',task,'.csv'), row.names = FALSE)						  
+write.csv(bbs_betadiv, file = paste0('/mnt/research/nasabio/data/bbs/bbs_allbetadiv_byroute',task,'.csv'), row.names = FALSE)						  
