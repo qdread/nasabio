@@ -82,6 +82,15 @@ try_byspmean <- try_nometa %>%
 try_wide <- dcast(try_byspmean[,c(1,2,4)], AccSpeciesName ~ TraitName, fun.aggregate = mean)
 try_wide <- try_wide[, apply(try_wide, 2, function(x) sum(!is.na(x))) > 10]
 
+# Modification 15 March: Also tally the number of values.
+try_nvalues <- dcast(try_byspmean[,c(1,2,4)], AccSpeciesName ~ TraitName, fun.aggregate = function(x) sum(!is.na(x)))
+try_nvalues <- try_nvalues[, apply(try_nvalues, 2, function(x) sum(x > 0) > 10)]
+
+try_nvalues <- try_nvalues[, names(try_use)]
+dimnames(try_nvalues)[[1]] <- dimnames(try_use)[[1]] <- tryspp
+write.csv(try_use, file.path(fp, 'try_fia_traitmeans.csv'), row.names = TRUE)
+write.csv(try_nvalues, file.path(fp, 'try_fia_howmanyvalues.csv'), row.names = TRUE)
+
 write.csv(try_wide, file.path(fp, 'try_fia.csv'), row.names = FALSE)
 
 #################################################
