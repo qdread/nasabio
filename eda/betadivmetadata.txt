@@ -1,0 +1,9 @@
+Metadata for FIA taxonomic beta-diversity
+
+Columns:
+plot identifiers
+radius - radius in m within which beta diversity is calculated
+nneighb - number of neighboring plots (plot consists of 4 subplots) within the radius, in addition to the target plot. There must be at least one neighbor plot to calculate beta diversity.
+beta_shannon - Shannon beta diversity
+beta_pairwise_abundance - beta diversity calculated by mean pairwise distance among plots within the radius, weighted by species abundances. For both pairwise diversities, Jaccard distance is used.
+beta_pairwise_presence - beta diversity calculated by mean pairwise distance among plots within the radius, using binary species presence-absence data
