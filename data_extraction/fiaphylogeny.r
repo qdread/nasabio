@@ -120,3 +120,40 @@ save(phytophylo, file = file.path(fp,'phytophylo_taxaadded.r'))
 fiaphytophylo <- drop.tip(phytophylo, tip = phytophylo$tip.label[!phytophylo$tip.label %in% pnw_species$sciname])
 
 save(fiaphytophylo, file = file.path(fp, 'phytophylo_fia.r'))
+
+
+###############
+# Added 07 April: Test Kevin Potter's phylogeny
+
+pnw_species <- fiataxa[match(pnw_codes, fiataxa$FIA.Code), c('Genus','Species')]
+pnw_scinames <- paste(pnw_species$Genus, pnw_species$Species, sep = '_')
+pnw_scinames <- gsub(' ', '', pnw_scinames) #Remove extraneous spaces
+
+# Correction for subspecies that are not in the tree.
+pnw_species$sciname <- pnw_scinames
+pnw_species$sciname[pnw_species$sciname == 'Chrysolepis_chrysophyllavar.chrysophylla'] <- 'Chrysolepis_chrysophylla'
+pnw_species$sciname[pnw_species$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_balsamifera_trichocarpa'
+
+pnw_species <- subset(pnw_species, !grepl('Tree', sciname)) # unidentified species
+#pnw_species$sciname <- gsub('_', ' ', pnw_species$sciname)
+pnw_species <- pnw_species[order(pnw_species$sciname), ]
+
+library(ape)
+fullphylo <- read.tree(file.path(fp, 'allfiaphylogeny/tree_all_final_031716.txt'))
+fulldist <- cophenetic(fullphylo)
+phymatchfull <- pnw_species$sciname %in% fullphylo$tip.label
+
+spp_not_in_tree <- pnw_species$sciname[!phymatchfull]
+spp_not_in_tree <- spp_not_in_tree[!grepl('Tree',spp_not_in_tree)]
+
+# Populus trichocarpa is called Populus_balsamifera_trichocarpa.
+# Abies shastensis is a subspecies of Abies magnifica.
+# Other than that we only need to add Fraxinus_sp and Aesculus_sp.
+
+library(phytools)
+fullphylo <- add.species.to.genus(tree = fullphylo, species = 'Fraxinus_sp', where = 'root')
+fullphylo <- add.species.to.genus(tree = fullphylo, species = 'Aesculus_sp', where = 'root')
+
+pnwphylo <- drop.tip(fullphylo, tip = fullphylo$tip.label[!fullphylo$tip.label %in% pnw_species$sciname])
+
+save(pnwphylo, file = file.path(fp, 'pnwphylo_potter.r'))

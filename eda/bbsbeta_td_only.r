@@ -132,26 +132,12 @@ bbsnhb_r <- do.call('c', bbsnhb_list$l)
 
 # 7. Run all the presence-only metrics with appropriate null models using d, vegdist, and comdist.
 
-# Determine row indices for the slice of the matrix to be used.
-# rowidx <- round(seq(0,nrow(fixedbbsmat),length.out=11))
-# rowidxmin <- rowidx[slice]+1
-# rowidxmax <- rowidx[slice+1]
-# n <- length(rowidxmin:rowidxmax)
-
 # Initialize data structures for observed metrics (presence only)
-bbs_meanpairwisedissim_pa <- rep(NA, n)
-# bbs_phypairwise_pa <- rep(NA, n)
-# bbs_phynt_pa <- rep(NA, n)
-# bbs_phypairwise_pa_z <- rep(NA, n)
-# bbs_phynt_pa_z <- rep(NA, n)
-# bbs_funcpairwise_pa <- rep(NA, n)
-# bbs_funcnt_pa <- rep(NA, n)
-# bbs_funcpairwise_pa_z <- rep(NA, n)
-# bbs_funcnt_pa_z <- rep(NA, n)
+bbs_meanpairwisedissim_pa <- rep(NA, nrow(fixedbbsmat))
 
-bbs_nneighb <- rep(NA, n)
+bbs_nneighb <- rep(NA, nrow(fixedbbsmat))
 
-pb2 <- txtProgressBar(0, n, style = 3)
+pb2 <- txtProgressBar(0, nrow(fixedbbsmat), style = 3)
 
 # Number of simulations for null model
 # nnull <- 999
@@ -159,7 +145,7 @@ pb2 <- txtProgressBar(0, n, style = 3)
 library(vegan)
 library(vegetarian)
 
-source('~/code/fia/fixpicante.r')
+#source('~/code/fia/fixpicante.r')
 
 i <- 0
 
@@ -172,7 +158,7 @@ for (p in 1:nrow(fixedbbsmat)) {
 	stops_p <- c(as.character(bbscov$Stop[p]), as.character(bbsnhb_r[[p]]$Stop))
     dat_p <- fixedbbsmat[bbscov$year == year_p & bbscov$rteNo == route_p & bbscov$Stop %in% stops_p, ]
     # Get rid of empty columns
-    mat_p <- dat_p[, apply(dat_p, 2, sum) > 0]
+    mat_p <- dat_p[, apply(dat_p, 2, sum) > 0, drop = FALSE]
     
     if(!is.null(mat_p)) {
       if(nrow(mat_p) > 1) {

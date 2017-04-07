@@ -5,6 +5,8 @@ library(FD)
 
 try_wide <- read.csv(file.path(fp, 'data/fia/try_fia.csv'), stringsAsFactors = FALSE)
 
+# Edit 07 Apr: fix to get the populus correct.
+try_wide$AccSpeciesName[try_wide$AccSpeciesName == 'Populus trichocarpa'] <- 'Populus balsamifera trichocarpa'
 
 tryspp <- gsub(' ', '_', try_wide$AccSpeciesName)
 trymatch <- dimnames(fiaplotmat)[[2]] %in% tryspp

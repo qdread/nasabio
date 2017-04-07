@@ -148,11 +148,11 @@ close(pb2)
 m2v <- function(m) m[1:prod(dim(m))]
 
 fia_betadiv <- cbind(ungroup(fiacoords),
-				data.frame(radius = rep(radii, nrow(fiaalbers)),
+				data.frame(radius = rep(radii, each=nrow(fiaalbers)),
 					      nneighb = m2v(fia_nneighb),
 						  beta_shannon = m2v(fia_shannonbetadiv), 
 						  beta_pairwise_abundance = m2v(fia_meanpairwisedissim),
 						  beta_pairwise_presence = m2v(fia_meanpairwisedissim_pa)
 						  ))
 
-write.csv(fia_betadiv, file = file.path(fp, paste0('fia_betatd',task,'.csv')), row.names = FALSE)						  
+write.csv(fia_betadiv, file = file.path(fp, 'data/fia/fia_betatd.csv'), row.names = FALSE)						  

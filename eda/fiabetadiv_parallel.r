@@ -1,4 +1,5 @@
 # FIA taxonomic and phylogenetic beta diversity calculation for the cluster.
+# Modified 7 April 2017: add Kevin's new phylogeny and change the name corrections.
 # Modified 6 March 2017: correct the bug in species names. Also add functional beta-diversity to this.
 
 fp <- '/mnt/research/nasabio'
@@ -6,8 +7,8 @@ fiapnw <- read.csv(file.path(fp, 'data/fia/finley_trees_pnw_2015evaluations_feb1
 
 #phylogenetic distance matrix
 library(ape)
-load(file.path(fp, 'data/fia/phytophylo_fia.r'))
-fiadist <- cophenetic(fiaphytophylo)
+load(file.path(fp, 'data/fia/pnwphylo_potter.r'))
+fiadist <- cophenetic(pnwphylo)
 
 # Get FIA species code to scientific name lookup table
 fiataxa <- read.csv(file.path(fp, 'data/fia/fia_taxon_lookuptable.csv'), stringsAsFactors = FALSE)
@@ -39,7 +40,7 @@ sppids <- sort(unique(fiasums_plot$SPCD))
 idx <- match(sppids, fiataxa$FIA.Code)
 fiataxa$sciname <- paste(gsub(' ', '', fiataxa$Genus), gsub(' ', '', fiataxa$Species), sep = '_')
 fiataxa$sciname[fiataxa$sciname == 'Chrysolepis_chrysophyllavar.chrysophylla'] <- 'Chrysolepis_chrysophylla'
-fiataxa$sciname[fiataxa$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_trichocarpa'
+fiataxa$sciname[fiataxa$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_balsamifera_trichocarpa'
 
 
 fiaplotlist <- fiasums_plot %>% do(x = area_by_sp(., sppids))
@@ -49,8 +50,13 @@ fiaplotmat <- do.call('rbind', fiaplotlist$x)
 #sppnames <- pnw_species$sciname[match(sppids, pnw_codes)]
 dimnames(fiaplotmat)[[2]] <- fiataxa$sciname[idx]
 
+# Add Abies shastensis to Abies magnifica
+fiaplotmat[,'Abies_magnifica'] <- fiaplotmat[,'Abies_magnifica'] + fiaplotmat[,'Abies_shastensis']
+fiaplotmat <- fiaplotmat[, !grepl('Abies_shastensis', dimnames(fiaplotmat)[[2]])]
+
 # Get rid of the unknown species.
-fiaplotmat <- fiaplotmat[, dimnames(fiaplotmat)[[2]] %in% fiaphytophylo$tip.label]
+fiaplotmat <- fiaplotmat[, dimnames(fiaplotmat)[[2]] %in% pnwphylo$tip.label]
+
 
 # Generate distance matrix for functional beta-diversity
 source('~/code/fia/trydistmat.r')
@@ -100,28 +106,28 @@ r <- radii[task]
 
 
 # Initialize data structures for observed metrics
-fia_shannonbetadiv <- rep(NA, nrow = nrow(fiaalbers))
-fia_meanpairwisedissim <- rep(NA, nrow = nrow(fiaalbers))
-fia_meanpairwisedissim_pa <- rep(NA, nrow = nrow(fiaalbers))
-fia_phypairwise <- rep(NA, nrow = nrow(fiaalbers))
-fia_phypairwise_pa <- rep(NA, nrow = nrow(fiaalbers))
-fia_phynt <- rep(NA, nrow = nrow(fiaalbers))
-fia_phynt_pa <- rep(NA, nrow = nrow(fiaalbers))
-fia_phypairwise_z <- rep(NA, nrow = nrow(fiaalbers))
-fia_phypairwise_pa_z <- rep(NA, nrow = nrow(fiaalbers))
-fia_phynt_z <- rep(NA, nrow = nrow(fiaalbers))
-fia_phynt_pa_z <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcpairwise <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcpairwise_pa <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcnt <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcnt_pa <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcpairwise_z <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcpairwise_pa_z <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcnt_z <- rep(NA, nrow = nrow(fiaalbers))
-fia_funcnt_pa_z <- rep(NA, nrow = nrow(fiaalbers))
+fia_shannonbetadiv <- rep(NA, nrow(fiaalbers))
+fia_meanpairwisedissim <- rep(NA, nrow(fiaalbers))
+fia_meanpairwisedissim_pa <- rep(NA, nrow(fiaalbers))
+fia_phypairwise <- rep(NA, nrow(fiaalbers))
+fia_phypairwise_pa <- rep(NA, nrow(fiaalbers))
+fia_phynt <- rep(NA, nrow(fiaalbers))
+fia_phynt_pa <- rep(NA, nrow(fiaalbers))
+fia_phypairwise_z <- rep(NA, nrow(fiaalbers))
+fia_phypairwise_pa_z <- rep(NA, nrow(fiaalbers))
+fia_phynt_z <- rep(NA, nrow(fiaalbers))
+fia_phynt_pa_z <- rep(NA, nrow(fiaalbers))
+fia_funcpairwise <- rep(NA, nrow(fiaalbers))
+fia_funcpairwise_pa <- rep(NA, nrow(fiaalbers))
+fia_funcnt <- rep(NA, nrow(fiaalbers))
+fia_funcnt_pa <- rep(NA, nrow(fiaalbers))
+fia_funcpairwise_z <- rep(NA, nrow(fiaalbers))
+fia_funcpairwise_pa_z <- rep(NA, nrow(fiaalbers))
+fia_funcnt_z <- rep(NA, nrow(fiaalbers))
+fia_funcnt_pa_z <- rep(NA, nrow(fiaalbers))
 
 
-fia_nneighb <- rep(NA, nrow = nrow(fiaalbers))
+fia_nneighb <- rep(NA, nrow(fiaalbers))
 
 
 pb2 <- txtProgressBar(0, nrow(fiaalbers), style = 3)
@@ -152,7 +158,7 @@ for (p in 1:nrow(fiaalbers)) {
         sppnames <- fiataxa$sciname[match(sppids, fiataxa$FIA.Code)]
         dimnames(mat_p)[[1]] <- 1:nrow(mat_p)
         dimnames(mat_p)[[2]] <- sppnames
-        mat_p <- mat_p[, dimnames(mat_p)[[2]] %in% fiaphytophylo$tip.label, drop = FALSE]
+        mat_p <- mat_p[, dimnames(mat_p)[[2]] %in% pnwphylo$tip.label, drop = FALSE]
         mat_p_noproblem <- mat_p[, !dimnames(mat_p)[[2]] %in% problemspp, drop = FALSE]
         
         # Calculate beta-diversity for that matrix.

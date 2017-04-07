@@ -159,7 +159,7 @@ for (p in 1:nrow(bbsalbers)) {
 	routes_p <- c(as.character(bbscov$rteNo[p]), as.character(bbsnhb_r[[p]]$rteNo))
     dat_p <- fixedbbsmat_byroute[bbscov$year == year_p & bbscov$rteNo %in% routes_p, ]
     # Get rid of empty columns
-    mat_p <- dat_p[, apply(dat_p, 2, sum) > 0]
+    mat_p <- dat_p[, apply(dat_p, 2, sum) > 0, drop = FALSE]
     
     if(!is.null(mat_p)) {
       if(nrow(mat_p) > 1) {
