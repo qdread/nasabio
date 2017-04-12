@@ -3,13 +3,19 @@
 # QDR, 07 Mar 2017
 # Project: NASABioXGeo
 
+# Modification 11 April 2017: taking way too long so create an array job by radius.
 # Reforked on 10 April 2017: Only preparatory work. Save "chunks" to send small pieces to HPCC.
 # Forked on 06 April 2017: do taxonomic diversity only, which makes it quicker. We can just do 1 task per radius now.
 # Modification 08 Mar 2017: Make doubly parallel by giving a different radius to each task
 # but then also splitting the loop into 10 chunks since it will take forever to run otherwise.
 
 radii <- c(1000,2000,3000,4000,5000,10000,15000,20000)
-n_chunks <- 100
+task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+
+combos <- data.frame(slice = rep(1:30, times = length(radii)), radius = rep(radii, each = 30))
+
+r <- combos$radius[task]
+slice <- combos$slice[task]
 
 # 1. Define community either as aggregated route or by stop
 
@@ -126,47 +132,17 @@ library(dplyr)
 
 # Calculate distances and identities of all neighbors within the maximum radius
 bbscov <- cbind(bbsgrps, bbsalbers)
-bbsnhb_list <- bbscov %>% group_by(year, rteNo) %>% do(l = getNeighbors(., radius = max(radii))) # Takes approx 8min on hpcc
+
+# For optimization purposes, convert stop to numeric, and convert covariates to a matrix.
+makenum <- function(x) {
+  idx <- gregexpr('[0-9]', x)
+  as.numeric(substr(x, idx[[1]][1], idx[[1]][length(idx[[1]])]))
+}
+bbscovmat <- bbscov %>% mutate(Stop = sapply(Stop, makenum), rteNo = as.numeric(rteNo)) %>% as.matrix
+
+bbsnhb_list <- as.data.frame(bbscovmat) %>% group_by(year, rteNo) %>% do(l = getNeighbors(., radius = max(radii))) # Takes approx 8min on hpcc
 # Flatten this into one list
 bbsnhb_r <- do.call('c', bbsnhb_list$l)
 
-# Prep list
-
-all_mats <- list()
-
-for (r in 1:length(radii)) {
-
-all_mats[[r]] <- list()
-
-for(p in 1:nrow(fixedbbsmat)) {
-  if (class(bbsnhb_r[[p]]) == 'data.frame') {
-	if (any(bbsnhb_r[[p]]$dist <= radii[r])) {
-    # Subset out the data frame with the nearest neighbors
-	neighbs <- subset(bbsnhb_r[[p]], dist <= radii[r])
-	year_p <- bbscov$year[p]
-	route_p <- bbscov$rteNo[p]
-	stops_p <- c(as.character(bbscov$Stop[p]), as.character(neighbs$Stop))
-    dat_p <- fixedbbsmat[bbscov$year == year_p & bbscov$rteNo == route_p & bbscov$Stop %in% stops_p, ]
-    # Get rid of empty columns
-    mat_p <- dat_p[, apply(dat_p, 2, sum) > 0, drop = FALSE]
-    
-	all_mats[[r]][[p]] <- mat_p
-
-	}}}}
-
-# Now we just have a nice simple list of matrices. We can split it up into as many chunks as we want!
-
-# Determine row indices for the slice of the matrix to be used.
-rowidx <- round(seq(0,nrow(fixedbbsmat),length.out=n_chunks + 1))
-rowidxmin <- rowidx[1:n_chunks]+1
-rowidxmax <- rowidx[(1:n_chunks)+1]
-
-save(bbscov, file = '/mnt/research/nasabio/data/bbs/bbscov.r')
-for (i in 1:n_chunks) {
-	for (j in 1:length(radii)) {
-		x <- all_mats[[j]][rowidxmin[i]:rowidxmax[i]]
-		save(x, file = paste0('/mnt/research/nasabio/data/bbs/mats/mat_',i,'_',j,'.r',sep='_'))
-	}
-}
-
+save(bbsnhb_r, bbscov, bbscovmat, fixedbbsmat, file = '/mnt/research/nasabio/data/bbs/bbsworkspace.r')
 
