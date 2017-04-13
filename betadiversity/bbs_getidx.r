@@ -16,7 +16,7 @@ all_mats <- list()
 dimnames(bbscovmat)[[1]] <- 1:nrow(bbscovmat)
 
 # Determine row indices for the slice of the matrix to be used.
-rowidx <- round(seq(0,nrow(fixedbbsmat),length.out=31))
+rowidx <- round(seq(0,nrow(fixedbbsmat),length.out=n_slices + 1))
 rowidxmin <- rowidx[slice]+1
 rowidxmax <- rowidx[slice+1]
 
