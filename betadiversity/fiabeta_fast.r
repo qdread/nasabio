@@ -15,6 +15,8 @@ source('~/code/fia/fixpicante.r')
 
 nnull <- 99 # Reduce to save time
 
+trydist <- as.matrix(trydist)
+
 pb <- txtProgressBar(0, length(all_mats), style=3)
 
 for (p in 1:length(all_mats)) {
@@ -39,11 +41,18 @@ for (p in 1:length(all_mats)) {
           fia_phypairwise_pa <- mean(comdist(comm = mat_p, dis = fiadist, abundance.weighted = FALSE))
           fia_phynt <- mean(comdistnt(comm = mat_p, dis = fiadist, abundance.weighted = TRUE))
           fia_phynt_pa <- mean(comdistnt(comm = mat_p, dis = fiadist, abundance.weighted = FALSE))
-		  fia_funcpairwise <- mean(comdist(comm = mat_p_noproblem, dis = trydist, abundance.weighted = TRUE))
-          fia_funcpairwise_pa <- mean(comdist(comm = mat_p_noproblem, dis = trydist, abundance.weighted = FALSE))
-          fia_funcnt <- mean(comdistnt(comm = mat_p_noproblem, dis = trydist, abundance.weighted = TRUE))
-          fia_funcnt_pa <- mean(comdistnt(comm = mat_p_noproblem, dis = trydist, abundance.weighted = FALSE))
-		  
+		  if (ncol(mat_p_noproblem) > 1) {
+			  fia_funcpairwise <- mean(comdist(comm = mat_p_noproblem, dis = trydist, abundance.weighted = TRUE))
+			  fia_funcpairwise_pa <- mean(comdist(comm = mat_p_noproblem, dis = trydist, abundance.weighted = FALSE))
+			  fia_funcnt <- mean(comdistnt(comm = mat_p_noproblem, dis = trydist, abundance.weighted = TRUE))
+			  fia_funcnt_pa <- mean(comdistnt(comm = mat_p_noproblem, dis = trydist, abundance.weighted = FALSE))
+		  }
+		  else {
+			fia_funcpairwise <- NA
+			fia_funcpairwise_pa <- NA
+			fia_funcnt <- NA
+			fia_funcnt_pa <- NA
+		  }
           # Null models by scrambling distance matrix
           phypairwise_null <- phypairwise_pa_null <- phynt_null <- phynt_pa_null <- rep(NA, nnull)
 		  funcpairwise_null <- funcpairwise_pa_null <- funcnt_null <- funcnt_pa_null <- rep(NA, nnull)
@@ -64,10 +73,13 @@ for (p in 1:length(all_mats)) {
             phynt_null[sim] <- mean(comdistnt(comm = mat_p, dis = fiadistnull, abundance.weighted = TRUE))
             phynt_pa_null[sim] <- mean(comdistnt(comm = mat_p, dis = fiadistnull, abundance.weighted = FALSE))
 			
-			funcpairwise_null[sim] <- mean(comdist(comm = mat_p, dis = trydistnull, abundance.weighted = TRUE))
-            funcpairwise_pa_null[sim] <- mean(comdist(comm = mat_p, dis = trydistnull, abundance.weighted = FALSE))
-            funcnt_null[sim] <- mean(comdistnt(comm = mat_p, dis = trydistnull, abundance.weighted = TRUE))
-            funcnt_pa_null[sim] <- mean(comdistnt(comm = mat_p, dis = trydistnull, abundance.weighted = FALSE))
+			if (ncol(mat_p_noproblem) > 1) {
+			funcpairwise_null[sim] <- mean(comdist(comm = mat_p_noproblem, dis = trydistnull, abundance.weighted = TRUE))
+            funcpairwise_pa_null[sim] <- mean(comdist(comm = mat_p_noproblem, dis = trydistnull, abundance.weighted = FALSE))
+            funcnt_null[sim] <- mean(comdistnt(comm = mat_p_noproblem, dis = trydistnull, abundance.weighted = TRUE))
+            funcnt_pa_null[sim] <- mean(comdistnt(comm = mat_p_noproblem, dis = trydistnull, abundance.weighted = FALSE))
+			}
+			
           }
           
           fia_phypairwise_z <- (fia_phypairwise - mean(phypairwise_null, na.rm=T))/sd(phypairwise_null, na.rm=T)
@@ -75,12 +87,27 @@ for (p in 1:length(all_mats)) {
           fia_phynt_z <- (fia_phynt - mean(phynt_null, na.rm=T))/sd(phynt_null, na.rm=T)
           fia_phynt_pa_z <- (fia_phynt_pa - mean(phynt_pa_null, na.rm=T))/sd(phynt_pa_null, na.rm=T)
 		  
+		  if (ncol(mat_p_noproblem) > 1) {
 		  fia_funcpairwise_z <- (fia_funcpairwise - mean(funcpairwise_null, na.rm=T))/sd(funcpairwise_null, na.rm=T)
           fia_funcpairwise_pa_z <- (fia_funcpairwise_pa - mean(funcpairwise_pa_null, na.rm=T))/sd(funcpairwise_pa_null, na.rm=T)
           fia_funcnt_z <- (fia_funcnt - mean(funcnt_null, na.rm=T))/sd(funcnt_null, na.rm=T)
           fia_funcnt_pa_z <- (fia_funcnt_pa - mean(funcnt_pa_null, na.rm=T))/sd(funcnt_pa_null, na.rm=T)
-			
+		}
+		else {
+			fia_funcpairwise_z <- NA
+			fia_funcpairwise_pa_z <- NA
+			fia_funcnt_z <- NA
+			fia_funcnt_pa_z <- NA
+		}
 			fia_list[[p]] <- data.frame(nneighb = nrow(mat_p) - 1, 
+										beta_pd_pairwise_abundance = fia_phypairwise,
+										beta_pd_pairwise_abundance_z = fia_phypairwise_z,
+										beta_pd_nearest_abundance = fia_phynt,
+										beta_pd_nearest_abundance_z = fia_phynt_z,
+										beta_fd_pairwise_abundance = fia_funcpairwise,
+										beta_fd_pairwise_abundance_z = fia_funcpairwise_z,
+										beta_fd_nearest_abundance = fia_funcnt,
+										beta_fd_nearest_abundance_z = fia_funcnt_z,
 										beta_pd_pairwise_presence = fia_phypairwise_pa,
 										beta_pd_pairwise_presence_z = fia_phypairwise_pa_z,
 										beta_pd_nearest_presence = fia_phynt_pa,
@@ -94,6 +121,14 @@ for (p in 1:length(all_mats)) {
 		  }
 		  else {
 			fia_list[[p]] <- data.frame(nneighb = NA, 
+										beta_pd_pairwise_abundance = NA,
+										beta_pd_pairwise_abundance_z = NA,
+										beta_pd_nearest_abundance = NA,
+										beta_pd_nearest_abundance_z = NA,
+										beta_fd_pairwise_abundance = NA,
+										beta_fd_pairwise_abundance_z = NA,
+										beta_fd_nearest_abundance = NA,
+										beta_fd_nearest_abundance_z = NA,
 										beta_pd_pairwise_presence = NA,
 										beta_pd_pairwise_presence_z = NA,
 										beta_pd_nearest_presence = NA,
@@ -107,6 +142,14 @@ for (p in 1:length(all_mats)) {
 		}
 		else {
 		  fia_list[[p]] <- data.frame(nneighb = NA, 
+										beta_pd_pairwise_abundance = NA,
+										beta_pd_pairwise_abundance_z = NA,
+										beta_pd_nearest_abundance = NA,
+										beta_pd_nearest_abundance_z = NA,
+										beta_fd_pairwise_abundance = NA,
+										beta_fd_pairwise_abundance_z = NA,
+										beta_fd_nearest_abundance = NA,
+										beta_fd_nearest_abundance_z = NA,
 										beta_pd_pairwise_presence = NA,
 										beta_pd_pairwise_presence_z = NA,
 										beta_pd_nearest_presence = NA,

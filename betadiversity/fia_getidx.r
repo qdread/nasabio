@@ -31,8 +31,7 @@ for(p in 1:nrow(fiaalbers)) {
        mat_p <- do.call('rbind', mat_p$x)
 	   
 	   sppnames <- fiataxa$sciname[match(sppids, fiataxa$FIA.Code)]
-        dimnames(mat_p)[[1]] <- 1:nrow(mat_p)
-        dimnames(mat_p)[[2]] <- sppnames
+	   if (inherits(mat_p, 'matrix')) dimnames(mat_p) <- list(1:nrow(mat_p), sppnames)
 		
 	   all_mats[[length(all_mats) + 1]] <- mat_p
 	}

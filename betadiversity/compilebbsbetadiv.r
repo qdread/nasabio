@@ -6,7 +6,7 @@ for (r in 1:length(radii)) {
 	list_r <- list()
 	for (slice in 1:50) {
 
-dat <- read.csv(paste0('/mnt/research/nasabio/data/bbs/betaoutput/td_',radii[r],'_',slice,'.csv'))
+dat <- read.csv(paste0('/mnt/research/nasabio/data/bbs/betaoutput/td/td_',radii[r],'_',slice,'.csv'))
 list_r[[slice]] <- dat
 
 }

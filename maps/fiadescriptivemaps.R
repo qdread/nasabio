@@ -1,10 +1,11 @@
 # Map of FIA.
-
+# Edit 18 April: add betadiversity
 
 fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
 
 library(dplyr)
 load(file.path(fp, 'fia_diversitymetrics.RData'))
+betatd <- read.csv(file.path(fp, 'fia_betatd.csv'), stringsAsFactors = F)
 
 fiapnw <- read.csv(file.path(fp, 'finley_trees_pnw_2015evaluations_feb14_2017.csv'), stringsAsFactors = FALSE)
 
@@ -73,3 +74,35 @@ fiamap2 <- ggplot(plot_diversity, aes(x = lon, y = lat, color = shannon_basalare
 fp_fig <- 'C:/Users/Q/Google Drive/NasaBiodiversityWG/Figures/descriptivemaps'
 ggsave(file.path(fp_fig, 'fia_richness.png'), fiamap1, height = 6, width = 6, dpi = 400)
 ggsave(file.path(fp_fig, 'fia_shannon.png'), fiamap2, height = 6, width = 6, dpi = 400)
+
+
+colscalebeta <- scale_colour_gradientn(name = 'Taxonomic\nbeta-diversity', colours = rainbow(10))	  
+fiamap3 <- ggplot(betatd %>% filter(radius == 10000), aes(x = lon, y = lat, color = beta_pairwise_abundance)) +
+  borders('world', 'canada', fill = 'gray70') +
+  borders('world', 'usa', fill = 'gray70') +
+  borders('state') +
+  geom_point(size = 0.75) +
+  coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = bothlonbds, ylim = bothlatbds) +
+  blackmaptheme + colscalebeta
+
+
+fiamap4 <- ggplot(betatd %>% filter(radius == 20000), aes(x = lon, y = lat, color = beta_pairwise_abundance)) +
+  borders('world', 'canada', fill = 'gray70') +
+  borders('world', 'usa', fill = 'gray70') +
+  borders('state') +
+  geom_point(size = 0.75) +
+  coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = bothlonbds, ylim = bothlatbds) +
+  blackmaptheme + colscalebeta
+
+
+fiamap5 <- ggplot(betatd %>% filter(radius == 50000), aes(x = lon, y = lat, color = beta_pairwise_abundance)) +
+  borders('world', 'canada', fill = 'gray70') +
+  borders('world', 'usa', fill = 'gray70') +
+  borders('state') +
+  geom_point(size = 0.75) +
+  coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = bothlonbds, ylim = bothlatbds) +
+  blackmaptheme + colscalebeta
+
+ggsave(file.path(fp_fig, 'fia_betadiv10km.png'), fiamap3 + ggtitle('10 km radius'), height=6, width=6, dpi=400)
+ggsave(file.path(fp_fig, 'fia_betadiv20km.png'), fiamap4 + ggtitle('20 km radius'), height=6, width=6, dpi=400)
+ggsave(file.path(fp_fig, 'fia_betadiv50km.png'), fiamap5 + ggtitle('50 km radius'), height=6, width=6, dpi=400)
