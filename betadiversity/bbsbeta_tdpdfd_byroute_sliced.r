@@ -1,11 +1,20 @@
 radii <- c(50000, 75000, 100000, 150000, 200000)
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+n_slices <- 20
 
-r <- radii[task]
+combos <- data.frame(slice = rep(1:n_slices, times = length(radii)), radius = rep(radii, each = n_slices))
+
+r <- combos$radius[task]
+slice <- combos$slice[task]
 
 
 load(paste0('/mnt/research/nasabio/data/bbs/mats/routemat_', as.character(as.integer(r)), '.r'))
 bbs_list <- list()
+
+# Determine row indices for the slice of the matrix to be used.
+idx <- round(seq(0,length(all_mats),length.out=n_slices + 1))
+idxmin <- idx[slice]+1
+idxmax <- idx[slice+1]
 
 load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance matrices.
 
@@ -15,9 +24,9 @@ source('~/code/fia/fixpicante.r')
 
 nnull <- 99 # Reduce to save time
 
-pb <- txtProgressBar(0, length(all_mats), style=3)
+pb <- txtProgressBar(0, length(idxmin:idxmax), style=3)
 
-for (p in 1:length(all_mats)) {
+for (p in idxmin:idxmax) {
 	setTxtProgressBar(pb, p)
 	mat_p <- all_mats[[p]]
 	
@@ -62,7 +71,7 @@ for (p in 1:length(all_mats)) {
           bbs_funcnt_pa_z <- (bbs_funcnt_pa - mean(funcnt_pa_null, na.rm=T))/sd(funcnt_pa_null, na.rm=T)
 
 			
-			bbs_list[[p]] <- data.frame(nneighb = nrow(mat_p) - 1, 
+			bbs_list[[(p - idxmin + 1)]] <- data.frame(nneighb = nrow(mat_p) - 1, 
 										beta_td_pairwise_presence = beta_td_pairwise_presence,
 										beta_pd_pairwise_presence = bbs_phypairwise_pa,
 										beta_pd_pairwise_presence_z = bbs_phypairwise_pa_z,
@@ -76,7 +85,7 @@ for (p in 1:length(all_mats)) {
 			
 		  }
 		  else {
-			bbs_list[[p]] <- data.frame(nneighb = NA, 
+			bbs_list[[(p - idxmin + 1)]] <- data.frame(nneighb = NA, 
 										beta_td_pairwise_presence = NA,
 										beta_pd_pairwise_presence = NA,
 										beta_pd_pairwise_presence_z = NA,
@@ -90,7 +99,7 @@ for (p in 1:length(all_mats)) {
 		  }
 		}
 		else {
-		  bbs_list[[p]] <- data.frame(nneighb = NA, 
+		  bbs_list[[(p - idxmin + 1)]] <- data.frame(nneighb = NA, 
 										beta_td_pairwise_presence = NA,
 										beta_pd_pairwise_presence = NA,
 										beta_pd_pairwise_presence_z = NA,
@@ -109,4 +118,4 @@ close(pb)
 # Compile all of these values into a single data frame and save.
 bbs_betadiv <- do.call('rbind', bbs_list)
 
-write.csv(bbs_betadiv, file = paste0('/mnt/research/nasabio/data/bbs/betaoutput/route_tdpdfd_',r,'.csv'), row.names = FALSE)						  
+write.csv(bbs_betadiv, file = paste0('/mnt/research/nasabio/data/bbs/betaoutput/byroute/route_tdpdfd_',r,'_',slice,'.csv'), row.names = FALSE)						  

@@ -28,12 +28,36 @@ fiaalbers <- spTransform(fiaspatial, CRSobj = CRS(aea_crs))
 # srtm 90m dem for west coast
 wcdem <- raster('/mnt/research/nasabio/data/dem/SRTM_90m_DEM/west_coast_dem.vrt')
   
-wcdem_albers <- projectRaster(wcdem, crs = aea_crs)
-writeRaster(wcdem_albers, file = '/mnt/research/nasabio/data/dem/SRTM_90m_DEM/west_coast_dem_albers.grd', format='raster')			  
+#wcdem_albers <- projectRaster(wcdem, crs = aea_crs)
+#writeRaster(wcdem_albers, file = '/mnt/research/nasabio/data/dem/SRTM_90m_DEM/west_coast_dem_albers.grd', format='raster')			  
 			  
+radii <- c(1000,5000,7500,10000,20000)
 
-# Test 5km buffer on one coordinate.
+mns <- matrix(NA, nrow=nrow(fiaalbers), ncol=length(radii))
+cvs <- mns			  
 
-pbuf <- gBuffer(fiaalbers[100,], width=1000)
+pb <- txtProgressBar(0, length(radii) * nrow(fiaalbers), style=3)
+			  
+for (r in 1:length(radii)) {
+	for (i in 1:nrow(fiaalbers)) {
+		setTxtProgressBar(pb, nrow(fiaalbers)*(r-1) + i)
+		buf1 <- raster::buffer(fiaalbers[i,], width=r)
+		buf1l <- spTransform(buf1, CRS=wgs_crs)
+		# Error catcher:
+		iserr <- try(extract(wcdem, fiaspatial[i,]), TRUE)
+		if (!inherits(iserr, 'try-error')) {
+			elevs <- na.omit(extract(wcdem, buf1l)[[1]])
+			if (min(elevs) < 0) elevs <- elevs - min(elevs)
+			mns[i,r] <- mean(elevs)
+			cvs[i,r] <- sd(elevs)/mns[i,r]
+		}
+	}
+}
 
-extract(wcdem_albers, pbuf)
+close(pb)
+
+# Convert to longform
+elevdatalong <- data.frame(fiaspatial@coords, fiaspatial@data)
+df2 <- data.frame(radius=rep(radii, each=nrow(elevdatalong)), mean_elev = as.vector(mns), cv_elev = as.vector(cvs))
+elevdatalong <- cbind(elevdatalong, df2)
+write.csv(elevdatalong, file='/mnt/research/nasabio/data/dem/SRTM_90m_DEM/elevstats90m.csv', row.names=FALSE)
