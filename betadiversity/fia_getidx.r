@@ -31,9 +31,13 @@ for(p in 1:nrow(fiaalbers)) {
        mat_p <- do.call('rbind', mat_p$x)
 	   
 	   sppnames <- fiataxa$sciname[match(sppids, fiataxa$FIA.Code)]
-	   if (inherits(mat_p, 'matrix')) dimnames(mat_p) <- list(1:nrow(mat_p), sppnames)
-		
-	   all_mats[[length(all_mats) + 1]] <- mat_p
+	   if (inherits(mat_p, 'matrix')) {
+		dimnames(mat_p) <- list(1:nrow(mat_p), sppnames)
+		all_mats[[length(all_mats) + 1]] <- mat_p
+	  }
+	  else {
+		all_mats[[length(all_mats) + 1]] <- NA
+	}
 	}
 	else {
 		all_mats[[length(all_mats) + 1]] <- NA

@@ -14,3 +14,20 @@ load(file.path(fp,'fia_betadiv3k.r'))
 fia_betadiv3k <- cbind(fiaalbers@data, fia_betadiv3k)
 plot_diversity <- left_join(plot_diversity, fia_betadiv3k)
 names(plot_diversity)[13:16] <- paste0(names(plot_diversity)[13:16], '3000')
+
+#########################
+
+# Compile beta-diversity from longer runs.
+
+load('/mnt/research/nasabio/data/fia/fiaworkspace.r') 
+
+radii <- c(5000, 7500, 10000)
+
+fia_betadiv <- list()
+
+for (r in 1:length(radii)) {
+	dat <- read.csv(paste0('/mnt/research/nasabio/data/fia/betaoutput/tdpdfd_',as.character(as.integer(radii[r])),'.csv'))
+	fia_betadiv[[r]] <- data.frame(radius = radii[r], dat)
+}
+
+fia_betadiv <- do.call('rbind', fia_betadiv)
