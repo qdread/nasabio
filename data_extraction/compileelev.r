@@ -26,3 +26,33 @@ for (i in 1:length(elev_list)) {
 
 fia_elev_stats <- do.call('rbind', elev_list)
 write.csv(fia_elev_stats, file = '/mnt/research/nasabio/data/dem/fia_elev_stats_noalaska.csv', row.names = FALSE)
+
+# Added 3 May: also extract bbs
+
+elev_list <- list()
+
+for (i in 1:150) {
+	load(paste0('/mnt/research/nasabio/data/bbs/elevstats/30m/stats_', i, '.r'))
+	elev_list <- c(elev_list, stats_by_point)
+}
+
+
+library(dplyr)
+
+fp <- '/mnt/research/nasabio'
+bbscoords <- read.csv(file.path(fp, 'data/bbs/bbs_wgs84_coords_byroute.csv'), stringsAsFactors = FALSE)
+bbsaea <- read.csv(file.path(fp, 'data/bbs/bbs_aea_coords_byroute.csv'), stringsAsFactors = FALSE)
+load(file.path(fp, 'data/bbs/bbsworkspace_byroute.r'))
+
+# paste all coordinates, year, and route number together.
+bbsall <- data.frame(year=rep(NA,nrow(bbscoords)), rteNo=NA, x_aea=NA, y_aea=NA)
+bbsall[which(!is.na(bbscoords[,1])), ] <- bbscov
+bbsall <- transform(bbsall, rteNo=as.numeric(rteNo))
+bbsall <- cbind(bbsall, bbscoords)
+
+for (i in 1:length(elev_list)) {
+	elev_list[[i]] <- data.frame(bbsall[i,], elev_list[[i]])
+}
+
+bbs_elev_stats <- do.call('rbind', elev_list)
+write.csv(bbs_elev_stats, file = file.path(fp, 'data/dem/bbs_elev_stats.csv'), row.names = FALSE)
