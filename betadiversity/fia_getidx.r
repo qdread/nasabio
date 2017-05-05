@@ -1,4 +1,4 @@
-radii <- c(1000,5000,7500,10000,20000,50000)
+radii <- c(1000,5000,7500,10000,20000,50000,100000)
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 r <- radii[task]
 
@@ -49,4 +49,4 @@ for(p in 1:nrow(fiaalbers)) {
 	if (p%%1000 == 0) print(p)
 }
 
-save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/mat_',r,'.r'))
+save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/mat_',as.character(as.integer(r)),'.r'))

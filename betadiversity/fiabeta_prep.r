@@ -95,7 +95,7 @@ getNeighbors <- function(dat, radius) {
 }
 
 
-radii <- c(1000,5000,7500,10000,20000,50000)
+radii <- c(1000,5000,7500,10000,20000,50000,100000)
 fianhb_r <- getNeighbors(fiaalbers, radius = max(radii))
 
 save(fianhb_r, fiadist, trydist, pnwphylo, problemspp, fiataxa, fiaplotmat, fiaalbers, fiasums_plot, sppids, file = '/mnt/research/nasabio/data/fia/fiaworkspace.r')

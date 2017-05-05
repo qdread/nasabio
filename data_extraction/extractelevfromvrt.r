@@ -4,7 +4,7 @@ n_slices <- 100 # Divide this into 100 little jobs, because this will take a whi
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # BBS lat long coordinates
-bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_wgs84_coords_byroute.csv')
+bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
 rad <- 1e5 # Maximal radius for bbs and fia, as anything above 100km has WAY too many pixels in it.
 
 # Find row index of slice.
@@ -30,9 +30,9 @@ pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
 
 for (i in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb,i)
-	if (!is.na(bbsll[i,1])) {
-		loni <- bbsll[i,1]
-		lati <- bbsll[i,2]
+	if (!is.na(bbsll[i,2])) {
+		loni <- bbsll[i,2]
+		lati <- bbsll[i,3]
 		if (loni > usaext@xmin & loni < usaext@xmax & lati > usaext@ymin & lati < usaext@ymax) {
 			ei <- extract(usa, cbind(x=loni,y=lati), buffer=rad, cellnumbers = TRUE) # The actual extraction of elevations, will be slow
 			ex <- xFromCell(usa, ei[[1]][,1]) # Find longitudes of the extracted elevations
@@ -50,4 +50,4 @@ for (i in rowidxmin:rowidxmax) {
 
 close(pb)
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/bbs/elevstats/30m/stats_',slice,'.csv')
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/bbs/elevstats/30m/stats_',slice,'.r'))

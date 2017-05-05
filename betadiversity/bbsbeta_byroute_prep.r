@@ -3,6 +3,7 @@
 # QDR, 07 Mar 2017
 # Project: NASABioXGeo
 
+# Modification 05 May 2017: New coordinates (correct)
 # Rereforked on 18 April 2017: Do by route.
 # Modification 11 April 2017: taking way too long so create an array job by radius.
 # Reforked on 10 April 2017: Only preparatory work. Save "chunks" to send small pieces to HPCC.
@@ -23,9 +24,9 @@ fixedbbsmat_byroute[, which(sppids == 5739)] <- fixedbbsmat_byroute[, which(sppi
 fixedbbsmat_byroute[, which(sppids == 5738)] <- 0
 fixedbbsmat_byroute[, which(sppids == 6960)] <- 0
 
-# 3. Project lat-long to Albers. (Already done in another script, just load coordinates)
+# 3. Project lat-long to Albers.
 
-bbsalbers <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbs_aea_coords_byroute.csv')
+bbsalbers <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
 
 # 4. Create cophenetic distance matrix from bird phylogeny. Use average branch lengths from the ten trees.
 
@@ -61,7 +62,10 @@ dimnames(birdtraitdist)[[1]] <- dimnames(birdtraitdist)[[2]] <- birdtrait_diurna
 # 5b. Perform any last data cleaning that is necessary.
 
 # Remove stops that don't have coordinates from the dataset.
-has_coords <- !is.na(bbsalbers$x_aea)
+
+library(dplyr)
+bbsgrps_byroute <- bbsgrps_byroute %>% mutate(rteNo=as.numeric(rteNo)) %>% left_join(bbsalbers)
+has_coords <- !is.na(bbsgrps_byroute$lon)
 
 # Set dimnames of community matrix, trait distance matrix, and phylogenetic distance matrix to match.
 
@@ -97,7 +101,7 @@ rs <- rowSums(fixedbbsmat_byroute)
 nocturnalbirds <- birdtrait$Latin_Name[birdtrait$Nocturnal == 1]
 fixedbbsmat_byroute <- fixedbbsmat_byroute[has_coords & rs != 0, !(dimnames(fixedbbsmat_byroute)[[2]] %in% nocturnalbirds) & ns != 0]
 
-bbsalbers <- bbsalbers[has_coords & rs != 0, ]
+#bbsalbers <- bbsalbers[has_coords & rs != 0, ]
 bbsgrps_byroute <- bbsgrps_byroute[has_coords & rs != 0, ]
 
 # 6. For the given radius, get pairwise distances among stops and the list of all neighbors.
@@ -106,7 +110,7 @@ bbsgrps_byroute <- bbsgrps_byroute[has_coords & rs != 0, ]
 # Refer to http://gis.stackexchange.com/questions/132384/distance-to-nearest-point-for-every-point-same-spatialpointsdataframe-in-r
 getNeighbors <- function(dat, radius) {
   library(spdep)
-  coords <- cbind(dat$x_aea, dat$y_aea)
+  coords <- cbind(dat$lon_aea, dat$lat_aea)
   idlist <- dnearneigh(coords, 0, radius)
   distlist <- nbdists(idlist, coords)
   dflist <- list()
@@ -121,15 +125,14 @@ getNeighbors <- function(dat, radius) {
   dflist
 }
 
-library(dplyr)
-
 # Calculate distances and identities of all neighbors within the maximum radius
-bbscov <- cbind(bbsgrps_byroute, bbsalbers)
+bbscov <- bbsgrps_byroute
 
-# For optimization purposes, convert stop to numeric, and convert covariates to a matrix.
-bbscovmat <- bbscov %>% mutate(rteNo = as.numeric(rteNo)) %>% as.matrix
+# For optimization purposes, convert covariates to a matrix.
+bbscovmat <- as.matrix(bbscov)
 
-bbsnhb_list <- as.data.frame(bbscovmat) %>% group_by(year) %>% do(l = getNeighbors(., radius = max(radii))) 
+
+bbsnhb_list <- as.data.frame(bbscovmat) %>% group_by(year) %>% do(l = getNeighbors(., radius = 2e5)) 
 # Flatten this into one list
 bbsnhb_r <- do.call('c', bbsnhb_list$l)
 
