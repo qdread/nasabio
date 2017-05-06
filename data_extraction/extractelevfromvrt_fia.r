@@ -30,7 +30,7 @@ usa <- raster('/mnt/research/ersamlab/shared_data/DEM_SRTM_30m/VRTs/conus_30m_de
 usaext <- extent(usa)
 
 # Radii of circles where we want summary stats
-radii <- c(1, 5, 10, 20, 50) # in km. Just do up to 50 km for fia since there are more plots in that radius.
+radii <- c(1, 5, 10, 20, 50, 100) # in km. Just do up to 50 km for fia since there are more plots in that radius.
 
 emptydf <- data.frame(radius = radii, mean_elev = NA, sd_elev = NA, min_elev = NA, max_elev = NA, n = NA)
 

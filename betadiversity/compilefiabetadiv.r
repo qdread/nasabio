@@ -31,3 +31,25 @@ for (r in 1:length(radii)) {
 }
 
 fia_betadiv <- do.call('rbind', fia_betadiv)
+
+##########################
+
+# Compile taxonomic-only beta-diversity from 100km run.
+
+load('/mnt/research/nasabio/data/fia/fiaworkspace.r') 
+
+fia_betadiv <- list()
+
+for (i in 1:50) {
+	dat <- read.csv(paste0('/mnt/research/nasabio/data/fia/betaoutput/sliced/td_100000_',i,'.csv'))
+	fia_betadiv[[i]] <- dat
+}
+
+fia_betadiv <- do.call('rbind', fia_betadiv)
+
+# add to the existing data frame.
+fia_betatd <- read.csv('/mnt/research/nasabio/data/fia/fia_betatd.csv', stringsAsFactors=FALSE)
+
+fia_betadiv <- cbind(fia_betatd[1:nrow(fia_betadiv), 1:6], radius = 1e5, fia_betadiv)
+fia_betatd <- rbind(fia_betatd, fia_betadiv)
+write.csv(fia_betatd, file = '/mnt/research/nasabio/data/fia/fia_betatd.csv', row.names = FALSE)

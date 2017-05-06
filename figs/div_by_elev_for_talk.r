@@ -15,7 +15,7 @@ bd <- bd %>%
 
 library(cowplot)
 
-fia_beta_plot <- ggplot(bd %>% subset(radius %in% c(5,10,20,50)), aes(x = sd_elev, y = beta_pairwise_abundance)) +
+fia_beta_plot <- ggplot(bd %>% subset(radius %in% c(5,10,20,50,100)), aes(x = sd_elev, y = beta_pairwise_abundance)) +
   geom_point(alpha = 0.33) +
   stat_smooth() +
   facet_wrap(~ radius, labeller = labeller(radius = function(x) paste(x, 'km')), scales = 'free_x') +
@@ -25,7 +25,7 @@ fia_beta_plot <- ggplot(bd %>% subset(radius %in% c(5,10,20,50)), aes(x = sd_ele
   labs(x = 'Standard deviation of elevation')
 
 fpfig <- 'C:/Users/Q/Google Drive/NASABiodiversityWG/Figures/betadiv/'
-ggsave(file.path(fpfig, 'fiabetadiversity.png'), fia_beta_plot, height = 9, width = 9, dpi = 400)
+ggsave(file.path(fpfig, 'fiabetadiversity.png'), fia_beta_plot, height = 13.5, width = 9, dpi = 400)
 
 # Alpha diversity (taxonomic)
 
