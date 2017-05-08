@@ -1,6 +1,7 @@
 # Figures for FIA beta-diversity at different scales, regressed on elevational diversity
 
 fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
+fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/betadiv/'
 
 bd <- read.csv(file.path(fp, 'fia_betatd.csv'), stringsAsFactors = FALSE)
 ed <- read.csv(file.path(fp, 'fia_elev_stats_noalaska.csv'), stringsAsFactors = FALSE)
@@ -24,8 +25,7 @@ fia_beta_plot <- ggplot(bd %>% subset(radius %in% c(5,10,20,50,100)), aes(x = sd
   scale_y_continuous(name = 'Pairwise abundance-weighted beta-diversity', expand = c(0,0)) +
   labs(x = 'Standard deviation of elevation')
 
-fpfig <- 'C:/Users/Q/Google Drive/NASABiodiversityWG/Figures/betadiv/'
-ggsave(file.path(fpfig, 'fiabetadiversity.png'), fia_beta_plot, height = 13.5, width = 9, dpi = 400)
+ggsave(file.path(fpfig, 'fiabetadiversity.png'), fia_beta_plot, height = 9, width = 13.5, dpi = 400)
 
 # Alpha diversity (taxonomic)
 
@@ -42,7 +42,7 @@ fiacoords <- fiapnw %>%
             lon = LON_FUZZSWAP[1])
 
 plot_diversity <- left_join(plot_diversity, fiacoords)
-radii <- c(5, 10, 20, 50)
+radii <- c(5, 10, 20, 50, 100)
 
 
 neighbordiv <- function(x) {
@@ -72,8 +72,7 @@ fia_alpha_plot <- ggplot(ad, aes(x = sd_elev, y = shannon_basalarea)) +
   scale_y_continuous(name = 'Median Shannon alpha-diversity', expand = c(0,0)) +
   labs(x = 'Standard deviation of elevation')
 
-fpfig <- 'C:/Users/Q/Google Drive/NASABiodiversityWG/Figures/betadiv/'
-ggsave(file.path(fpfig, 'fiaalphadiversity.png'), fia_alpha_plot, height = 9, width = 9, dpi = 400)
+ggsave(file.path(fpfig, 'fiaalphadiversity.png'), fia_alpha_plot, height = 9, width = 13.5, dpi = 400)
 
 ####################################################
 
@@ -102,14 +101,17 @@ blackmaptheme <- theme_void() + theme(panel.grid = element_blank(),
                                       legend.direction = 'horizontal',
                                       text = element_text(color = 'white'))
 
-fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/betadiv/'
+
+
 
 for (rad in radii) {
-  fiamap_bd <- ggplot(bd %>% filter(radius == rad, !is.na(beta_pairwise_abundance)), 
+  bdmapdat <- bd %>% filter(radius == rad, !is.na(beta_pairwise_abundance)) %>% arrange(beta_pairwise_abundance)
+  
+  fiamap_bd <- ggplot(bdmapdat, 
                        aes(x = lon, y = lat, color = beta_pairwise_abundance)) +
     borders('world', 'canada', fill = 'gray70') +
     borders('world', 'usa', fill = 'gray70') +
-    #borders('state') +
+    borders('state') +
     geom_point(size = 0.75) +
     coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
     blackmaptheme + colscalebeta +
@@ -117,7 +119,9 @@ for (rad in radii) {
   fname <- paste0('fia_map_',rad,'km_beta.png')
   ggsave(file.path(fpfig, fname), fiamap_bd, height = 8, width = 6, dpi = 400)
   
-  fiamap_ad <- ggplot(ad %>% filter(radius == rad, !is.na(shannon_basalarea)), 
+  admapdat <- ad %>% filter(radius == rad, !is.na(shannon_basalarea)) %>% arrange(shannon_basalarea)
+  
+  fiamap_ad <- ggplot(admapdat, 
                       aes(x = lon, y = lat, color = shannon_basalarea)) +
     borders('world', 'canada', fill = 'gray70') +
     borders('world', 'usa', fill = 'gray70') +
@@ -129,7 +133,9 @@ for (rad in radii) {
   fname <- paste0('fia_map_',rad,'km_alpha.png')
   ggsave(file.path(fpfig, fname), fiamap_ad, height = 8, width = 6, dpi = 400)
   
-  fiamap_ed <- ggplot(bd %>% filter(radius == rad, !is.na(sd_elev)), 
+  edmapdat <- bd %>% filter(radius == rad, !is.na(sd_elev)) %>% arrange(sd_elev)
+  
+  fiamap_ed <- ggplot(edmapdat, 
                       aes(x = lon, y = lat, color = sd_elev)) +
     borders('world', 'canada', fill = 'gray70') +
     borders('world', 'usa', fill = 'gray70') +
@@ -149,15 +155,13 @@ for (rad in radii) {
 ####################################################
 # Added 03 May: BBS
 
-fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
-
 bd <- read.csv(file.path(fp, 'bbs_beta_byroute.csv'), stringsAsFactors = FALSE)
 ed <- read.csv(file.path(fp, 'bbs_elev_stats.csv'), stringsAsFactors = FALSE)
 
 library(dplyr)
 
 ed <- ed %>%
-  filter(year >= 2001, year <= 2011) %>%
+  #filter(year >= 2001, year <= 2011) %>%
   group_by(rteNo, radius) %>%
   summarize_all(.funs=mean, na.rm=T)
 
@@ -179,7 +183,6 @@ bbs_beta_plot <- ggplot(bd, aes(x = sd_elev, y = beta_td_pairwise_presence)) +
   scale_y_continuous(name = 'Pairwise abundance-weighted beta-diversity', expand = c(0,0)) +
   labs(x = 'Standard deviation of elevation')
 
-fpfig <- 'C:/Users/Q/Google Drive/NASABiodiversityWG/Figures/betadiv/'
 ggsave(file.path(fpfig, 'bbsbetadiversity.png'), bbs_beta_plot, height = 9, width = 9, dpi = 400)
 
 # Calculate alpha diversity within radii
@@ -209,8 +212,8 @@ ggsave(file.path(fpfig, 'bbsalphadiversity.png'), bbs_alpha_plot, height = 9, wi
 latbds <- c(25, 50)
 lonbds <- c(-125, -67)
 
-coords <- ad[,c('rteNo','radius','x_wgs84','y_wgs84')]
-bd <- left_join(bd,coords)
+#coords <- ad[,c('rteNo','radius','lon','lat')]
+#bd <- left_join(bd,coords)
 
 blackmaptheme <- theme_void() + theme(panel.grid = element_blank(), 
                                      panel.background = element_rect(color = 'black', fill = 'black'), 
@@ -221,8 +224,8 @@ blackmaptheme <- theme_void() + theme(panel.grid = element_blank(),
 
 radii <- c(50, 75, 100)
 for (rad in radii) {
-  bbsmap_bd <- ggplot(bd %>% filter(radius == rad, !is.na(beta_td_pairwise_presence)), 
-                      aes(x = x_wgs84, y = y_wgs84, color = beta_td_pairwise_presence)) +
+  bbsmap_bd <- ggplot(bd %>% filter(radius == rad, !is.na(beta_td_pairwise_presence)) %>% arrange(beta_td_pairwise_presence), 
+                      aes(x = lon, y = lat, color = beta_td_pairwise_presence)) +
     borders('world', 'canada', fill = 'gray70') +
     borders('world', 'mexico', fill = 'gray70') +
     borders('world', 'usa', fill = 'gray70') +
@@ -234,8 +237,8 @@ for (rad in radii) {
   fname <- paste0('bbs_map_',rad,'km_beta.png')
   ggsave(file.path(fpfig, fname), bbsmap_bd, height = 6, width = 9, dpi = 400)
   
-  bbsmap_ad <- ggplot(ad %>% filter(radius == rad, !is.na(richness)), 
-                      aes(x = x_wgs84, y = y_wgs84, color = richness)) +
+  bbsmap_ad <- ggplot(ad %>% filter(radius == rad, !is.na(richness)) %>% arrange(richness), 
+                      aes(x = lon, y = lat, color = richness)) +
     borders('world', 'canada', fill = 'gray70') +
     borders('world', 'mexico', fill = 'gray70') +
     borders('world', 'usa', fill = 'gray70') +
@@ -247,8 +250,8 @@ for (rad in radii) {
   fname <- paste0('bbs_map_',rad,'km_alpha.png')
   ggsave(file.path(fpfig, fname), bbsmap_ad, height = 6, width = 9, dpi = 400)
   
-  bbsmap_ed <- ggplot(bd %>% filter(radius == rad, !is.na(sd_elev)), 
-                      aes(x = x_wgs84, y = y_wgs84, color = sd_elev)) +
+  bbsmap_ed <- ggplot(bd %>% filter(radius == rad, !is.na(sd_elev)) %>% arrange(sd_elev), 
+                      aes(x = lon, y = lat, color = sd_elev)) +
     borders('world', 'canada', fill = 'gray70') +
     borders('world', 'mexico', fill = 'gray70') +
     borders('world', 'usa', fill = 'gray70') +

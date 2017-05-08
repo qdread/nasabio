@@ -1,7 +1,8 @@
 # New: now that Kyla has pulled the entire USA in a single VRT file, all I need to do is get the maximally sized square box, get distances from each cell, then subset by radius for any radius we want.
 # This version is for FIA.
+# Quickly run the last slice.
 
-n_slices <- 100 # Divide this into 100 little jobs, because this will take a while.
+n_slices <- 50 # Divide this into 100 little jobs, because this will take a while.
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # BBS lat long coordinates
@@ -19,7 +20,7 @@ fiacoords <- fiapnw %>%
 rad <- 1e5 # Maximal radius for bbs and fia, as anything above 100km has WAY too many pixels in it.
 
 # Find row index of slice.
-rowidx <- round(seq(0,nrow(fiacoords),length.out=n_slices + 1))
+rowidx <- round(seq(19378,19603,length.out=n_slices + 1))
 rowidxmin <- rowidx[slice]+1
 rowidxmax <- rowidx[slice+1]
 
@@ -61,4 +62,4 @@ for (i in rowidxmin:rowidxmax) {
 
 close(pb)
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/elevstats/30m/stats_',slice,'.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/elevstats/30m/stats_87_',slice,'.r'))

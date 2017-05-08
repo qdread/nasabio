@@ -1,5 +1,16 @@
 # Compile elevation stats for the west coast into one file.
 # modified 1 May: all, not just west coast.
+# modified 8 May: put together the last slice.
+
+list87 <- list()
+
+for (i in 1:50) {
+	load(paste0('/mnt/research/nasabio/data/fia/elevstats/30m/stats_87_', i, '.r'))
+	list87 <- c(list87, stats_by_point)
+}
+
+stats_by_point <- list87
+save(stats_by_point, file = '/mnt/research/nasabio/data/fia/elevstats/30m/stats_87.r')
 
 elev_list <- list()
 
@@ -31,7 +42,7 @@ write.csv(fia_elev_stats, file = '/mnt/research/nasabio/data/dem/fia_elev_stats_
 
 elev_list <- list()
 
-for (i in 1:150) {
+for (i in 1:100) {
 	load(paste0('/mnt/research/nasabio/data/bbs/elevstats/30m/stats_', i, '.r'))
 	elev_list <- c(elev_list, stats_by_point)
 }
@@ -40,18 +51,17 @@ for (i in 1:150) {
 library(dplyr)
 
 fp <- '/mnt/research/nasabio'
-bbscoords <- read.csv(file.path(fp, 'data/bbs/bbs_wgs84_coords_byroute.csv'), stringsAsFactors = FALSE)
-bbsaea <- read.csv(file.path(fp, 'data/bbs/bbs_aea_coords_byroute.csv'), stringsAsFactors = FALSE)
+bbscoords <- read.csv(file.path(fp, 'data/bbs/bbs_correct_route_centroids.csv'), stringsAsFactors = FALSE)
 load(file.path(fp, 'data/bbs/bbsworkspace_byroute.r'))
 
 # paste all coordinates, year, and route number together.
-bbsall <- data.frame(year=rep(NA,nrow(bbscoords)), rteNo=NA, x_aea=NA, y_aea=NA)
-bbsall[which(!is.na(bbscoords[,1])), ] <- bbscov
-bbsall <- transform(bbsall, rteNo=as.numeric(rteNo))
-bbsall <- cbind(bbsall, bbscoords)
+# bbsall <- data.frame(year=rep(NA,nrow(bbscoords)), rteNo=NA, x_aea=NA, y_aea=NA)
+# bbsall[which(!is.na(bbscoords[,1])), ] <- bbscov
+# bbsall <- transform(bbsall, rteNo=as.numeric(rteNo))
+# bbsall <- cbind(bbsall, bbscoords)
 
 for (i in 1:length(elev_list)) {
-	elev_list[[i]] <- data.frame(bbsall[i,], elev_list[[i]])
+	elev_list[[i]] <- data.frame(bbscoords[i,], elev_list[[i]])
 }
 
 bbs_elev_stats <- do.call('rbind', elev_list)
