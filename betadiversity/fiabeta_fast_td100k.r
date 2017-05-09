@@ -32,8 +32,8 @@ for (p in 1:length(idxmin:idxmax)) {
         # Calculate beta-diversity for that matrix.
         
         fia_shannonbetadiv <- d(abundances = mat_p, lev = 'beta', wts = FALSE, q = 1)
-        fia_meanpairwisedissim <- mean(vegdist(x = mat_p, binary = FALSE, method = 'jaccard'))
-        fia_meanpairwisedissim_pa <- mean(vegdist(x = mat_p, binary = TRUE, method = 'jaccard'))
+        fia_meanpairwisedissim <- mean(vegdist(x = mat_p, binary = FALSE, method = 'jaccard'), na.rm=TRUE)
+        fia_meanpairwisedissim_pa <- mean(vegdist(x = mat_p, binary = TRUE, method = 'jaccard'), na.rm=TRUE)
         
 			fia_list[[p]] <- data.frame(nneighb = nrow(mat_p) - 1, 
 										beta_shannon = fia_shannonbetadiv,
