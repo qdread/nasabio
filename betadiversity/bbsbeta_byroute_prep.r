@@ -137,4 +137,4 @@ bbsnhb_list <- as.data.frame(bbscovmat) %>% group_by(year) %>% do(l = getNeighbo
 bbsnhb_r <- do.call('c', bbsnhb_list$l)
 
 save(bbsnhb_r, bbscov, bbscovmat, fixedbbsmat_byroute, file = '/mnt/research/nasabio/data/bbs/bbsworkspace_byroute.r')
-
+write.csv(fixedbbsmat_byroute, file = '/mnt/research/nasabio/data/bbs/bbs_plot_matrix.csv', row.names = FALSE)

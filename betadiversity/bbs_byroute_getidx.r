@@ -1,3 +1,5 @@
+# Modified 15 May: add the focal plot as row 1 of the matrix!
+
 radii <- c(50000, 75000, 100000, 150000, 200000)
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
@@ -21,7 +23,7 @@ for(p in 1:nrow(fixedbbsmat_byroute)) {
 		yearidx <- which(bbscovmat[,1] == year_p)
 		yearmat <- bbscovmat[yearidx, , drop = FALSE]
 		rowidx <- as.numeric(dimnames(yearmat[which(yearmat[,2] %in% routes_p), , drop = FALSE])[[1]])
-		dat_p <- fixedbbsmat_byroute[rowidx, , drop = FALSE]
+		dat_p <- fixedbbsmat_byroute[c(p, rowidx), , drop = FALSE]		# Ensures that the first row of the matrix will be the focal plot.
 		# Get rid of empty columns
 		mat_p <- dat_p[, apply(dat_p, 2, sum) > 0, drop = FALSE]
 		all_mats[[length(all_mats) + 1]] <- mat_p
@@ -36,4 +38,4 @@ for(p in 1:nrow(fixedbbsmat_byroute)) {
 	if (p%%1000 == 0) print(p)
 }
 	
-save(all_mats, file = paste0('/mnt/research/nasabio/data/bbs/mats/routemat_',r,'.r'))
+save(all_mats, file = paste0('/mnt/research/nasabio/data/bbs/mats/newroutemat_',r,'.r'))

@@ -1,3 +1,5 @@
+# Modified 15 May: rearrange each matrix so that the focal plot is the first row of the resulting matrix.
+
 radii <- c(1000,5000,7500,10000,20000,50000,100000)
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 r <- radii[task]
@@ -28,8 +30,13 @@ for(p in 1:nrow(fiaalbers)) {
        # Convert into a site x species matrix
        sppids <- sort(unique(dat_p$SPCD))
        mat_p <- dat_p %>% group_by(PLT_CN) %>% do(x = area_by_sp(., sppids))
-       mat_p <- do.call('rbind', mat_p$x)
-	   
+	   # Sort the output so that the focal plot will be the first row of the resulting matrix.
+	   focal_idx <- which(mat_p$PLT_CN == fiaalbers$PLT_CN[p])
+	   mat_p <- mat_p[c(focal_idx, (1:nrow(mat_p))[-focal_idx]), ]
+		
+	   mat_p <- do.call('rbind', mat_p$x)
+ 
+
 	   sppnames <- fiataxa$sciname[match(sppids, fiataxa$FIA.Code)]
 	   if (inherits(mat_p, 'matrix')) {
 		dimnames(mat_p) <- list(1:nrow(mat_p), sppnames)
@@ -49,4 +56,4 @@ for(p in 1:nrow(fiaalbers)) {
 	if (p%%1000 == 0) print(p)
 }
 
-save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/mat_',as.character(as.integer(r)),'.r'))
+save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/newmat_',as.character(as.integer(r)),'.r'))
