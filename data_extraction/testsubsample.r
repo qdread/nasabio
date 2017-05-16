@@ -1,8 +1,11 @@
 # Some code to test the different extraction functions I developed.
+# Must run on cluster due to the high ram demand.
 
 library(dplyr)
 
-# Load fia coordintes.
+source('~/code/fia/elev/extractfrombuffer_subsample.r')
+
+# Load fia coordinates.
 fp <- '/mnt/research/nasabio'
 fiapnw <- read.csv(file.path(fp, 'data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv'), stringsAsFactors = FALSE)
 fiacoords <- fiapnw %>%
@@ -11,13 +14,13 @@ fiacoords <- fiapnw %>%
             lon = LON_FUZZSWAP[1])
 
 # Radii of circles where we want summary stats
-radii <- c(0.01, 0.1, 1) 
+#radii <- c(0.01, 0.1, 1) 
 
-testcoords <- as.matrix(fiacoords[10001:10005,c('lon','lat')])
+#testcoords <- as.matrix(fiacoords[10001:10005,c('lon','lat')])
 
-extract_from_buffer(coords = testcoords, raster_file = '/mnt/research/ersamlab/shared_data/DEM_SRTM_30m/VRTs/conus_30m_dem.vrt', radii = radii)
+#extract_from_buffer(coords = testcoords, raster_file = '/mnt/research/ersamlab/shared_data/DEM_SRTM_30m/VRTs/conus_30m_dem.vrt', radii = radii)
 
-extract_from_buffer_subsample(coords = testcoords, raster_file = '/mnt/research/ersamlab/shared_data/DEM_SRTM_30m/VRTs/conus_30m_dem.vrt', radius = 5, samplesize = 10)
+#extract_from_buffer_subsample(coords = testcoords, raster_file = '/mnt/research/ersamlab/shared_data/DEM_SRTM_30m/VRTs/conus_30m_dem.vrt', radius = 5, samplesize = 10)
 
 # Test how many subsamples is required to asymptotically reach a value.
 
@@ -34,3 +37,4 @@ for (i in 1:length(testsamplesizes)) {
 														samplesize = testsamplesizes[i])
 }
 
+save(summary_stats, file = '/mnt/research/nasabio/data/fia/testsummarystats.r')

@@ -8,7 +8,7 @@ r <- combos$radius[task]
 slice <- combos$slice[task]
 
 
-load(paste0('/mnt/research/nasabio/data/bbs/mats/routemat_', as.character(as.integer(r)), '.r'))
+load(paste0('/mnt/research/nasabio/data/bbs/mats/newroutemat_', as.character(as.integer(r)), '.r'))
 bbs_list <- list()
 
 # Determine row indices for the slice of the matrix to be used.
