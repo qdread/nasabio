@@ -1,4 +1,7 @@
 # Generalized additive model fit statistics for fia/bbs alpha and beta diversity at different radii.
+
+# Modified 17 May: make axis numbers. Fit a line to it?
+
 # procedure: 
 # 1. fit gam to diversity~sd elev at each radius (do this for both alpha and beta)
 # 2. get some sort of fit statistic.
@@ -28,13 +31,20 @@ beta_fitdat <- betagams %>% summarize(rsq = summary(fit)$r.sq) %>% cbind(radius 
 
 fiafitdat <- rbind(data.frame(diversity='alpha',alpha_fitdat), data.frame(diversity='beta',beta_fitdat))
 
+# fit a function to each.
+lma <- lm(rsq ~ poly(radius,2), data=fiafitdat, subset= diversity=='alpha')
+lmb <- lm(rsq ~ poly(radius,2), data=fiafitdat, subset= diversity=='beta')
+
 library(cowplot)
-pgamfia <- ggplot(fiafitdat, aes(x=factor(radius), y=rsq)) + 
+pgamfia <- ggplot(fiafitdat, aes(x=radius, y=rsq)) + 
+  stat_smooth(method = lm, formula = y ~ x + I(x^2), se=FALSE, size=1, color='red') +
   geom_point(size = 3) + 
+  geom_text(data=data.frame(radius=c(15,15), rsq=c(.49,.49), diversity=c('alpha','beta'), lab=c('R^2 == 0.944','R^2 == .995')), aes(label=lab), parse=TRUE) +
   facet_wrap(~ diversity) +
   panel_border(colour = 'black') +
   theme(strip.background = element_blank()) +
   labs(x = 'Radius (km)', y = expression(R^2)) +
+  scale_x_continuous(breaks=radii) +
   ggtitle('FIA: GAM fits by radius')
 ggsave(file.path(fpfig, 'gam_fits_by_radius_FIA.png'), pgamfia, height = 4, width = 7, dpi = 400)
 
@@ -57,11 +67,17 @@ beta_fitdat <- betagams %>% summarize(rsq = summary(fit)$r.sq) %>% cbind(radius 
 
 bbsfitdat <- rbind(data.frame(diversity='alpha',alpha_fitdat), data.frame(diversity='beta',beta_fitdat))
 
-pgambbs <- ggplot(bbsfitdat, aes(x=factor(radius), y=rsq)) + 
+lma <- lm(rsq ~ poly(radius,2), data=bbsfitdat, subset= diversity=='alpha')
+lmb <- lm(rsq ~ poly(radius,2), data=bbsfitdat, subset= diversity=='beta')
+
+
+pgambbs <- ggplot(bbsfitdat, aes(x=radius, y=rsq)) + 
+  stat_smooth(method = lm, formula = y ~ x + I(x^2), se=FALSE, size=1, color='red') +
   geom_point(size = 3) + 
   facet_wrap(~ diversity) +
   panel_border(colour = 'black') +
   theme(strip.background = element_blank()) +
   labs(x = 'Radius (km)', y = expression(R^2)) +
+  scale_x_continuous(breaks=radii) +
   ggtitle('BBS: GAM fits by radius')
 ggsave(file.path(fpfig, 'gam_fits_by_radius_BBS.png'), pgambbs, height = 4, width = 7, dpi = 400)

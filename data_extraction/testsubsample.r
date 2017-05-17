@@ -38,3 +38,38 @@ for (i in 1:length(testsamplesizes)) {
 }
 
 save(summary_stats, file = '/mnt/research/nasabio/data/fia/testsummarystats.r')
+
+
+#########################################################
+
+# Fake data.
+
+# Fake elevation raster with 30m pixel size and 100 km radius.
+
+200e3/30
+
+# just do it as a vector since it does not matter.
+fakedat <- rnorm(7000^2, mean = 2000, sd = 100)
+
+# for each sample size, take 999 samples of that size from fakedat and get the distribution of sd's.
+
+ssizes <- 10^(3:6)
+simoutput <- list()
+
+for (ssize in ssizes) {
+  print(ssize)
+  for (run in 1:9999) {
+    simoutput[[length(simoutput) + 1]] <- c(samplesize=ssize, sd=sd(sample(fakedat, ssize, replace=FALSE)))
+  }
+}
+
+simoutput <- as.data.frame(do.call(rbind, simoutput))
+
+library(cowplot)
+
+truevalue <- sd(fakedat)
+
+ggplot(simoutput, aes(x=samplesize, y=sd)) +
+  geom_hline(yintercept=truevalue, color='red', size=1.5) +
+  stat_summary(geom='pointrange') +
+  scale_x_log10(breaks=ssizes)

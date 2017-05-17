@@ -1,5 +1,6 @@
 # FIA taxonomic and phylogenetic beta diversity calculation for the cluster.
 # Forked 17 April. Just preparatory work, actual diversity calculated in a different script.
+# Modified 17 May: add rows to matrix that have zero species.
 
 fp <- '/mnt/research/nasabio'
 fiapnw <- read.csv(file.path(fp, 'data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv'), stringsAsFactors = FALSE)
@@ -40,9 +41,22 @@ fiataxa$sciname <- paste(gsub(' ', '', fiataxa$Genus), gsub(' ', '', fiataxa$Spe
 fiataxa$sciname[fiataxa$sciname == 'Chrysolepis_chrysophyllavar.chrysophylla'] <- 'Chrysolepis_chrysophylla'
 fiataxa$sciname[fiataxa$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_balsamifera_trichocarpa'
 
+fiacoords <- fiapnw %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
+  summarize(lat = LAT_FUZZSWAP[1],
+            lon = LON_FUZZSWAP[1])
 
-fiaplotlist <- fiasums_plot %>% do(x = area_by_sp(., sppids))
-fiaplotmat <- do.call('rbind', fiaplotlist$x)
+#fiaplotlist <- fiasums_plot %>% do(x = area_by_sp(., sppids))
+#fiaplotmat <- do.call('rbind', fiaplotlist$x)
+
+fiaplotlist <- list()
+pb <- txtProgressBar(0, nrow(fiacoords), style=3)
+for (i in 1:nrow(fiacoords)) {
+	fiaplotlist[[i]] <- area_by_sp(subset(fiasums_plot, PLT_CN == fiacoords$PLT_CN[i]), sppids)
+	setTxtProgressBar(pb,i)
+}
+close(pb)
+fiaplotmat <- do.call('rbind', fiaplotlist)
 
 # Get the species names from the lookup table that go with the numerical codes.
 #sppnames <- pnw_species$sciname[match(sppids, pnw_codes)]
@@ -55,10 +69,6 @@ fiaplotmat <- fiaplotmat[, !grepl('Abies_shastensis', dimnames(fiaplotmat)[[2]])
 # Get rid of the unknown species.
 fiaplotmat <- fiaplotmat[, dimnames(fiaplotmat)[[2]] %in% pnwphylo$tip.label]
 
-fiacoords <- fiapnw %>%
-  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
-  summarize(lat = LAT_FUZZSWAP[1],
-            lon = LON_FUZZSWAP[1])
 
 # Reproject FIA plots and calculate the distance in m from each plot to all other plots.
 library(rgdal)
@@ -98,4 +108,6 @@ getNeighbors <- function(dat, radius) {
 radii <- c(1000,5000,7500,10000,20000,50000,100000)
 fianhb_r <- getNeighbors(fiaalbers, radius = max(radii))
 
-save(fianhb_r, fiadist, trydist, pnwphylo, problemspp, fiataxa, fiaplotmat, fiaalbers, fiasums_plot, sppids, file = '/mnt/research/nasabio/data/fia/fiaworkspace.r')
+#save(fianhb_r, fiadist, trydist, pnwphylo, problemspp, fiataxa, fiaplotmat, fiaalbers, fiasums_plot, sppids, file = '/mnt/research/nasabio/data/fia/fiaworkspace.r')
+
+save(fiadist, trydist, pnwphylo, problemspp, fiataxa, fiaspatial, fiaalbers, fiacoords, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace2.r')

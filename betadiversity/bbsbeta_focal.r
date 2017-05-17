@@ -74,7 +74,6 @@ for (p in 1:length(idxmin:idxmax)) {
 		  }
 		  else {
 			bbs_list[[p]] <- rep(NA,10)
-			)
 		  }
 		}
 		else {
