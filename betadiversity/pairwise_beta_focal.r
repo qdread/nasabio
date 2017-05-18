@@ -174,17 +174,21 @@ singlepair_beta <- function(p1, p2, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, p
 #####################################################################
 # Added 17 May: function to do all 3 flavors of diversity for alpha or gamma given an input matrix. The matrix is all plots within a given radius of the focal point.
 
-diversity_3ways <- function(m, flavor = 'alpha', td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, pddist = NULL, fddist = NULL, nnull = 99, phylo_spp = NULL, func_problem_spp = NULL, phy = NULL) {
+diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE, abundance=TRUE, pddist = NULL, fddist = NULL, nnull = 99, phylo_spp = NULL, func_problem_spp = NULL, phy = NULL) {
 	
+  require(vegan)
+  require(FD)
+  require(picante)
+  
 	# Get rid of species that aren't in phylogenetic and functional diversity.
 	if (!is.null(phylo_spp)) m <- m[, dimnames(m)[[2]] %in% phylo_spp, drop = FALSE]
-    if (!is.null(func_problem_spp)) mfunc <- m[, !dimnames(m)[[2]] %in% func_problem_spp, drop = FALSE] else mfunc <- m
+  if (!is.null(func_problem_spp)) mfunc <- m[, !dimnames(m)[[2]] %in% func_problem_spp, drop = FALSE] else mfunc <- m
 	
 	# Alpha diversity is done for each row separately.
 	# Gamma diversity is for the sum of all the species down each column.
 	if (flavor == 'gamma') {
-		m <- matrix(apply(m, 2, sum), nrow=1)
-		mfunc <- matrix(apply(mfunc, 2, sum), nrow=1)
+		m <- t(apply(m, 2, sum))
+		mfunc <- t(apply(mfunc, 2, sum))
 	}
 	
 	# Declare variables to hold the data
@@ -195,26 +199,45 @@ diversity_3ways <- function(m, flavor = 'alpha', td=TRUE, pd=TRUE, fd=TRUE, abun
 	FRic_pa <- FDis_pa <- FDiv_pa <- FEve_pa <- rep(NA, nrow(m))
 		
 	# Calculate the different flavors of diversity.
-	if (td) {
+	if (dotd) {
 		richness <- apply(m > 0, 1, sum)
 	}
-	if (td & abundance) {
+	if (dotd & abundance) {
 		shannon <- diversity(m, index = 'shannon')
 		evenness <- shannon/log(richness)
 	}
-	if (pd) {
-		PD_pa <- pd(m > 0, phy, include.root = TRUE)
-		MPD_pa_z <- ses.mpd(m, pddist, null.model = 'independentswap', abundance.weighted = FALSE, runs = nnull, iterations = 1000)
-		MNTD_pa_z <- ses.mntd(m, pddist, null.model = 'independentswap', abundance.weighted = FALSE, runs = nnull, iterations = 1000)
+	if (dopd) {
+		PD_pa <- pd(m > 0, phy, include.root = TRUE)$PD
+		MPD_pa <- ses.mpd(m, pddist, null.model = 'taxa.labels', abundance.weighted = FALSE, runs = nnull)
+		MNTD_pa <- ses.mntd(m, pddist, null.model = 'taxa.labels', abundance.weighted = FALSE, runs = nnull)
+		
+		if (flavor == 'alpha') {
+		  MPD_pa_z <- MPD_pa$mpd.obs.z
+		  MNTD_pa_z <- MNTD_pa$mntd.obs.z
+		}
+		if (flavor == 'gamma') {
+		  MPD_pa_z <- (MPD_pa$mpd.obs[1] - mean(MPD_pa$mpd.rand.mean, na.rm=T))/sd(MPD_pa$mpd.rand.mean, na.rm=T)
+		  MNTD_pa_z <- (MNTD_pa$mntd.obs[1] - mean(MNTD_pa$mntd.rand.mean, na.rm=T))/sd(MNTD_pa$mntd.rand.mean, na.rm=T)
+		}
+
 	}
-	if (pd & abundance) {
-		PD <- pd(m, phy, include.root = TRUE)
-		MPD_z <- ses.mpd(m, pddist, null.model = 'independentswap', abundance.weighted = TRUE, runs = nnull, iterations = 1000)
-		MNTD_z <- ses.mntd(m, pddist, null.model = 'independentswap', abundance.weighted = TRUE, runs = nnull, iterations = 1000)
+	if (dopd & abundance) {
+		PD <- pd(m, phy, include.root = TRUE)$PD
+		MPD <- ses.mpd(m, pddist, null.model = 'taxa.labels', abundance.weighted = TRUE, runs = nnull)
+		MNTD <- ses.mntd(m, pddist, null.model = 'taxa.labels', abundance.weighted = TRUE, runs = nnull)
+		if (flavor == 'alpha') {
+		  MPD_z <- MPD$mpd.obs.z
+		  MNTD_z <- MNTD$mntd.obs.z
+		}
+		if (flavor == 'gamma') {
+		  MPD_z <- (MPD$mpd.obs[1] - mean(MPD$mpd.rand.mean, na.rm=T))/sd(MPD$mpd.rand.mean, na.rm=T)
+		  MNTD_z <- (MNTD$mntd.obs[1] - mean(MNTD$mntd.rand.mean, na.rm=T))/sd(MNTD$mntd.rand.mean, na.rm=T)
+		}
 	}
-	if (fd) {
-		zerorows <- apply(mfunc, 1, sum) > 0
-		fd_plot_pa <- dbFD(x = , a = mfunc[!zerorows, ], w.abun = FALSE, corr = 'cailliez')
+	if (dofd) {
+		zerorows <- apply(mfunc, 1, sum) == 0
+		zerocols <- apply(mfunc, 2, sum) == 0
+		fd_plot_pa <- dbFD(x = fddist[!zerocols, !zerocols], a = mfunc[!zerorows, !zerocols], w.abun = FALSE, corr = 'cailliez')
 
 		# Output of FD should have NAs for the zero-abundance communities
 		FRic_pa[!zerorows] <- fd_plot_pa$FRic
@@ -222,8 +245,8 @@ diversity_3ways <- function(m, flavor = 'alpha', td=TRUE, pd=TRUE, fd=TRUE, abun
 		FDiv_pa[!zerorows] <- fd_plot_pa$FDiv
 		FDis_pa[!zerorows] <- fd_plot_pa$FDis
 	}
-	if (fd & abundance) {
-		fd_plot <- dbFD(x = , a = mfunc[!zerorows, ], w.abun = TRUE, corr = 'cailliez')
+	if (dofd & abundance) {
+		fd_plot <- dbFD(x = fddist[!zerocols, !zerocols], a = mfunc[!zerorows, !zerocols], w.abun = TRUE, corr = 'cailliez')
 
 		# Output of FD should have NAs for the zero-abundance communities
 		FRic[!zerorows] <- fd_plot$FRic

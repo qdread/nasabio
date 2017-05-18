@@ -31,6 +31,10 @@ ggsave(file.path(fpfig, 'fiabetadiversity.png'), fia_beta_plot, height = 9, widt
 
 load(file.path(fp, 'fia_diversitymetrics.RData'))
 
+# Also add functional diversity to this.
+fia_fd <- read.csv(file.path(fp, 'fia_fd.csv'))
+plot_diversity <- cbind(plot_diversity, fia_fd)
+
 # Calculate plot diversity within radii
 
 library(sp)
