@@ -162,6 +162,9 @@ percent_problem <- apply(fiaplotmat, 1, function(x) sum(x[names(x) %in% problems
 fiaplotmat_noproblem <- fiaplotmat[, !dimnames(fiaplotmat)[[2]] %in% problemspp]
 try_noproblem <- try_use[!dimnames(try_use)[[1]] %in% problemspp, ]
 
+# Save the matrix for use elsewhere. (added 18 May)
+save(try_noproblem, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/trymat_clean.r')
+
 # Code also breaks if a plot has zero trees in it.
 zerorows <- apply(fiaplotmat_noproblem, 1, sum) == 0
 

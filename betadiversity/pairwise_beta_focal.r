@@ -174,7 +174,7 @@ singlepair_beta <- function(p1, p2, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, p
 #####################################################################
 # Added 17 May: function to do all 3 flavors of diversity for alpha or gamma given an input matrix. The matrix is all plots within a given radius of the focal point.
 
-diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE, abundance=TRUE, pddist = NULL, fddist = NULL, nnull = 99, phylo_spp = NULL, func_problem_spp = NULL, phy = NULL) {
+diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE, abundance=TRUE, pddist = NULL, fdmat = NULL, nnull = 99, phylo_spp = NULL, func_problem_spp = NULL) {
 	
   require(vegan)
   require(FD)
@@ -193,8 +193,8 @@ diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE
 	
 	# Declare variables to hold the data
 	richness <- shannon <- evenness <- rep(NA, nrow(m))
-	PD <- MPD_z <- MNTD_z <- rep(NA, nrow(m))
-	PD_pa <- MPD_pa_z <- MNTD_pa_z <- rep(NA, nrow(m))
+	MPD_z <- MNTD_z <- rep(NA, nrow(m))
+	MPD_pa_z <- MNTD_pa_z <- rep(NA, nrow(m))
 	FRic <- FDis <- FDiv <- FEve <- rep(NA, nrow(m))
 	FRic_pa <- FDis_pa <- FDiv_pa <- FEve_pa <- rep(NA, nrow(m))
 		
@@ -207,7 +207,6 @@ diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE
 		evenness <- shannon/log(richness)
 	}
 	if (dopd) {
-		PD_pa <- pd(m > 0, phy, include.root = TRUE)$PD
 		MPD_pa <- ses.mpd(m, pddist, null.model = 'taxa.labels', abundance.weighted = FALSE, runs = nnull)
 		MNTD_pa <- ses.mntd(m, pddist, null.model = 'taxa.labels', abundance.weighted = FALSE, runs = nnull)
 		
@@ -222,7 +221,6 @@ diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE
 
 	}
 	if (dopd & abundance) {
-		PD <- pd(m, phy, include.root = TRUE)$PD
 		MPD <- ses.mpd(m, pddist, null.model = 'taxa.labels', abundance.weighted = TRUE, runs = nnull)
 		MNTD <- ses.mntd(m, pddist, null.model = 'taxa.labels', abundance.weighted = TRUE, runs = nnull)
 		if (flavor == 'alpha') {
@@ -237,29 +235,31 @@ diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE
 	if (dofd) {
 		zerorows <- apply(mfunc, 1, sum) == 0
 		zerocols <- apply(mfunc, 2, sum) == 0
-		fd_plot_pa <- dbFD(x = fddist[!zerocols, !zerocols], a = mfunc[!zerorows, !zerocols], w.abun = FALSE, corr = 'cailliez')
+		X <- fdmat[!zerocols, , drop = FALSE]
+		X <- X[, apply(X, 2, function(X) all(!is.na(X)))]
+		fd_plot_pa <- dbFD(x = X, a = mfunc[!zerorows, !zerocols, drop = FALSE], w.abun = FALSE, corr = 'cailliez', messages = FALSE)
 
 		# Output of FD should have NAs for the zero-abundance communities
-		FRic_pa[!zerorows] <- fd_plot_pa$FRic
-		FEve_pa[!zerorows] <- fd_plot_pa$FEve
-		FDiv_pa[!zerorows] <- fd_plot_pa$FDiv
-		FDis_pa[!zerorows] <- fd_plot_pa$FDis
+		if ('FRic' %in% names(fd_plot_pa)) FRic_pa[!zerorows] <- fd_plot_pa$FRic
+		if ('FEve' %in% names(fd_plot_pa)) FEve_pa[!zerorows] <- fd_plot_pa$FEve
+		if ('FDiv' %in% names(fd_plot_pa)) FDiv_pa[!zerorows] <- fd_plot_pa$FDiv
+		if ('FDis' %in% names(fd_plot_pa)) FDis_pa[!zerorows] <- fd_plot_pa$FDis
 	}
 	if (dofd & abundance) {
-		fd_plot <- dbFD(x = fddist[!zerocols, !zerocols], a = mfunc[!zerorows, !zerocols], w.abun = TRUE, corr = 'cailliez')
+		fd_plot <- dbFD(x = X, a = mfunc[!zerorows, !zerocols, drop = FALSE], w.abun = TRUE, corr = 'cailliez', messages = FALSE)
 
 		# Output of FD should have NAs for the zero-abundance communities
-		FRic[!zerorows] <- fd_plot$FRic
-		FEve[!zerorows] <- fd_plot$FEve
-		FDiv[!zerorows] <- fd_plot$FDiv
-		FDis[!zerorows] <- fd_plot$FDis
+		if ('FRic' %in% names(fd_plot)) FRic[!zerorows] <- fd_plot$FRic
+		if ('FEve' %in% names(fd_plot)) FEve[!zerorows] <- fd_plot$FEve
+		if ('FDiv' %in% names(fd_plot)) FDiv[!zerorows] <- fd_plot$FDiv
+		if ('FDis' %in% names(fd_plot)) FDis[!zerorows] <- fd_plot$FDis
 	}
 	
 	
 	# Concatenate into a vector and return.
 	c(richness = median(richness, na.rm=T), shannon = median(shannon, na.rm=T), evenness = median(evenness, na.rm=T),
-	  PD_pa = median(PD_pa, na.rm=T), MPD_pa_z = median(MPD_pa_z, na.rm=T), MNTD_pa_z = median(MNTD_pa_z, na.rm=T),
-	  PD = median(PD, na.rm=T), MPD_z = median(MPD_z, na.rm=T), MNTD_z = median(MNTD_z, na.rm=T),
+	  MPD_pa_z = median(MPD_pa_z, na.rm=T), MNTD_pa_z = median(MNTD_pa_z, na.rm=T),
+	  MPD_z = median(MPD_z, na.rm=T), MNTD_z = median(MNTD_z, na.rm=T),
 	  FRic = median(FRic, na.rm=T), FEve = median(FEve, na.rm=T), FDiv = median(FDiv, na.rm=T), FDis = median(FDis, na.rm=T),
 	  FRic_pa = median(FRic_pa, na.rm=T), FEve_pa = median(FEve_pa, na.rm=T), FDiv_pa = median(FDiv_pa, na.rm=T), FDis_pa = median(FDis_pa, na.rm=T))
 	

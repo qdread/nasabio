@@ -11,6 +11,7 @@
 
 load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
 source('~/code/fia/pairwise_beta_focal.r')
+load('/mnt/research/nasabio/data/fia/trymat_clean.r') # trait matrix.
 
 library(sp)
 library(vegan)
@@ -31,7 +32,7 @@ rowidxmax <- rowidx[slice+1]
 # Declare structures to hold data
 
 pb <- txtProgressBar(rowidxmin, rowidxmax, style = 3)
-gamma_div <- array(NA, dim = c(nrow(fiaplotmat), length(radii), 17))
+gamma_div <- array(NA, dim = c(nrow(fiaplotmat), length(radii), 15))
 
 for (p in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, p)
@@ -39,13 +40,12 @@ for (p in rowidxmin:rowidxmax) {
 	dist_p <- spDistsN1(pts=with(fiacoords, cbind(lon, lat)), pt = c(fiacoords$lon[p], fiacoords$lat[p]), longlat = TRUE)
 	
 	for (r in 1:length(radii)) {
-		neighbs <- fiaplotmat[dist_p <= radii[r], ]
+		neighbs <- fiaplotmat[dist_p <= radii[r], , drop = FALSE]
 		gamma_div[p, r, ] <- diversity_3ways(m = neighbs, flavor = 'gamma', 
-											 td=T, pd=T, fd=T, abundance=T,
-											 pddist = fiadist, fddist = trydist,
+											 dotd=T, dopd=T, dofd=F, abundance=T,
+											 pddist = fiadist, fdmat = try_noproblem,
 											 nnull = nnull,
-											 phylo_spp = pnwphylo$tip.label, func_problem_spp = problemspp, phy = pnwphylo
-											 )
+											 phylo_spp = pnwphylo$tip.label, func_problem_spp = problemspp)
 	}
 
 }
@@ -53,8 +53,8 @@ for (p in rowidxmin:rowidxmax) {
 close(pb)
 
 cnames <- c('richness', 'shannon', 'evenness',
-            'PD_pa', 'MPD_pa_z', 'MNTD_pa_z',
-            'PD', 'MPD_z', 'MNTD_z',
+            'MPD_pa_z', 'MNTD_pa_z',
+            'MPD_z', 'MNTD_z',
             'FRic', 'FEve', 'FDiv', 'FDis',
             'FRic_pa', 'FEve_pa', 'FDiv_pa', 'FDis_pa')
 

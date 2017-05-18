@@ -13,7 +13,7 @@ bbs_div_byroute <- bbs_div_byroute %>%
 	left_join(bbsll)
 
 # For each year and route number, get the median alpha diversity within each radius.
-radii <- c(50, 75, 100) # in km
+radii <- c(50, 75, 100, 150, 200, 300, 400, 500) # in km
 
 library(sp)
 

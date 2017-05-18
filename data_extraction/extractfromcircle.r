@@ -1,43 +1,47 @@
 # Function for extracting pixels from buffers around a focal point within a given radius, and calculating summary statistics
-# This version uses Andy's code that does the following:
-# make a polygon that approximates a circle and write it to a .shp
-# make a system call to GDAL to clip the raster to the circle, writing it to a square .tif with missing values for pixels with centers outside the circle.
-
-# issues to still resolve: 
-# what to do about the fact that the raster is in lat long and the circle has a fixed radius in km? can we make a "great" circle?
-# also, what about missing data?
-
-
 # Author: QDR
 # Project: NASABIOXGEO
 # Date: 17 May 2017
+
+# Last modified: 18 May 2017 (made circle into a "great" circle using the proper spherical geometry with lat-long coordinates.)
 
 # Needed inputs:
 # matrix containing focal point coordinates (col1 is long, col2 is lat)
 # path to raster containing the data (usually this will be the continental USA)
 # radii is a vector of all the radii, in km, that we want to get summary stats for.
+# lonbds and latbds are each a vector of the min and max longitude and latitude. Default is continental usa
 # fp is the path where the temporary files will be written
+# filetag is a tag that prevents overwriting of files.
 
+# What it does:
+# Make a polygon approximating a circle and write it to a .shp
+# make a system call to GDAL to clip the raster to the circle, writing it to a square .tif with missing values for pixels with centers outside the circle.
+# call GDAL again to get summary stats and parse the GDAL output file in R.
 
+extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetag = '') {
+	require(sp)
+	require(rgdal)
 
-extract_from_buffer <- function(coords, raster_file, radii, lonbds, latbds, fp) {
-	# define function to make an approximate circle with center point cx,cy, radius r, and n vertices
-	approxCircle <- function(cx, cy, r, n){
-		a <-  seq(0,  (2*pi), length.out=n+1)[-1]
-		x <- cx + r * cos(a)
-		y <- cy + r * sin(a)
-		cbind(x, y)
+	# define function to make an approximate circle with center point lon1, lat1, radius d, and n vertices
+	latLongCircle <- function(lon1, lat1, d, n = 1000) {
+  
+	  lat1 <- lat1 * pi/180
+	  lon1 <- lon1 * pi/180
+	  d <- d/6371			# Earth's radius in km
+	  
+	  thetas <- seq(0, 2*pi, length.out = n)
+	  lat <- asin(sin(lat1)*cos(d)+cos(lat1)*sin(d)*cos(thetas))
+	  dlon <- atan2(sin(thetas)*sin(d)*cos(lat1), cos(d)-sin(lat1)*sin(lat))
+	  lon = ((lon1+dlon+pi) %% (2*pi)) - pi
+	  
+	  cbind(lon, lat) * 180/pi
+  
 	}
 	
 	# define function to make the polygon into a json
 	polygon2json <- function(p){
 		paste('{"type": "Polygon", "coordinates": [ [', paste(apply(p, 1, function(x){paste("[",x[1],", ",x[2],"]",sep="")}), collapse=","), '] ]}', sep="")
 	}
-	
-	# Load raster and get its extent (bounding box).
-	require(raster)
-	ras <- raster(raster_file)
-	ras_extent <- extent(ras)
 	
 	# Initialize data structure to hold the summary stats for each radius at each point.
 	# It is a list of data frames.
@@ -55,23 +59,27 @@ extract_from_buffer <- function(coords, raster_file, radii, lonbds, latbds, fp) 
 		if (!is.na(coords[i,1])) {
 			loni <- coords[i,1]
 			lati <- coords[i,2]
-			if (loni > ras_extent@xmin & loni < ras_extent@xmax & lati > ras_extent@ymin & lati < ras_extent@ymax) {
+			if (loni > lonbds[1] & loni < lonbds[2] & lati > latbds[1] & lati < latbds[2]) {
 				
 				for (r in 1:length(radii)) {
 					# Create circle with 1000 vertices and create geojson object from it.
-					circle_r <- approxCircle(loni, lati, radii[r], 1000)
+					circle_r <- latLongCircle(loni, lati, radii[r], 1000)
 					circle_json <- polygon2json(circle_r)
 					circle_geojson <- readOGR(circle_json, "OGRGeoJSON", verbose = F,  p4s = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
 					# write the geojson to .shp
-					writeOGR(circle_geojson, fp, "temp_circle", driver="ESRI Shapefile")
+					writeOGR(circle_geojson, fp, paste0("temp_circle_", filetag), driver="ESRI Shapefile")
 					# define arguments for system call
-					call_args <- paste("-crop_to_cutline -overwrite -dstnodata NULL -cutline temp_circle.shp", raster_file, "temp_extracted.tif")
+					call_args <- paste("-crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(fp, paste0("temp_circle_", filetag, ".shp")), raster_file, file.path(fp,paste0("temp_circle_extracted", filetag, ".tif")))
 					# call GDAL twice, first to clip circle, then to calculate summary statistics on it.
 					system2(command="gdalwarp", args=call_args)
-					g.info <- system2(command="gdalinfo", args="-stats out.tif", stdout=TRUE)
-					a <- g.info[(length(g.info)-3):length(g.info)]##get the last four lines
+					g.info <- system2(command="gdalinfo", args=paste("-stats", file.path(fp,paste0("temp_circle_extracted", filetag, ".tif"))), stdout=TRUE) 
+					
+					a <- g.info[(length(g.info)-3):length(g.info)] # get the last four lines
 					summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # In order, this outputs: min, max, mean, sd
-					stats_by_point[[i]][r, 2:5] <- summary_stats[c(3,4,1,2)]
+					stats_by_point[[i]][r, 2:5] <- summary_stats[c(3,4,1,2)] # write summary stats to the output list.
+					
+					# Delete the temporarily created files between each iteration because GDAL gets mad if you overwrite an existing file.
+					system2(command="rm", args=file.path(fp, paste0("temp_circle*", filetag, "*")))
 				}
 		
 			}

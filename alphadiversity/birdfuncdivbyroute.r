@@ -32,6 +32,9 @@ dimnames(birdtraitclean)[[1]] <- sppids_nonzero
 # Make sure all columns are numerics, even the binary variables. (nocturnal is no longer included here)
 birdtraitclean <- transform(birdtraitclean, PelagicSpecialist = as.numeric(PelagicSpecialist))
 
+# Save matrix for use elsewhere (added 18 May)
+save(birdtraitclean, file = '/mnt/research/nasabio/data/bbs/birdtraitmat_clean.r')
+
 # Remove rows where no birds at all were found, flagging them for later. Probably none for entire routes.
 rs <- apply(fixedbbsmat_byroute_nonzero, 1, sum)
 fixedbbsmat_byroute_nonzerorows <- fixedbbsmat_byroute_nonzero[rs > 0, ]
