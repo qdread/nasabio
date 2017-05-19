@@ -1,6 +1,7 @@
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/fiaworkspace2.r')
 source('betadiversity/pairwise_beta_focal.r')
-load('C:/Users/Q/Dropbox/projects/nasabiodiv/trymat_clean.r')
+#load('C:/Users/Q/Dropbox/projects/nasabiodiv/trymat_clean.r')
+#dimnames(try_noproblem)[[1]][dimnames(try_noproblem)[[1]] == 'Populus_trichocarpa'] <- 'Populus_balsamifera_trichocarpa'
 
 library(sp)
 library(vegan)
@@ -15,7 +16,7 @@ n_slices <- 250
 slice <- 51
 
 p <- 4507
-r <- 1
+r <- 9
 
 dist_p <- spDistsN1(pts=with(fiacoords, cbind(lon, lat)), pt = c(fiacoords$lon[p], fiacoords$lat[p]), longlat = TRUE)
 neighbs <- fiaplotmat[dist_p <= radii[r], , drop = FALSE]
@@ -28,13 +29,13 @@ dofd <- T
 abundance <- T
 pddist <- fiadist
 fddist <- trydist
-fdmat <- try_noproblem
+#fdmat <- try_noproblem
 phylo_spp <- pnwphylo$tip.label
 func_problem_spp <- problemspp
 
 diversity_3ways(m = neighbs, flavor = 'gamma', 
-                                     dotd=T, dopd=T, dofd=F, abundance=T,
-                                     pddist = fiadist, fdmat = try_noproblem,
+                                     dotd=T, dopd=T, dofd=T, abundance=T,
+                                     pddist = fiadist, fddist = trydist,
                                      nnull = 10,
                                      phylo_spp = pnwphylo$tip.label, func_problem_spp = problemspp)
 
@@ -44,7 +45,7 @@ diversity_3ways(m = neighbs, flavor = 'gamma',
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/bbsworkspace_byroute.r')
 source('betadiversity/pairwise_beta_focal.r')
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/bbspdfddist.r') # Phy and Func distance matrices.
-load('C:/Users/Q/Dropbox/projects/nasabiodiv/birdtraitmat_clean.r')
+#load('C:/Users/Q/Dropbox/projects/nasabiodiv/birdtraitmat_clean.r')
 
 library(sp)
 library(vegan)
@@ -70,8 +71,8 @@ rowidx <- round(seq(0,nrow(bbs_year_mat),length.out=n_slices + 1))
 rowidxmin <- rowidx[slice]+1
 rowidxmax <- rowidx[slice+1]
 
-p <- 1580
-r <- 3
+p <- 1600
+r <- 5
 
 dist_p <- spDistsN1(pts=with(bbs_year_coords, cbind(lon, lat)), pt = c(bbs_year_coords$lon[p], bbs_year_coords$lat[p]), longlat = TRUE)
 neighbs <- bbs_year_mat[dist_p <= radii[r], , drop = FALSE]
@@ -84,13 +85,18 @@ dofd <- T
 abundance <- F
 pddist <- ericdist
 fddist <- birdtraitdist
-fdmat <- birdtraitclean
+#fdmat <- birdtraitclean
 phylo_spp <- NULL
 func_problem_spp <- NULL
 
 diversity_3ways(m = neighbs, flavor = 'gamma', 
                 dotd=T, dopd=T, dofd=T, abundance=F,
-                pddist = ericdist, fdmat = birdtraitclean,
+                pddist = ericdist, fddist = birdtraitdist,
                 nnull = nnull,
                 phylo_spp = NULL, func_problem_spp = NULL)
 
+diversity_3ways(m = fixedbbsmat_byroute[2000:2001,], flavor = 'alpha', 
+                dotd=T, dopd=T, dofd=T, abundance=F,
+                pddist = ericdist, fddist = birdtraitdist,
+                nnull = 10,
+                phylo_spp = NULL, func_problem_spp = NULL,combine=F)

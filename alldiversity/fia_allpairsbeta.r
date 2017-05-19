@@ -22,7 +22,7 @@ nnull <- 99 # Reduce to save time
 
 trydist <- as.matrix(trydist)
 
-max_radius <- 500e3 # 500 km
+max_radius <- 300e3 # Do 300 km for now.
 n_slices <- 250
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
@@ -67,7 +67,7 @@ for (p in rowidxmin:rowidxmax) {
 	
 }
 
-save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity_', slice, '.r'))
+save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/beta_', slice, '.r'))
      
 close(pb)
 

@@ -173,11 +173,11 @@ singlepair_beta <- function(p1, p2, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, p
 
 #####################################################################
 # Added 17 May: function to do all 3 flavors of diversity for alpha or gamma given an input matrix. The matrix is all plots within a given radius of the focal point.
+# Modification 19 May: standardize so that pd and fd are done with the same two distance-based metrics: pairwise and nearest-neighbor.
 
-diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE, abundance=TRUE, pddist = NULL, fdmat = NULL, nnull = 99, phylo_spp = NULL, func_problem_spp = NULL) {
+diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE, abundance=TRUE, pddist = NULL, fddist = NULL, nnull = 99, phylo_spp = NULL, func_problem_spp = NULL, combine = TRUE) {
 	
   require(vegan)
-  require(FD)
   require(picante)
   
 	# Get rid of species that aren't in phylogenetic and functional diversity.
@@ -195,9 +195,9 @@ diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE
 	richness <- shannon <- evenness <- rep(NA, nrow(m))
 	MPD_z <- MNTD_z <- rep(NA, nrow(m))
 	MPD_pa_z <- MNTD_pa_z <- rep(NA, nrow(m))
-	FRic <- FDis <- FDiv <- FEve <- rep(NA, nrow(m))
-	FRic_pa <- FDis_pa <- FDiv_pa <- FEve_pa <- rep(NA, nrow(m))
-		
+	MPDfunc_z <- MNTDfunc_z <- rep(NA, nrow(m))
+	MPDfunc_pa_z <- MNTDfunc_pa_z <- rep(NA, nrow(m))
+	
 	# Calculate the different flavors of diversity.
 	if (dotd) {
 		richness <- apply(m > 0, 1, sum)
@@ -233,35 +233,42 @@ diversity_3ways <- function(m, flavor = 'alpha', dotd=TRUE, dopd=TRUE, dofd=TRUE
 		}
 	}
 	if (dofd) {
-		zerorows <- apply(mfunc, 1, sum) == 0
-		zerocols <- apply(mfunc, 2, sum) == 0
-		X <- fdmat[!zerocols, , drop = FALSE]
-		X <- X[, apply(X, 2, function(X) all(!is.na(X)))]
-		fd_plot_pa <- dbFD(x = X, a = mfunc[!zerorows, !zerocols, drop = FALSE], w.abun = FALSE, corr = 'cailliez', messages = FALSE)
-
-		# Output of FD should have NAs for the zero-abundance communities
-		if ('FRic' %in% names(fd_plot_pa)) FRic_pa[!zerorows] <- fd_plot_pa$FRic
-		if ('FEve' %in% names(fd_plot_pa)) FEve_pa[!zerorows] <- fd_plot_pa$FEve
-		if ('FDiv' %in% names(fd_plot_pa)) FDiv_pa[!zerorows] <- fd_plot_pa$FDiv
-		if ('FDis' %in% names(fd_plot_pa)) FDis_pa[!zerorows] <- fd_plot_pa$FDis
+	  MPDfunc_pa <- ses.mpd(mfunc, fddist, null.model = 'taxa.labels', abundance.weighted = FALSE, runs = nnull)
+	  MNTDfunc_pa <- ses.mntd(mfunc, fddist, null.model = 'taxa.labels', abundance.weighted = FALSE, runs = nnull)
+	  
+	  if (flavor == 'alpha') {
+	    MPDfunc_pa_z <- MPDfunc_pa$mpd.obs.z
+	    MNTDfunc_pa_z <- MNTDfunc_pa$mntd.obs.z
+	  }
+	  if (flavor == 'gamma') {
+	    MPDfunc_pa_z <- (MPDfunc_pa$mpd.obs[1] - mean(MPDfunc_pa$mpd.rand.mean, na.rm=T))/sd(MPDfunc_pa$mpd.rand.mean, na.rm=T)
+	    mntdrand <- MNTDfunc_pa$mntd.rand.mean[is.finite(MNTDfunc_pa$mntd.rand.mean)]
+	    MNTDfunc_pa_z <- (MNTDfunc_pa$mntd.obs[1] - mean(mntdrand))/sd(mntdrand)
+	  }
+	  
 	}
 	if (dofd & abundance) {
-		fd_plot <- dbFD(x = X, a = mfunc[!zerorows, !zerocols, drop = FALSE], w.abun = TRUE, corr = 'cailliez', messages = FALSE)
-
-		# Output of FD should have NAs for the zero-abundance communities
-		if ('FRic' %in% names(fd_plot)) FRic[!zerorows] <- fd_plot$FRic
-		if ('FEve' %in% names(fd_plot)) FEve[!zerorows] <- fd_plot$FEve
-		if ('FDiv' %in% names(fd_plot)) FDiv[!zerorows] <- fd_plot$FDiv
-		if ('FDis' %in% names(fd_plot)) FDis[!zerorows] <- fd_plot$FDis
+	  MPDfunc <- ses.mpd(mfunc, pddist, null.model = 'taxa.labels', abundance.weighted = TRUE, runs = nnull)
+	  MNTDfunc <- ses.mntd(mfunc, pddist, null.model = 'taxa.labels', abundance.weighted = TRUE, runs = nnull)
+	  if (flavor == 'alpha') {
+	    MPDfunc_z <- MPDfunc$mpd.obs.z
+	    MNTDfunc_z <- MNTDfunc$mntd.obs.z
+	  }
+	  if (flavor == 'gamma') {
+	    MPDfunc_z <- (MPDfunc$mpd.obs[1] - mean(MPDfunc$mpd.rand.mean, na.rm=T))/sd(MPDfunc$mpd.rand.mean, na.rm=T)
+	    mntdrand <- MNTDfunc$mntd.rand.mean[is.finite(MNTDfunc$mntd.rand.mean)]
+	    MNTDfunc_z <- (MNTDfunc$mntd.obs[1] - mean(mntdrand))/sd(mntdrand)
+	  }
 	}
 	
 	
 	# Concatenate into a vector and return.
-	c(richness = median(richness, na.rm=T), shannon = median(shannon, na.rm=T), evenness = median(evenness, na.rm=T),
+	if(combine) return(c(richness = median(richness, na.rm=T), shannon = median(shannon, na.rm=T), evenness = median(evenness, na.rm=T),
 	  MPD_pa_z = median(MPD_pa_z, na.rm=T), MNTD_pa_z = median(MNTD_pa_z, na.rm=T),
 	  MPD_z = median(MPD_z, na.rm=T), MNTD_z = median(MNTD_z, na.rm=T),
-	  FRic = median(FRic, na.rm=T), FEve = median(FEve, na.rm=T), FDiv = median(FDiv, na.rm=T), FDis = median(FDis, na.rm=T),
-	  FRic_pa = median(FRic_pa, na.rm=T), FEve_pa = median(FEve_pa, na.rm=T), FDiv_pa = median(FDiv_pa, na.rm=T), FDis_pa = median(FDis_pa, na.rm=T))
+	  MPDfunc_pa_z = median(MPDfunc_pa_z, na.rm=T), MNTDfunc_pa_z = median(MNTDfunc_pa_z, na.rm=T),
+	  MPDfunc_z = median(MPDfunc_z, na.rm=T), MNTDfunc_z = median(MNTDfunc_z, na.rm=T)))
+	if(!combine) return(data.frame(richness, shannon, evenness, MPD_pa_z, MNTD_pa_z, MPD_z, MNTD_z, MPDfunc_pa_z, MNTDfunc_pa_z, MPDfunc_z, MNTDfunc_z))
 	
 
 }

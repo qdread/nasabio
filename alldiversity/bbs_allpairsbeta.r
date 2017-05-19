@@ -22,7 +22,7 @@ source('~/code/fia/fixpicante.r')
 nnull <- 99 # Reduce to save time
 
 
-max_radius <- 500e3 # 500 km
+max_radius <- 300e3 # 500 km
 years <- 1997:2015
 n_slices <- 13
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))

@@ -46,3 +46,17 @@ bbs_betadiv_route[[r]] <- data.frame(radius = radii[r], do.call('rbind', list_r)
 load('/mnt/research/nasabio/data/bbs/bbsworkspace_byroute.r')
 bbs_betadiv_route <- cbind(bbscov, do.call('rbind', bbs_betadiv_route))
 write.csv(bbs_betadiv_route, file = '/mnt/research/nasabio/data/bbs/bbs_beta_byroute.csv', row.names = FALSE)
+
+
+###############################
+# 19 May: compile BBS alpha diversity.
+
+bbs_alphadiv <- list()
+
+for (i in 1:250) {
+	load(paste0('/mnt/research/nasabio/data/bbs/diversity/alpha_',i,'.r'))
+	bbs_alphadiv[[i]] <- alpha_div
+}
+
+bbs_alphadiv <- do.call('rbind', bbs_alphadiv)
+write.csv(bbs_alphadiv, file = '/mnt/research/nasabio/data/bbs/bbs_alphadiv.csv', row.names = FALSE)

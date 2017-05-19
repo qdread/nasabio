@@ -11,7 +11,6 @@
 
 load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
 source('~/code/fia/pairwise_beta_focal.r')
-load('/mnt/research/nasabio/data/fia/trymat_clean.r') # trait matrix.
 
 library(sp)
 library(vegan)
@@ -32,7 +31,7 @@ rowidxmax <- rowidx[slice+1]
 # Declare structures to hold data
 
 pb <- txtProgressBar(rowidxmin, rowidxmax, style = 3)
-gamma_div <- array(NA, dim = c(nrow(fiaplotmat), length(radii), 15))
+gamma_div <- array(NA, dim = c(nrow(fiaplotmat), length(radii), 11))
 
 for (p in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, p)
@@ -42,8 +41,8 @@ for (p in rowidxmin:rowidxmax) {
 	for (r in 1:length(radii)) {
 		neighbs <- fiaplotmat[dist_p <= radii[r], , drop = FALSE]
 		gamma_div[p, r, ] <- diversity_3ways(m = neighbs, flavor = 'gamma', 
-											 dotd=T, dopd=T, dofd=F, abundance=T,
-											 pddist = fiadist, fdmat = try_noproblem,
+											 dotd=T, dopd=T, dofd=T, abundance=T,
+											 pddist = fiadist, fddist = trydist,
 											 nnull = nnull,
 											 phylo_spp = pnwphylo$tip.label, func_problem_spp = problemspp)
 	}
@@ -55,9 +54,10 @@ close(pb)
 cnames <- c('richness', 'shannon', 'evenness',
             'MPD_pa_z', 'MNTD_pa_z',
             'MPD_z', 'MNTD_z',
-            'FRic', 'FEve', 'FDiv', 'FDis',
-            'FRic_pa', 'FEve_pa', 'FDiv_pa', 'FDis_pa')
+            'MPDfunc_pa_z', 'MNTDfunc_pa_z',
+            'MPDfunc_z', 'MNTDfunc_z')
 
-dimnames(gamma_div) <- list(cnames, paste(r,radii,sep='_'), NULL)
+dimnames(gamma_div)[[3]] <- cnames
+dimnames(gamma_div)[[2]] <- paste('r',radii,sep='_')
 
 save(gamma_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/gamma_', slice, '.r'))

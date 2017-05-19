@@ -53,3 +53,44 @@ fia_betatd <- read.csv('/mnt/research/nasabio/data/fia/fia_betatd.csv', stringsA
 fia_betadiv <- cbind(fia_betatd[1:nrow(fia_betadiv), 1:6], radius = 1e5, fia_betadiv)
 fia_betatd <- rbind(fia_betatd, fia_betadiv)
 write.csv(fia_betatd, file = '/mnt/research/nasabio/data/fia/fia_betatd.csv', row.names = FALSE)
+
+###############################
+# 19 May: compile FIA alpha + gamma diversity.
+
+fia_alphadiv <- list()
+
+for (i in 1:250) {
+	load(paste0('/mnt/research/nasabio/data/fia/diversity/alpha_',i,'.r'))
+	fia_alphadiv[[i]] <- alpha_div
+}
+
+fia_alphadiv <- do.call('rbind', fia_alphadiv)
+write.csv(fia_alphadiv, file = '/mnt/research/nasabio/data/fia/fia_alphadiv.csv', row.names = FALSE)
+
+fia_gammadiv <- list()
+rowidx <- round(seq(0,22532,length.out=251))
+
+library(reshape2)
+
+for (i in 1:250) {
+	print(i)
+	rowidxmin <- rowidx[i]+1
+	rowidxmax <- rowidx[i+1]
+
+	load(paste0('/mnt/research/nasabio/data/fia/diversity/gamma_',i,'.r'))
+	gamma_div_melt <- melt(gamma_div[rowidxmin:rowidxmax,,], varnames = c('plot','radius','diversity'))
+	gamma_div_cast <- dcast(gamma_div_melt, plot + radius ~ diversity)
+	gamma_div_cast$radius <- as.numeric(substr(gamma_div_cast$radius, 3, nchar(as.character(gamma_div_cast$radius))))
+	fia_gammadiv[[i]] <- gamma_div_cast
+}
+
+fia_gammadiv <- do.call('rbind', fia_gammadiv)
+
+# Join with identifiers
+load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
+fia_gammadiv <- cbind(fiacoords[rep(1:nrow(fiacoords), each=14),], fia_gammadiv[,-1])
+
+
+write.csv(fia_gammadiv, file = '/mnt/research/nasabio/data/fia/fia_gammadiv.csv', row.names = FALSE)
+
+
