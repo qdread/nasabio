@@ -72,7 +72,7 @@ lmb <- lm(rsq ~ poly(radius,2), data=bbsfitdat, subset= diversity=='beta')
 
 
 pgambbs <- ggplot(bbsfitdat, aes(x=radius, y=rsq)) + 
-  stat_smooth(method = lm, formula = y ~ x + I(x^2), se=FALSE, size=1, color='red') +
+  #stat_smooth(method = lm, formula = y ~ x + I(x^2), se=FALSE, size=1, color='red') +
   geom_point(size = 3) + 
   facet_wrap(~ diversity) +
   panel_border(colour = 'black') +

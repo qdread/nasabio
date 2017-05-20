@@ -60,3 +60,40 @@ for (i in 1:250) {
 
 bbs_alphadiv <- do.call('rbind', bbs_alphadiv)
 write.csv(bbs_alphadiv, file = '/mnt/research/nasabio/data/bbs/bbs_alphadiv.csv', row.names = FALSE)
+
+
+################################
+# 22 May: compile taxonomic-only route-aggregated BBS beta diversity, by year.
+# These are pairwise comparisons. It will generate a lookup table that I will go through and get median pairwise for each radius.
+
+
+years <- 1997:2015
+n_slices <- 13
+
+bbs_betadivtd <- replicate(length(years), list()) # One list for each year.
+
+combos <- expand.grid(1:n_slices, years)
+
+for (i in 1:nrow(combos)) {
+	load(paste0('/mnt/research/nasabio/data/bbs/diversity/tdbeta_', combos[i,2], '_', combos[i,1], '.r'))
+	bbs_betadivtd[[which(years==combos[i,2])]] <- c(bbs_betadivtd[[which(years==combos[i,2])]], beta_div)
+}
+
+# Results in a list of lists. 19 years long, each one is a pairwise.
+
+# Go through and convert the list into a list of matrices that are essentially pairwise distance matrices.
+# An array can be created for each year. route x route x beta-diversity metric. (or a list of equal size matrices)
+# Then put those arrays into a list.
+
+bbs_betadivtd_arraylist <- lapply(bbs_betadivtd, function(x) array(NA, dim = c(nrow(x[[1]]), nrow(x[[1]]), ncol(x[[1]]))))
+
+for (year in 1:length(bbs_betadivtd)) {
+	for (divmetric in 1:ncol(bbs_betadivtd[[1]][[1]]))
+	bbs_betadivtd_arraylist[[year]][,,divmetric] <- do.call(cbind, lapply(bbs_betadivtd[[year]], '[', , divmetric))
+
+}
+
+bbs_betadivtd_arraylist <- lapply(bbs_betadivtd_arraylist, function(x) {dimnames(x)[[3]] <- dimnames(bbs_betadivtd[[1]][[1]])[[2]]; x})
+names(bbs_betadivtd_arraylist) <- paste0('year',years)
+
+save(bbs_betadivtd_arraylist, file = '/mnt/research/nasabio/data/bbs/bbs_betadiv_arraylist.r')

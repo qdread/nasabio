@@ -158,8 +158,9 @@ for (rad in radii) {
 
 ####################################################
 # Added 03 May: BBS
+# Edited 22 May: corrected metrics (tax div only)
 
-bd <- read.csv(file.path(fp, 'bbs_beta_byroute.csv'), stringsAsFactors = FALSE)
+bd <- read.csv(file.path(fp, 'bbs_beta_td_byroute.csv'), stringsAsFactors = FALSE)
 ed <- read.csv(file.path(fp, 'bbs_elev_stats.csv'), stringsAsFactors = FALSE)
 
 library(dplyr)
@@ -170,15 +171,17 @@ ed <- ed %>%
   summarize_all(.funs=mean, na.rm=T)
 
 bd <- bd %>%
-  mutate(radius = radius/1000) %>% # put radius in km
+ # mutate(radius = radius/1000) %>% # put radius in km
   filter(year >= 2001, year <= 2011) %>%
   group_by(rteNo, radius) %>%
-  summarize(beta_td_pairwise_presence=mean(beta_td_pairwise_presence, na.rm=T)) %>%
+  summarize(beta_td_pairwise_presence=mean(beta_td_pairwise_pa, na.rm=T)) %>%
   left_join(ed)
 
 library(cowplot)
 
-bbs_beta_plot <- ggplot(bd, aes(x = sd_elev, y = beta_td_pairwise_presence)) +
+radii <- c(50,75,100)
+
+bbs_beta_plot <- ggplot(bd %>% filter(radius %in% radii), aes(x = sd_elev, y = beta_td_pairwise_presence)) +
   geom_point(alpha = 0.33) +
   stat_smooth() +
   facet_wrap(~ radius, labeller = labeller(radius = function(x) paste(x, 'km')), scales = 'free_x', nrow=2) +
@@ -227,6 +230,9 @@ blackmaptheme <- theme_void() + theme(panel.grid = element_blank(),
                                      text = element_text(color = 'white'))
 
 radii <- c(50, 75, 100)
+colscalebeta <- scale_colour_gradientn(name = 'Taxonomic\nbeta-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.8)(9))
+
+
 for (rad in radii) {
   bbsmap_bd <- ggplot(bd %>% filter(radius == rad, !is.na(beta_td_pairwise_presence)) %>% arrange(beta_td_pairwise_presence), 
                       aes(x = lon, y = lat, color = beta_td_pairwise_presence)) +
@@ -240,7 +246,7 @@ for (rad in radii) {
     ggtitle(paste(rad, 'km radius'))
   fname <- paste0('bbs_map_',rad,'km_beta.png')
   ggsave(file.path(fpfig, fname), bbsmap_bd, height = 6, width = 9, dpi = 400)
-  
+
   bbsmap_ad <- ggplot(ad %>% filter(radius == rad, !is.na(richness)) %>% arrange(richness), 
                       aes(x = lon, y = lat, color = richness)) +
     borders('world', 'canada', fill = 'gray70') +

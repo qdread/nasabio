@@ -22,7 +22,7 @@ nnull <- 99 # Reduce to save time
 
 trydist <- as.matrix(trydist)
 
-max_radius <- 300e3 # Do 300 km for now.
+max_radius <- 300 # Do 300 km for now.
 n_slices <- 250
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 

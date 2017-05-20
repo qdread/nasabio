@@ -22,7 +22,7 @@ source('~/code/fia/fixpicante.r')
 nnull <- 99 # Reduce to save time
 
 
-max_radius <- 300e3 # 500 km
+max_radius <- 300 # 300 km
 years <- 1997:2015
 n_slices <- 13
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
@@ -49,9 +49,9 @@ for (p in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, p)
 	# Distances between target plot and all other plots.
 	dist_p <- spDistsN1(pts=with(bbs_year_coords, cbind(lon, lat)), pt = c(bbs_year_coords$lon[p], bbs_year_coords$lat[p]), longlat = TRUE)
-	beta_div_p <- matrix(NA, nrow=nrow(fiaplotmat), ncol=19)
+	beta_div_p <- matrix(NA, nrow=nrow(bbs_year_mat), ncol=19)
 		
-	for (p2 in 1:nrow(fiaplotmat)) {
+	for (p2 in 1:nrow(bbs_year_coords)) {
 		# Loop through all other FIA plots, check if plot is in radius
 		# If plot is within radius, calculate diversity between that plot and target plot. 
 		if (dist_p[p2] > 0 & dist_p[p2] <= max_radius) {
