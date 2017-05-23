@@ -18,7 +18,7 @@ radii <- c(5,10,20,50,100)
 alphagams <- ad %>%
   filter(radius %in% radii) %>%
   group_by(radius) %>%
-  do(fit = gam(shannon_basalarea ~ sd_elev, data = .))
+  do(fit = gam(shannon ~ sd_elev, data = .))
 
 alpha_fitdat <- alphagams %>% summarize(rsq = summary(fit)$r.sq) %>% cbind(radius = radii)
 
@@ -29,24 +29,34 @@ betagams <- bd %>%
 
 beta_fitdat <- betagams %>% summarize(rsq = summary(fit)$r.sq) %>% cbind(radius = radii)
 
-fiafitdat <- rbind(data.frame(diversity='alpha',alpha_fitdat), data.frame(diversity='beta',beta_fitdat))
+gammagams <- gd %>%
+  filter(radius %in% radii) %>%
+  group_by(radius) %>%
+  do(fit = gam(shannon ~ sd_elev, data = .)) 
+
+gamma_fitdat <- gammagams %>% summarize(rsq = summary(fit)$r.sq) %>% cbind(radius = radii)
+
+fiafitdat <- rbind(data.frame(diversity='alpha',alpha_fitdat), 
+                   data.frame(diversity='beta',beta_fitdat), 
+                   data.frame(diversity='gamma',gamma_fitdat))
 
 # fit a function to each.
 lma <- lm(rsq ~ poly(radius,2), data=fiafitdat, subset= diversity=='alpha')
 lmb <- lm(rsq ~ poly(radius,2), data=fiafitdat, subset= diversity=='beta')
+lmg <- lm(rsq ~ poly(radius,2), data=fiafitdat, subset= diversity=='gamma')
 
 library(cowplot)
 pgamfia <- ggplot(fiafitdat, aes(x=radius, y=rsq)) + 
   stat_smooth(method = lm, formula = y ~ x + I(x^2), se=FALSE, size=1, color='red') +
   geom_point(size = 3) + 
-  geom_text(data=data.frame(radius=c(15,15), rsq=c(.49,.49), diversity=c('alpha','beta'), lab=c('R^2 == 0.944','R^2 == .995')), aes(label=lab), parse=TRUE) +
+  geom_text(data=data.frame(radius=15, rsq=.49, diversity=c('alpha','beta','gamma'), lab=c('R^2 == 0.944','R^2 == .995','R^2 == 0.989')), aes(label=lab), parse=TRUE) +
   facet_wrap(~ diversity) +
   panel_border(colour = 'black') +
   theme(strip.background = element_blank()) +
   labs(x = 'Radius (km)', y = expression(R^2)) +
   scale_x_continuous(breaks=radii) +
   ggtitle('FIA: GAM fits by radius')
-ggsave(file.path(fpfig, 'gam_fits_by_radius_FIA.png'), pgamfia, height = 4, width = 7, dpi = 400)
+ggsave(file.path(fpfig, 'gam_fits_by_radius_FIA.png'), pgamfia, height = 4, width = 9, dpi = 400)
 
 # do for bbs as well.
 radii <- c(50,75,100)
@@ -65,10 +75,20 @@ betagams <- bd %>%
 
 beta_fitdat <- betagams %>% summarize(rsq = summary(fit)$r.sq) %>% cbind(radius = radii)
 
-bbsfitdat <- rbind(data.frame(diversity='alpha',alpha_fitdat), data.frame(diversity='beta',beta_fitdat))
+gammagams <- gd %>%
+  filter(radius %in% radii) %>%
+  group_by(radius) %>%
+  do(fit = gam(richness ~ sd_elev, data = .))
+
+gamma_fitdat <- gammagams %>% summarize(rsq = summary(fit)$r.sq) %>% cbind(radius = radii)
+
+bbsfitdat <- rbind(data.frame(diversity='alpha',alpha_fitdat), 
+                   data.frame(diversity='beta',beta_fitdat), 
+                   data.frame(diversity='gamma',gamma_fitdat))
 
 lma <- lm(rsq ~ poly(radius,2), data=bbsfitdat, subset= diversity=='alpha')
 lmb <- lm(rsq ~ poly(radius,2), data=bbsfitdat, subset= diversity=='beta')
+lmg <- lm(rsq ~ poly(radius,2), data=fiafitdat, subset= diversity=='gamma')
 
 
 pgambbs <- ggplot(bbsfitdat, aes(x=radius, y=rsq)) + 
@@ -80,4 +100,4 @@ pgambbs <- ggplot(bbsfitdat, aes(x=radius, y=rsq)) +
   labs(x = 'Radius (km)', y = expression(R^2)) +
   scale_x_continuous(breaks=radii) +
   ggtitle('BBS: GAM fits by radius')
-ggsave(file.path(fpfig, 'gam_fits_by_radius_BBS.png'), pgambbs, height = 4, width = 7, dpi = 400)
+ggsave(file.path(fpfig, 'gam_fits_by_radius_BBS.png'), pgambbs, height = 4, width = 9, dpi = 400)
