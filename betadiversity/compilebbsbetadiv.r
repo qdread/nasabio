@@ -97,3 +97,47 @@ bbs_betadivtd_arraylist <- lapply(bbs_betadivtd_arraylist, function(x) {dimnames
 names(bbs_betadivtd_arraylist) <- paste0('year',years)
 
 save(bbs_betadivtd_arraylist, file = '/mnt/research/nasabio/data/bbs/bbs_betadiv_arraylist.r')
+
+################################
+# 23 May: compile BBS gamma-diversity, by year
+
+years <- 1997:2015
+n_slices <- 13
+combos <- expand.grid(1:n_slices, years)
+
+bbs_gammadiv <- replicate(length(years), list()) # One list for each year.
+
+library(reshape2)
+
+load('/mnt/research/nasabio/data/bbs/bbsworkspace_byroute.r')
+yeartable <- table(bbscov$year)
+
+
+
+# Combine arrays since I stupidly put wrong indices.
+for (i in 1:length(years)) {
+	print(i)
+	rowidx <- round(seq(0,yeartable[which(names(yeartable)==years[i])],length.out=n_slices + 1))
+	
+	
+	for (j in 1:n_slices) {
+		rowidxmin <- rowidx[j]+1
+		rowidxmax <- rowidx[j+1]
+		load(paste0('/mnt/research/nasabio/data/bbs/diversity/gamma_', years[i], '_', j, '.r'))
+		gamma_div_melt <- melt(gamma_div[rowidxmin:rowidxmax,,], varnames = c('rteNo','radius','diversity'))
+		gamma_div_cast <- dcast(gamma_div_melt, rteNo + radius ~ diversity)
+		gamma_div_cast$radius <- as.numeric(substr(gamma_div_cast$radius, 3, nchar(as.character(gamma_div_cast$radius))))
+		bbs_gammadiv[[i]][[length(bbs_gammadiv[[i]]) + 1]] <- gamma_div_cast
+		
+	}
+	
+	bbs_gammadiv[[i]] <- do.call(rbind, bbs_gammadiv[[i]])
+	cov_i <- subset(bbscov, year == years[i])
+	bbs_gammadiv[[i]] <- cbind(cov_i[rep(1:nrow(cov_i), each=9),], bbs_gammadiv[[i]][,-1])
+	
+}
+
+bbs_gammadiv <- do.call(rbind, bbs_gammadiv)
+write.csv(bbs_gammadiv, file = '/mnt/research/nasabio/data/bbs/bbs_gammadiv.csv', row.names = FALSE)
+
+
