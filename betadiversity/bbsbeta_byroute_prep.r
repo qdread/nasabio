@@ -3,6 +3,7 @@
 # QDR, 07 Mar 2017
 # Project: NASABioXGeo
 
+# Updated on 31 May 2017: new 2016 routes+coordinates.
 # Modification 05 May 2017: New coordinates (correct)
 # Rereforked on 18 April 2017: Do by route.
 # Modification 11 April 2017: taking way too long so create an array job by radius.
@@ -18,7 +19,7 @@
 # 2. Load community matrix.
 
 bbsspp <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/specieslist.csv', stringsAsFactors = FALSE)
-load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2015.r') # Load fixed bbsmat. This loads both byroute and bystop.
+load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2016.r') # Load fixed bbsmat. This loads both byroute and bystop.
 # Quick correction to fix two birds that aren't in the phylogeny. Just get rid of the eastern yellow wagtail since it's probably only in Alaska anyway.
 fixedbbsmat_byroute[, which(sppids == 5739)] <- fixedbbsmat_byroute[, which(sppids == 5738)] + fixedbbsmat_byroute[, which(sppids == 5739)]
 fixedbbsmat_byroute[, which(sppids == 5738)] <- 0
@@ -62,9 +63,11 @@ dimnames(birdtraitdist)[[1]] <- dimnames(birdtraitdist)[[2]] <- birdtrait_diurna
 # 5b. Perform any last data cleaning that is necessary.
 
 # Remove stops that don't have coordinates from the dataset.
+# Here check why some of the coordinates are missing.
 
 library(dplyr)
-bbsgrps_byroute <- bbsgrps_byroute %>% mutate(rteNo=as.numeric(rteNo)) %>% left_join(bbsalbers)
+
+bbsgrps_byroute <- bbsgrps_byroute %>% mutate(rteNo=as.numeric(rteNo)) %>% left_join(bbsalbers, by = 'rteNo')
 has_coords <- !is.na(bbsgrps_byroute$lon)
 
 # Set dimnames of community matrix, trait distance matrix, and phylogenetic distance matrix to match.
@@ -126,6 +129,7 @@ getNeighbors <- function(dat, radius) {
 }
 
 # Calculate distances and identities of all neighbors within the maximum radius
+names(bbsgrps_byroute) <- c('year','rteNo','lon','lat','lon_aea','lat_aea')
 bbscov <- bbsgrps_byroute
 
 # For optimization purposes, convert covariates to a matrix.
