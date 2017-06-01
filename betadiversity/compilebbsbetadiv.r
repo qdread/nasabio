@@ -100,9 +100,10 @@ save(bbs_betadivtd_arraylist, file = '/mnt/research/nasabio/data/bbs/bbs_betadiv
 
 ################################
 # 23 May: compile BBS gamma-diversity, by year
+# Updated 01 June with latest year
 
-years <- 1997:2015
-n_slices <- 13
+years <- 1997:2016
+n_slices <- 12
 combos <- expand.grid(1:n_slices, years)
 
 bbs_gammadiv <- replicate(length(years), list()) # One list for each year.
