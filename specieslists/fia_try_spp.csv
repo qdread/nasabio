@@ -1,0 +1,303 @@
+"Core","East","West","woodland.Caribbean","FIA.Code","PLANTS.Code","Common.name","Genus","Species","AccSpeciesName","AccSpeciesID","ObsNum","ObsGRNum","MeasNum","MeasGRNum","TraitNum"
+"X ","","W ","",11,"ABAM ","Pacific silver fir ","Abies","amabilis","Abies amabilis",30,162,44,535,137,99
+"X ","E ","W ","",12,"ABBA ","balsam fir ","Abies","balsamea","Abies balsamea",32,518,281,2644,1496,150
+"X ","","W ","",14,"ABBR ","Santa Lucia fir,","Abies","bracteata","Abies bracteata",35,21,47,26,NA,NA
+"X ","","W ","",15,"ABCO ","white fir ","Abies","concolor","Abies concolor",39,256,99,854,514,114
+"X ","E ","","",16,"ABFR ","Fraser fir ","Abies","fraseri","Abies fraseri",48,118,19,500,166,78
+"X ","","W ","",17,"ABGR ","grand fir ","Abies","grandis","Abies grandis",50,176,14,389,68,118
+"X ","","W ","",19,"ABLA ","subalpine fir ","Abies","lasiocarpa","Abies lasiocarpa",56,276,154,1321,946,144
+"X ","","W ","",18,"ABLAA ","corkbark fir ","Abies","lasiocarpavar.arizonica","Abies lasiocarpavar.arizonica",NA,NA,NA,NA,NA,NA
+"X ","","W ","",20,"ABMA ","California red fir ","Abies","magnifica","Abies magnifica",57,91,10,272,42,79
+"X ","","W ","",22,"ABPR ","noble fir ","Abies","procera","Abies procera",67,148,17,296,8,92
+"X ","","W ","",21,"ABSH ","Shasta red fir ","Abies","shastensis","Abies shastensis",64964,3,86,45,NA,NA
+"X ","","W ","",81,"CADE27 ","incense-cedar ","Calocedrus","decurrens","Calocedrus decurrens",9622,80,8,224,32,82
+"X ","","W ","",41,"CHLA ","Port-Orford-cedar","Chamaecyparis","lawsoniana","Chamaecyparis lawsoniana",11983,123,6,385,48,101
+"X ","","W ","",42,"CHNO ","Alaska yellow-cedar","Chamaecyparis","nootkatensis","Chamaecyparis nootkatensis",11984,46,2,155,5,61
+"X ","E ","","",43,"CHTH2 ","Atlantic white-cedar","Chamaecyparis","thyoides","Chamaecyparis thyoides",11988,45,1,168,3,61
+"X ","","W ","",51,"CUAR ","Arizona cypress ","Cupressus","arizonica","Cupressus arizonica",15925,47,2,148,6,56
+"X ","","W ","",52,"CUBA ","Baker cypress,","Cupressus","bakeri","Cupressus bakeri",15926,13,20,11,NA,NA
+"X ","","W ","",53,"CUFO2 ","tecate cypress ","Cupressus","forbesii","Cupressus forbesii",15930,13,3,59,39,34
+"X ","","W ","",56,"CUMA ","MacNab's cypress","Cupressus","macnabiana","Cupressus macnabiana",15936,20,1,37,3,16
+"X ","","W ","",54,"CUMA2 ","Monterey cypress","Cupressus","macrocarpa","Cupressus macrocarpa",15937,43,3,77,9,27
+"X ","E ","","w ",61,"JUAS ","Ashe juniper ","Juniperus","ashei","Juniperus ashei",31548,22,7,112,82,26
+"X ","","W ","w ",62,"JUCA7 ","California juniper ","Juniperus","californica","Juniperus californica",31552,29,5,107,59,39
+"X ","","W ","w ",59,"JUCO11 ","redberry juniper ","Juniperus","coahuilensis","Juniperus coahuilensis",31555,12,21,9,NA,NA
+"X ","","W ","w ",63,"JUDE2 ","alligator juniper ","Juniperus","deppeana","Juniperus deppeana",31558,78,41,325,269,49
+"X ","","W ","w ",69,"JUMO ","oneseed juniper ","Juniperus","monosperma","Juniperus monosperma",31572,125,52,680,380,100
+"X ","","W ","",64,"JUOC ","western juniper ","Juniperus","occidentalis","Juniperus occidentalis",31575,75,5,259,49,74
+"X ","","W ","w ",65,"JUOS ","Utah juniper ","Juniperus","osteosperma","Juniperus osteosperma",31577,123,59,673,478,103
+"X ","","W ","w ",58,"JUPI ","Pinchot juniper ","Juniperus","pinchotii","Juniperus pinchotii",31581,18,4,66,39,25
+"X ","E ","W ","w ",66,"JUSC2 ","Rocky Mountain juniper","Juniperus","scopulorum","Juniperus scopulorum",31590,101,53,579,385,98
+"X ","E ","","",68,"JUVI ","eastern redcedar ","Juniperus","virginiana","Juniperus virginiana",31598,152,76,773,419,104
+"X ","E ","W ","",71,"LALA ","tamarack (native)","Larix","laricina","Larix laricina",32372,348,104,1700,564,121
+"X ","","W ","",72,"LALY ","subalpine larch ","Larix","lyallii","Larix lyallii",32374,85,15,308,90,64
+"X ","","W ","",73,"LAOC ","western larch ","Larix","occidentalis","Larix occidentalis",32376,139,8,447,71,94
+"X ","E ","","",91,"PIAB ","Norway spruce ","Picea","abies","Picea abies",41907,4264,2745,11790,7804,341
+"X ","","W ","",92,"PIBR ","Brewer spruce ","Picea","breweriana","Picea breweriana",41913,32,1,136,3,55
+"X ","","W ","",93,"PIEN ","Engelmann spruce","Picea","engelmannii","Picea engelmannii",41917,190,70,793,411,127
+"X ","E ","W ","",94,"PIGL ","white spruce ","Picea","glauca","Picea glauca",41920,348,74,1950,769,164
+"X ","E ","W ","",95,"PIMA ","black spruce ","Picea","mariana","Picea mariana",41927,4151,3674,13216,11567,159
+"X ","E ","W ","",96,"PIPU ","blue spruce ","Picea","pungens","Picea pungens",41937,126,6,361,47,106
+"X ","E ","","",97,"PIRU ","red spruce ","Picea","rubens","Picea rubens",41939,403,295,1927,1449,122
+"X ","","W ","",98,"PISI ","Sitka spruce ","Picea","sitchensis","Picea sitchensis",41942,1121,819,2888,1922,235
+"X ","","W ","",101,"PIAL ","whitebark pine ","Pinus","albicaulis","Pinus albicaulis",42092,74,6,279,66,92
+"X ","","W ","",102,"PIAR ","Rocky Mountain bristlecone pine","Pinus","aristata","Pinus aristata",42093,110,35,541,198,81
+"X ","","W ","",135,"PIAR5 ","Arizona pine ","Pinus","arizonica","Pinus arizonica",42094,4,4,4,NA,NA
+"X ","","W ","",103,"PIAT ","knobcone pine ","Pinus","attenuata","Pinus attenuata",42097,30,1,59,4,27
+"X ","","W ","",104,"PIBA ","foxtail pine ","Pinus","balfouriana","Pinus balfouriana",42099,43,70,24,NA,NA
+"X ","E ","","",105,"PIBA2 ","jack pine ","Pinus","banksiana","Pinus banksiana",42100,4077,3355,14759,10462,177
+"X ","","W ","w ",140,"PICE ","Mexican pinyon pine","Pinus","cembroides","Pinus cembroides",42106,44,21,289,164,64
+"X ","E ","","",107,"PICL ","sand pine ","Pinus","clausa","Pinus clausa",42109,105,61,335,151,70
+"X ","","W ","",108,"PICO ","lodgepole pine ","Pinus","contorta","Pinus contorta",42110,441,130,1723,614,173
+"X ","","W ","",109,"PICO3 ","Coulter pine ","Pinus","coulteri","Pinus coulteri",42111,42,1,162,4,67
+"X ","","W ","w ",134,"PIDI3 ","border pinyon ","Pinus","discolor","Pinus discolor",93450,5,16,14,NA,NA
+"X ","E ","","",110,"PIEC2 ","shortleaf pine ","Pinus","echinata","Pinus echinata",42118,56,6,251,44,87
+"X ","","W ","w ",106,"PIED ","Common pinyon,","Pinus","edulis","Pinus edulis",42119,147,60,761,373,99
+"X ","E ","","",111,"PIEL ","slash pine ","Pinus","elliottii","Pinus elliottii",42120,164,72,800,298,102
+"X ","E ","","",144,"PIELE2 ","Caribbean pine ","Pinus","elliottiivar.elliottii","Pinus elliottiivar.elliottii",NA,NA,NA,NA,NA,NA
+"X ","","W ","",112,"PIEN2 ","Apache pine ","Pinus","engelmannii","Pinus engelmannii",42121,18,33,18,NA,NA
+"X ","","W ","",113,"PIFL2 ","limber pine ","Pinus","flexilis","Pinus flexilis",42124,88,30,470,296,99
+"X ","E ","","",115,"PIGL2 ","spruce pine ","Pinus","glabra","Pinus glabra",42126,98,61,307,153,63
+"X ","","W ","",116,"PIJE ","Jeffrey pine ","Pinus","jeffreyi","Pinus jeffreyi",42135,83,8,314,35,89
+"X ","","W ","",117,"PILA ","sugar pine ","Pinus","lambertiana","Pinus lambertiana",42140,86,12,213,13,74
+"X ","","W ","",118,"PILE ","Chihuahuan pine ","Pinus","leiophylla","Pinus leiophylla",42144,23,44,20,NA,NA
+"X ","","W ","",142,"PILO ","Great Basin bristlecone pine","Pinus","longaeva","Pinus longaeva",42145,26,45,21,NA,NA
+"X ","","W ","w ",133,"PIMO ","singleleaf pinyon ","Pinus","monophylla","Pinus monophylla",42153,71,7,305,85,93
+"X ","","W ","w ",143,"PIMOF ","Arizona pinyon pine","Pinus","monophyllavar.fallax","Pinus monophyllavar.fallax",NA,NA,NA,NA,NA,NA
+"X ","","W ","",119,"PIMO3 ","western white pine","Pinus","monticola","Pinus monticola",42156,177,7,480,9,90
+"X ","","W ","",120,"PIMU ","bishop pine ","Pinus","muricata","Pinus muricata",42158,50,19,246,112,67
+"X ","E ","","",136,"PINI ","Austrian pine ","Pinus","nigra","Pinus nigra",42159,1333,904,4131,3142,180
+"X ","E ","","",121,"PIPA2 ","longleaf pine ","Pinus","palustris","Pinus palustris",42162,160,93,575,310,105
+"X ","E ","W ","",122,"PIPO ","ponderosa pine ","Pinus","ponderosa","Pinus ponderosa",42168,507,224,2654,1304,165
+"X ","E ","","",123,"PIPU5 ","Table Mountain pine","Pinus","pungens","Pinus pungens",42172,32,2,138,7,59
+"X ","","W ","w ",138,"PIQU ","four-leaf pine,","Pinus","quadrifolia","Pinus quadrifolia",42173,19,40,20,NA,NA
+"X ","","W ","",124,"PIRA2 ","Monterey pine ","Pinus","radiata","Pinus radiata",42174,378,99,2344,910,123
+"X ","E ","","",125,"PIRE ","red pine ","Pinus","resinosa","Pinus resinosa",42175,265,59,1337,413,145
+"X ","E ","","",126,"PIRI ","pitch pine ","Pinus","rigida","Pinus rigida",42176,105,9,396,98,102
+"X ","","W ","",127,"PISA2 ","gray pine,","Pinus","sabiniana","Pinus sabiniana",42179,46,2,190,7,76
+"X ","E ","","",128,"PISE ","pond pine ","Pinus","serotina","Pinus serotina",42180,59,6,304,88,78
+"X ","","W ","",114,"PIST3 ","southwestern white pine","Pinus","strobiformis","Pinus strobiformis",42183,140,69,498,411,41
+"X ","E ","","",129,"PIST ","eastern white pine","Pinus","strobus","Pinus strobus",42184,666,209,2825,816,189
+"X ","E ","W ","",130,"PISY ","Scotch pine ","Pinus","sylvestris","Pinus sylvestris",42185,6000,4450,19292,15207,392
+"X ","E ","","",131,"PITA ","loblolly pine ","Pinus","taeda","Pinus taeda",42188,652,392,2892,2126,149
+"X ","","W ","",139,"PITO ","Torrey pine ","Pinus","torreyana","Pinus torreyana",42195,28,56,30,NA,NA
+"X ","E ","","",132,"PIVI2 ","Virginia pine ","Pinus","virginiana","Pinus virginiana",42198,87,24,393,176,86
+"X ","","W ","",137,"PIWA ","Washoe pine ","Pinus","washoensis","Pinus washoensis",42200,15,26,15,NA,NA
+"X ","","W ","",201,"PSMA ","bigcone Douglas-fir","Pseudotsuga","macrocarpa","Pseudotsuga macrocarpa",44566,42,2,169,13,66
+"X ","","W ","",202,"PSME ","Douglas-fir ","Pseudotsuga","menziesii","Pseudotsuga menziesii",44567,1671,890,5223,2623,248
+"X ","","W ","",211,"SESE3 ","redwood ","Sequoia","sempervirens","Sequoia sempervirens",49727,146,31,605,283,104
+"X ","","W ","",212,"SEGI2 ","giant sequoia ","Sequoiadendron","giganteum","Sequoiadendron giganteum",49729,83,6,292,75,89
+"X ","E ","","",222,"TAAS ","pondcypress ","Taxodium","ascendens","Taxodium ascendens",53522,7,4,114,28,59
+"X ","E ","","",221,"TADI2 ","baldcypress ","Taxodium","distichum","Taxodium distichum",53523,140,19,608,267,118
+"X ","E ","","",232,"TAFL ","Florida yew ","Taxus","floridana","Taxus floridana",53531,8,11,7,NA,NA
+"X ","E ","","",241,"THOC2 ","northern white-cedar","Thuja","occidentalis","Thuja occidentalis",54206,174,21,771,195,117
+"X ","","W ","",242,"THPL ","western redcedar","Thuja","plicata","Thuja plicata",54208,191,23,706,148,126
+"X ","","W ","",251,"TOCA ","California torreya (nutmeg)","Torreya","californica","Torreya californica",54497,29,1,54,6,18
+"X ","E ","","",252,"TOTA ","Florida torreya (nutmeg)","Torreya","taxifolia","Torreya taxifolia",54500,22,118,51,NA,NA
+"X ","E ","","",261,"TSCA ","eastern hemlock ","Tsuga","canadensis","Tsuga canadensis",55316,157,48,699,374,120
+"X ","E ","","",262,"TSCA2 ","Carolina hemlock ","Tsuga","caroliniana","Tsuga caroliniana",55317,12,108,53,NA,NA
+"X ","","W ","",263,"TSHE ","western hemlock ","Tsuga","heterophylla","Tsuga heterophylla",55323,338,119,1059,483,151
+"X ","","W ","",264,"TSME ","mountain hemlock","Tsuga","mertensiana","Tsuga mertensiana",55325,31,3,181,24,74
+"X ","E ","W ","C ",299,"2TE ","unknown dead conifer","Tree","evergreen","Tree evergreen",NA,NA,NA,NA,NA,NA
+"X ","E ","","",311,"ACBA3 ","Florida maple ","Acer","barbatum","Acer barbatum",792,43,25,247,127,60
+"X ","E ","","",323,"ACLE ","chalk maple ","Acer","leucoderme","Acer leucoderme",830,11,2,41,14,17
+"X ","","W ","",312,"ACMA3 ","bigleaf maple ","Acer","macrophyllum","Acer macrophyllum",833,77,7,231,35,78
+"X ","E ","W ","",313,"ACNE2 ","boxelder ","Acer","negundo","Acer negundo",841,375,110,1337,777,195
+"X ","E ","","",314,"ACNI5 ","black maple ","Acer","nigrum","Acer nigrum",842,23,2,144,25,70
+"X ","E ","","",315,"ACPE ","striped maple ","Acer","pensylvanicum","Acer pensylvanicum",852,850,782,13524,13287,94
+"X ","E ","","",316,"ACRU ","red maple ","Acer","rubrum","Acer rubrum",859,779,407,4753,2703,186
+"X ","E ","","",317,"ACSA2 ","silver maple ","Acer","saccharinum","Acer saccharinum",861,127,19,423,86,114
+"X ","E ","","",318,"ACSA3 ","sugar maple ","Acer","saccharum","Acer saccharum",863,1800,1345,22124,19681,233
+"X ","E ","","",332,"AEFL ","yellow buckeye ","Aesculus","flava","Aesculus flava",1569,18,1,146,13,58
+"X ","E ","","",331,"AEGL ","Ohio buckeye ","Aesculus","glabra","Aesculus glabra",1570,61,202,65,NA,NA
+"X ","E ","","",337,"AESY ","painted buckeye ","Aesculus","sylvatica","Aesculus sylvatica",1577,23,120,53,NA,NA
+"X ","E ","W ","",341,"AIAL ","ailanthus ","Ailanthus","altissima","Ailanthus altissima",2124,284,15,722,70,161
+"X ","E ","W ","",345,"ALJU ","mimosa/silktree ","Albizia","julibrissin","Albizia julibrissin",2237,88,27,486,215,122
+"X ","E ","","",355,"ALGL2 ","European alder ","Alnus","glutinosa","Alnus glutinosa",2710,1040,180,2848,735,289
+"X ","","W ","",353,"ALOB2 ","Arizona alder ","Alnus","oblongifolia","Alnus oblongifolia",2721,16,37,18,NA,NA
+"X ","","W ","",352,"ALRH2 ","white alder ","Alnus","rhombifolia","Alnus rhombifolia",2725,77,8,321,99,84
+"X ","","W ","",351,"ALRU2 ","red alder ","Alnus","rubra","Alnus rubra",2726,596,494,1143,794,106
+"X ","","W ","",362,"ARAR2 ","Arizona madrone ","Arbutus","arizonica","Arbutus arizonica",4441,14,97,47,NA,NA
+"X ","","W ","",361,"ARME ","Pacific madrone ","Arbutus","menziesii","Arbutus menziesii",4443,120,18,455,143,86
+"X ","E ","","",367,"ASTR ","Pawpaw ","Asimina","triloba","Asimina triloba",5522,52,2,202,16,71
+"X ","E ","","",371,"BEAL2 ","yellow birch ","Betula","alleghaniensis","Betula alleghaniensis",7319,285,143,1332,788,156
+"X ","E ","","",372,"BELE ","sweet birch ","Betula","lenta","Betula lenta",7341,212,151,1401,1162,93
+"X ","E ","","",373,"BENI ","river birch ","Betula","nigra","Betula nigra",7352,100,27,559,288,95
+"X ","E ","W ","",374,"BEOC2 ","water birch ","Betula","occidentalis","Betula occidentalis",7354,61,24,367,226,71
+"X ","E ","W ","",375,"BEPA ","paper birch ","Betula","papyrifera","Betula papyrifera",7355,789,348,3862,1735,209
+"X ","E ","","",379,"BEPO ","gray birch ","Betula","populifolia","Betula populifolia",7358,226,156,1497,1255,94
+"X ","E ","","",377,"BEUB ","Virginia roundleaf birch","Betula","uber","Betula uber",7363,26,55,6,NA,NA
+"X ","","W ","",378,"BEUT ","northwestern paper birch","Betula","Xutahensis","Betula Xutahensis",NA,NA,NA,NA,NA,NA
+"X ","E ","","",391,"CACA18 ","American hornbeam, musclewood","Carpinus","caroliniana","Carpinus caroliniana",10774,136,55,575,308,82
+"X ","E ","","",409,"CAAL27 ","mockernut hickory","Carya","alba","Carya alba",10825,11,1,105,9,51
+"X ","E ","","",401,"CAAQ2 ","water hickory ","Carya","aquatica","Carya aquatica",10827,30,147,63,NA,NA
+"X ","E ","","",413,"CACA38 ","southern shagbark hickory","Carya","carolinae-septentrionalis","Carya carolinae-septentrionalis",78010,2,2,2,NA,NA
+"X ","E ","","",402,"CACO15 ","bitternut hickory ","Carya","cordiformis","Carya cordiformis",10829,86,7,326,46,80
+"X ","E ","","",411,"CAFL6 ","scrub hickory ","Carya","floridana","Carya floridana",10830,9,1,18,8,10
+"X ","E ","","",403,"CAGL8 ","pignut hickory ","Carya","glabra","Carya glabra",10831,127,54,624,403,97
+"X ","E ","","",404,"CAIL2 ","pecan ","Carya","illinoinensis","Carya illinoinensis",10833,18,2,131,15,54
+"X ","E ","","",405,"CALA21 ","shellbark hickory ","Carya","laciniosa","Carya laciniosa",10834,44,175,63,NA,NA
+"X ","E ","","",406,"CAMY ","nutmeg hickory ","Carya","myristiciformis","Carya myristiciformis",10837,21,128,58,NA,NA
+"X ","E ","","",412,"CAOV3 ","red hickory ","Carya","ovalis","Carya ovalis",10838,8,8,5,NA,NA
+"X ","E ","","",407,"CAOV2 ","shagbark hickory ","Carya","ovata","Carya ovata",10839,98,7,423,101,93
+"X ","E ","","",410,"CAPA24 ","sand hickory ","Carya","pallida","Carya pallida",10840,25,2,52,6,23
+"X ","E ","","",408,"CATE9 ","black hickory ","Carya","texana","Carya texana",10844,11,31,15,NA,NA
+"X ","E ","W ","",424,"CAMO83 ","Chinese chestnut ","Castanea","mollissima","Castanea mollissima",11065,47,9,211,41,71
+"X ","E ","","",422,"CAPU9 ","Allegheny chinkapin","Castanea","pumila","Castanea pumila",11067,38,12,193,60,64
+"X ","E ","","C ",856,"CAGL11 ","gray sheoak ","Casuarina","glauca","Casuarina glauca",11167,58,227,89,NA,NA
+"X ","E ","","C ",857,"CALE28 ","Australian pine ","Casuarina","lepidophloia","Casuarina lepidophloia",11176,17,1,21,5,11
+"X ","E ","","",451,"CABI8 ","southern catalpa ","Catalpa","bignonioides","Catalpa bignonioides",11183,47,2,164,4,67
+"X ","E ","","",452,"CASP8 ","northern catalpa ","Catalpa","speciosa","Catalpa speciosa",11189,78,43,508,341,83
+"X ","E ","W ","",461,"CELA ","sugarberry ","Celtis","laevigata","Celtis laevigata",11491,99,49,503,253,69
+"X ","E ","W ","",462,"CEOC ","hackberry ","Celtis","occidentalis","Celtis occidentalis",11497,91,6,371,70,91
+"X ","E ","","",471,"CECA4 ","eastern redbud ","Cercis","canadensis","Cercis canadensis",11853,198,125,1270,881,105
+"X ","E ","","",481,"CLKE ","yellowwood ","Cladrastis","kentukea","Cladrastis kentukea",13237,23,131,55,NA,NA
+"X ","E ","","",491,"COFL2 ","flowering dogwood","Cornus","florida","Cornus florida",14574,240,129,1263,932,119
+"X ","","W ","",492,"CONU4 ","Pacific dogwood ","Cornus","nuttallii","Cornus nuttallii",14584,45,1,157,1,60
+"X ","E ","","",996,"COOB2 ","smoketree ","Cotinus","obovatus","Cotinus obovatus",14790,25,53,18,NA,NA
+"X ","E ","","",522,"DITE3 ","Texas persimmon","Diospyros","texana","Diospyros texana",18610,53,2,172,52,44
+"X ","E ","","",521,"DIVI5 ","common persimmon","Diospyros","virginiana","Diospyros virginiana",18628,72,6,299,58,98
+"X ","E ","","",512,"EUCA2 ","river redgum ","Eucalyptus","camaldulensis","Eucalyptus camaldulensis",22391,127,8,358,80,96
+"X ","","W ","",511,"EUGL ","Tasmanian bluegum","Eucalyptus","globulus","Eucalyptus globulus",22543,241,68,1571,416,92
+"X ","E ","","C ",513,"EUGR12 ","grand eucalyptus ","Eucalyptus","grandis","Eucalyptus grandis",22552,129,48,613,197,108
+"X ","E ","","C ",514,"EURO2 ","swamp mahogany","Eucalyptus","robusta","Eucalyptus robusta",22784,75,1,227,29,93
+"X ","E ","","",531,"FAGR ","American beech ","Fagus","grandifolia","Fagus grandifolia",23898,2054,1903,31375,30927,198
+"X ","E ","","",541,"FRAM2 ","white ash ","Fraxinus","americana","Fraxinus americana",25239,303,163,2190,1812,169
+"X ","E ","","",548,"FRCA3 ","Carolina ash ","Fraxinus","caroliniana","Fraxinus caroliniana",25243,52,28,263,131,67
+"X ","","W ","",542,"FRLA ","Oregon ash ","Fraxinus","latifolia","Fraxinus latifolia",25252,26,126,51,NA,NA
+"X ","E ","","",543,"FRNI ","black ash ","Fraxinus","nigra","Fraxinus nigra",25256,83,8,298,74,79
+"X ","E ","","",544,"FRPE ","green ash ","Fraxinus","pennsylvanica","Fraxinus pennsylvanica",25263,175,14,607,156,152
+"X ","E ","","",545,"FRPR ","pumpkin ash ","Fraxinus","profunda","Fraxinus profunda",25267,30,135,57,NA,NA
+"X ","E ","","",546,"FRQU ","blue ash ","Fraxinus","quadrangulata","Fraxinus quadrangulata",25268,29,51,22,NA,NA
+"X ","E ","","",549,"FRTE ","Texas ash ","Fraxinus","texensis","Fraxinus texensis",83698,3,5,5,NA,NA
+"X ","","W ","",547,"FRVE2 ","velvet ash ","Fraxinus","velutina","Fraxinus velutina",25276,50,5,209,41,68
+"X ","E ","W ","",561,"GIBI2 ","Ginkgo,","Ginkgo","biloba","Ginkgo biloba",26255,147,67,1011,586,136
+"X ","E ","","",551,"GLAQ ","waterlocust ","Gleditsia","aquatica","Gleditsia aquatica",26341,17,102,48,NA,NA
+"X ","E ","","",552,"GLTR ","honeylocust ","Gleditsia","triacanthos","Gleditsia triacanthos",26351,125,16,409,109,111
+"X ","E ","","",555,"GOLA ","loblolly bay ","Gordonia","lasianthus","Gordonia lasianthus",26761,43,13,204,67,68
+"X ","E ","","",571,"GYDI ","Kentucky coffeetree","Gymnocladus","dioicus","Gymnocladus dioicus",27334,51,165,62,NA,NA
+"X ","E ","","",581,"HACA3 ","Carolina silverbell","Halesia","carolina","Halesia carolina",27702,38,151,59,NA,NA
+"X ","E ","","",582,"HADI3 ","two-wing silverbell","Halesia","diptera","Halesia diptera",27703,15,4,88,11,48
+"X ","E ","","",583,"HAPA2 ","little silverbell ","Halesia","parviflora","Halesia parviflora",27706,7,3,3,NA,NA
+"X ","E ","","",591,"ILOP ","American holly ","Ilex","opaca","Ilex opaca",30308,177,109,870,651,80
+"X ","","W ","",604,"JUCA ","Southern California black walnue","Juglans","californica","Juglans californica",31416,39,1,74,14,33
+"X ","E ","","",601,"JUCI ","butternut ","Juglans","cinerea","Juglans cinerea",31418,72,5,240,42,74
+"X ","","W ","",606,"JUMA ","Arizona walnut ","Juglans","major","Juglans major",31421,30,122,53,NA,NA
+"X ","E ","W ","",602,"JUNI ","black walnut ","Juglans","nigra","Juglans nigra",31425,177,11,532,88,121
+"X ","E ","","",611,"LIST2 ","sweetgum ","Liquidambar","styraciflua","Liquidambar styraciflua",33704,263,164,2018,1280,137
+"X ","E ","","",621,"LITU ","yellow-poplar ","Liriodendron","tulipifera","Liriodendron tulipifera",33707,263,80,1411,679,152
+"X ","","W ","",631,"LIDE3 ","tanoak ","Lithocarpus","densiflorus","Lithocarpus densiflorus",33736,47,1,151,3,54
+"X ","E ","","",641,"MAPO ","Osage-orange ","Maclura","pomifera","Maclura pomifera",34849,52,203,65,NA,NA
+"X ","E ","","",651,"MAAC ","cucumbertree ","Magnolia","acuminata","Magnolia acuminata",35014,40,2,189,31,80
+"X ","E ","","",655,"MAFR ","mountain magnolia, Fraser magnolia","Magnolia","fraseri","Magnolia fraseri",35029,39,2,203,39,67
+"X ","E ","","",652,"MAGR4 ","southern magnolia","Magnolia","grandiflora","Magnolia grandiflora",35032,137,69,756,441,134
+"X ","E ","","",654,"MAMA2 ","bigleaf magnolia ","Magnolia","macrophylla","Magnolia macrophylla",35042,28,61,26,NA,NA
+"X ","E ","","",657,"MAPY ","pyramid magnolia","Magnolia","pyramidata","Magnolia pyramidata",89537,2,2,2,NA,NA
+"X ","E ","","",658,"MATR ","umbrella magnolia","Magnolia","tripetala","Magnolia tripetala",35063,28,1,140,4,60
+"X ","E ","","",653,"MAVI2 ","sweetbay ","Magnolia","virginiana","Magnolia virginiana",35065,121,83,688,526,89
+"X ","E ","","",662,"MAAN3 ","southern crabapple","Malus","angustifolia","Malus angustifolia",35223,6,10,6,NA,NA
+"X ","E ","","",663,"MACO5 ","sweet crabapple ","Malus","coronaria","Malus coronaria",35227,13,13,6,NA,NA
+"X ","","W ","",661,"MAFU ","Oregon crabapple","Malus","fusca","Malus fusca",35233,17,100,45,NA,NA
+"X ","E ","","",664,"MAIO ","prairie crabapple ","Malus","ioensis","Malus ioensis",35237,10,93,43,NA,NA
+"X ","E ","","C ",992,"MEQU ","melaleuca ","Melaleuca","quinquenervia","Melaleuca quinquenervia",35956,57,1,124,29,55
+"X ","E ","","C ",993,"MEAZ ","chinaberry ","Melia","azedarach","Melia azedarach",36047,100,3,312,36,103
+"X ","E ","","C ",681,"MOAL ","white mulberry ","Morus","alba","Morus alba",37299,174,40,791,340,157
+" X ","E ","","C ",684,"MONI ","black mulberry ","Morus","nigra","Morus nigra",37313,65,2,198,44,73
+"X ","E ","","",682,"MORU2 ","red mulberry ","Morus","rubra","Morus rubra",37314,98,41,450,225,82
+"X ","E ","","",691,"NYAQ2 ","water tupelo ","Nyssa","aquatica","Nyssa aquatica",38404,40,153,63,NA,NA
+"X ","E ","","",694,"NYBI ","swamp tupelo ","Nyssa","biflora","Nyssa biflora",38405,53,43,309,210,61
+"X ","E ","","",692,"NYOG ","Ogeechee tupelo ","Nyssa","ogeche","Nyssa ogeche",38407,30,146,56,NA,NA
+"X ","E ","","",693,"NYSY ","blackgum ","Nyssa","sylvatica","Nyssa sylvatica",38411,139,34,779,343,115
+"X ","E ","","",701,"OSVI ","eastern hophornbeam","Ostrya","virginiana","Ostrya virginiana",39473,651,573,9558,9191,105
+"X ","E ","","",711,"OXAR ","sourwood ","Oxydendrum","arboreum","Oxydendrum arboreum",39624,77,11,411,141,99
+"X ","E ","","",712,"PATO2 ","paulownia,","Paulownia","tomentosa","Paulownia tomentosa",40581,116,13,360,76,101
+"X ","","W ","C ",7211,"PEAM3 ","avocado ","Persea","americana","Persea americana",41140,62,14,174,84,69
+"X ","E ","","",721,"PEBO ","redbay ","Persea","borbonia","Persea borbonia",41142,109,53,570,292,87
+"X ","E ","","",722,"PLAQ ","water-elm, planertree","Planera","aquatica","Planera aquatica",42501,12,103,48,NA,NA
+"X ","E ","","",731,"PLOC ","American sycamore","Platanus","occidentalis","Platanus occidentalis",42585,119,8,541,88,91
+"X ","","W ","",730,"PLRA ","California sycamore","Platanus","racemosa","Platanus racemosa",42587,22,1,142,3,63
+"X ","","W ","",732,"PLWR2 ","Arizona sycamore","Platanus","wrightii","Platanus wrightii",42588,7,1,120,31,61
+"X ","E ","","",752,"POAL7 ","silver poplar ","Populus","alba","Populus alba",43493,415,29,1091,219,182
+"X ","","W ","",749,"POAN3 ","narrowleaf cottonwood","Populus","angustifolia","Populus angustifolia",43494,47,19,263,138,62
+"X ","E ","W ","",741,"POBA2 ","balsam poplar ","Populus","balsamifera","Populus balsamifera",43495,178,43,955,302,128
+"X ","","W ","",747,"POBAT ","black cottonwood","Populus","balsamiferassp.Trichocarpa","Populus balsamiferassp.Trichocarpa",NA,NA,NA,NA,NA,NA
+"X ","E ","","",742,"PODE3 ","eastern cottonwood","Populus","deltoides","Populus deltoides",43504,254,84,1365,471,112
+"X ","E ","W ","",745,"PODEM ","plains cottonwood","Populus","deltoidesssp.Monilifera","Populus deltoidesssp.Monilifera",NA,NA,NA,NA,NA,NA
+"X ","","W ","",748,"POFR2 ","Fremont cottonwood","Populus","fremontii","Populus fremontii",43507,90,45,638,453,89
+"X ","E ","","",743,"POGR4 ","bigtooth aspen ","Populus","grandidentata","Populus grandidentata",43510,149,55,782,491,98
+"X ","E ","","",744,"POHE4 ","swamp cottonwood","Populus","heterophylla","Populus heterophylla",43511,40,2,156,22,63
+"X ","E ","","",753,"PONI ","Lombardy poplar ","Populus","nigra","Populus nigra",43519,555,55,1591,494,209
+"X ","E ","W ","",746,"POTR5 ","quaking aspen ","Populus","tremuloides","Populus tremuloides",43533,3854,3450,15088,13276,220
+"X ","E ","W ","w ",756,"PRGL2 ","honey mesquite","Prosopis","glandulosa","Prosopis glandulosa",44133,101,18,450,203,92
+"X ","E ","W ","w ",758,"PRPU ","screwbean mesquite","Prosopis","pubescens","Prosopis pubescens",44141,26,143,64,NA,NA
+"X ","E ","W ","w ",757,"PRVE ","velvet mesquite ","Prosopis","velutina","Prosopis velutina",44150,51,22,271,190,48
+"X ","E ","","",766,"PRAM ","American plum ","Prunus","americana","Prunus americana",44294,27,121,53,NA,NA
+"X ","E ","","",771,"PRAV ","sweet cherry (domesticated)","Prunus","avium","Prunus avium",44304,596,58,1285,435,181
+"X ","E ","","",765,"PRNI ","Canada plum ","Prunus","nigra","Prunus nigra",64786,5,86,43,NA,NA
+"X ","E ","","",762,"PRSE2 ","black cherry ","Prunus","serotina","Prunus serotina",44414,728,305,2697,1675,192
+"X ","","W ","",801,"QUAG ","California live oak","Quercus","agrifolia","Quercus agrifolia",45314,78,10,461,125,96
+"X ","E ","","",802,"QUAL ","white oak ","Quercus","alba","Quercus alba",45315,281,83,2263,1347,155
+"X ","","W ","w ",803,"QUAR ","Arizona white oak","Quercus","arizonica","Quercus arizonica",45321,24,49,24,NA,NA
+"X ","E ","","",804,"QUBI ","swamp white oak","Quercus","bicolor","Quercus bicolor",45326,52,1,199,6,67
+"X ","E ","","",806,"QUCO2 ","scarlet oak ","Quercus","coccinea","Quercus coccinea",45349,96,11,614,174,107
+"X ","","W ","",807,"QUDO ","blue oak ","Quercus","douglasii","Quercus douglasii",45363,556,6,8307,136,96
+"X ","E ","","",809,"QUEL ","northern pin oak ","Quercus","ellipsoidalis","Quercus ellipsoidalis",45367,162,66,694,213,49
+"X ","","W ","w ",810,"QUEM ","Emory oak ","Quercus","emoryi","Quercus emoryi",45369,25,45,21,NA,NA
+"X ","","W ","",811,"QUEN ","Engelmann oak ","Quercus","engelmannii","Quercus engelmannii",45370,11,1,50,12,21
+"X ","E ","","",812,"QUFA ","southern red oak ","Quercus","falcata","Quercus falcata",45375,160,66,815,488,98
+"X ","","W ","w ",814,"QUGA ","Gambel oak ","Quercus","gambelii","Quercus gambelii",45381,165,120,785,524,108
+"X ","","W ","",815,"QUGA4 ","Oregon white oak","Quercus","garryana","Quercus garryana",45383,63,13,268,104,61
+"X ","","W ","w ",846,"QUGR3 ","gray oak ","Quercus","grisea","Quercus grisea",45392,9,29,14,NA,NA
+"X ","","W ","w ",843,"QUHY ","silverleaf oak ","Quercus","hypoleucoides","Quercus hypoleucoides",45401,7,22,13,NA,NA
+"X ","E ","","",816,"QUIL ","scrub oak ","Quercus","ilicifolia","Quercus ilicifolia",45403,30,1,74,9,31
+"X ","E ","","",817,"QUIM ","shingle oak ","Quercus","imbricaria","Quercus imbricaria",45404,28,150,60,NA,NA
+"X ","E ","","",842,"QUIN ","bluejack oak ","Quercus","incana","Quercus incana",45405,100,59,377,269,47
+"X ","","W ","",818,"QUKE ","California black oak","Quercus","kelloggii","Quercus kelloggii",45408,79,7,319,103,80
+"X ","E ","","",819,"QULA2 ","turkey oak ","Quercus","laevis","Quercus laevis",45410,101,52,595,344,98
+"X ","E ","","",820,"QULA3 ","laurel oak ","Quercus","laurifolia","Quercus laurifolia",45414,102,49,499,241,82
+"X ","","W ","",821,"QULO ","California white oak","Quercus","lobata","Quercus lobata",45420,71,10,550,228,83
+"X ","E ","","",822,"QULY ","overcup oak ","Quercus","lyrata","Quercus lyrata",45422,40,164,60,NA,NA
+"X ","E ","","",823,"QUMA2 ","bur oak ","Quercus","macrocarpa","Quercus macrocarpa",45424,127,17,691,181,98
+"X ","E ","","",840,"QUMA6 ","dwarf post oak ","Quercus","margarettae","Quercus margarettae",45427,43,25,148,121,27
+"X ","E ","","",824,"QUMA3 ","blackjack oak ","Quercus","marilandica","Quercus marilandica",45428,23,150,67,NA,NA
+"X ","E ","","",825,"QUMI ","swamp chestnut oak","Quercus","michauxii","Quercus michauxii",45431,94,43,457,248,79
+"X ","E ","","",841,"QUMI2 ","dwarf live oak ","Quercus","minima","Quercus minima",45432,63,38,258,214,33
+"X ","E ","","",826,"QUMU ","chinkapin oak ","Quercus","muehlenbergii","Quercus muehlenbergii",45436,40,1,182,1,62
+"X ","E ","","",827,"QUNI ","water oak ","Quercus","nigra","Quercus nigra",45441,143,81,764,487,98
+"X ","","W ","w ",829,"QUOB ","Mexican blue oak","Quercus","oblongifolia","Quercus oblongifolia",45444,11,33,17,NA,NA
+"X ","E ","","",844,"QUOG ","Oglethorpe oak ","Quercus","oglethorpensis","Quercus oglethorpensis",45445,8,25,13,NA,NA
+"X ","E ","","",813,"QUPA5 ","cherrybark oak ","Quercus","pagoda","Quercus pagoda",45450,17,115,53,NA,NA
+"X ","E ","","",830,"QUPA2 ","pin oak ","Quercus","palustris","Quercus palustris",45452,93,6,270,28,76
+"X ","E ","","",831,"QUPH ","willow oak ","Quercus","phellos","Quercus phellos",45458,52,4,257,49,80
+"X ","E ","","",832,"QUPR2 ","chestnut oak ","Quercus","prinus","Quercus prinus",45464,117,34,672,238,121
+"X ","E ","","",833,"QURU ","northern red oak ","Quercus","rubra","Quercus rubra",45473,724,326,3013,1540,236
+"X ","","W ","w ",847,"QURU4 ","netleaf oak ","Quercus","rugosa","Quercus rugosa",45474,12,3,35,24,12
+"X ","E ","","",834,"QUSH ","Shumard’s oak ","Quercus","shumardii","Quercus shumardii",45484,52,1,224,25,71
+"X ","E ","","",808,"QUSIS ","Durand oak ","Quercus","sinuatavar.sinuata","Quercus sinuatavar.sinuata",NA,NA,NA,NA,NA,NA
+"X ","E ","","",835,"QUST ","post oak ","Quercus","stellata","Quercus stellata",45489,125,39,722,390,103
+"X ","E ","","",828,"QUTE ","Nuttall oak,","Quercus","texana","Quercus texana",45495,13,96,45,NA,NA
+"X ","E ","","",837,"QUVE ","black oak ","Quercus","velutina","Quercus velutina",45501,114,19,588,222,103
+"X ","E ","","",838,"QUVI ","live oak ","Quercus","virginiana","Quercus virginiana",45503,132,57,757,355,99
+"X ","","W ","",839,"QUWI2 ","interior live oak ","Quercus","wislizeni","Quercus wislizeni",45504,81,5,190,54,42
+"X ","E ","","C ",989,"RHMA2 ","American mangrove","Rhizophora","mangle","Rhizophora mangle",46095,130,72,363,167,65
+"X ","E ","W ","",901,"ROPS ","black locust ","Robinia","pseudoacacia","Robinia pseudoacacia",46621,411,55,1534,584,242
+"X ","E ","","",912,"SAPA ","cabbage palmetto","Sabal","palmetto","Sabal palmetto",47631,39,6,186,30,61
+"X ","E ","","",925,"SACA5 ","coastal plain willow","Salix","caroliniana","Salix caroliniana",47808,18,118,53,NA,NA
+"X ","E ","","",926,"SAPY ","balsam willow ","Salix","pyrifolia","Salix pyrifolia",47914,6,8,8,NA,NA
+"X ","E ","","",929,"SASE10 ","weeping willow ","Salix","sepulcralis","Salix sepulcralis",60113,8,88,45,NA,NA
+"X ","E ","","",931,"SAAL5 ","sassafras ","Sassafras","albidum","Sassafras albidum",48458,148,89,739,539,89
+"X ","E ","","",936,"SOAU ","European mountain ash","Sorbus","aucuparia","Sorbus aucuparia",50997,1179,184,3539,1086,280
+"X ","E ","","",937,"SODE3 ","northern mountain ash","Sorbus","decora","Sorbus decora",51020,17,1,133,27,65
+"X ","E ","","",951,"TIAM ","American basswood","Tilia","americana","Tilia americana",54321,208,88,1198,643,101
+"X ","E ","","",994,"TRSE6 ","Chinese tallowtree","Triadica","sebifera","Triadica sebifera",54694,31,44,9,NA,NA
+"X ","E ","","",971,"ULAL ","winged elm ","Ulmus","alata","Ulmus alata",55439,84,48,354,204,64
+"X ","E ","","",972,"ULAM ","American elm ","Ulmus","americana","Ulmus americana",55440,251,152,1710,1266,102
+"X ","E ","","",973,"ULCR ","cedar elm ","Ulmus","crassifolia","Ulmus crassifolia",55446,31,139,58,NA,NA
+"X ","E ","","",974,"ULPU ","Siberian elm ","Ulmus","pumila","Ulmus pumila",55471,101,25,506,232,109
+"X ","E ","","",975,"ULRU ","slippery elm ","Ulmus","rubra","Ulmus rubra",55473,72,11,305,87,82
+"X ","E ","","",976,"ULSE ","September elm ","Ulmus","serotina","Ulmus serotina",55475,22,123,56,NA,NA
+"X ","E ","","",977,"ULTH ","rock elm ","Ulmus","thomasii","Ulmus thomasii",55480,50,2,210,29,72
+"X ","","W ","",981,"UMCA ","California laurel ","Umbellularia","californica","Umbellularia californica",55485,71,6,305,72,93
+"X ","E ","","",995,"VEFO ","tungoil tree ","Vernicia","fordii","Vernicia fordii",56058,22,9,252,219,48
+"X ","E ","W ","C ",998,"2TB ","unknown dead hardwood","Tree","broadleaf","Tree broadleaf",NA,NA,NA,NA,NA,NA
+"X ","E ","W ","C ",999,"2TREE ","other, or unknown live tree","Tree","unknown","Tree unknown",NA,NA,NA,NA,NA,NA
