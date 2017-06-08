@@ -3,7 +3,7 @@
 pairwise_beta_focal <- function(m, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, pddist = NULL, fddist = NULL) {
 	
 	# Initialize data structures
-	beta_td_pairwise_pa <- beta_td_shannon <- beta_td_pairwise <- rep(NA, nrow(m) - 1)
+	beta_td_pairwise_pa <- beta_td_sorensen_pa <- beta_td_shannon <- beta_td_pairwise <- beta_td_sorensen <- rep(NA, nrow(m) - 1)
 	beta_pd_pairwise_pa <- beta_pd_nt_pa <- beta_pd_pairwise <- beta_pd_nt <- rep(NA, nrow(m) - 1)
 	beta_fd_pairwise_pa <- beta_fd_nt_pa <- beta_fd_pairwise <- beta_fd_nt <- rep(NA, nrow(m) - 1)
 	
@@ -12,10 +12,12 @@ pairwise_beta_focal <- function(m, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, pd
 		mat_i <- m[c(1,i), ]
 		if (td) {
 			beta_td_pairwise_pa[i] <- vegdist(x = mat_i, binary = TRUE, method = 'jaccard')
+			beta_td_sorensen_pa[i] <- vegdist(x = mat_i, binary = TRUE, method = 'bray')
 		}
 		if (td & abundance) {
 			beta_td_shannon[i] <- d(abundances = mat_i, lev = 'beta', wts = FALSE, q = 1)
 			beta_td_pairwise[i] <- vegdist(x = mat_i, binary = FALSE, method = 'jaccard')
+			beta_td_sorensen[i] <- vegdist(x = mat_i, binary = FALSE, method = 'bray')
 		}
 		if (pd) {  
 			beta_pd_pairwise_pa[i] <- comdist(comm = mat_i, dis = pddist, abundance.weighted = FALSE)
@@ -39,11 +41,13 @@ pairwise_beta_focal <- function(m, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, pd
 	res <- c()
 	
 	if (td) {
-		res <- c(res, beta_td_pairwise_pa = mean(beta_td_pairwise_pa, na.rm = TRUE))
+		res <- c(res, beta_td_pairwise_pa = mean(beta_td_pairwise_pa, na.rm = TRUE),
+					  beta_td_sorensen_pa = mean(beta_td_sorensen_pa, na.rm = TRUE))
 	}
 	if (td & abundance) {
 		res <- c(res, beta_td_shannon = mean(beta_td_shannon, na.rm = TRUE),
-					  beta_td_pairwise_pa = mean(beta_td_pairwise_pa, na.rm = TRUE))
+					  beta_td_pairwise = mean(beta_td_pairwise, na.rm = TRUE),
+					  beta_td_sorensen = mean(beta_td_sorensen, na.rm = TRUE))
 	}
 	if (pd) {
 		res <- c(res, beta_pd_pairwise_pa = mean(beta_pd_pairwise_pa, na.rm = TRUE),
@@ -68,6 +72,7 @@ pairwise_beta_focal <- function(m, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, pd
 #################################################################
 # Added 17 May: pairwise beta for a single pair.
 # Also does the null model.
+# Modified 07 June: add Sorensen or Bray index.
 
 singlepair_beta <- function(p1, p2, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, pddist = NULL, fddist = NULL, nnull = 99, phylo_spp = NULL, func_problem_spp = NULL) {
 	
@@ -78,7 +83,7 @@ singlepair_beta <- function(p1, p2, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, p
     if (!is.null(func_problem_spp)) mfunc <- m[, !dimnames(m)[[2]] %in% func_problem_spp, drop = FALSE] else mfunc <- m
 	
 	# Declare variables to hold the data
-	beta_td_pairwise_pa <- beta_td_shannon <- beta_td_pairwise <- NA
+	beta_td_pairwise_pa <- beta_td_sorensen_pa <- beta_td_shannon <- beta_td_pairwise <- beta_td_sorensen <- NA
 	beta_pd_pairwise_pa <- beta_pd_nt_pa <- beta_pd_pairwise <- beta_pd_nt <- NA
 	beta_fd_pairwise_pa <- beta_fd_nt_pa <- beta_fd_pairwise <- beta_fd_nt <- NA
 	
@@ -86,10 +91,12 @@ singlepair_beta <- function(p1, p2, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, p
 
 	if (td) {
 		beta_td_pairwise_pa <- vegdist(x = m, binary = TRUE, method = 'jaccard')[1]
+		beta_td_sorensen_pa <- vegdist(x = m, binary = TRUE, method = 'bray')[1]
 	}
 	if (td & abundance) {
 		beta_td_shannon <- d(abundances = m, lev = 'beta', wts = FALSE, q = 1)
-		beta_td_pairwise <- vegdist(x = m, binary = FALSE, method = 'jaccard')[1]
+		beta_td_pairwise <- vegdist(x = m, binary = FALSE, method = 'jaccard')[1]				
+		beta_td_sorensen <- vegdist(x = m, binary = FALSE, method = 'bray')[1]
 	}
 	if (pd) {  
 		beta_pd_pairwise_pa <- comdist(comm = m, dis = pddist, abundance.weighted = FALSE)[1]
@@ -158,7 +165,8 @@ singlepair_beta <- function(p1, p2, td=TRUE, pd=TRUE, fd=TRUE, abundance=TRUE, p
     beta_fd_nt_pa_z <- (beta_fd_nt_pa - mean(funcnt_pa_null, na.rm=T))/sd(funcnt_pa_null, na.rm=T)
 	
 	# Concatenate results into a vector and return them.
-	c(beta_td_pairwise_pa=beta_td_pairwise_pa, beta_td_pairwise=beta_td_pairwise, beta_td_shannon=beta_td_shannon, 
+	c(beta_td_pairwise_pa=beta_td_pairwise_pa, beta_td_sorensen_pa=beta_td_sorensen_pa,
+	  beta_td_pairwise=beta_td_pairwise, beta_td_sorensen=beta_td_sorensen, beta_td_shannon=beta_td_shannon,
 	  beta_pd_pairwise_pa=beta_pd_pairwise_pa, beta_pd_pairwise_pa_z=beta_pd_pairwise_pa_z,
 	  beta_pd_nt_pa=beta_pd_nt_pa, beta_pd_nt_pa_z=beta_pd_nt_pa_z,
 	  beta_pd_pairwise=beta_pd_pairwise, beta_pd_pairwise_z=beta_pd_pairwise_z,

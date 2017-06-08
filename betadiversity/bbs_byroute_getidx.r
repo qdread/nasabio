@@ -1,6 +1,6 @@
 # Modified 15 May: add the focal plot as row 1 of the matrix!
 
-radii <- c(50000, 75000, 100000, 150000, 200000)
+radii <- c(50, 75, 100, 150, 200, 300, 400, 500) * 1000
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 r <- radii[task]
@@ -38,4 +38,4 @@ for(p in 1:nrow(fixedbbsmat_byroute)) {
 	if (p%%1000 == 0) print(p)
 }
 	
-save(all_mats, file = paste0('/mnt/research/nasabio/data/bbs/mats/newroutemat_',r,'.r'))
+save(all_mats, file = paste0('/mnt/research/nasabio/data/bbs/mats/newroutemat_',as.character(as.integer(r)),'.r'))

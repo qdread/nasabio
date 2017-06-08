@@ -136,7 +136,7 @@ bbscov <- bbsgrps_byroute
 bbscovmat <- as.matrix(bbscov)
 
 
-bbsnhb_list <- as.data.frame(bbscovmat) %>% group_by(year) %>% do(l = getNeighbors(., radius = 2e5)) 
+bbsnhb_list <- as.data.frame(bbscovmat) %>% group_by(year) %>% do(l = getNeighbors(., radius = 5e5)) 
 # Flatten this into one list
 bbsnhb_r <- do.call('c', bbsnhb_list$l)
 
