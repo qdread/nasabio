@@ -8,7 +8,8 @@ load('/mnt/research/nasabio/data/bbs/bbsworkspace_byroute.r')
 library(dplyr)
 
 # For each year and route number, get the median beta diversity within each radius.
-radii <- c(50, 75, 100, 150, 200, 300, 400, 500) # in km
+# The pairwise table was constructed to only go up to 300 km, so that is all we will have.
+radii <- c(50, 75, 100, 150, 200, 300) # in km
 years <- 1997:2016
 
 # Find the right matrix in the lookup table, and for each plot, get the median pairwise beta-diversity within each radius.

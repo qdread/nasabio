@@ -93,6 +93,7 @@ getNeighbors <- function(dat, radius) {
   idlist <- dnearneigh(coordinates(dat), 0, radius)
   distlist <- nbdists(idlist, coordinates(dat))
   dflist <- list()
+  pb <- txtProgressBar(0, length(idlist), style = 3)
   for (i in 1:length(idlist)) {
     if (any(distlist[[i]] <= radius)) {
       dflist[[i]] <- data.frame(idx = idlist[[i]], dist = distlist[[i]][distlist[[i]] <= radius])
@@ -100,7 +101,9 @@ getNeighbors <- function(dat, radius) {
     else {
       dflist[[i]] <- NA
     }
+	setTxtProgressBar(pb, i)
   }
+  close(pb)
   dflist
 }
 

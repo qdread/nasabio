@@ -34,7 +34,7 @@ beta_part <- function(m, abundance=TRUE, pairwise=FALSE) {
 	
 	# Combine and return results.
 	res <- data.frame(index = rep(c('sorensen', 'jaccard'), each = 3),
-					  divtype = c('bal','gra','tot'),
+					  divtype = c('sim','sne','tot','jtu','jne','tot'),
 					  abundance = FALSE,
 					  beta = c(beta_sorensen_presence, beta_jaccard_presence))
 	if (abundance) {
@@ -47,7 +47,10 @@ beta_part <- function(m, abundance=TRUE, pairwise=FALSE) {
 	
 	if (!pairwise) return(res)
 	res <- list(res, beta_sorensen_presence_pair, beta_jaccard_presence_pair)
-	if (abundance) res <- c(res, beta_bray_abundance_pair, beta_ruzicka_abundance_pair)
+	if (abundance) {
+		res[[4]] <- beta_bray_abundance_pair
+		res[[5]] <- beta_ruzicka_abundance_pair
+	}
 	return(res)
 }
 
