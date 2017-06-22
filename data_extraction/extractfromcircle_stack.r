@@ -3,6 +3,7 @@
 # Project: NASABIOXGEO
 # Date: 17 May 2017
 
+# Last modified: 22 Jun 2017 (changed tif to hdf)
 # Last modified: 13 Jun 2017 (add additional text extraction code to deal with extraction stats for multiple layers)
 # Last modified: 18 May 2017 (made circle into a "great" circle using the proper spherical geometry with lat-long coordinates.)
 
@@ -70,10 +71,10 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 					# write the geojson to .shp
 					writeOGR(circle_geojson, fp, paste0("temp_circle_", filetag), driver="ESRI Shapefile")
 					# define arguments for system call
-					call_args <- paste("-crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(fp, paste0("temp_circle_", filetag, ".shp")), raster_file, file.path(fp,paste0("temp_circle_extracted", filetag, ".tif")))
+					call_args <- paste("-crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(fp, paste0("temp_circle_", filetag, ".shp")), raster_file, file.path(fp,paste0("temp_circle_extracted", filetag, ".hdf")))
 					# call GDAL twice, first to clip circle, then to calculate summary statistics on it.
 					system2(command="gdalwarp", args=call_args)
-					g.info <- system2(command="gdalinfo", args=paste("-stats", file.path(fp,paste0("temp_circle_extracted", filetag, ".tif"))), stdout=TRUE) 
+					g.info <- system2(command="gdalinfo", args=paste("-stats", file.path(fp,paste0("temp_circle_extracted", filetag, ".hdf"))), stdout=TRUE) 
 					
 					# Extract stats from g.info 
 					rowids <- grep('^Band*', g.info) # header rows for each layer.

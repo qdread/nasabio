@@ -17,6 +17,11 @@ allfileids <- paste0('route_betabaselga_', rep(as.character(as.integer(c(50000, 
 x <- dir()
 allfileids <- paste0('betabaselga_', rep(as.character(as.integer(c(1000, 5000, 7500, 10000, 20000, 50000, 75000, 100000, 150000, 200000, 300000))),each=20), '_', 1:20, '.csv')
 
+x <- dir()
+allfileids <- paste0('sortedmat', 1:10000, '.r')
+
+x <- dir()
+allfileids <- paste0('newmat_300000_',1:100,'.r')
 
 isthere <- sapply(allfileids, function(i) any(grepl(i, x)))
 table(isthere)
