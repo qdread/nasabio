@@ -93,4 +93,38 @@ fia_gammadiv <- cbind(fiacoords[rep(1:nrow(fiacoords), each=14),], fia_gammadiv[
 
 write.csv(fia_gammadiv, file = '/mnt/research/nasabio/data/fia/fia_gammadiv.csv', row.names = FALSE)
 
+###################################
+# 23 Jun: compile FIA beta diversity lookup table
+
+# There are 2000 slices.
+
+n_slices <- 2000
+
+fia_betadiv <- list()
+
+pb <- txtProgressBar(0, n_slices, style = 3)
+
+for (i in 1:n_slices) {
+	load(paste0('/mnt/research/nasabio/data/fia/diversity/beta_', i, '.r'))
+	fia_betadiv[[i]] <- beta_div
+	setTxtProgressBar(pb, i)
+}
+
+close(pb)
+fia_betadiv <- do.call(c, fia_betadiv)
+
+# Results in a list of pairwise matrices.
+
+# Go through and convert the list into a list of matrices that are essentially pairwise distance matrices.
+# An array can be created for each year. route x route x beta-diversity metric. (or a list of equal size matrices)
+# Then put those arrays into a list.
+
+fia_betadiv_array <- array(NA, dim = c(nrow(fia_betadiv[[1]]), nrow(fia_betadiv[[1]]), ncol(fia_betadiv[[1]])))
+
+for (divmetric in 1:ncol(fia_betadiv[[1]]))
+	fia_betadiv_array[,,divmetric] <- do.call(cbind, lapply(fia_betadiv, '[', , divmetric))
+
+fia_betadiv_array <- lapply(fia_betadiv_array, function(x) {dimnames(x)[[3]] <- dimnames(fia_betadiv[[1]])[[2]]; x})
+
+save(fia_betadiv_array, file = '/mnt/research/nasabio/data/fia/fia_betadivtdpdfd_array.r')
 
