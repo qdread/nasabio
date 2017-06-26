@@ -23,6 +23,9 @@ allfileids <- paste0('sortedmat', 1:10000, '.r')
 x <- dir()
 allfileids <- paste0('newmat_300000_',1:100,'.r')
 
+x <- dir()
+allfileids <- paste0('overlap',1:50,'_23Jun.R')
+
 isthere <- sapply(allfileids, function(i) any(grepl(i, x)))
 table(isthere)
 

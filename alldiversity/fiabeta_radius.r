@@ -32,7 +32,12 @@ fia_beta <- fiacoords %>%
 	rowwise() %>%
 	do(neighbordivfromtable(.))
 
-fia_beta <- cbind(fiacoords, fia_beta)
+#fia_beta <- cbind(fiacoords, fia_beta)
 	
-write.csv(fia_beta, file = '/mnt/research/nasabio/data/fia/fia_beta.csv', row.names = FALSE)	
-	
+#write.csv(fia_beta, file = '/mnt/research/nasabio/data/fia/fia_beta.csv', row.names = FALSE)	
+
+load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')	
+load('/mnt/research/nasabio/data/fia/fia_betaobj.r')	
+
+fia_beta <- cbind(fiacoords[rep(1:8, times = nrow(fiacoords)),], fia_beta)
+write.csv(fia_beta, file = '/mnt/research/nasabio/data/fia/fia_beta.csv', row.names = FALSE)
