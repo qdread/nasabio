@@ -189,7 +189,7 @@ fiamap_bd_facet <- ggplot(bdmapdat_facet,
   theme(strip.background = element_blank())
 
 westcoast_scalebar <- scalebar_latlong(latmin=33.25, lonmin=-121, h=.2, d=500)
-westcoast_scalebar[[2]] <- transform(westcoast_scalebar[[2]], ylab = ylab + 0.2)
+westcoast_scalebar[[2]] <- transform(westcoast_scalebar[[2]], ylab = ylab + 0.22)
 
 fiamap_ed_facet <- ggplot(edmapdat_facet, 
                           aes(x = lon, y = lat)) +
@@ -200,7 +200,7 @@ fiamap_ed_facet <- ggplot(edmapdat_facet,
   geom_point(aes(color = sd_elev), size = 0.5) +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
-  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.75) +
+  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.5) +
   coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
   whitemaptheme + colscaleelev + panel_border(colour = 'black') +
   fia_xs + fia_ys +
@@ -217,7 +217,7 @@ fiamap_ad_facet <- ggplot(admapdat_facet,
   geom_point(aes(color = shannon), size = 0.5) +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
-  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.75) +
+  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.5) +
   coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
   whitemaptheme + colscalealpha + panel_border(colour = 'black') +
   fia_xs + fia_ys +
@@ -234,7 +234,7 @@ fiamap_gd_facet <- ggplot(gdmapdat_facet,
   geom_point(aes(color = shannon), size = 0.5) +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
-  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.75) +
+  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.5) +
   coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
   whitemaptheme + colscalegamma + panel_border(colour = 'black') +
   fia_xs + fia_ys +
@@ -262,8 +262,15 @@ goodtheme <- theme(legend.position = c(0.153,0.12), legend.key.size = unit(5, 'm
                    legend.title = element_text(size = unit(9,'mm')), legend.text = element_text(size = unit(7, 'mm')),
                    axis.text = element_blank(), axis.ticks = element_blank())
 
+leftlegtheme <- theme(legend.position = 'left', legend.key.size = unit(5, 'mm'), legend.direction = 'vertical',
+                   legend.title = element_text(size = unit(9,'mm')), legend.text = element_text(size = unit(7, 'mm')),
+                   axis.text = element_blank(), axis.ticks = element_blank())
+
 ggsave(file.path(fpfig, 'fig2_toprow_betamap.png'), fiamap_bd_facet + goodtheme, width = fwidth - 10, height = fwidth * 0.4, units = 'mm', dpi = 600)
 ggsave(file.path(fpfig, 'fig2_middlerow_elevmap.png'), fiamap_ed_facet + goodtheme, width = fwidth - 10, height = fwidth * 0.4, units = 'mm', dpi = 600)
+
+ggsave(file.path(fpfig, 'fig2_toprow2_betamap.png'), fiamap_bd_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'fig2_middlerow2_elevmap.png'), fiamap_ed_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
 ggsave(file.path(fpfig, 'fig2_bottomrow_fits.png'), fia_beta_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)), width = fwidth, height = fwidth * 0.32, units = 'mm', dpi = 600)
 
 # other three panels
@@ -277,3 +284,55 @@ pgamfia <- ggplot(fiafitdat, aes(x=radius, y=rsq)) +
   labs(x = 'Radius (km)', y = expression(R^2)) +
   scale_x_continuous(breaks=radii) 
 ggsave(file.path(fpfig, 'fig3_verybottomrow_gamfits.png'), pgamfia, width = fwidth * 0.75, height = fwidth * 0.25, units = 'mm', dpi = 600)
+
+
+#####
+
+#edited 28 june. make legend into a separate thing.
+#Extract Legend : code found on stack overflow
+g_legend<-function(a.gplot){ 
+  tmp <- ggplot_gtable(ggplot_build(a.gplot)) 
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box") 
+  legend <- tmp$grobs[[leg]] 
+  return(legend)} 
+
+legend1 <- g_legend(fiamap_bd_facet + leftlegtheme)
+legend2 <- g_legend(fiamap_ed_facet + leftlegtheme)
+
+library(grid)
+
+png(file.path(fpfig, 'legend1.png'), height=fwidth*0.25, width=20, units = 'mm', res=600)
+grid.draw(legend1)
+dev.off()
+
+png(file.path(fpfig, 'legend2.png'), height=fwidth*0.25, width=20, units = 'mm', res=600)
+grid.draw(legend2)
+dev.off()
+
+# Make plots with no legend.
+
+nolegtheme <- theme(legend.position = 'none',
+                      axis.text = element_blank(), axis.ticks = element_blank())
+
+ggsave(file.path(fpfig, 'fig2_toprow3_betamap.png'), fiamap_bd_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'fig2_middlerow3_elevmap.png'), fiamap_ed_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'fig2_bottomrow_fits.png'), fia_beta_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)), width = fwidth - 10, height = fwidth * 0.32, units = 'mm', dpi = 600)
+
+
+bplot <- ggplot_build(fia_beta_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)))
+btable <- ggplot_gtable(bplot)
+
+source('~/R/setpanelsize.r') # See https://stackoverflow.com/questions/30571198/how-achieve-identical-facet-sizes-and-scales-in-several-multi-facet-ggplot2-grap/30571289#30571289
+
+pset <- set_panel_size(p = fia_beta_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)), 
+               margin = unit(2,'mm'),
+               width = unit(26.5,'mm'),
+               height = unit(fwidth * 0.28,'mm'))
+png(file.path(fpfig, 'fig2_bottomrow_fixedsize.png'), width=fwidth, height=fwidth*0.4, units = 'mm', res = 600)
+grid.draw(pset)
+dev.off()
+
+
+####################################
+
+# Set panel sizes for each of the three rows and 

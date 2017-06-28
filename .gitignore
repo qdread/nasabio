@@ -38,3 +38,4 @@ vignettes/*.pdf
 
 # Result pdf files generated from markdown
 *.pdf
+*.html
