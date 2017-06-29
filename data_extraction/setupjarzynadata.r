@@ -3,22 +3,9 @@
 # Make list of arrays, 1 per year. Dimensions are n routes x 5 x n species
 # Also get average elevation for each segment as a covariate.
 
-load('/mnt/research/nasabio/data/bbs/bbsworkspace.r')
+load('/mnt/research/nasabio/data/bbs/bbsworkspace.r') # This has already been pre-processed to remove nocturnal birds.
 
 library(dplyr)
-
-bbsbysegment <- bbscov %>%
-  mutate(stopno = as.numeric(unlist(regmatches(Stop, gregexpr('[0-9]+',Stop)))),
-         segment = ceiling(stopno/10)) %>%
-  cbind(fixedbbsmat) 
-
-names(bbsbysegment)[8:ncol(bbsbysegment)] <- paste0('sp', 1:(ncol(fixedbbsmat)))
-
-bbsbysegment <- bbsbysegment %>%
-  group_by(year, rteNo, segment) %>%
-  summarize_at(8:ncol(bbsbysegment), .funs = function(x) any(x > 0))
-
-save(bbsbysegment, file = '/mnt/research/nasabio/data/bbs/occmod_bysegment.r')
 
 # Load bbs coordinates to get the elevations.
 bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
@@ -42,3 +29,92 @@ bbselevs[is.na(bbselevs)] <- bbselevs_ak2[is.na(bbselevs)]
 
 bbsll_elev <- cbind(bbsll, bbselevs)
 save(bbsll_elev, file = '/mnt/research/nasabio/data/bbs/occmod_elevs.r')
+
+######
+# Create objects for jags model.
+load('/mnt/research/nasabio/data/bbs/occmod_elevs.r')
+
+bbscov <- bbscov %>%
+  mutate(rteNo = as.numeric(rteNo),
+         stopno = as.numeric(unlist(regmatches(Stop, gregexpr('[0-9]+',Stop)))),
+         segment = ceiling(stopno/10)) %>%
+  left_join(bbsll_elev %>% select(rteNo, bbselevs) %>% rename(elev = bbselevs))
+
+bbsjoin <- cbind(bbscov, fixedbbsmat)  
+sp_names <- dimnames(fixedbbsmat)[[2]]
+
+names(bbsjoin)[9:ncol(bbsjoin)] <- paste0('sp', 1:(ncol(fixedbbsmat)))
+
+bbsbysegment <- bbsjoin %>%
+  group_by(year, rteNo, elev, segment) %>%
+  summarize_at(9:ncol(bbsjoin), .funs = function(x) any(x > 0))
+
+#save(bbsbysegment, file = '/mnt/research/nasabio/data/bbs/occmod_bysegment.r')
+#load('/mnt/research/nasabio/data/bbs/occmod_bysegment.r')
+
+make_bbs_array <- function(df) {
+  siteids <- unique(df$rteNo)
+  res <- array(NA, dim = c(length(siteids), 5, ncol(df) - 3))
+  for (site in 1:length(siteids)) {
+    for (segment in 1:5) {
+      res[site, segment, ] <- as.logical(df[df$rteNo == siteids[site] & df$segment == segment, -(1:3)])
+    }
+  }
+  return(res)
+}
+
+bbs_arrays <- bbsbysegment %>%
+  group_by(year) %>%
+  do(x = make_bbs_array(.))
+
+# By route, for initial values.
+bbsbyroute <- bbsjoin %>%
+  group_by(year, rteNo) %>%
+  summarize_at(9:ncol(bbsjoin), .funs = function(x) any(x > 0))
+
+df2mat <- function(x) as.matrix(x[,3:ncol(x)])
+
+# Make this into a list.
+bbsbyroutelist <- bbsbyroute %>%
+  ungroup %>% group_by(year) %>%
+  do(x = df2mat(.))
+
+df2elevvector <- function(x) as.numeric(x$elev)
+
+# Make elevations into a list as well.
+bbselevvectors <- bbsjoin %>%
+  group_by(year, rteNo) %>%
+  do(x = df2elevvector(.))
+
+#save(bbs_arrays, file = '/mnt/research/nasabio/data/bbs/occmod_arrays.r')
+
+#load('/mnt/research/nasabio/data/bbs/occmod_bysegment.r')
+#load('/mnt/research/nasabio/data/bbs/occmod_elevs.r')
+#load('/mnt/research/nasabio/data/bbs/occmod_arrays.r')
+
+# For the initial values we need the route observed presence/absences.
+# Probably the same as the bbsmat byroute but I will recreate it here just to make sure that everything lines up.
+#bbsbyroute <- cbind(bbscov, fixedbbsmat)
+
+#names(bbsbyroute)[6:ncol(bbsbyroute)] <- paste0('sp', 1:(ncol(fixedbbsmat)))
+
+bbsbyroute <- bbsbyroute %>%
+  group_by(year, rteNo) %>%
+  summarize_at(6:ncol(bbsbyroute), .funs = function(x) any(x > 0))
+
+df2mat <- function(x) as.matrix(x[,3:ncol(x)])
+
+# Make this into a list.
+bbsbyroutelist <- bbsbyroute %>%
+  ungroup %>% group_by(year) %>%
+  do(x = df2mat(.))
+
+# Match elevations with routes.
+# We need a separate elevation vector for each year.
+bbselevvectors <- bbscov %>% left_join(bbsll_elev %>% select(rteNo, bbselevs) %>% rename(elev = bbselevs)) %>%
+  group_by(year) %>%
+  do(x = function(.) as.numeric(.$elev))
+
+# Save route ids and species ids to vectors, include in the final object so that no information gets mixed up.
+
+
