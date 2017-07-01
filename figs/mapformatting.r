@@ -273,6 +273,33 @@ ggsave(file.path(fpfig, 'fig2_toprow2_betamap.png'), fiamap_bd_facet + leftlegth
 ggsave(file.path(fpfig, 'fig2_middlerow2_elevmap.png'), fiamap_ed_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
 ggsave(file.path(fpfig, 'fig2_bottomrow_fits.png'), fia_beta_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)), width = fwidth, height = fwidth * 0.32, units = 'mm', dpi = 600)
 
+# For appendix: alpha and gamma
+fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/conceptual_paper/'
+ggsave(file.path(fpfig, 'SuppFig_alphadiv_maps.png'), fiamap_ad_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'SuppFig_gammadiv_maps.png'), fiamap_gd_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
+
+# For appendix: regression plots with alpha and gamma.
+
+fia_alpha_plot <- ggplot(ad %>% subset(radius %in% radii), aes(x = sd_elev, y = shannon)) +
+  geom_point(alpha = 0.05, size = 0.25) +
+  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  facet_grid(. ~ radius) +
+  scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+  theme(strip.background = element_blank(), strip.text = element_blank()) +
+  panel_border(colour='black') +
+  scale_y_continuous(name = 'Taxonomic alpha-diversity', expand = c(0,0)) +
+  labs(x = 'Standard deviation of elevation')
+
+fia_gamma_plot <- ggplot(gd %>% subset(radius %in% radii), aes(x = sd_elev, y = shannon)) +
+  geom_point(alpha = 0.05, size = 0.25) +
+  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  facet_grid(. ~ radius) +
+  scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+  theme(strip.background = element_blank(), strip.text = element_blank()) +
+  panel_border(colour='black') +
+  scale_y_continuous(name = 'Taxonomic gamma-diversity', expand = c(0,0)) +
+  labs(x = 'Standard deviation of elevation')
+
 # other three panels
 pgamfia <- ggplot(fiafitdat, aes(x=radius, y=rsq)) + 
   stat_smooth(method = lm, formula = y ~ x + I(x^2), se=FALSE, size=1, color='red') +
@@ -327,10 +354,27 @@ source('~/R/setpanelsize.r') # See https://stackoverflow.com/questions/30571198/
 pset <- set_panel_size(p = fia_beta_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)), 
                margin = unit(2,'mm'),
                width = unit(26.5,'mm'),
-               height = unit(fwidth * 0.28,'mm'))
-png(file.path(fpfig, 'fig2_bottomrow_fixedsize.png'), width=fwidth, height=fwidth*0.4, units = 'mm', res = 600)
+               height = unit(fwidth * 0.22,'mm'))
+png(file.path(fpfig, 'fig2_bottomrow_fixedsize2.png'), width=fwidth, height=fwidth*0.33, units = 'mm', res = 600)
 grid.draw(pset)
 dev.off()
+
+pseta <- set_panel_size(p = fia_alpha_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)), 
+                       margin = unit(2,'mm'),
+                       width = unit(26.5,'mm'),
+                       height = unit(fwidth * 0.22,'mm'))
+png(file.path(fpfig, 'SuppFig_alphadiv_fits.png'), width=fwidth, height=fwidth*0.33, units = 'mm', res = 600)
+grid.draw(pseta)
+dev.off()
+
+psetg <- set_panel_size(p = fia_gamma_plot + theme(axis.text = element_text(size = 9), axis.title = element_text(size=10.5)), 
+                       margin = unit(2,'mm'),
+                       width = unit(26.5,'mm'),
+                       height = unit(fwidth * 0.23,'mm'))
+png(file.path(fpfig, 'SuppFig_gammadiv_fits.png'), width=fwidth, height=fwidth*0.34, units = 'mm', res = 600)
+grid.draw(psetg)
+dev.off()
+
 
 
 ####################################

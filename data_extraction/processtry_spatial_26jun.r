@@ -123,3 +123,27 @@ try_byobsmean <- as.data.frame(lapply(try_byobsmean, numstring2num))
 try_location_trait_byobs <- left_join(try_locations_wide, try_byobsmean)
 
 write.csv(try_location_trait_byobs, file = 'X:/data/fia/try_location_trait_byobs.csv', row.names = FALSE)
+
+
+######################################
+# 30 June 2017: Generate different trait datasets with and without missing values to test imputation methods.
+
+traits_to_use <- c(11, 42, 45, 58, 60)
+traits_reduced <- try_location_trait_byobs[,c(1:5, traits_to_use)]
+names(traits_reduced)[6:10] <- c('specific_leaf_area', 'plant_height', 'plant_lifespan', 'rooting_depth', 'seed_dry_mass')
+
+# Use only individuals that have at least 1 of those traits measured.
+userows <- apply(traits_reduced, 1, function(x) any(!is.na(x[6:10])))
+
+traits_individual <- traits_reduced[userows,]
+
+# Species means
+traits_speciesmean <- traits_individual %>%
+  group_by(AccSpeciesName) %>%
+  summarize_at(4:10, mean, na.rm = TRUE)
+
+write.csv(traits_individual, file = 'X:/jay/tree_data/traits_individual.csv', row.names=F)
+write.csv(traits_speciesmean, file = 'X:/jay/tree_data/traits_speciesmean.csv', row.names=F)
+
+# No missing values
+traits_nomiss <- traits_speciesmean[,c(1:5,8)] %>% filter(complete.cases(.))

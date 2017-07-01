@@ -55,10 +55,10 @@ bbsbysegment <- bbsjoin %>%
 
 make_bbs_array <- function(df) {
   siteids <- unique(df$rteNo)
-  res <- array(NA, dim = c(length(siteids), 5, ncol(df) - 3))
+  res <- array(NA, dim = c(length(siteids), 5, ncol(df) - 4))
   for (site in 1:length(siteids)) {
     for (segment in 1:5) {
-      res[site, segment, ] <- as.logical(df[df$rteNo == siteids[site] & df$segment == segment, -(1:3)])
+      res[site, segment, ] <- as.numeric(df[df$rteNo == siteids[site] & df$segment == segment, -(1:4)])
     }
   }
   dimnames(res) <- list(siteids, 1:5, 1:dim(res)[3])
@@ -75,8 +75,9 @@ bbsbyroute <- bbsjoin %>%
   summarize_at(9:ncol(bbsjoin), .funs = function(x) as.numeric(any(x > 0)))
 
 df2mat <- function(x) {
-	res <- as.matrix(x[,3:ncol(x)])
+	res <- as.matrix(x[, !names(x) %in% c('year','rteNo')])
 	dimnames(res)[[1]] <- as.character(x$rteNo)
+	return(res)
 }
 
 # Make this into a list of matrices.
@@ -84,9 +85,10 @@ bbsbyroutelist <- bbsbyroute %>%
   ungroup %>% group_by(year) %>%
   do(x = df2mat(.))
 
-df2elevvector <- function(x) {
-	res <- as.numeric(x$elev)
-	names(res) <- as.character(x$rteNo)
+df2elevvector <- function(df) {
+	siteids <- unique(df$rteNo)
+	res <- as.numeric(df$elev[match(siteids, df$rteNo)])
+	names(res) <- as.character(siteids)
 	res
 }
 
