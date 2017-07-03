@@ -1,0 +1,232 @@
+---
+title: "Occupancy Model Test Run"
+author: "Quentin D. Read"
+date: "July 3, 2017"
+output: pdf_document
+---
+
+We have been discussing the use of occupancy models in the BBS data. The work of Marta Jarzyna and Walter Jetz has shown that the surveying protocol of BBS doesn't detect all species with equal probability. That might be a problem for FD and PD because the species that are hard to detect are non-random with respect to phylogeny. Marta Jarzyna wrote code in JAGS to fit occupancy models to the BBS data. The model takes the *observed presence/absence* of each bird species at each site and uses them to predict the *true occupancy* for each bird species at each site. In this document, I briefly describe her model, which is described in more detail in their Global Change Biology paper, and then run it on a small subset of our data.
+
+# Description of the model
+
+Each BBS route consists of 50 point counts (stops) along a transect. The model assumes that each segment of 10 stops is an independent observation, so there are 5 replicate observations of bird presence and absence for each species at each site. The model also assumes that the true probability of occurrence of each species at each site is a function of the site's elevation in meters. The model estimates the true occurrence of each species at each site. Species that are observed at a higher proportion of the 5 segments of a given route are considered to be easier to detect, if truly present. The model is fit simultaneously for all the sites in a single year of BBS observations, to account for how the interaction between species identity and site characteristics influences the detection probability for each species. The hierarchical model is run in JAGS. We get a median posterior estimate of the true occupancies, which is a binary matrix of 0's and 1's. In addition, we can get a mean occupancy for each species across all sites. Both of these can be compared with the raw data.
+
+# Example model fit
+
+I transformed all our BBS data from 1997-2016 into a format that works with Jarzyna's existing JAGS code, so we can simply run the code out of the box if we want. Given the huge size of the BBS dataset, I haven't fit the model for all our data yet. However I did fit it for a very small toy dataset, consisting of 50 sites in the year 1997. It takes a few hours to fit the model with three MCMC chains, so you can imagine how long it would take for the several thousand sites in a full year's dataset. The number of parameters to estimate is the number of sites * 600 species. If we decide to run this on the full dataset, I would parallelize the computations which would speed things up.
+
+Below is the code for setting up the input data and fitting the model, including the JAGS model as a text string for people who are interested in the specifics of the model. I copied it directly from Marta's code except for correcting a couple of typos.
+
+```{r, eval=FALSE}
+# Use the arrays and initial value matrices generated in a different script.
+# Run separately for each year. Try to run in parallel if possible.
+
+rm(list = ls())
+library(dplyr)
+load('C:/Users/Q/Dropbox/projects/nasabiodiv/occmod_workspace.r')
+
+yr <- 1997 # Test year: 1997
+
+###Combine input data for 1997: detection array and covariate information
+X <- bbs_arrays$x[[which(bbs_arrays$year == 1997)]]
+elev <- bbselevvectors$x[[which(bbselevvectors$year == 1997)]]
+
+# Take a random sample of 50 sites to use for test data, to speed up the model fitting
+sites_to_sample <- 50
+
+set.seed(5156)
+elev_subset <- sample(elev[!is.na(elev)], sites_to_sample)
+X_subset <- X[names(elev_subset), ,]
+
+# Create input data list, scaling the elevation predictor.
+sp.data <- list(nspec=dim(X_subset)[3], 
+                nsite=dim(X_subset)[1], 
+                nrep=dim(X_subset)[2], 
+                X=X_subset, 
+                elev=as.numeric(scale(elev_subset)))
+
+###Specify the parameters to be monitored
+sp.params <- c("Z", "occ_sp")
+#Z matrix will store true prob of occurrence
+#additionally, occ_sp will store mean occupancy across all sites for all species
+
+###Specify the initial values
+# Latent variable Z, true occurrence, is initialized with the observed occurrences
+Zobs <- bbsbyroutelist$x[[which(bbsbyroutelist$year == 1997)]]
+Zobs_subset <- Zobs[names(elev_subset), ]
+
+# Function to specify initial values.
+sp.inits <- function(nspec, Zobs) {
+  list(psi.mean=runif(1,0.001,0.99), 
+       theta.mean=runif(1,0.001,0.99),
+       u=rnorm(nspec), 
+       v=rnorm(nspec),
+       Z = Zobs,
+       alpha1=rnorm(nspec))
+}
+
+#JAGS model
+modelString <- "
+    model {
+    
+    #Prior distributions on the community level occupancy and detection covariates
+    psi.mean ~ dunif(0.001,0.99) #vague prior for the hyperparameter 
+                                 #of the community-level occupancy covariates
+    a <- log(psi.mean) - log(1-psi.mean)
+    
+    theta.mean ~ dunif(0.001,0.99) #vague prior for the hyperparameter 
+                                   #of the community-level detection covariates
+    b <- log(theta.mean) - log(1-theta.mean)
+    mu.alpha1 ~ dnorm(0, 0.01) #vague Normal prior for the community-level 
+                               #habitat (alphas) and sampling (betas) covariates
+    
+    
+    tau1 ~ dgamma(10,1)
+    tau2 ~ dgamma(10,1)
+    
+    tau.alpha1 ~ dgamma(10,1)
+    
+    rho ~ dunif(-0.99,0.99)
+    var.v <- tau2 /(1.-pow(rho,2))
+    
+    sigma1 <- 1/sqrt(tau1)
+    sigma2 <- 1/sqrt(tau2)
+    
+    for (i in 1:nspec) {
+    
+    #Prior distributions for the occupancy and detection covariates for each species 
+    u[i] ~ dnorm(a, tau1)
+    
+    mu.v[i] <- b + (rho*sigma2 /sigma1)*(u[i]-a)
+    v[i] ~ dnorm(mu.v[i], var.v)
+    
+    alpha1[i] ~ dnorm(mu.alpha1, tau.alpha1)
+    
+    
+    #Estimate the occupancy probability (latent Z matrix) for each species 
+    #at each point (i.e., route or site)
+    for (j in 1:nsite) {
+    logit(psi[j,i]) <- u[i] + alpha1[i]*elev[j] 
+    mu.psi[j,i] <- psi[j,i]
+    Z[j,i] ~ dbin(psi[j,i], 1) #Z is generally not observed with certainty, instead
+    #we observed data theta[i,j,k] for species i at site j during sampling period k
+    
+    #Estimate the species specific detection probability 
+    #for every rep at each point where the species occurs (Z=1)
+    # Q edited the line below to say nrep instead of nrep[j]
+    for (k in 1:nrep) {  
+    logit(theta[j,k,i]) <- v[i] 
+    mu.theta[j,k,i] <- theta[j,k,i]*Z[j,i]
+    X[j,k,i] ~ dbin(mu.theta[j,k,i], 1) #X is the 3D array of dependent variable: 
+    #The detection/non-detection data is defined in a three dimensional
+    #array X where the first dimension, j, is the point; the second
+    #dimension, k, is the rep; and the last dimension, i, is the species.
+    
+    } } }
+    
+    #Estimation of species occupancy (averaged across all the sites)
+    for(i in 1:nspec) {
+    occ_sp[i] <- sum(Z[1:nsite,i])/nsite
+    }
+    
+    #End model specification
+    }
+    "
+
+##### FIT MODEL
+library(rjags)
+
+# Set sampling options: number of burn-in steps, 
+# number of sampling steps, and how much to thin
+# Use Jarzyna's settings
+n_burn <- 500
+n_thin <- 10
+n_iter <- 20000
+
+# Compile and initialize model
+ocmod <- jags.model(file = textConnection(modelString), 
+                    inits = sp.inits(nspec = dim(X_subset)[3], Zobs = Zobs_subset), 
+                    data = sp.data, n.chains = 3)
+
+# Do MCMC sampling including burn-in steps
+# Even for the toy dataset with 10 sites, this takes a long time (non-parallel)
+# For 50 sites, it takes 2 or 3 hours.
+update(ocmod, n.iter = n_burn)
+out <- coda.samples(ocmod, n.iter = n_iter, variable.names = sp.params, thin = n_thin)
+
+# Burn-in already removed, so concatenate each of the 3 chains to get the posterior.
+out.mcmc <- as.mcmc(do.call(rbind, out))
+str(out.mcmc)
+
+# Create data frame with summary statistics for the output.
+# There are 6000 posterior samples of 30753 parameters here
+# 30753 = 603 species * (50 sites + 1)
+# each species by site has an occupancy estimate (Z) 
+# plus a mean occupancy across sites (occ_sp), hence the 50+1.
+
+summ_stats <- function(x) {
+  res <- c(mean(x), sd(x), quantile(x, probs = c(0.025, 0.5, 0.975)))
+  names(res) <- c('mean','sd','q025','median','q975')
+  return(res)
+}
+ 
+output <- t(apply(out.mcmc, 2, summ_stats))
+
+
+```
+
+\newpage
+# Figures showing results of the occupancy model
+
+I fit the occupancy model with 50 sites from 1997. I believe that the more sites we use, the more differences will show up between observed and predicted occurrences. The reason that the 50-site subset doesn't have much difference between observed and modeled occurrence is that many species were observed 0 times across all 50 sites, so it's impossible for the model to predict any true occupancies for those species. With a full dataset, almost every species will be observed at least at some sites. My next plan is to run this for a full year with ~2000 sites, at which point I will update the data.
+
+The figures below show only differences in mean occupancy across all sites for each species (each species actually has 50 different predicted occupancy estimates, but for visualization purposes I'm just showing the mean). The species that tend to have a higher discrepancy between their observed and predicted abundances are the ones with intermediate abundances. I've shown it both as a scatterplot with jittered points and as a histogram. To summarize the results, **337 species were present across the 50 sites. The occupancy model predicted that 96 of them were truly present in at least one site where they weren't detected, but the other 241 were predicted to have been detected correctly everywhere they were truly present. On average, each species went undetected at 0.54 sites, according to the model.**
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=5, fig.width=5}
+# Compare the observed values with the occupancy values
+load('C:/Users/Q/Dropbox/projects/nasabiodiv/code/jagsoutput_occ_toydata.r')
+load('C:/Users/Q/Dropbox/projects/nasabiodiv/code/jagsoutput_observations_toydata.r')
+
+# Function to convert the MCMC summary output into a matrix with the same dimensions as the observed data
+mcout2matrix <- function(mc) {
+  library(stringr)
+  dn <- dimnames(mc)[[1]]
+  varn <- unlist(str_extract_all(dn, "[_[:alpha:]]+")) # letters or the underscore character.
+  nums <- str_extract_all(dn, "[0-9]+")
+  rowidx <- sapply(nums, function(x) as.integer(x[1]))
+  colidx <- sapply(nums, function(x) as.integer(x[2]))
+  n_sites <- max(rowidx)
+  n_spp <- max(colidx, na.rm=TRUE)
+  Z <- matrix(0, nrow = n_sites, ncol = n_spp)
+  occ_sp <- numeric(n_spp)
+  for (i in 1:nrow(mc)) {
+    if (varn[i] == 'Z') Z[rowidx[i], colidx[i]] <- output[i, 'median']
+    if (varn[i] == 'occ_sp') occ_sp[rowidx[i]] <- output[i, 'median']
+  }
+  return(list(Z=Z, occ_sp=occ_sp))
+}
+
+outmat <- mcout2matrix(output)
+
+# Compare mean occupancy across the ten sites with mean observed presence.
+meanobs <- apply(Zobs_subset, 2, function(x) sum(x)/length(x))
+
+obspreddat <- data.frame(obs = meanobs, pred = outmat$occ_sp)
+obspreddat <- subset(obspreddat, obs > 0)
+
+library(cowplot)
+ggplot(obspreddat, aes(x=obs, y=pred, color=obs==pred)) +
+  geom_jitter() +
+  scale_color_discrete(name = 'Any change?', labels=c('no (241 species)','yes (96 species)')) +
+  theme(legend.position=c(0.2,0.8)) +
+  labs(x = 'Observed mean occupancy', y = 'Predicted mean occupancy')
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.height=5, fig.width=5}
+# Histogram of changes in occupancy.
+ggplot(obspreddat, aes(x = pred - obs)) + geom_histogram(binwidth = 0.02) +
+  scale_y_continuous(expand = c(0,0)) +
+  labs(x = 'Predicted - observed mean occupancy')
+
+```
+
