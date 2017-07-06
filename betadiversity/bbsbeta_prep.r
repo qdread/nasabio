@@ -24,7 +24,7 @@ slice <- combos$slice[task]
 # 2. Load community matrix.
 
 bbsspp <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/specieslist.csv', stringsAsFactors = FALSE)
-load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2015.r') # Load fixed bbsmat. This loads both byroute and bystop.
+load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2016.r') # Load fixed bbsmat. This loads both byroute and bystop.
 # Quick correction to fix two birds that aren't in the phylogeny. Just get rid of the eastern yellow wagtail since it's probably only in Alaska anyway.
 fixedbbsmat[, which(sppids == 5739)] <- fixedbbsmat[, which(sppids == 5738)] + fixedbbsmat[, which(sppids == 5739)]
 fixedbbsmat[, which(sppids == 5738)] <- 0
@@ -106,6 +106,13 @@ fixedbbsmat <- fixedbbsmat[has_coords & rs != 0, !(dimnames(fixedbbsmat)[[2]] %i
 
 bbsalbers <- bbsalbers[has_coords & rs != 0, ]
 bbsgrps <- bbsgrps[has_coords & rs != 0, ]
+
+#### edit on 5 july: make the matrix including the rows that don't have coords under the old way.
+# fixedbbsmat <- fixedbbsmat[rs != 0, !(dimnames(fixedbbsmat)[[2]] %in% nocturnalbirds) & ns != 0]
+# bbsalbers <- bbsalbers[rs != 0, ]
+# bbsgrps <- bbsgrps[rs != 0, ]
+# bbscov <- cbind(bbsgrps, bbsalbers)
+# save(bbscov, fixedbbsmat, file = '/mnt/research/nasabio/data/bbs/bbsworkspace2016.r')
 
 # 6. For the given radius, get pairwise distances among stops and the list of all neighbors. Calculation can be sped up by limiting stop-level beta-diversity to stops that share a route.
 

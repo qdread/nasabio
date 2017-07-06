@@ -4,7 +4,7 @@
 # Also get average elevation for each segment as a covariate.
 # Version to run remotely on hpcc.
 
-load('/mnt/research/nasabio/data/bbs/bbsworkspace.r') # This has already been pre-processed to remove nocturnal birds.
+load('/mnt/research/nasabio/data/bbs/bbsworkspace2016.r') # This has already been pre-processed to remove nocturnal birds.
 
 library(dplyr)
 
