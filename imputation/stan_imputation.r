@@ -157,10 +157,19 @@ n_cores <- parallel::detectCores() # 4 on Q's machine
 rstan_options(auto_write = TRUE)
 options(mc.cores = n_cores) 
 
-n_chains <- 4
-n_iter <- 9999
-n_warmup <- 1000
-n_thin <- 10
+### set to very low for testing purposes. 
+n_chains <- 2
+n_iter <- 1000 
+n_warmup <- 100
+n_thin <- 1
+
+### Here is a better set of options when we fit the full model.
+# n_chains <- 4
+# n_iter <- 99999
+# n_warmup <- 10000
+# n_thin <- 10
+
+# Here, we can write a function to initialize each chain with different values, because it's bad to initialize all chains with 1 for every parameter.
 
 # Step 4: Fit model -------------------------------------------------------
 
@@ -171,16 +180,26 @@ trait_fit <- sampling(trait_model, data = trait_data_list_test, chains = n_chain
 # Extract summary information on parameters
 summ_fit <- summary(trait_fit)
 
-# Display the summary info for some of the parameters
-summ_fit$summ['insert parameter names here',]
+# Display the summary info for some of the parameters: beta only
+summ_fit$summary[grep('beta', row.names(summ_fit$summary)),]
+
+head(summ_fit$summary)
+
 
 # Diagnostic plots to make sure the models converged
 stan_diag(trait_fit)
-traceplot(trait_fit, pars=c('insert parameter names here'))
+
+# Must load bayesplot because ggplot2 is no longer compatible with rstan.
+library(bayesplot)
+draws <- as.array(trait_fit, pars="beta")
+mcmc_trace(draws)
+
 
 
 # Step 6: Fit model with some of Y missing --------------------------------
 
 # This should impute the missing values in Y.
+missing_data_test <- trait_data_list_test
+missing_data_test$Y[1] <- NA
 
-
+trait_fit_missing <- sampling(trait_model, data = missing_data_test, chains = 1, iter = 100, warmup = 100, thin = 1, init = 1) # FAILS
