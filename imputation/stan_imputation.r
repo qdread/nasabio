@@ -5,7 +5,7 @@
 
 library(rstan)
 
-trait_model <- stanc(file = 'imputation/phylo_spatial_trait.stan') # Read from GitHub.
+trait_model <- stan_model(file = 'imputation/phylo_spatial_trait.stan') # Read from GitHub.
 
 # Step 2: Create list containing m,n,N,p,Y,X,Z,and R for model fit --------
 
@@ -69,7 +69,23 @@ make_Z <- function(traitdat) {
 # Define function to make X (Jay is writing)
 
 make_X <- function(preds, m) {
-  ###insert code here
+  preds <- as.matrix(preds)
+  p = ncol(preds) 
+  n = nrow(preds)
+  #X <- matrix(nrow=(m*nrow(preds)),ncol = m*(p+1), byrow = TRUE)
+  bigList <- list()
+  for(k in 1:n){
+    mlist <- list()
+    for(i in 1:m){
+      
+      X <- matrix(0,nrow=m,ncol=p+1) 
+      X[i,] <- c(1,as.numeric(preds[k,]))
+      mlist[[length(mlist) + 1]] <- X
+    }
+    ilist <- do.call(cbind,mlist)
+    bigList[[k]] <- ilist
+  }
+  return(do.call(rbind,bigList))
 }
 
 # Y is vector of trait values by individuals/species, all strung into one long vector
@@ -86,6 +102,9 @@ make_Y <- function(traitdat) {
 # Define function to make data list for stan model
 
 make_standatalist <- function(traitdat, predictors, phy, evolution_model = c('brownian','ou')) {
+  require(reshape2)
+  require(Matrix)
+  traitdat_melted <- melt(traitdat, id.vars = 'species', variable.name = 'trait')
   
   splist <- unique(traitdat$species)
   
@@ -102,15 +121,18 @@ make_standatalist <- function(traitdat, predictors, phy, evolution_model = c('br
   
   R <- R[splist, splist] # Sort matrix so that it's in the same order as the trait and environment data frames.
   
-  m <- length(unique(traitdat$trait))
-  X <- make_X(predictors, m)
-  Z <- make_Z(traitdat)
+  # Force R to be symmetric
+  R <- as.matrix(forceSymmetric(R, "U"))
+  
+  m <- length(unique(traitdat_melted$trait))
+  X <- make_X(predictors[,-1], m)
+  Z <- make_Z(traitdat_melted)
   Y <- make_Y(traitdat)
   
   datlist <- list(m = m,
                   n = length(unique(traitdat$species)),
-                  N = nrow(traitdat),
-                  p = ncol(X) + 1,
+                  N = nrow(traitdat_melted)/m,
+                  p = ncol(predictors), # this only works out because predictors has 1 extra column for species, then we add 1 to p for the intercept
                   X = X,
                   Y = Y,
                   Z = Z,
@@ -119,18 +141,46 @@ make_standatalist <- function(traitdat, predictors, phy, evolution_model = c('br
   return(datlist)
 }
 
-trait_data_list <- make_standatalist(traitdat = species_traits, phy = species_phylogeny, evolution_model = 'ou')
+trait_data_list <- make_standatalist(traitdat = species_traits, predictors = species_covariates, phy = species_phylogeny, evolution_model = 'ou')
 
+trait_data_list_test <- make_standatalist(traitdat = species_traits[1:5,], predictors = species_covariates[1:5,1:3], phy = drop.tip(species_phylogeny, species_phylogeny$tip.label[!species_phylogeny$tip.label %in% species_traits$species[1:5]]), evolution_model = 'ou')
 
 # Step 3: Set model fitting options ---------------------------------------
 
+# These numbers can be changed. If convergence is happening easily, we can reduce the number of chains and the number of iterations. 
+# If it is not converging, we can increase the number of iterations.
+# If that still doesn't help with convergence, we will have to change the prior specifications inside the model.
+# If that STILL doesn't work, we will have to change the actual parameterization of the model (let's hope that isn't necessary).
 
+n_cores <- parallel::detectCores() # 4 on Q's machine
 
+rstan_options(auto_write = TRUE)
+options(mc.cores = n_cores) 
+
+n_chains <- 4
+n_iter <- 9999
+n_warmup <- 1000
+n_thin <- 10
 
 # Step 4: Fit model -------------------------------------------------------
 
-
+trait_fit <- sampling(trait_model, data = trait_data_list_test, chains = n_chains, iter = n_iter, warmup = n_warmup, thin = n_thin, init = 1)
 
 # Step 5: Examine diagnostic plots and metrics ----------------------------
+
+# Extract summary information on parameters
+summ_fit <- summary(trait_fit)
+
+# Display the summary info for some of the parameters
+summ_fit$summ['insert parameter names here',]
+
+# Diagnostic plots to make sure the models converged
+stan_diag(trait_fit)
+traceplot(trait_fit, pars=c('insert parameter names here'))
+
+
+# Step 6: Fit model with some of Y missing --------------------------------
+
+# This should impute the missing values in Y.
 
 

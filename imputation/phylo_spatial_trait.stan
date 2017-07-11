@@ -8,10 +8,10 @@ data {
 	int N;			// Number of individuals across all species
 	int p;			// Number of predictor variables + 1 (includes intercept)
 	
-	vector[N] Y;		// Trait vector, ordered by 1...m traits within each individual within each species
+	vector[m*N] Y;		// Trait vector, ordered by 1...m traits within each individual within each species
 	matrix[m*N, m*p] X;	// Predictor matrix
 	matrix[m*N, m*n] Z;	// Design matrix to map individuals to the proper species
-	matrix[n, n] R;		// Phylogenetic variance-covariance matrix
+	cov_matrix[n] R;		// Phylogenetic variance-covariance matrix
 }
 
 transformed data {
@@ -28,23 +28,23 @@ parameters {
 	vector[m*p] beta;			// Vector of coefficients on environmental predictors (fixed effects)
 	vector[m*n] alpha;			// Vector of random effects
 	
-	matrix[m, m] Sigma;			// Trait variance-covariance matrix, to be estimated.
+	cov_matrix[m] Sigma;			// Trait variance-covariance matrix, to be estimated.
 	vector[m] sigma;			// Hyperparameter on error term--different error for each trait.
 }
 
 transformed parameters {
 	
-	matrix[m*N, m*N] epsilon;	// Error term. Each individual gets its own error for now. Should have a diagonal of all sigma^2s.
+	cov_matrix[m*N] epsilon;	// Error term. Each individual gets its own error for now. Should have a diagonal of all sigma^2s.
 	vector[m*N] epsilon_diag;	// Diagonal of epsilon matrix.	
 	vector[m] sigma2;			
 
-	matrix[m*n, m*n] lambda;	// Kronecker product of Sigma (trait vcov matrix) and R (phylogenetic vcov matrix)
+	cov_matrix[m*n] lambda;		// Kronecker product of Sigma (trait vcov matrix) and R (phylogenetic vcov matrix)
 	
 	for (i in 1:m)
 		sigma2[i] = sigma[i]^2;
 	
 	for (i in 1:m)
-		epsilon_diag[(1 + (N*(i-1))):(N + (N*(i-1)))] = sigma2;
+		epsilon_diag[(1 + (N*(i-1))):(N + (N*(i-1)))] = rep_vector(sigma2[i], N);
 
 	epsilon = diag_matrix(epsilon_diag);
 	
