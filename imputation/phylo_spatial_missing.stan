@@ -8,8 +8,8 @@ data {
 	int n;			// Number of species
 	int N;			// Number of individuals across all species
 	int p;			// Number of predictor variables + 1 (includes intercept)
-	int n_obs;		// Number of values in Y that are observed (not missing)
-	int n_mis;		// Number of values in Y that are missing
+	int N_obs;		// Number of values in Y that are observed (not missing)
+	int N_mis;		// Number of values in Y that are missing
 					// ***NOTE: n_obs + n_mis must be m*N !!!
 	
 	vector[n_obs] Y_obs;	// Trait vector, ordered by 1...m traits within each individual within each species. Shortened by the number of missing values.
@@ -17,8 +17,8 @@ data {
 	matrix[m*N, m*n] Z;		// Design matrix to map individuals to the proper species
 	cov_matrix[n] R;		// Phylogenetic variance-covariance matrix
 	
-	int<lower = 1, upper = n_obs + n_mis> index_obs[n_obs];		// Indexes of observed values
-	int<lower = 1, upper = n_obs + n_mis> index_mis[n_mis];		// Indexes of missing values
+	int<lower = 1, upper = N_obs + N_mis> index_obs[N_obs];		// Indexes of observed values
+	int<lower = 1, upper = N_obs + N_mis> index_mis[N_mis];		// Indexes of missing values
 }
 
 transformed data {
@@ -38,7 +38,7 @@ parameters {
 	cov_matrix[m] Sigma;		// Trait variance-covariance matrix, to be estimated.
 	vector[m] sigma;			// Hyperparameter on error term--different error for each trait.
 	
-	vector[n_mis] Y_mis;		// Missing values as parameters to be estimated.
+	vector[N_mis] Y_mis;		// Missing values as parameters to be estimated.
 }
 
 transformed parameters {
@@ -76,7 +76,7 @@ model {
 	Y ~ multi_normal(X * beta + Z * alpha, epsilon);
 	// Priors
 	alpha ~ multi_normal(zero_mn, lambda);	
-	beta ~ normal(0, 0.0001);
+	beta ~ normal(0, 10);
 	Sigma ~ inv_wishart(m + 1, 0.01 * Im);
 	sigma ~ uniform(0, 100);
 }

@@ -120,8 +120,8 @@ make_standatalist_missing <- function(traitdat, predictors, phy, evolution_model
   index_obs <- which(!is.na(Y))
   index_mis <- which(is.na(Y))
   Y_obs <- Y[index_obs]
-  n_obs <- length(index_obs)
-  n_mis <- length(index_mis)
+  N_obs <- length(index_obs)
+  N_mis <- length(index_mis)
   
   datlist <- list(m = m,
                   n = length(unique(traitdat$species)),
@@ -133,8 +133,8 @@ make_standatalist_missing <- function(traitdat, predictors, phy, evolution_model
                   R = R,
                   index_obs = index_obs,
                   index_mis = index_mis,
-                  n_obs = n_obs,
-                  n_mis = n_mis)
+                  N_obs = N_obs,
+                  N_mis = N_mis)
   
   return(datlist)
 }
