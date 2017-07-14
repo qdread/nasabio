@@ -12,7 +12,7 @@ data {
 	int N_mis;		// Number of values in Y that are missing
 					// ***NOTE: n_obs + n_mis must be m*N !!!
 	
-	vector[n_obs] Y_obs;	// Trait vector, ordered by 1...m traits within each individual within each species. Shortened by the number of missing values.
+	vector[N_obs] Y_obs;	// Trait vector, ordered by 1...m traits within each individual within each species. Shortened by the number of missing values.
 	matrix[m*N, m*p] X;		// Predictor matrix
 	matrix[m*N, m*n] Z;		// Design matrix to map individuals to the proper species
 	cov_matrix[n] R;		// Phylogenetic variance-covariance matrix
