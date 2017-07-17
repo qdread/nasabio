@@ -135,7 +135,14 @@ save(rphylo_RMSEs, file = 'insert path')
 
 # 4. load stan fits and get rmses from them -------------------------------
 
-### Insert code here!
+# Make stan rdumps for each of the missing datasets and write them to .R files on the hpcc
+library(rstan)
+
+for (i in 1:n_datasets) {
+  missing_list_i <- make_standatalist_missing(traitdat = missing_datasets[[i]], predictors = species_covariates, phy = species_phylogeny, evolution_model = 'ou')
+  with(missing_list_i, stan_rdump(names(missing_list_i), file = paste0('X:/data/fia/staninputs/trait_data_list_', i, '.R')))
+}
+
 
 
 # 5. Combine RMSEs into data frame and plot -------------------------------
