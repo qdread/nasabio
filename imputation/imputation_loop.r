@@ -129,7 +129,16 @@ rphylopars_rmse <- function(dat, phy) {
   
 }
 
-rphylo_RMSEs <- pblapply(missing_datasets, rphylopars_rmse, phy = species_phylogeny)
+# Calculate RMSE for each Rphylopars imputation as a loop, because some of them unexpectedly return errors.
+
+rphylo_RMSEs <- list()
+
+for (i in 1:n_datasets) {
+  rphylo_RMSEs[[i]] <- try(rphylopars_rmse(dat = missing_datasets[[i]], phy = species_phylogeny), TRUE)
+  if (inherits(rphylo_RMSEs[[i]], 'try-error')) rphylo_RMSEs[[i]] <- c('overall'=NA, 'Bark.thickness'=NA, 'Wood.density'=NA, 'Specific.leaf.area'=NA, 'Plant.height'=NA, 'Plant.lifespan'=NA, 'Seed.dry.mass'=NA)
+}
+
+#rphylo_RMSEs <- pblapply(missing_datasets, rphylopars_rmse, phy = species_phylogeny)
 
 save(rphylo_RMSEs, file = 'insert path')
 
