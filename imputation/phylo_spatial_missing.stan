@@ -76,7 +76,7 @@ model {
 	Y ~ multi_normal(X * beta + Z * alpha, epsilon);
 	// Priors
 	alpha ~ multi_normal(zero_mn, lambda);	
-	beta ~ normal(0, 10);
-	Sigma ~ inv_wishart(m + 1, 0.01 * Im);
+	beta ~ normal(0, 1);
+	Sigma ~ inv_wishart(m + 1, 100 * Im);
 	sigma ~ uniform(0, 100);
 }

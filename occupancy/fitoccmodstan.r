@@ -53,3 +53,20 @@ with(data_ranef2005, stan_rdump(names(data_ranef2005), 'X:/code/occupancy/data_r
 
 ### cmdstan syntax to sample model.
 ./occmod_ranef sample num_samples=100 num_warmup=100 thin=1 data file=./data_ranef2005.txt init=0.1 output file=./test_ranef_output.csv
+
+
+### Function to write data dump for each year to hpcc
+
+dump_ranef_data <- function(yr, arr = bbs_arrays) {
+  
+  ### Combine input data
+  X <- bbs_arrays$x[[which(bbs_arrays$year == yr)]]
+  X[is.na(X)] <- 0
+  
+  data_ranef <- list(nspec=dim(X)[3], nsite=dim(X)[1], nrep=dim(X)[2], X=X)
+  
+  # Dump the data to the hpcc
+  with(data_ranef, stan_rdump(names(data_ranef), paste0('C:/Users/Q/Dropbox/projects/nasabiodiv/code/staninputs/data_ranef',yr,'.txt')))
+}
+
+sapply(1997:2016, dump_ranef_data, arr = bbs_arrays)

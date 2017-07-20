@@ -38,3 +38,9 @@ species_covariates <- species_covariates %>%
 species_traits <- species_traits %>%
   rename(species = Scientific_Name) %>%
   arrange(species)
+
+# Mean-center and standardize the predictor variables.
+species_covariates[,-1] <- sapply(species_covariates[,-1], scale)
+
+# Get rid of everything except temperature, precipitation, and productivity
+species_covariates <- species_covariates[,c('species','temp_min_monthly','precip_min_monthly','npp')]
