@@ -152,7 +152,28 @@ for (i in 1:n_datasets) {
   with(missing_list_i, stan_rdump(names(missing_list_i), file = paste0('X:/data/fia/staninputs/trait_data_list_', i, '.R')))
 }
 
+# Loop through the list of loaded stan summaries and output a comparisondf for each one.
 
+stan_rmse <- function(dat, summ) {
+  true_traits <- species_traits
+  is_missing <- is.na(dat[,-c(1)])
+  
+  y_miss <- summ[grepl('Y_mis', row.names(summ)), ]
+  
+  imputed_traits <- y_miss$median
+  imputed_ci_min <- y_miss$q025
+  imputed_ci_max <- y_miss$q975
+  
+  # Dataframe with comparison of values.
+  
+  comparisondf <- data.frame(imputed_trait =imputed_traits,
+                             imputed_variance = mice_imputed_variances,
+                             true_trait = true_traits[, -1][is_missing],
+                             trait_id = col(is_missing)[is_missing],  # Vector of column numbers with missing data 
+                             species_id = row(is_missing)[is_missing])
+  
+  return(RMSE_eachtrait(comparisondf))
+}
 
 # 5. Combine RMSEs into data frame and plot -------------------------------
 
