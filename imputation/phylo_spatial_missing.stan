@@ -4,13 +4,13 @@
 // First version will have spatial coordinates as fixed effects, not random
 
 data {
-	int m; 			// Number of traits
-	int n;			// Number of species
-	int N;			// Number of individuals across all species
-	int p;			// Number of predictor variables + 1 (includes intercept)
-	int N_obs;		// Number of values in Y that are observed (not missing)
-	int N_mis;		// Number of values in Y that are missing
-					// ***NOTE: n_obs + n_mis must be m*N !!!
+	int<lower=0> m; 					// Number of traits
+	int<lower=0> n;						// Number of species
+	int<lower=0> N;						// Number of individuals across all species
+	int<lower=0> p;						// Number of predictor variables + 1 (includes intercept)
+	int<lower=0, upper=m*N> N_obs;		// Number of values in Y that are observed (not missing)
+	int<lower=0, upper=m*N> N_mis;		// Number of values in Y that are missing
+										// ***NOTE: n_obs + n_mis must be m*N !!!
 	
 	vector[N_obs] Y_obs;	// Trait vector, ordered by 1...m traits within each individual within each species. Shortened by the number of missing values.
 	matrix[m*N, m*p] X;		// Predictor matrix
@@ -22,10 +22,8 @@ data {
 }
 
 transformed data {
-	matrix[m*N, m*N] ImN;	// identity matrix dimension m*N
 	matrix[m, m] Im;		// identity matrix dimension m
 	vector[m*n] zero_mn;	// vector of zeroes m*n long
-	vector[m*N] zero_mN;	// vector of zeroes m*N long
 	
 	zero_mn = rep_vector(0.0, m*n);
 	Im = diag_matrix(rep_vector(1.0, m));
