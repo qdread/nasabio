@@ -94,7 +94,27 @@ ggplot(BPdat_jaccard, aes(x = baselga, y = podani)) +
 
 # 4. To abundance-weight or not to abundance-weight?
 
-There was some discussion about whether to use presence-absence metrics, or abundance-weighted metrics. For BBS, we don't have good estimates of abundance so typically people just use presences. However, for FIA, we can use basal area to estimate abundance of each species. I've presented both in this document. I think it is fine to use just presence-absence as long as we are consistent throughout. I will continue to calculate and make maps for both, and we can decide for each paper which one(s) to present. For the most part, they should yield similar results at the broad scales we are looking at.
+There was some discussion about whether to use presence-absence metrics, or abundance-weighted metrics. For BBS, we don't have good estimates of abundance so typically people just use presences. However, for FIA, we can use basal area to estimate abundance of each species. I've presented both in this document. I think it is fine to use just presence-absence as long as we are consistent throughout. I will continue to calculate and make maps for both, and we can decide for each paper which one(s) to present. For the most part, they should yield similar results at the broad scales we are looking at. Below is a plot comparing the abundance-weighted and presence-absence beta-diversity metrics for FIA data, at multiple radii and with both Sorensen and Jaccard dissimilarity.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# Comparison of abundance-weighted and presence-absence diversity
+
+abunddat <- bd %>%
+  filter(family == 'podani', divtype == 'total') %>%
+  select(PLT_CN, radius, index, abundance, beta) %>%
+  mutate(abund_name = c('presence_absence', 'abundance_weighted')[abundance+1])
+
+abunddat <- dcast(abunddat, PLT_CN + radius + index ~ abund_name, value.var = 'beta')
+
+ggplot(abunddat, aes(x = presence_absence, y = abundance_weighted)) +
+  geom_point() +
+  stat_smooth(method = 'lm') +
+  geom_abline(slope=1, intercept=0, color='red', linetype='dotted') +
+  facet_grid(index ~ radius) +
+  theme_bw() +
+  ggtitle('Comparison of presence-based and abundance-based beta-diversity')
+```
+**Figure 4.** Comparison of presence-based and abundance-based beta-diversity. Blue solid line is the relationship between the indices, and red dotted line is the y=x line. The indices are compared at different radii and for both Sorensen and Jaccard dissimilarity.
 
 # 5. Next steps: phylogenetic and functional diversity
 

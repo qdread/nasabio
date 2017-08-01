@@ -40,7 +40,7 @@ library(reshape2)
 SJdat <- bd %>% 
   filter(divtype == 'total', family == 'podani') %>%
   select(PLT_CN, radius, index, abundance, beta) %>%
-  mutate(abund_name = c('presence-absence', 'abundance-weighted')[abundance+1])
+  mutate(abund_name = c('presence_absence', 'abundance_weighted')[abundance+1])
 
 SJdat <- dcast(SJdat, PLT_CN + radius + abund_name ~ index, value.var = 'beta')
 
@@ -57,7 +57,7 @@ ggplot(SJdat, aes(x = jaccard, y = sorensen)) +
 BPdat <- bd %>%
   filter(divtype %in% c('replacement_proportion')) %>%
   select(PLT_CN, radius, family, index, divtype, abundance, beta) %>%
-  mutate(abund_name = c('presence-absence', 'abundance-weighted')[abundance+1])
+  mutate(abund_name = c('presence_absence', 'abundance_weighted')[abundance+1])
 
 BPdat_sorensen <- filter(BPdat, index == 'sorensen')
 BPdat_jaccard <- filter(BPdat, index == 'jaccard')
@@ -86,12 +86,44 @@ ggplot(BPdat_jaccard, aes(x = baselga, y = podani)) +
 abunddat <- bd %>%
   filter(family == 'podani', divtype == 'total') %>%
   select(PLT_CN, radius, index, abundance, beta) %>%
-  mutate(abund_name = c('presence-absence', 'abundance-weighted')[abundance+1])
+  mutate(abund_name = c('presence_absence', 'abundance_weighted')[abundance+1])
 
 abunddat <- dcast(abunddat, PLT_CN + radius + index ~ abund_name, value.var = 'beta')
 
+ggplot(abunddat, aes(x = presence_absence, y = abundance_weighted)) +
+  geom_point() +
+  stat_smooth(method = 'lm') +
+  geom_abline(slope=1, intercept=0, color='red', linetype='dotted') +
+  facet_grid(index ~ radius) +
+  theme_bw() +
+  ggtitle('Comparison of presence-based and abundance-based beta-diversity')
+
 # Plotting functions ------------------------------------------------------
 
-# These will plot just some individual maps, rather than the big row of maps formatted for the paper.
+# This will plot just some individual maps, rather than the big row of maps formatted for the paper.
+# Refer back to mapformatting.r for drawing faceted maps.
 
-
+draw_fia_map <- function(dat, zvar, rad, colscale, 
+                         scalebar = scalebar_latlong(latmin=33.25, lonmin=-117, h=.2, d=200), 
+                         lonbds = c(33,50), latbds = c(-125, -114), 
+                         maptheme = whitemaptheme, 
+                         xsc = scale_x_continuous(breaks = c(-125, -120, -115), labels = c('125° W', '120° W', '115° W')), 
+                         ysc = scale_y_continuous(breaks = c(35,40,45,50), labels = c('35° N', '40° N', '45° N', '50° N')), 
+                         arrow = geom_line(data = data.frame(lon = c(-114.5,-114.5), lat = c(48,49)), size=1.5, arrow=arrow(length=unit(0.1,'in'), angle=30, type='open')),
+                         northlabel = geom_text(data = data.frame(lon = -114.5, lat = 49.2, lab = 'N'), aes(label=lab), fontface='bold'), 
+                         maptitle = ggtitle(paste(rad, 'km radius')),
+                         fpfig, fname) {
+  the_map <- ggplot(dat, 
+                      aes(x = lon, y = lat)) +
+    borders('world', 'canada', fill = 'gray70') +
+    borders('world', 'usa', fill = 'gray70') +
+    borders('state') +
+    geom_point(aes_string(color = zvar), size = 0.75) +
+    geom_rect(data=scalebar[[1]], aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
+              show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
+    geom_text(data=scalebar[[2]], aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F) +
+    coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
+    maptheme + colscale + panel_border(colour = 'black') +
+    xsc + ysc + arrow + northlabel + maptitle
+  ggsave(file.path(fpfig, fname), the_map, height = 8, width = 6, dpi = 400)
+}
