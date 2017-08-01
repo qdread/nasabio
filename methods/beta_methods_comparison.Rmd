@@ -1,0 +1,22 @@
+---
+title: "Beta-diversity methods comparison"
+author: "Quentin D. Read"
+date: "July 31, 2017"
+output: pdf_document
+---
+
+For the NASA BioXGeo project, we've decided to focus on beta-diversity. Since a lot of theoretical debate is still ongoing about how precisely to quantify beta-diversity, it behooves us to compare some of the different methods that are out there before we go too far ahead with our analyses. Here I've tried to describe some of the different methods with plots where needed. Any feedback, suggestions, or opinions are welcomed. See Barton for further reading, and other references given below.
+
+# 1. Big picture: Decomposition versus pairwise
+
+There are two main ways of thinking about beta-diversity. Both are trying to get at the basic concept of trying to measure how different a group of local communities are from one another, but in different ways. The first way, decomposition, goes back to Whittaker and is based on the equation $\gamma = \alpha + \beta$, sometimes expressed as $\gamma = \alpha\beta$. If the total diversity of the region, $\gamma$, is the sum or product of $\alpha$ and $\beta$, just calculate $\alpha$ and $\gamma$ and solve for $\beta$. The other way, the pairwise or Sorensen method, is to somehow calculate the average pairwise dissimilarity of all the local communities from one another. So far, I've been using the pairwise method because I think it makes the most sense. All the plots below are different versions of that method. However if anyone has any good arguments for using the Whittaker method, please share them.
+
+# 2. Dissimilarity indices: Sorensen versus Jaccard
+
+If we are committed to using the pairwise dissimilarity method, we need to use a dissimilarity metric.  
+
+# 3. Partitioning beta-diversity: Baselga versus Podani
+
+# 4. To abundance-weight or not to abundance-weight?
+
+# References
