@@ -1,22 +1,111 @@
 ---
 title: "Beta-diversity methods comparison"
 author: "Quentin D. Read"
-date: "July 31, 2017"
+date: "August 1, 2017"
 output: pdf_document
 ---
 
-For the NASA BioXGeo project, we've decided to focus on beta-diversity. Since a lot of theoretical debate is still ongoing about how precisely to quantify beta-diversity, it behooves us to compare some of the different methods that are out there before we go too far ahead with our analyses. Here I've tried to describe some of the different methods with plots where needed. Any feedback, suggestions, or opinions are welcomed. See Barton for further reading, and other references given below.
+For the NASA BioXGeo project, we've decided to focus on beta-diversity. Since a lot of theoretical debate is still ongoing about how precisely to quantify beta-diversity, it behooves us to compare some of the different methods that are out there before we go too far ahead with our analyses. Here I've tried to describe some of the different methods with plots where needed. Any feedback, suggestions, or opinions are welcomed. A good introduction to beta-diversity is Jost et al. 2011 (a book chapter). Also see Barton et al. 2013 for further reading, which we have been heavily inspired by, although apparently one of Phoebe's old colleagues disputes most of Barton's way of thinking. References are below.
 
 # 1. Big picture: Decomposition versus pairwise
 
-There are two main ways of thinking about beta-diversity. Both are trying to get at the basic concept of trying to measure how different a group of local communities are from one another, but in different ways. The first way, decomposition, goes back to Whittaker and is based on the equation $\gamma = \alpha + \beta$, sometimes expressed as $\gamma = \alpha\beta$. If the total diversity of the region, $\gamma$, is the sum or product of $\alpha$ and $\beta$, just calculate $\alpha$ and $\gamma$ and solve for $\beta$. The other way, the pairwise or Sorensen method, is to somehow calculate the average pairwise dissimilarity of all the local communities from one another. So far, I've been using the pairwise method because I think it makes the most sense. All the plots below are different versions of that method. However if anyone has any good arguments for using the Whittaker method, please share them.
+There are two main ways of thinking about beta-diversity. Both are trying to get at the basic concept of trying to measure how different a group of local communities are from one another, but in different ways. The first way, decomposition, goes back to Whittaker and is based on the equation $\gamma = \alpha + \beta$, sometimes expressed as $\gamma = \alpha\beta$. If the total diversity of the region, $\gamma$, is the sum or product of $\alpha$ and $\beta$, just find $\alpha$ and $\gamma$ and solve for $\beta$. The other way, the pairwise or Sorensen method, is to somehow calculate the average pairwise dissimilarity of all the local communities from one another. So far, I've been using the pairwise method because I think it makes the most sense. All the plots below are different versions of that method. However if anyone has any good arguments for using the Whittaker method, please share them.
 
 # 2. Dissimilarity indices: Sorensen versus Jaccard
 
-If we are committed to using the pairwise dissimilarity method, we need to use a dissimilarity metric.  
+If we are committed to using the pairwise dissimilarity method, we need to use a dissimilarity metric. Barton et al. state that an appropriate measure of differentiation that is statistically independent of both species richness and community number is 1 minus the multi-site Sorensen index. The formula is given in Baselga 2010. There is also a Jaccard-based multi-site index. In each case, the multi-site index is a generalization to many sites of the pairwise Sorensen or Jaccard similarity index which were originally given for two sites. The two-site Sorensen index is $\frac {2a}{2a+b+c}$, where $a$ is the number of shared species, $b$ is the number of species unique to the first community, and $c$ is the number of species unique to the second community. Similarly, the two-site Jaccard index is $\frac {a}{a+b+c}$. Jost et al. (2011) state that the Jaccard and Sorensen index both have the desired properties, but differ in that the Jaccard index compares the number of shared species to the total richness, while the Sorensen index compares the number of shared species to the mean richness of a single assemblage. This makes the Jaccard index "global" and the Sorensen index "local." The Sorensen index is a true overlap measure, according to Jost et al. Figure 1 shows, for the FIA data, how the two indices differ. I think it would be justifiable to use either one, but given that Barton et al. specifically endorse Sorensen, we should use Sorensen.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
+fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/fia_diversity_maps/'
+
+bd <- read.csv(file.path(fp, 'fia_betapart_to150.csv'), stringsAsFactors = FALSE) # Slow.
+ed <- read.csv(file.path(fp, 'fia_elev_stats_noalaska.csv'), stringsAsFactors = FALSE)
+
+library(dplyr)
+
+bd <- bd %>%
+  mutate(radius = radius/1000) %>% # put radius in km
+  filter(radius %in% c(5, 10, 20, 50, 100)) %>% # reduce to more manageable size
+  left_join(ed)
+
+library(cowplot)
+library(reshape2)
+
+# Comparison of Sorensen and Jaccard
+
+SJdat <- bd %>% 
+  filter(divtype == 'total', family == 'podani') %>%
+  select(PLT_CN, radius, index, abundance, beta) %>%
+  mutate(abund_name = c('presence-absence', 'abundance-weighted')[abundance+1])
+
+SJdat <- dcast(SJdat, PLT_CN + radius + abund_name ~ index, value.var = 'beta')
+
+ggplot(SJdat, aes(x = jaccard, y = sorensen)) +
+  geom_point() +
+  stat_smooth(method = 'lm') +
+  geom_abline(slope=1, intercept=0, color='red', linetype='dotted') +
+  facet_grid(abund_name ~ radius) +
+  theme_bw() +
+  ggtitle('Comparison of Sorensen and Jaccard indices')
+
+```
+**Figure 1.** Comparison of Sorensen and Jaccard indices. Blue solid line is the relationship between the indices, and red dotted line is the y=x line. The indices are compared at different radii and for both incidence-based and abundance-based beta-diversity.
 
 # 3. Partitioning beta-diversity: Baselga versus Podani
 
+There are two different methods that have been developed to partition beta-diversity into two components: the species replacement component and the nestedness component. For example, two communities might differ because there is spatial turnover in species (replacement), or because one has a higher richness and has some extra species that aren't in the other, though there is no turnover (nestedness). Figure 1 in Baselga (2010) illustrates this. Baselga presented a method to find what proportion of beta-diversity in a set of assemblages is due to the replacement component, and which is due to the nestedness component. Podani et al. (2013) also developed a similar method. Both are implemented in the R package *adespatial*, and can be used with either Sorensen or Jaccard indices. Below, I show some plots comparing the indices for FIA plots: Figure 2 compares them using Sorensen, and Figure 3 compares them using Jaccard. It seems like the Baselga method always gives a higher estimate of the proportion of dissimilarity due to species replacement, regardless of which dissimilarity metric is used. I have no strong opinion about which one to use, because the justifications for each are highly technical. If anyone has a preference, please let me know.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# Comparison of Baselga and Podani decompositions
+
+BPdat <- bd %>%
+  filter(divtype %in% c('replacement_proportion')) %>%
+  select(PLT_CN, radius, family, index, divtype, abundance, beta) %>%
+  mutate(abund_name = c('presence-absence', 'abundance-weighted')[abundance+1])
+
+BPdat_sorensen <- filter(BPdat, index == 'sorensen')
+BPdat_jaccard <- filter(BPdat, index == 'jaccard')
+
+BPdat_sorensen <- dcast(BPdat_sorensen, PLT_CN + radius + abund_name ~ family, value.var = 'beta')
+BPdat_jaccard <- dcast(BPdat_jaccard, PLT_CN + radius + abund_name ~ family, value.var = 'beta')
+
+ggplot(BPdat_sorensen, aes(x = baselga, y = podani)) +
+  geom_point() +
+  stat_smooth(method = 'lm') +
+  geom_abline(slope=1, intercept=0, color='red', linetype='dotted') +
+  facet_grid(abund_name ~ radius) +
+  theme_bw() +
+  ggtitle('Comparison of Baselga and Podani partitioning: proportion due to species replacement', subtitle = 'Sorensen index')
+```
+**Figure 2.** Comparison of Baselga and Podani methods, using Sorensen index. Blue solid line is the relationship between the indices, and red dotted line is the y=x line. The indices are compared at different radii and for both incidence-based and abundance-based beta-diversity.
+
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(BPdat_jaccard, aes(x = baselga, y = podani)) +
+  geom_point() +
+  stat_smooth(method = 'lm') +
+  geom_abline(slope=1, intercept=0, color='red', linetype='dotted') +
+  facet_grid(abund_name ~ radius) +
+  theme_bw() +
+  ggtitle('Comparison of Baselga and Podani partitioning: proportion due to species replacement', subtitle = 'Jaccard index')
+```
+**Figure 3.** Comparison of Baselga and Podani methods, using Jaccard index. Blue solid line is the relationship between the indices, and red dotted line is the y=x line. The indices are compared at different radii and for both incidence-based and abundance-based beta-diversity.
+
 # 4. To abundance-weight or not to abundance-weight?
 
+There was some discussion about whether to use presence-absence metrics, or abundance-weighted metrics. For BBS, we don't have good estimates of abundance so typically people just use presences. However, for FIA, we can use basal area to estimate abundance of each species. I've presented both in this document. I think it is fine to use just presence-absence as long as we are consistent throughout. I will continue to calculate and make maps for both, and we can decide for each paper which one(s) to present. For the most part, they should yield similar results at the broad scales we are looking at.
+
+# 5. Next steps: phylogenetic and functional diversity
+
+These metrics are very cutting-edge but haven't been integrated with phylogenetic and functional beta-diversity methods that are easily available in R. For now, we are using older methods in the *vegan* and *picante* packages to get phylogenetic and functional beta-diversity. It would be nice to integrate these new methods with phylogenetic and functional diversity, but that would require writing a lot of our own code and getting the math right. It would be a nice addition to the project but would be a lot of work. If anyone is interested, let me know. If not, we can stick with the out-of-the-box methods that are already out there.
+
 # References
+
+Barton PS, Cunningham SA, Manning AD, Gibb H, Lindenmayer DB, Didham RK. 2013 The spatial scaling of beta diversity. Global Ecology and Biogeography 22, 639–647. (doi:10.1111/geb.12031)
+
+Baselga A. 2010 Partitioning the turnover and nestedness components of beta diversity. Global Ecology and Biogeography 19, 134–143. (doi:10.1111/j.1466-8238.2009.00490.x)
+
+Jost L, Chao A, Chazdon RL. 2011 Compositional similarity and beta diversity. In Biological diversity: frontiers in measurement and assessment, pp. 66–84. Oxford University Press. 
+
+Podani J, Ricotta C, Schmera D. 2013 A general framework for analyzing beta diversity, nestedness and related community-level phenomena based on abundance data. Ecological Complexity 15, 52–61. (doi:10.1016/j.ecocom.2013.03.002)

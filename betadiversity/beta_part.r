@@ -66,10 +66,10 @@ beta_baselga_podani <- function(m, abundance = TRUE) {
 	beta_baselga_jaccard_presence <- beta.div.comp(m, coef = 'BJ', quant = FALSE)$part
 	
 	if (abundance) {
-		beta_podani_sorensen <- beta.div.comp(m, coef = 'S', quant = FALSE)$part
-		beta_podani_jaccard <- beta.div.comp(m, coef = 'J', quant = FALSE)$part
-		beta_baselga_sorensen <- beta.div.comp(m, coef = 'BS', quant = FALSE)$part
-		beta_baselga_jaccard <- beta.div.comp(m, coef = 'BJ', quant = FALSE)$part
+		beta_podani_sorensen <- beta.div.comp(m, coef = 'S', quant = TRUE)$part
+		beta_podani_jaccard <- beta.div.comp(m, coef = 'J', quant = TRUE)$part
+		beta_baselga_sorensen <- beta.div.comp(m, coef = 'BS', quant = TRUE)$part
+		beta_baselga_jaccard <- beta.div.comp(m, coef = 'BJ', quant = TRUE)$part
 	}
 	
 	# Combine and return results.

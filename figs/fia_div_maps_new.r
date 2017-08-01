@@ -81,6 +81,15 @@ ggplot(BPdat_jaccard, aes(x = baselga, y = podani)) +
   theme_bw() +
   ggtitle('Comparison of Baselga and Podani partitioning: proportion due to species replacement', subtitle = 'Jaccard index')
 
+# Comparison of abundance-weighted and presence-absence diversity
+
+abunddat <- bd %>%
+  filter(family == 'podani', divtype == 'total') %>%
+  select(PLT_CN, radius, index, abundance, beta) %>%
+  mutate(abund_name = c('presence-absence', 'abundance-weighted')[abundance+1])
+
+abunddat <- dcast(abunddat, PLT_CN + radius + index ~ abund_name, value.var = 'beta')
+
 # Plotting functions ------------------------------------------------------
 
 # These will plot just some individual maps, rather than the big row of maps formatted for the paper.
