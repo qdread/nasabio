@@ -1,4 +1,9 @@
-try_all <- read.delim('C:/Users/Q/Dropbox/projects/nasabiodiv/fia_try_04jul2017.txt',stringsAsFactors = FALSE, quote = '')
+# Updated 17 Aug for newest data.
+
+#try_all <- read.delim('C:/Users/Q/Dropbox/projects/nasabiodiv/fia_try_04jul2017.txt',stringsAsFactors = FALSE, quote = '')
+try_all <- read.delim('C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/fia_try_17aug/3404.txt',stringsAsFactors = FALSE, quote = '')
+
+
 
 nmeas <- table(try_all$AccSpeciesName, try_all$TraitName)
 unittable <- table(try_all$TraitName, try_all$OrigUnitStr)
@@ -72,9 +77,9 @@ seedbanknounit <- subset(try_nometa, grepl('\\(seedbank\\) longevity',TraitName)
 try_nometa$TraitName[grepl('\\(seedbank\\) longevity',try_nometa$TraitName) & try_nometa$UnitName=='dimensionless'] <- 'Seedbank longevity categorical'
 
 # LDMC has some with no unit
-ldmcnounit <- subset(try_nometa, grepl('LDMC',TraitName) & UnitName=='')
+#ldmcnounit <- subset(try_nometa, grepl('LDMC',TraitName) & UnitName=='')
 # They are just missing values
-try_nometa <- subset(try_nometa, !(grepl('LDMC',TraitName) & UnitName==''))
+#try_nometa <- subset(try_nometa, !(grepl('LDMC',TraitName) & UnitName==''))
 
 # Sclerophylly has some with no unit. Only a few are in N/mm
 scleronounit <- subset(try_nometa, grepl('sclerophylly',TraitName) & UnitName=='')
@@ -115,29 +120,29 @@ try_byobsmean <- as.data.frame(lapply(try_byobsmean, numstring2num))
 
 try_location_trait_byobs <- left_join(try_locations_wide, try_byobsmean)
 
-# Get a small subset that is actually good data.
-try_testdata <- try_location_trait_byobs %>%
-  rename(Specific.leaf.area = Leaf.area.per.leaf.dry.mass..specific.leaf.area..SLA.,
-         Leaf.Cmass = Leaf.carbon..C..content.per.leaf.dry.mass,
-         Leaf.dry.matter.content = Leaf.dry.mass.per.leaf.fresh.mass..Leaf.dry.matter.content..LDMC.,
-         Leaf.Nmass = Leaf.nitrogen..N..content.per.leaf.dry.mass,
-         Leaf.Pmass = Leaf.phosphorus..P..content.per.leaf.dry.mass,
-         Specific.stem.density = Stem.dry.mass.per.stem.fresh.volume..stem.specific.density..SSD..wood.density.,
-         Stomatal.conductance = Stomata.conductance.per.leaf.area) %>%
-  select(AccSpeciesName, DatasetID, ObservationID, lat, lon, Specific.leaf.area, Leaf.thickness, Leaf.Cmass, Leaf.Nmass, Leaf.Pmass, Leaf.dry.matter.content, Plant.height, Seed.dry.mass, Specific.stem.density, Stomatal.conductance)
-
-try_smalldataset <- try_testdata %>%
-  ungroup %>%
-  select(AccSpeciesName, lat, lon, Specific.leaf.area, Leaf.Nmass, Plant.height) %>%
-  filter(complete.cases(.))
-
+# # Get a small subset that is actually good data.
+# try_testdata <- try_location_trait_byobs %>%
+#   rename(Specific.leaf.area = Leaf.area.per.leaf.dry.mass..specific.leaf.area..SLA.,
+#          Leaf.Cmass = Leaf.carbon..C..content.per.leaf.dry.mass,
+#          Leaf.dry.matter.content = Leaf.dry.mass.per.leaf.fresh.mass..Leaf.dry.matter.content..LDMC.,
+#          Leaf.Nmass = Leaf.nitrogen..N..content.per.leaf.dry.mass,
+#          Leaf.Pmass = Leaf.phosphorus..P..content.per.leaf.dry.mass,
+#          Specific.stem.density = Stem.dry.mass.per.stem.fresh.volume..stem.specific.density..SSD..wood.density.,
+#          Stomatal.conductance = Stomata.conductance.per.leaf.area) %>%
+#   select(AccSpeciesName, DatasetID, ObservationID, lat, lon, Specific.leaf.area, Leaf.thickness, Leaf.Cmass, Leaf.Nmass, Leaf.Pmass, Leaf.dry.matter.content, Plant.height, Seed.dry.mass, Specific.stem.density, Stomatal.conductance)
+# 
+# try_smalldataset <- try_testdata %>%
+#   ungroup %>%
+#   select(AccSpeciesName, lat, lon, Specific.leaf.area, Leaf.Nmass, Plant.height) %>%
+#   filter(complete.cases(.))
+# 
 # Centroid of coords
 get_centroid <- function(x) {
   coords <- cbind(x$lat, x$lon)
   uniquecoords <- unique(coords)
   data.frame(lat = mean(uniquecoords[,1], na.rm=T), lon = mean(uniquecoords[,2], na.rm=T))
 }
-
+# 
 # Get median locations for each species (leave out non-US locations)
 try_spp_loc <- try_locations_wide %>%
   ungroup %>%
@@ -147,7 +152,7 @@ try_spp_loc <- try_locations_wide %>%
   ungroup %>%
   mutate(AccSpeciesName = gsub('\\ ', '_', AccSpeciesName))
 
-write.csv(try_spp_loc, file = 'X:/data/fia/tree_locations.csv', row.names = FALSE)
+# write.csv(try_spp_loc, file = 'X:/data/fia/tree_locations.csv', row.names = FALSE)
 
 
 # Get the unit names for each trait ---------------------------------------
@@ -157,3 +162,22 @@ try_unitnames <- try_nometa %>%
   summarize(unit = unique(UnitName))
 
 write.csv(try_unitnames, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/try_units.csv', row.names = FALSE)
+
+
+# 17 Aug: Export new trait data -------------------------------------------
+
+fp <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/fia_try_17aug/'
+
+write.csv(try_byobsmean, file.path(fp, 'try_trait_byobs_all.csv'), row.names = FALSE)
+write.csv(try_location_trait_byobs, file.path(fp, 'try_trait_byobs_georeferenced.csv'), row.names = FALSE)
+
+# Aggregate by species.
+try_location_trait_byobs_all <- full_join(try_locations_wide, try_byobsmean)
+
+
+try_trait_byspecies <- try_location_trait_byobs_all %>% ungroup %>%
+  select(-DatasetID, -ObservationID, -lat, -lon) %>%
+  group_by(AccSpeciesName) %>%
+  summarize_if(is.numeric, mean, na.rm = TRUE)
+
+write.csv(try_trait_byspecies %>% left_join(try_spp_loc), file.path(fp, 'try_trait_byspecies.csv'), row.names = FALSE)
