@@ -1,0 +1,38 @@
+---
+title: "Standard deviation vs. number of unique values"
+author: "Quentin D. Read"
+date: "August 18, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here I create 99999 datasets. Each dataset is 1000 draws from a normal random variable with a different standard deviation ranging between 0 and 100. Then I round the values to the nearest integer and find the number of unique values. It looks like number of unique values captures very similar information to standard deviation, which is reassuring. Of course in this example the number of unique values will asymptote at 1000 while the standard deviation has no upper bound, but our elevation data will have a lot more than 1000 values in each dataset, so the relationship should be almost exactly linear. Overall I think standard deviation should be fine to use.
+
+```{r}
+n_sim <- 99999
+n_each <- 1000
+
+# choose a standard deviation from uniform distribution
+sds <- runif(n_sim, min=0, max=100)
+
+n_uniq <- numeric(n_sim)
+
+# make many datasets, round to nearest integer, and find number of uniques
+for (i in 1:n_sim) {
+  val_i <- round(rnorm(n_each, mean=0, sd=sds[i]))
+  n_uniq[i] <- length(unique(val_i))
+}
+```
+
+```{r, message = FALSE, echo = FALSE, fig.height=3.5, fig.width=3.7}
+library(cowplot)
+
+ggplot(data.frame(stdev=sds, n_uniq=n_uniq), aes(x=stdev, y=n_uniq)) +
+  geom_hex() +
+  stat_smooth(method=lm, color='red', se=FALSE) +
+  geom_text(data=data.frame(stdev=-Inf,n_uniq=Inf,lab=paste('r^2 ==', round(summary(lm(n_uniq~sds))$r.sq, 3))), aes(label=lab), parse=TRUE, hjust=-0.2, vjust=1)
+ ```
+
