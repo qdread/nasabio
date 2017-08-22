@@ -1,10 +1,11 @@
 # Modified 15 May: rearrange each matrix so that the focal plot is the first row of the resulting matrix.
+# Correction 22 Aug: use workspace 2, not old workspace
 
 radii <- c(1000,5000,7500,10000,20000,50000,100000)
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 r <- radii[task]
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
 
 library(dplyr)
 

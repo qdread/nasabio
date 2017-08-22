@@ -7,6 +7,7 @@ library(betapart)
 load('/mnt/research/nasabio/data/fia/mats/newmat_100000.r')
 load('/mnt/research/nasabio/data/fia/fiaworkspace2.r') 
 
+traits_imputed <- read.csv('/mnt/research/nasabio/data/fia/traits_imputed_22aug.csv', stringsAsFactors = FALSE, row.names = 1)
 
 beta_part <- function(m, abundance=TRUE, pairwise=FALSE, index_family='sorensen', TD=TRUE, FD=FALSE, PD=FALSE, trait_mat = NULL, phylo_tree = NULL) {
   
@@ -28,6 +29,7 @@ beta_part <- function(m, abundance=TRUE, pairwise=FALSE, index_family='sorensen'
   }
   
   if (FD) {
+    trait_mat <- trait_mat[dimnames(trait_mat)[[1]] %in% dimnames(m_bin)[[2]], ]
     core_func <- functional.betapart.core(m_bin, traits = trait_mat)
     beta_func <- unlist(functional.beta.multi(core_func, index.family = index_family))
   }

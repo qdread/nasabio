@@ -14,6 +14,18 @@ fiadist <- cophenetic(pnwphylo)
 fiataxa <- read.csv(file.path(fp, 'data/fia/fia_taxon_lookuptable.csv'), stringsAsFactors = FALSE)
 pnw_codes <- unique(fiapnw$SPCD)
 
+# Correct some subspecies IDs in fiataxa.
+fiataxa$sciname <- paste(gsub(' ', '', fiataxa$Genus), gsub(' ', '', fiataxa$Species), sep = '_')
+fiataxa$sciname[fiataxa$sciname == 'Chrysolepis_chrysophyllavar.chrysophylla'] <- 'Chrysolepis_chrysophylla'
+fiataxa$sciname[fiataxa$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_balsamifera_trichocarpa'
+
+# Here, sum the Abies shastensis with Abies magnifica and get rid of Abies shastensis.
+# Previously this was done too late in the pipeline. We don't want this currently invalid species cropping up later.
+ashast <- fiataxa$FIA.Code[fiataxa$sciname == 'Abies_shastensis']
+amagn <- fiataxa$FIA.Code[fiataxa$sciname == 'Abies_magnifica']
+
+fiapnw$SPCD[fiapnw$SPCD == ashast] <- amagn			
+
 # Convert fiapnw into a site x species matrix at plot level
 
 library(dplyr)
@@ -33,13 +45,10 @@ fiasums_plot <- fiapnw %>%
   group_by(STATECD, COUNTYCD, PLT_CN, PLOT, MEASYEAR, SPCD) %>%
   summarize(basalarea = sum(ba),
             n = n())
-
+			
 sppids <- sort(unique(fiasums_plot$SPCD))
 
 idx <- match(sppids, fiataxa$FIA.Code)
-fiataxa$sciname <- paste(gsub(' ', '', fiataxa$Genus), gsub(' ', '', fiataxa$Species), sep = '_')
-fiataxa$sciname[fiataxa$sciname == 'Chrysolepis_chrysophyllavar.chrysophylla'] <- 'Chrysolepis_chrysophylla'
-fiataxa$sciname[fiataxa$sciname == 'Populus_balsamiferassp.Trichocarpa'] <- 'Populus_balsamifera_trichocarpa'
 
 fiacoords <- fiapnw %>%
   group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
@@ -62,10 +71,6 @@ fiaplotmat <- do.call('rbind', fiaplotlist)
 #sppnames <- pnw_species$sciname[match(sppids, pnw_codes)]
 dimnames(fiaplotmat)[[2]] <- fiataxa$sciname[idx]
 
-# Add Abies shastensis to Abies magnifica
-fiaplotmat[,'Abies_magnifica'] <- fiaplotmat[,'Abies_magnifica'] + fiaplotmat[,'Abies_shastensis']
-fiaplotmat <- fiaplotmat[, !grepl('Abies_shastensis', dimnames(fiaplotmat)[[2]])]
-
 # Get rid of the unknown species.
 fiaplotmat <- fiaplotmat[, dimnames(fiaplotmat)[[2]] %in% pnwphylo$tip.label]
 
@@ -84,7 +89,10 @@ fiaspatial <- SpatialPointsDataFrame(coords = data.frame(x=fiacoords$lon, y=fiac
 fiaalbers <- spTransform(fiaspatial, CRSobj = CRS(aea_crs))
 
 # Generate distance matrix for functional beta-diversity
-source('~/code/fia/trydistmat.r')
+traits_imputed <- read.csv(file.path(fp,'data/fia/traits_imputed_22aug.csv'), stringsAsFactors = FALSE, row.names = 1)
+library(FD)
+
+trydist <- gowdis(scale(traits_imputed))
 
 # Fast function to get neighbor distances
 # Refer to http://gis.stackexchange.com/questions/132384/distance-to-nearest-point-for-every-point-same-spatialpointsdataframe-in-r
@@ -107,10 +115,8 @@ getNeighbors <- function(dat, radius) {
   dflist
 }
 
-
-radii <- c(1000,5000,7500,10000,20000,50000,100000)
 fianhb_r <- getNeighbors(fiaalbers, radius = 5e5)
 
 #save(fianhb_r, fiadist, trydist, pnwphylo, problemspp, fiataxa, fiaplotmat, fiaalbers, fiasums_plot, sppids, file = '/mnt/research/nasabio/data/fia/fiaworkspace.r')
 
-save(fianhb_r, fiadist, trydist, pnwphylo, problemspp, fiataxa, fiaspatial, fiaalbers, fiacoords, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace2.r')
+save(fianhb_r, fiadist, trydist, traits_imputed, pnwphylo, fiataxa, fiaspatial, fiaalbers, fiacoords, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace2.r')

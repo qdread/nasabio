@@ -111,5 +111,31 @@ trait_all_use <- left_join(data.frame(Scientific_Name = pnwspp), trait_all_use)
 library(Rphylopars)
 test_tree <- drop.tip(allfia_phylogeny, tip = allfia_phylogeny$tip.label[!allfia_phylogeny$tip.label %in% trait_all_use$Scientific_Name])
 
+traits_goodspp <- trait_all_use[!trait_all_use$Scientific_Name %in% c('Aesculus_sp','Fraxinus_sp'),]
+dimnames(traits_goodspp)[[1]] <- traits_goodspp$Scientific_Name
 
-phyimp <- phylopars(trait_data = trait_all_use[!trait_all_use$Scientific_Name %in% c('Aesculus_sp','Fraxinus_sp'),], tree = multi2di(test_tree), model='OU')
+# Must rename first column of trait matrix to 'species' to get imputation to work.
+# Also log-transform the lifespan value.
+
+set.seed(313)
+phyimp <- phylopars(trait_data = traits_goodspp %>%
+                      rename(species = Scientific_Name) %>% 
+                      mutate(Plant.lifespan = log(Plant.lifespan),
+                             Seed.dry.mass = log(Seed.dry.mass)), 
+                    tree = test_tree,
+                    model = 'OU')
+apply(phyimp$anc_recon, 2, min) # check for validity
+
+# Back-transform and combine everything together.
+traits_imputed <- phyimp$anc_recon[1:94,] %>%
+  as.data.frame %>%
+  mutate(Plant.lifespan = exp(Plant.lifespan),
+         Seed.dry.mass = exp(Seed.dry.mass))
+
+dimnames(traits_imputed)[[1]] <- dimnames(phyimp$anc_recon)[[1]][1:94]
+
+traits_imputed <- rbind(traits_imputed, traits_imputed[grep('Aesculus|Fraxinus', dimnames(traits_imputed)[[1]]),])  
+dimnames(traits_imputed)[[1]][95:96] <- c('Aesculus_sp', 'Fraxinus_sp')
+
+traits_imputed <- cbind(Scientific_Name = dimnames(traits_imputed)[[1]], traits_imputed)
+write.csv(traits_imputed, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/traits_imputed_22aug.csv', row.names = FALSE)
