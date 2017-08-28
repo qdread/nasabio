@@ -3,6 +3,7 @@ slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # FIA lat long coordinates
 library(dplyr)
+library(raster)
 fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
 fiacoords <- fiapnw %>%
   group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
@@ -26,7 +27,7 @@ pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
 		   
 for (i in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, i)
-	extractBox(coords = with(fiacoords, cbind(lon, lat))[i,],
+	extractBox(coords = with(fiacoords, cbind(lon, lat))[i,,drop=FALSE],
 		   raster_file = '/mnt/research/ersamlab/shared_data/DEM_SRTM_30m/VRTs/conus_30m_dem.vrt',
 		   radius = 300,
 		   fp = '/mnt/research/nasabio/temp',
