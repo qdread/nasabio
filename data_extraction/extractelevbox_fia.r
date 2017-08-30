@@ -35,7 +35,7 @@ for (j in rowidxmin:rowidxmax) {
 		   filetags = paste('fiatest', row.names(fiacoords)[j], sep = '_'))
 	file_j <- paste0('/mnt/research/nasabio/temp/bbox_fiatest_', row.names(fiacoords)[j], '.tif')
 	stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_j)
-	if (file.exists(file_i)) deleteBox(file_j)
+	if (file.exists(file_j)) deleteBox(file_j)
 }	
 
 close(pb)
