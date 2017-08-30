@@ -1,5 +1,6 @@
 n_slices <- 5000
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+raster_file_name <- '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_dem.vrt'
 
 # FIA lat long coordinates
 library(dplyr)
@@ -25,16 +26,16 @@ stats_by_point <- list()
 
 pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
 		   
-for (i in rowidxmin:rowidxmax) {
-	setTxtProgressBar(pb, i)
-	extractBox(coords = with(fiacoords, cbind(lon, lat))[i,,drop=FALSE],
-		   raster_file = '/mnt/research/ersamlab/shared_data/DEM_SRTM_30m/VRTs/conus_30m_dem.vrt',
+for (j in rowidxmin:rowidxmax) {
+	setTxtProgressBar(pb, j)
+	extractBox(coords = with(fiacoords, cbind(lon, lat))[j,,drop=FALSE],
+		   raster_file = raster_file_name,
 		   radius = 300,
 		   fp = '/mnt/research/nasabio/temp',
-		   filetags = paste('fiatest', row.names(fiacoords)[i], sep = '_'))
-	file_i <- paste0('/mnt/research/nasabio/temp/bbox_fiatest_', row.names(fiacoords)[i], '.tif')
-	stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_i)
-	if (file.exists(file_i)) deleteBox(file_i)
+		   filetags = paste('fiatest', row.names(fiacoords)[j], sep = '_'))
+	file_j <- paste0('/mnt/research/nasabio/temp/bbox_fiatest_', row.names(fiacoords)[j], '.tif')
+	stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_j)
+	if (file.exists(file_i)) deleteBox(file_j)
 }	
 
 close(pb)

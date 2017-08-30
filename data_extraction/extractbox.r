@@ -1,7 +1,7 @@
 # Function to loop through a coordinate list and a raster file
 # At each iteration, extract a square with given radius and save to .hdf somewhere
 
-extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetags = 1:length(coords)) {
+extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetags = 1:nrow(coords), progress = FALSE) {
 	require(sp)
 	require(rgdal)
 	
@@ -23,10 +23,10 @@ extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbd
 		paste('{"type": "Polygon", "coordinates": [ [', paste(apply(p, 1, function(x){paste("[",x[1],", ",x[2],"]",sep="")}), collapse=","), '] ]}', sep="")
 	}
 	
-	pb <- txtProgressBar(1, nrow(coords), style=3) # Tracks progress
+	if (progress) pb <- txtProgressBar(1, nrow(coords), style=3) # Tracks progress
 	
 	for (i in 1:nrow(coords)) {
-		setTxtProgressBar(pb, i)
+		if (progress) setTxtProgressBar(pb, i)
 				
 		# For each point, check whether the value is not missing and if the point is in the bounding box.
 		if (!is.na(coords[i,1])) {
@@ -44,12 +44,12 @@ extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbd
 				# call GDAL to clip the box.
 				system2(command="gdalwarp", args=call_args)
 				# Remove temporary shapefile
-				system2(command="rm", args=file.path(fp, "temp_bbox*"))
+				for (file_ext in c('.shp', '.shx', '.prj', '.dbf')) system2(command="rm", args=file.path(fp, paste0("temp_bbox_", filetags[i], file_ext)))
 			}
 		}
 	}
 	
-	close(pb)
+	if (progress) close(pb)
 }
 
 # Use precalculated distances to get the stats for the pixels within each radius.
