@@ -54,11 +54,12 @@ extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbd
 
 # Use precalculated distances to get the stats for the pixels within each radius.
 # idx_r should be loaded
-statsByRadius <- function(boxfile) {
-	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300)
+statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE) {
 	if (!file.exists(boxfile)) return(NA)
 	x <- raster(boxfile)
+	if(is_brick) x <- brick(boxfile)
 	xvals <- as.data.frame(x)
+	
 	stats_r <- list()
 	for (r in 1:ncol(idx_r)) {
 		vals_r <- xvals[idx_r[, r], , drop = FALSE]

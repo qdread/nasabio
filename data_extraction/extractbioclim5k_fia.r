@@ -1,12 +1,11 @@
-n_slices <- 5000
+
+n_slices <- 1000
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-raster_file_name <- '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_dem.vrt'
-#scratch_path <- paste0('/mnt/ffs17/users/', Sys.getenv('USER'))
+raster_file_name <- '/mnt/research/nasabio/data/bioclim/Bioclim5k/rasterstack/bioclim5k_20170613.vrt'
 scratch_path <- Sys.getenv('TMPDIR')
 
 # FIA lat long coordinates
 library(dplyr)
-library(raster)
 fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
 fiacoords <- fiapnw %>%
   group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
@@ -16,14 +15,18 @@ fiacoords <- fiapnw %>%
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')
 
-# Load precalculated distances
-load('/mnt/research/nasabio/data/fia/distlogical.r')
+load('/mnt/research/nasabio/data/fia/distlogical_5ktile.r')
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
 rowidx <- round(seq(0,nrow(fiacoords),length.out=n_slices + 1))
 rowidxmin <- rowidx[slice]+1
 rowidxmax <- rowidx[slice+1]
 
+# Radii of circles where we want summary stats
+radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # in km
+
+# Call extraction function, specifying the raster from which to extract data.
+# 1 km bioclim
 stats_by_point <- list()
 
 pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
@@ -32,14 +35,14 @@ for (j in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, j)
 	extractBox(coords = with(fiacoords, cbind(lon, lat))[j,,drop=FALSE],
 		   raster_file = raster_file_name,
-		   radius = 300,
+		   radius = 500,
 		   fp = scratch_path,
-		   filetags = paste('fiatest', row.names(fiacoords)[j], sep = '_'))
-	file_j <- paste0(scratch_path, '/bbox_fiatest_', row.names(fiacoords)[j], '.tif')
-	stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_j)
+		   filetags = paste('fia5k', row.names(fiacoords)[j], sep = '_'))
+	file_j <- paste0(scratch_path, '/bbox_fia5k_', row.names(fiacoords)[j], '.tif')
+	stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_j, radii = radii, is_brick = TRUE)
 	if (file.exists(file_j)) deleteBox(file_j)
 }	
 
 close(pb)
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/elevstats/newslice/stats_',slice,'.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/climstats/bioclim5k_',slice,'.r'))
