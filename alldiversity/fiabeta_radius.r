@@ -1,8 +1,13 @@
 # Calculate median beta-diversity of fia by radius.
 # Modified 25 June to include PD and FD.
+# Modified 09 Sep to load a different object
 
 # Load bbs beta diversity and route coordinates
-load('/mnt/research/nasabio/data/fia/fia_betadivtdpdfd_array.r') # v. large (13gb on hard disk)
+load('/mnt/research/nasabio/data/fia/fia_betadivtdpdfd_listbymetric.r') # v. large (13gb on hard disk)
+library(abind)
+fia_betadiv_array <- abind(fia_betadiv_list, along = 3)
+rm(fia_betadiv_list)
+
 load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
 
 library(dplyr)
@@ -36,8 +41,9 @@ fia_beta <- fiacoords %>%
 	
 #write.csv(fia_beta, file = '/mnt/research/nasabio/data/fia/fia_beta.csv', row.names = FALSE)	
 
+library(dplyr)
 load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')	
-load('/mnt/research/nasabio/data/fia/fia_betaobj.r')	
+load('/mnt/research/nasabio/data/fia/fia_betaobj09sep.r')	
 
-fia_beta <- cbind(fiacoords[rep(1:8, times = nrow(fiacoords)),], fia_beta)
+fia_beta <- cbind(as.data.frame(fiacoords[rep(1:8, times = nrow(fiacoords)),]), as.data.frame(fia_beta))
 write.csv(fia_beta, file = '/mnt/research/nasabio/data/fia/fia_beta.csv', row.names = FALSE)
