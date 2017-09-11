@@ -15,7 +15,7 @@ fiacoords <- fiapnw %>%
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')
 
-load('/mnt/research/nasabio/data/fia/distlogical_1ktile.r')
+load('/mnt/research/nasabio/data/precalcdist/distlogical_fia_bio1.r')
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
 rowidx <- round(seq(0,nrow(fiacoords),length.out=n_slices + 1))

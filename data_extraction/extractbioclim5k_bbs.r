@@ -10,7 +10,7 @@ bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.cs
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')
 
-load('/mnt/research/nasabio/data/fia/distlogical_5ktile.r')
+load('/mnt/research/nasabio/data/precalcdist/distlogical_bbs_bio5.r')
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
 rowidx <- round(seq(0,nrow(bbsll),length.out=n_slices + 1))

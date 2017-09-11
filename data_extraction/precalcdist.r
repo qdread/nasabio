@@ -53,7 +53,7 @@ makeDistRaster <- function(infile, outfile, radii, lon, lat) {
 }
 
 
-###############################################3
+###############################################
 
 # 1 km tile, 500 km radius.
 
@@ -85,4 +85,60 @@ makeDistRaster(infile = '/mnt/research/nasabio/temp/bbox_bbstest5k_1.tif',
 			   radii = c(50, 75, 100, 150, 200, 300, 400, 500),
 			   outfile = '/mnt/research/nasabio/data/fia/distlogical_5ktile.r',
 			   lon = bbsll$lon[j], lat = bbsll$lat[j])
-	   
+
+
+##############################################		
+# Added 11 Sep: Precalculate distances for **all** combinations of radius and raster tile size.
+# Use the same point for each.
+
+source('/mnt/research/nasabio/code/extractbox.r')
+
+lon1 <- -98.59595
+lat1 <- 39.79797
+
+bbs_radii <- c(50, 75, 100, 150, 200, 300, 400, 500)
+fia_radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500)
+
+elevfile <- '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_dem.vrt'
+bio1file <- '/mnt/research/nasabio/data/bioclim/Bioclim1k/rasterstack/bioclim1k_20170613.vrt'
+bio5file <- '/mnt/research/nasabio/data/bioclim/Bioclim5k/rasterstack/bioclim5k_20170613.vrt'
+geafile <- '/mnt/research/nasabio/data/geology/geo_ages/GEA.vrt'
+stgfile <- '/mnt/research/nasabio/data/geology/soils/stg.vrt'
+hffile <- '/mnt/research/nasabio/data/human_impacts/hfp-global-geo-grid/hf.vrt'
+
+mat_names <- c('bio1','bio5','gea','stg','hf')
+
+for (n in mat_names) {
+	print(n)
+	nfile <- get(paste0(n, 'file'))
+	print('Extracting box . . .')
+	extractBox(coords = cbind(lon1, lat1),
+			   raster_file = nfile,
+			   radius = 500,
+			   fp = '/mnt/research/nasabio/temp',
+			   filetags = paste0(n ,'500'))
+	print('Creating BBS matrix . . .')
+	makeDistRaster(infile = paste0('/mnt/research/nasabio/temp/bbox_',n,'500.tif'),
+				   radii = bbs_radii,
+				   outfile = paste0('/mnt/research/nasabio/data/precalcdist/distlogical_bbs_',n,'.r'),
+				   lon = lon1, lat = lat1)
+	print('Creating FIA matrix . . .')
+	makeDistRaster(infile = paste0('/mnt/research/nasabio/temp/bbox_',n,'500.tif'),
+				   radii = fia_radii,
+				   outfile = paste0('/mnt/research/nasabio/data/precalcdist/distlogical_fia_',n,'.r'),
+				   lon = lon1, lat = lat1)
+}
+				   
+extractBox(coords = cbind(lon1, lat1),
+		   raster_file = elevfile,
+		   radius = 300,
+		   fp = '/mnt/research/nasabio/temp',
+		   filetags = 'elev300')
+makeDistRaster(infile = '/mnt/research/nasabio/temp/bbox_elev300.tif',
+			   radii = bbs_radii[bbs_radii <= 300],
+			   outfile = '/mnt/research/nasabio/data/precalcdist/distlogical_bbs_elev.r',
+			   lon = lon1, lat = lat1)
+makeDistRaster(infile = '/mnt/research/nasabio/temp/bbox_elev300.tif',
+			   radii = fia_radii[fia_radii <= 300],
+			   outfile = '/mnt/research/nasabio/data/precalcdist/distlogical_fia_elev.r',
+			   lon = lon1, lat = lat1)		   

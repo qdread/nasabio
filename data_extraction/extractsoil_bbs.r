@@ -1,7 +1,7 @@
 
 n_slices <- 500
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-raster_file_name <- '/mnt/research/nasabio/data/bioclim/Bioclim1k/rasterstack/bioclim1k_20170613.vrt'
+raster_file_name <- '/mnt/research/nasabio/data/geology/soils/stg.vrt'
 scratch_path <- Sys.getenv('TMPDIR')
 
 # BBS lat long coordinates
@@ -10,7 +10,7 @@ bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.cs
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')
 
-load('/mnt/research/nasabio/data/precalcdist/distlogical_bbs_bio1.r')
+load('/mnt/research/nasabio/data/precalcdist/distlogical_bbs_stg.r')
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
 rowidx <- round(seq(0,nrow(bbsll),length.out=n_slices + 1))
@@ -33,12 +33,12 @@ for (j in rowidxmin:rowidxmax) {
 		   raster_file = raster_file_name,
 		   radius = 500,
 		   fp = scratch_path,
-		   filetags = paste('bbs1k', row.names(bbsll)[j], sep = '_'))
-	file_j <- paste0(scratch_path, '/bbox_bbs1k_', row.names(bbsll)[j], '.tif')
-	stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_j, radii = radii, is_brick = TRUE)
+		   filetags = paste('bbsstg', row.names(bbsll)[j], sep = '_'))
+	file_j <- paste0(scratch_path, '/bbox_bbsstg_', row.names(bbsll)[j], '.tif')
+	stats_by_point[[length(stats_by_point) + 1]] <- diversityByRadius(file_j, radii = radii, is_brick = FALSE)
 	if (file.exists(file_j)) deleteBox(file_j)
 }	
 
 close(pb)
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/bbs/climstats/bioclim1k_',slice,'.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/bbs/geostats/soil_',slice,'.r'))

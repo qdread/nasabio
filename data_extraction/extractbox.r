@@ -80,5 +80,31 @@ statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150
 	do.call('rbind', stats_r)	
 }
 
+# For categorical data, use this function to get "diversity indices" for the different categories.
+diversityByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE, exclude_values = numeric(0)) {
+	require(raster)
+	require(vegan)
+	if (!file.exists(boxfile)) return(NA)
+	x <- raster(boxfile)
+	if(is_brick) x <- brick(boxfile)
+	xvals <- as.data.frame(x)
+	
+	stats_r <- list()
+	for (r in 1:ncol(idx_r)) {
+		vals_r <- xvals[idx_r[, r], , drop = FALSE]
+		vals_r[vals_r %in% exclude_values] <- NA
+		richnesses <- apply(vals_r, 2, function(z) length(unique(na.omit(z))))
+		diversities <- apply(vals_r, 2, function(z) diversity(na.omit(z), index = 'shannon'))
+		nums <- apply(vals_r, 2, function(z) sum(!is.na(z)))
+		stats_r[[r]] <- data.frame(radius = radii[r],
+								   variable = names(xvals),
+								   richness = richnesses,
+								   diversity = diversities,
+								   n = nums)
+
+	}
+	do.call('rbind', stats_r)	
+}
+
 # delete pre-created tif
 deleteBox <- function(boxfile) system2("rm", args=boxfile)
