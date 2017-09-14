@@ -4,6 +4,8 @@
 
 # Edited 13 Sep 2017: add geostats (footprint, soil type diversity, and geological age diversity)
 
+library(dplyr)
+
 ##############################
 # BBS
 
