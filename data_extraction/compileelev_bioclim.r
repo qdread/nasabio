@@ -46,7 +46,7 @@ bbs_all_stats <- list()
 
 for (i in 1:length(bbs_elev_stats)) {
 	bbs_5k_i <- if (class(bbs_bioclim5k_stats[[i]]) == 'data.frame') bbs_bioclim5k_stats[[i]] else bbs_5k_missing
-	bbs_5k_i$variable <- paste0('bio', 1:19)
+	bbs_5k_i$variable <- paste0('bio', 1:19, '_5k')
 	bbs_1k_i <- if (class(bbs_bioclim1k_stats[[i]]) == 'data.frame') bbs_bioclim1k_stats[[i]] else bbs_1k_missing
 	bbs_1k_i$variable <- paste0('bio', 1:19,'_1k')
 	bbs_elev_i <- data.frame(radius = bbs_elev_stats[[i]][,'radius'], variable = 'elevation', bbs_elev_stats[[i]][,c('mean','sd','min','max')], n = NA)
@@ -57,11 +57,12 @@ for (i in 1:length(bbs_elev_stats)) {
 	bbs_soil_i <- if(class(bbs_soil_stats[[i]]) == 'data.frame') bbs_soil_stats[[i]] else bbs_soil_missing
 	bbs_soil_i$variable <- 'soil_type'
 	
-	bbs_all_stats[[i]] <- full_join(cbind(bbsll[i,], rbind(bbs_elev_i, bbs_5k_i, bbs_1k_i)),
+	bbs_all_stats[[i]] <- full_join(cbind(bbsll[i,], rbind(bbs_elev_i, bbs_5k_i, bbs_1k_i, bbs_foot_i)),
 									cbind(bbsll[i,], rbind(bbs_geo_i, bbs_soil_i)))
 }
 
 bbs_all_stats <- do.call('rbind', bbs_all_stats)
+bbs_all_stats <- rename(bbs_all_stats, lon_aea = lon.1, lat_aea = lat.1)
 
 write.csv(bbs_all_stats, file = '/mnt/research/nasabio/data/bbs/bbs_geodiversity_stats.csv', row.names = FALSE)
 

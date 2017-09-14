@@ -67,11 +67,11 @@ for (p in rowidxmin:rowidxmax) {
 	                                'beta_pd_pairwise_pa', 'beta_pd_pairwise_pa_z',
 	                                'beta_pd_nt_pa', 'beta_pd_nt_pa_z',
 	                                'beta_pd_pairwise', 'beta_pd_pairwise_z',
-	                                'beta_pd_nt', 'beta_pd_nt_pa_z',
+	                                'beta_pd_nt', 'beta_pd_nt_z',
 	                                'beta_fd_pairwise_pa', 'beta_fd_pairwise_pa_z',
 	                                'beta_fd_nt_pa', 'beta_fd_nt_pa_z',
 	                                'beta_fd_pairwise', 'beta_fd_pairwise_z',
-	                                'beta_fd_nt', 'beta_fd_nt_pa_z')
+	                                'beta_fd_nt', 'beta_fd_nt_z')
 	beta_div[[length(beta_div) + 1]] <- beta_div_p
 	
 }
