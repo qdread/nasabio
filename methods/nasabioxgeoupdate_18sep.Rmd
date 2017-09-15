@@ -1,0 +1,58 @@
+---
+title: "NASABioXGeo data & methods update"
+author: "Quentin D. Read"
+date: "September 18, 2017"
+output: pdf_document
+---
+
+Hopefully this document will get everyone up to speed on the status of the data and analysis methods for the NASABIOXGeo project (and hopefully I get it to people soon enough so that everyone can look at it before the meeting)! It would be great to get everyone's feedback on some specific data and methods questions, as well as to use some of these preliminary visualizations as a jumping-off point for some discussion about hypotheses or predictions.
+
+# Biodiversity calculations
+
+## BBS
+
+I've used the methods that we hopefully can all agree are defensible for calculating alpha, beta, and gamma diversity for BBS routes. I've used the Sorensen dissimilarity index, ignored species relative abundances (which aren't reliable for BBS anyway), and used Baselga's method for partitioning beta-diversity into nestedness and species-replacement components. I also calculated alpha-diversity and gamma-diversity in similar ways. The functional diversity is still done using some older packages instead of the "cutting edge" packages used for taxonomic and phylogenetic, because the newer packages don't support functional diversity. However I think the method is fine and gives good results that we can defend using. I used all the BBS biodiversity data to make some cool maps. See below.
+
+Currently, all BBS results are based on the raw observations. I am working on the occupancy corrections using a random-effects-only model fitted in JAGS. It is still a work in progress. The plan is to use the occupancy model as a module in the final hierarchical model, but we need to make sure it works first, and if it does, check to see if it really makes any difference. The models are currently running but I've had problems getting them to work. I seem to be getting close to a result, and I will update everyone when I do.
+
+One other issue that you can see on some of the maps is that for big radius and plots that are on a long skinny sticking-out piece of the USA such as south Texas, Florida, or Maine, you can see there is an artifact where the beta-diversity is really low. I was curious if anyone had any idea of what to do about that.
+
+If anyone has any ideas about the diversity methods, or about the occupancy models, please let me know.
+
+## FIA
+
+I haven't updated the FIA biodiversity calculations yet because I did not want to rerun all the calculations with the fuzzed coordinates. Soon I will use the true coordinates to update the FIA biodiversity calculations. First I will do just the Pacific Northwest, then do the whole country.
+
+# Geodiversity calculations 
+
+Thanks to a lot of help and suggestions from Adam and Andy, I finally came up with a solution to extract very large radius circles from very high resolution rasters in parallel. So we now have a large number of geodiversity variables extracted at a lot of different radii, up to 300 km for the 30-m resolution elevation layer and up to 500 km for all the other layers. Right now, I am just calculating the mean and standard deviation of the variables (which you can get the coefficient of variation from). I know that a while ago, we talked about other possible metrics to calculate. If anyone has an idea for one they would prefer, let me know and I can get it calculated as well.
+
+# Where to find the data and code
+
+Right now, all the data are on the MSU HPCC. The files are probably too big to put on Google Drive. A document on Google Drive at `Google Drive/NASABiodiversityWG/DATA_README.md` explains where to find the data.
+
+The code is all on GitHub at `github.com/qdread/nasabio`.
+
+\newpage
+# Some maps and figures for your perusal
+
+You can see all the maps I have made out of the most recent BBS biodiversity and geodiversity data on the google drive at `Google Drive/NASABiodiversityWG/Figures/bbs_diversity_maps/`. I am working on making some scatterplots and statistics which I will add there soon. Here are a couple of example maps and a few of the scatterplots.
+
+![Taxonomic beta-diversity](/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_diversity_maps/beta_div_tax_total.png)
+
+This map shows taxonomic beta-diversity for BBS routes, averaged across all years 1997-2016, at four representative radii. 
+
+\newpage
+![Nestedness contribution to taxonomic beta-diversity](/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_diversity_maps/beta_div_tax_nestedness.png)
+
+This map shows the proportion due to species nestedness (not species replacement) of taxonomic beta-diversity, averaged across all years 1997-2016, at four representative radii. 
+
+\newpage
+![Taxonomic beta-diversity by elevation variability](/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_diversity_maps/plot_beta_tax_total_by_elev_sd.png)
+
+This scatterplot shows the relationship between taxonomic beta-diversity of BBS routes, averaged from 1997-2016, and elevation standard deviation at four representative radii with a generalized additive model (GAM) trend plotted on top.
+
+\newpage
+![Phylogenetic beta-diversity by elevation variability](/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_diversity_maps/plot_beta_phy_total_by_elev_sd.png)
+
+This scatterplot is the same as the previous one (Fig. 3) but with phylogenetic diversity.

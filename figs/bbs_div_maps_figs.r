@@ -1,6 +1,7 @@
 # Maps and figures for BBS plots.
 # Using most recent biodiversity and geodiversity data
 # QDR 14 Sep 2017: NASABIOXGEO project
+# Last modified 15 Sep 2017: added DHI and night light index.
 
 
 # Load data ---------------------------------------------------------------
@@ -59,9 +60,6 @@ bdold_yrmeans <- bd %>%
             pd_z = mean(na.omit(beta_pd_pairwise_pa_z)),
             fd = mean(na.omit(beta_fd_pairwise_pa)),
             fd_z = mean(na.omit(beta_fd_pairwise_pa_z)))
-
-
-# Bivariate plots ---------------------------------------------------------
 
 
 # Maps --------------------------------------------------------------------
@@ -217,6 +215,38 @@ ed %>%
 
 ed %>%
   mutate(radius = radius * 1000) %>%
+  filter(radius %in% radii, variable == 'nightlight') %>%
+  draw_bbs_map(zvar = 'sd',  
+               colscale = scale_colour_gradientn(name = 'Night light\nstd. dev.', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+               maptitle = 'BBS geodiversity: nighttime light intensity',
+               fp = fpfig, fname = 'geodiv_nightlight.png')
+
+ed %>%
+  mutate(radius = radius * 1000) %>%
+  filter(radius %in% radii, variable == 'dhi_gpp') %>%
+  draw_bbs_map(zvar = 'sd',  
+               colscale = scale_colour_gradientn(name = 'DHI GPP\nstd. dev.', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+               maptitle = 'BBS geodiversity: dynamic habitat index GPP',
+               fp = fpfig, fname = 'geodiv_dhi_gpp.png')
+
+ed %>%
+  mutate(radius = radius * 1000) %>%
+  filter(radius %in% radii, variable == 'dhi_lai8') %>%
+  draw_bbs_map(zvar = 'sd',  
+               colscale = scale_colour_gradientn(name = 'DHI LAI\nstd. dev.', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+               maptitle = 'BBS geodiversity: dynamic habitat index LAI',
+               fp = fpfig, fname = 'geodiv_dhi_lai.png')
+
+ed %>%
+  mutate(radius = radius * 1000) %>%
+  filter(radius %in% radii, variable == 'dhi_ndvi') %>%
+  draw_bbs_map(zvar = 'sd',  
+               colscale = scale_colour_gradientn(name = 'DHI NDVI\nstd. dev.', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+               maptitle = 'BBS geodiversity: dynamic habitat index NDVI',
+               fp = fpfig, fname = 'geodiv_dhi_ndvi.png')
+
+ed %>%
+  mutate(radius = radius * 1000) %>%
   filter(radius %in% radii, variable == 'geological_age') %>%
   draw_bbs_map(zvar = 'diversity',  
                colscale = scale_colour_gradientn(name = 'Geological age\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.25)(9)),
@@ -230,3 +260,72 @@ ed %>%
                colscale = scale_colour_gradientn(name = 'Soil type\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9)),
                maptitle = 'BBS geodiversity: soil type',
                fp = fpfig, fname = 'geodiv_soiltype.png')
+
+# Bivariate plots ---------------------------------------------------------
+
+radlabel <- labeller(radius = function(x) paste(as.integer(x)/1000, 'km'))
+
+# Taxonomic beta-diversity by elevational diversity
+
+td_total_ed_plot <- ed %>%
+  mutate(radius = radius*1000) %>%
+  filter(variable == 'elevation', radius %in% radii) %>%
+  right_join(beta_td) %>%
+  ggplot(aes(x = sd, y = total)) +
+  geom_point(alpha = 0.05, size = 0.25) +
+  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  facet_grid(. ~ radius, labeller = radlabel) +
+  scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+  theme(strip.background = element_blank()) +
+  panel_border(colour='black') +
+  scale_y_continuous(name = 'Taxonomic beta-diversity', expand = c(0,0), limits = c(0,1)) +
+  labs(x = 'Elevation variability')
+
+td_nested_ed_plot <- ed %>%
+  mutate(radius = radius*1000) %>%
+  filter(variable == 'elevation', radius %in% radii) %>%
+  right_join(beta_td) %>%
+  ggplot(aes(x = sd, y = prop_nested)) +
+  geom_point(alpha = 0.05, size = 0.25) +
+  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  facet_grid(. ~ radius, labeller = radlabel) +
+  scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+  theme(strip.background = element_blank()) +
+  panel_border(colour='black') +
+  scale_y_continuous(name = 'Nestedness proportion TD', expand = c(0,0), limits = c(0,1)) +
+  labs(x = 'Elevation variability')
+
+# Phylogenetic beta diversity by elevation diversity
+
+pd_total_ed_plot <- ed %>%
+  mutate(radius = radius*1000) %>%
+  filter(variable == 'elevation', radius %in% radii) %>%
+  right_join(beta_pd) %>%
+  ggplot(aes(x = sd, y = total)) +
+  geom_point(alpha = 0.05, size = 0.25) +
+  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  facet_grid(. ~ radius, labeller = radlabel) +
+  scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+  theme(strip.background = element_blank()) +
+  panel_border(colour='black') +
+  scale_y_continuous(name = 'Phylogenetic beta-diversity', expand = c(0,0), limits = c(0,1)) +
+  labs(x = 'Elevation variability')
+
+pd_nested_ed_plot <- ed %>%
+  mutate(radius = radius*1000) %>%
+  filter(variable == 'elevation', radius %in% radii) %>%
+  right_join(beta_pd) %>%
+  ggplot(aes(x = sd, y = prop_nested)) +
+  geom_point(alpha = 0.05, size = 0.25) +
+  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  facet_grid(. ~ radius, labeller = radlabel) +
+  scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+  theme(strip.background = element_blank()) +
+  panel_border(colour='black') +
+  scale_y_continuous(name = 'Nestedness proportion PD', expand = c(0,0), limits = c(0,1)) +
+  labs(x = 'Elevation variability')
+
+ggsave(file.path(fpfig, 'plot_beta_tax_total_by_elev_sd.png'), td_total_ed_plot, height = 4, width = 8, dpi = 400)
+ggsave(file.path(fpfig, 'plot_beta_tax_nestedness_by_elev_sd.png'), td_nested_ed_plot, height = 4, width = 8, dpi = 400)
+ggsave(file.path(fpfig, 'plot_beta_phy_total_by_elev_sd.png'), pd_total_ed_plot, height = 4, width = 8, dpi = 400)
+ggsave(file.path(fpfig, 'plot_beta_phy_nestedness_by_elev_sd.png'), pd_nested_ed_plot, height = 4, width = 8, dpi = 400)
