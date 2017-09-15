@@ -90,8 +90,32 @@ makeDistRaster(infile = '/mnt/research/nasabio/temp/bbox_bbstest5k_1.tif',
 ##############################################		
 # Added 11 Sep: Precalculate distances for **all** combinations of radius and raster tile size.
 # Use the same point for each.
+# Edited 15 Sep: add NightLights and DHI rasters.
 
 source('/mnt/research/nasabio/code/extractbox.r')
+
+makeDistRaster <- function(infile, outfile, radii, lon, lat) {
+	require(raster)
+	x <- raster(infile)
+	
+	# Get proximity map internally
+	xvals <- as.data.frame(x)
+	xcoords <- xyFromCell(x, 1:ncell(x))
+	xdist <- spDistsN1(xcoords, c(lon,lat), longlat=TRUE)
+	
+	idx_r <- list()
+	
+	for (r in 1:length(radii)) {
+		idx_r[[r]] <- xdist <= radii[r]
+	}
+
+	# Create logical matrix.
+	# Use column r to subset xvalues each time.
+	idx_r <- do.call('cbind', idx_r)
+
+	save(idx_r, file = outfile)
+
+}
 
 lon1 <- -98.59595
 lat1 <- 39.79797
@@ -105,8 +129,13 @@ bio5file <- '/mnt/research/nasabio/data/bioclim/Bioclim5k/rasterstack/bioclim5k_
 geafile <- '/mnt/research/nasabio/data/geology/geo_ages/GEA.vrt'
 stgfile <- '/mnt/research/nasabio/data/geology/soils/stg.vrt'
 hffile <- '/mnt/research/nasabio/data/human_impacts/hfp-global-geo-grid/hf.vrt'
+dhifparfile <- '/mnt/research/nasabio/data/dhi/dhi_fpar.vrt'
+dhigppfile <- '/mnt/research/nasabio/data/dhi/dhi_gpp.vrt'
+dhilai8file <- '/mnt/research/nasabio/data/dhi/dhi_lai8.vrt'
+dhindvifile <- '/mnt/research/nasabio/data/dhi/dhi_ndvi.vrt'
+nightlightfile <- '/mnt/research/nasabio/data/human_impacts/viirs_nightlights/vcm_orm_ntl.vrt'
 
-mat_names <- c('bio1','bio5','gea','stg','hf')
+mat_names <- c('bio1','bio5','gea','stg','hf','dhifpar','dhigpp','dhilai8','dhindvi','nightlight')
 
 for (n in mat_names) {
 	print(n)

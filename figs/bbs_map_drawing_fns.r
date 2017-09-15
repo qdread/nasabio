@@ -9,7 +9,7 @@ deglab <- function(n, d) {
   paste0(as.character(n), '° ', d)
 }
 
-draw_bbs_map_wrap <- function(dat, zvar, rad, colscale, 
+draw_bbs_map <- function(dat, zvar, colscale, by_rad = TRUE,
                              scalebar = scalebar_latlong(latmin=24, lonmin=-75, h=.2, d=400), 
                              latbds = c(25,50), lonbds = c(-125, -67), 
                              maptheme = whitemaptheme_bbs, 
@@ -18,9 +18,12 @@ draw_bbs_map_wrap <- function(dat, zvar, rad, colscale,
                              the_arrow = geom_line(data = data.frame(lon = c(-65,-65), lat = c(46,48)), size=1.5, arrow=arrow(length=unit(0.07,'in'), angle=30, type='open')),
                              northlabel = geom_text(data = data.frame(lon = -65, lat = 48.8, lab = 'N'), aes(label=lab), fontface='bold'), 
                              maptitle = '',
-                             fp, fname) {
-  the_map <- ggplot(dat, aes(x = lon, y = lat)) +
-    facet_wrap(~ radius, labeller = labeller(radius = function(x) paste(as.integer(x)/1000, 'km'))) +
+                             fp = '~', fname = 'plot.png', write_to_file = TRUE, img_h = 7, img_w = 12) {
+  the_map <- ggplot(dat, aes(x = lon, y = lat))
+  if (by_rad) {
+    the_map <- the_map + facet_wrap(~ radius, labeller = labeller(radius = function(x) paste(as.integer(x)/1000, 'km')))
+  }
+  the_map <- the_map +
     borders('world', 'canada', fill = 'gray90') +
     borders('world', 'mexico', fill = 'gray90') +
     borders('world', 'usa', fill = 'gray90') +
@@ -37,7 +40,8 @@ draw_bbs_map_wrap <- function(dat, zvar, rad, colscale,
     northlabel + 
     ggtitle(maptitle) +
     theme(axis.text.x = element_blank(), axis.text.y = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank())
-  ggsave(file.path(fp, fname), the_map, height = 7, width = 12, dpi = 400) 
+  if (write_to_file) ggsave(file.path(fp, fname), the_map, height = img_h, width = img_w, dpi = 400) 
+  if (!write_to_file) return(the_map)
 }
 
 # function to find delta longitude for two points separated by x km at a certain latitude
