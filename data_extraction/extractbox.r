@@ -94,7 +94,7 @@ diversityByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100,
 		vals_r <- xvals[idx_r[, r], , drop = FALSE]
 		vals_r[vals_r %in% exclude_values] <- NA
 		richnesses <- apply(vals_r, 2, function(z) length(unique(na.omit(z))))
-		diversities <- apply(vals_r, 2, function(z) diversity(na.omit(z), index = 'shannon'))
+		diversities <- apply(vals_r, 2, function(z) diversity(as.numeric(table(na.omit(z))), index = 'shannon'))
 		nums <- apply(vals_r, 2, function(z) sum(!is.na(z)))
 		stats_r[[r]] <- data.frame(radius = radii[r],
 								   variable = names(xvals),

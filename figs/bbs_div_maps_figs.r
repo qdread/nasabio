@@ -329,3 +329,21 @@ ggsave(file.path(fpfig, 'plot_beta_tax_total_by_elev_sd.png'), td_total_ed_plot,
 ggsave(file.path(fpfig, 'plot_beta_tax_nestedness_by_elev_sd.png'), td_nested_ed_plot, height = 4, width = 8, dpi = 400)
 ggsave(file.path(fpfig, 'plot_beta_phy_total_by_elev_sd.png'), pd_total_ed_plot, height = 4, width = 8, dpi = 400)
 ggsave(file.path(fpfig, 'plot_beta_phy_nestedness_by_elev_sd.png'), pd_nested_ed_plot, height = 4, width = 8, dpi = 400)
+
+# Create loop of predictor by response variables and make bivariate plots of all of them.
+
+bbs_xy_plot <- function(xdat, xvar, ydat, yvar, xlims, xbreaks, ylims, ybreaks, xname, yname) {
+  xdat %>%
+    mutate(radius = radius*1000) %>%
+    filter(variable == xvar, radius %in% radii) %>%
+    right_join(ydat) %>%
+    ggplot(aes_string(x = xvar, y = yvar)) +
+    geom_point(alpha = 0.05, size = 0.25) +
+    stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+    facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(as.integer(x)/1000, 'km'))) +
+    scale_x_continuous(name = xname, limits=xlims, breaks=xbreaks) +
+    scale_y_continuous(name = yname, limits=ylims, breaks=ybreaks, expand = c(0,0)) +
+    theme(strip.background = element_blank()) +
+    panel_border(colour='black') +
+}
+
