@@ -48,8 +48,87 @@ close(pb)
 # Visualize
 library(cowplot)
 all_stats <- do.call('rbind', all_stats)
+write.csv(all_stats, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/proofofconceptstats.csv', row.names = FALSE)
 
-ggplot(all_stats, aes(x = richness, y = sd)) +
-  geom_hex() +
+ggplot(all_stats, aes(x = sd, y = richness)) +
+  geom_point() +
   facet_grid(truncation ~ radius) +
-  stat_smooth(method = lm, color = 'red', se = FALSE)
+  stat_smooth(method = lm, color = 'red', se = FALSE) +
+  panel_border(colour = 'black')
+
+ggplot(all_stats, aes(x = sd, y = diversity)) +
+  geom_point() +
+  facet_grid(truncation ~ radius) +
+  stat_smooth(method = lm, color = 'red', se = FALSE) +
+  panel_border(colour = 'black')
+
+# Calculate R^2
+all_r2 <- all_stats %>%
+  group_by(radius, truncation) %>%
+  summarize(r2_richness = summary(lm(richness ~ sd))$r.sq,
+            r2_diversity = summary(lm(richness ~ diversity))$r.sq)
+
+# Observations
+# 1. The absolute value of richness and diversity are very dependent on the arbitrary threshold of rounding that we choose in order to force a continuous variable to act like a discrete variable
+# 2. (Trivially) as the rounding threshold becomes more coarse, you end up with basically no variation in richness or diversity, regardless of the true variation in the elevations.
+# 3. The relationship between sd and richness, and between sd and diversity, is different at different radii. I believe this is an artifact of the number of data points in each radius.
+
+
+# Histogram rules applied to one vector of elevation data
+# Return number of bins
+sturges_rule <- function(x) {
+  k <- ceiling(log(length(x), base = 2)) + 1
+  return(k)
+}
+scott_rule <- function(x) {
+  h <- 3.5 * sd(x) * length(x)^(-1/3)
+  k <- ceiling(diff(range(x))/h)
+  return(k)
+}
+freedman_rule <- function(x) {
+  h <- 2 * IQR(x) * length(x)^(-1/3)
+  k <- ceiling(diff(range(x))/h)
+  return(k)
+}
+
+histbinrules <- sapply(1:6, function(x) {
+  dat <- sample(er[[1]], 10^x)
+  c(sturges = sturges_rule(dat), scott = scott_rule(dat), freedman = freedman_rule(dat))
+})
+
+# Redo extractions with Freedman rule
+
+summ_stats_freedman <- function(dat) {
+  require(vegan)
+  dat <- na.omit(dat)
+  n_breaks <- freedman_rule(dat)
+  dat_table <- as.numeric(table(cut(dat, breaks = n_breaks)))
+  
+  data.frame(richness = length(dat_table), diversity = diversity(dat_table, index = 'shannon'), sd = sd(dat))
+}
+
+
+radii <- c(5, 10, 20, 50, 100)
+
+all_stats_freed <- list()
+
+pb <- txtProgressBar(0, length(radii), style = 3)
+
+for (i in 1:length(radii)) {
+  setTxtProgressBar(pb, i)
+  er <- extract(r, fiacoords[,c('lon','lat')], buffer = radii[i] * 1000)
+  stat_r <- lapply(er, summ_stats_freedman)
+  all_stats_freed[[length(all_stats_freed) + 1]] <- data.frame(radius = radii[i], lat = fiacoords$lat, lon = fiacoords$lon, do.call('rbind', stat_r))
+}
+
+close(pb)
+
+
+all_stats_freed <- do.call('rbind', all_stats_freed)
+write.csv(all_stats_freed, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/proofofconceptstatsfreed.csv', row.names = FALSE)
+
+ggplot(all_stats_freed, aes(x = sd, y = richness)) +
+  geom_point() +
+  facet_wrap(~ radius) +
+  stat_smooth(method = lm, color = 'red', se = FALSE) +
+  panel_border(colour = 'black')

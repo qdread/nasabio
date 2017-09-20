@@ -1,0 +1,10 @@
+---
+title: "Elevation variability as diversity"
+author: "Quentin D. Read"
+date: "September 19, 2017"
+output: pdf_document
+---
+
+This is a follow-up on the discussion we had on September 18 about whether it is possible or appropriate to run diversity calculations on continuous environmental variables within a region. This gets into a semantic debate about whether geodiversity can be conceptualized the same way as diversity of biological organisms, that is, as discrete entities making up communities. Full disclosure: I don't think this is an appropriate way of thinking about variation in continous variables on the landscape. I think it is a fine approach to calculate diversity metrics for discrete landscape variables but that we should not try to make continuous variables like temperature and elevation into discrete variables on which we can calculate diversity. In my opinion things like standard devation or CV are good measures of geodiversity because they represent the variability of a geological variable on the landscape. Pairwise distance among sites is good too, because it's similar to standard deviation. However I tried to convert elevation to a discrete variable and calculate diversity on it to see what it would look like; here are some of the observations I made.
+
+The most important issue when it comes to calculating diversity of something like elevation is that you have to decide how to round it to turn it into a discrete variable that can be binned. That's basically the same issue as creating a histogram. There are some rules about how many bins a histogram should have, so I decided to apply a well-known rule, the Freedman-Diaconis rule, to determine how many bins to split the elevation data into and then calculate diversity on it.
