@@ -25,7 +25,7 @@ summ_stats <- function(dat, truncations) {
   dat <- na.omit(dat)
   richnesses <- sapply(truncations, function(x) length(unique(plyr::round_any(dat, x))))
   diversities <- sapply(truncations, function(x) diversity(table(plyr::round_any(dat, x)), index = 'shannon'))
-  sds <- sapply(truncations, function(x) sd(plyr::round_any(dat, x)))
+  sds <- sd(dat)
   data.frame(truncation = truncations, richness = richnesses, diversity = diversities, sd = sds)
 }
 
@@ -86,8 +86,8 @@ scott_rule <- function(x) {
   return(k)
 }
 freedman_rule <- function(x) {
-  h <- 2 * IQR(x) * length(x)^(-1/3)
-  k <- ceiling(diff(range(x))/h)
+  h <- 2 * IQR(x) * length(x)^(-1/3) # Width of each bin
+  k <- ceiling(diff(range(x))/h) # Number of bins of width h that you can split the data into
   return(k)
 }
 
@@ -127,7 +127,23 @@ close(pb)
 all_stats_freed <- do.call('rbind', all_stats_freed)
 write.csv(all_stats_freed, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/proofofconceptstatsfreed.csv', row.names = FALSE)
 
+all_stats_freed <- read.csv('C:/Users/Q/Dropbox/projects/nasabiodiv/code/proofofconceptstatsfreed.csv', stringsAsFactors = FALSE)
+
+library(cowplot)
+
 ggplot(all_stats_freed, aes(x = sd, y = richness)) +
+  geom_point() +
+  facet_wrap(~ radius) +
+  stat_smooth(method = lm, color = 'red', se = FALSE) +
+  panel_border(colour = 'black')
+
+ggplot(all_stats_freed, aes(x = sd, y = diversity)) +
+  geom_point() +
+  facet_wrap(~ radius) +
+  stat_smooth(method = lm, color = 'red', se = FALSE) +
+  panel_border(colour = 'black')
+
+ggplot(all_stats_freed, aes(x = richness, y = diversity)) +
   geom_point() +
   facet_wrap(~ radius) +
   stat_smooth(method = lm, color = 'red', se = FALSE) +
