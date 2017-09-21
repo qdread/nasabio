@@ -1,34 +1,51 @@
 ---
 title: "Elevation variability as diversity"
 author: "Quentin D. Read"
-date: "September 19, 2017"
+date: "September 21, 2017"
 output: pdf_document
 ---
 
 This is a follow-up on the discussion we had on September 18 about whether it is possible or appropriate to run diversity calculations on continuous environmental variables within a region. This gets into a semantic debate about whether geodiversity can be conceptualized the same way as diversity of biological organisms, that is, as discrete entities making up communities. Full disclosure: I don't think this is an appropriate way of thinking about variation in continous variables on the landscape. I think it is a fine approach to calculate diversity metrics for discrete landscape variables but that we should not try to make continuous variables like temperature and elevation into discrete variables on which we can calculate diversity. In my opinion things like standard devation or CV are good measures of geodiversity because they represent the variability of a geological variable on the landscape. Pairwise distance among sites is good too, because it's similar to standard deviation. However I tried to convert elevation to a discrete variable and calculate diversity on it to see what it would look like; here are some of the observations I made.
 
-The most important issue when it comes to calculating diversity of something like elevation is that you have to decide how to round it to turn it into a discrete variable that can be binned. That's basically the same issue as creating a histogram. There are some rules about how many bins a histogram should have, so I decided to apply a well-known rule, the Freedman-Diaconis (F-D) rule, to determine how many bins to split the elevation data into and then calculate diversity on it. If we use this same rule every time to determine the number of bins, it could at least avoid the problem that the choice of number of bins is arbitrary and can be used to get whatever diversity value you want. The Freedman-Diaconis rule is $h = 2 \frac {IQR(x)}{n^{1/3}}$, where $h$ is the width of each bin, $IQR$ is the interquartile range of the data $x$, and $n$ is the number of values in the data. There are a few other rules but this one works best for large sample sizes.
+The most important issue when it comes to calculating diversity of something like elevation is that you have to decide how to round it to turn it into a discrete variable that can be binned. That's basically the same issue as creating a histogram. There are some rules about how many bins a histogram should have, but they are pretty dependent on sample size so we would probably still need to pick how finely to round the values and use that same value across all scales.
 
-This is the F-D rule implemented in R to return the number of bins.
+I took a small subset of the FIA points in Oregon and extracted 90-meter elevation data around the point for 5 different radii: 5, 10, 20, 50, and 100 km. First I calculated the standard deviation of the pixel values in each circle. Next I rounded the elevation pixel values to the nearest 0.01, 0.1, 1, 10, and 100. I found the richness (number of unique values) and diversity (Shannon entropy) for those discretized values. I used the following code.
 
-```{r}
-freedman_rule <- function(x) {
-  h <- 2 * IQR(x) * length(x)^(-1/3) # Width of each bin
-  k <- ceiling(diff(range(x))/h) # Number of bins of width h that you can split the data into
-  return(k)
-}
-```
-
-I extracted some 90-m resolution elevation data for a small subsample of FIA points in Oregon at a few different circle sizes and calculated the standard deviation of elevation, number of bins (richness), and Shannon diversity calculated on the binned values, using this function:
-
-```{r}
-summ_stats_freedman <- function(dat) {
+```{r, eval = FALSE}
+summ_stats <- function(dat, truncations) {
   require(vegan)
   dat <- na.omit(dat)
-  n_breaks <- freedman_rule(dat)
-  dat_table <- as.numeric(table(cut(dat, breaks = n_breaks)))
-  
-  data.frame(richness = length(dat_table), diversity = diversity(dat_table, index = 'shannon'), sd = sd(dat))
+  richnesses <- sapply(truncations, 
+                       function(x) length(unique(plyr::round_any(dat, x))))
+  diversities <- sapply(truncations, 
+                        function(x) diversity(table(plyr::round_any(dat, x)), index = 'shannon'))
+  sds <- sd(dat)
+  data.frame(truncation = truncations, richness = richnesses, diversity = diversities, sd = sds)
 }
+
+for (i in 1:length(radii)) {
+  er <- extract(r, fiacoords[,c('lon','lat')], buffer = radii[i] * 1000)
+  stat_r <- lapply(er, summ_stats, truncations = c(0.01, 0.1, 1, 10, 100))
+  all_stats[[length(all_stats) + 1]] <- data.frame(radius = radii[i], 
+                                                   lat = rep(fiacoords$lat, each=5), 
+                                                   lon=rep(fiacoords$lon, each=5), 
+                                                   do.call('rbind', stat_r))
+}
+
 ```
 
+\newpage
+![Richness versus standard deviation for each radius and rounding level](/Users/Q/google_drive/NASABiodiversityWG/Figures/elevation_richness_stdev.png)
+
+\newpage
+![Diversity versus standard deviation for each radius and rounding level](/Users/Q/google_drive/NASABiodiversityWG/Figures/elevation_diversity_stdev.png)
+
+\newpage
+We can observe the following:
+
+* Richness and diversity are well correlated with the standard deviation regardless of what rounding is used though it varies with radius.
+* At higher radii there is little variation in richness and diversity regardless of what rounding is used.
+* The rounding has to be fairly fine or you don't see much variability.
+* The $R^2$ values are different at different radii. At small radii they are high, at 20 km they are low, at 50 km they are high again, and then at 100 km since there is so little variation in richness or diversity they are nearly zero (as would be expected if all y-values are roughly equal).
+
+Overall I would say that this shows that calculating richness and diversity captures similar information to the standard deviation but might have some weird artifacts (especially the inability to detect variation at very large radii) so I would recommend against doing it.

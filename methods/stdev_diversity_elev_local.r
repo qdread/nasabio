@@ -50,17 +50,21 @@ library(cowplot)
 all_stats <- do.call('rbind', all_stats)
 write.csv(all_stats, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/proofofconceptstats.csv', row.names = FALSE)
 
-ggplot(all_stats, aes(x = sd, y = richness)) +
-  geom_point() +
-  facet_grid(truncation ~ radius) +
-  stat_smooth(method = lm, color = 'red', se = FALSE) +
-  panel_border(colour = 'black')
+all_stats <- read.csv('C:/Users/Q/Dropbox/projects/nasabiodiv/code/proofofconceptstats.csv', stringsAsFactors = FALSE)
 
-ggplot(all_stats, aes(x = sd, y = diversity)) +
+psdrich <- ggplot(all_stats, aes(x = sd, y = richness)) +
   geom_point() +
   facet_grid(truncation ~ radius) +
   stat_smooth(method = lm, color = 'red', se = FALSE) +
-  panel_border(colour = 'black')
+  panel_border(colour = 'black') +
+  theme(strip.background = element_blank())
+
+psddiv <- ggplot(all_stats, aes(x = sd, y = diversity)) +
+  geom_point() +
+  facet_grid(truncation ~ radius) +
+  stat_smooth(method = lm, color = 'red', se = FALSE) +
+  panel_border(colour = 'black') +
+  theme(strip.background = element_blank())
 
 # Calculate R^2
 all_r2 <- all_stats %>%
@@ -73,6 +77,19 @@ all_r2 <- all_stats %>%
 # 2. (Trivially) as the rounding threshold becomes more coarse, you end up with basically no variation in richness or diversity, regardless of the true variation in the elevations.
 # 3. The relationship between sd and richness, and between sd and diversity, is different at different radii. I believe this is an artifact of the number of data points in each radius.
 
+# Try to add extra label above and to the right of facets
+
+source('facetCategoryLabels.r')
+
+png('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/elevation_richness_stdev.png', height = 9, width = 9, res = 300, units = 'in')
+facetCategoryLabels(psdrich, 'Round to nearest', 'Radius (km)', background = FALSE, font_size = 14)
+dev.off()
+
+png('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/elevation_diversity_stdev.png', height = 9, width = 9, res = 300, units = 'in')
+facetCategoryLabels(psddiv, 'Round to nearest', 'Radius (km)', background = FALSE, font_size = 14)
+dev.off()
+
+# Histogram binning rules -------------------------------------------------
 
 # Histogram rules applied to one vector of elevation data
 # Return number of bins
