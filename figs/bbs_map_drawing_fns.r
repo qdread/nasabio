@@ -1,5 +1,6 @@
 # Functions for BBS map drawing
 # QDR 14 Sep 2017
+# Last modified 21 Sep 2017 (ensure 2 columns)
 
 # This will plot maps with the given radius.
 # A single row won't work well for BBS, because it's the whole US.
@@ -21,7 +22,7 @@ draw_bbs_map <- function(dat, zvar, colscale, by_rad = TRUE,
                              fp = '~', fname = 'plot.png', write_to_file = TRUE, img_h = 7, img_w = 12) {
   the_map <- ggplot(dat, aes(x = lon, y = lat))
   if (by_rad) {
-    the_map <- the_map + facet_wrap(~ radius, labeller = labeller(radius = function(x) paste(as.integer(x)/1000, 'km')))
+    the_map <- the_map + facet_wrap(~ radius, ncol = 2, labeller = labeller(radius = function(x) paste(as.integer(x)/1000, 'km')))
   }
   the_map <- the_map +
     borders('world', 'canada', fill = 'gray90') +

@@ -7,6 +7,7 @@ library(rstan)
 
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/occmod_workspace.r')
 occ_model <- stan_model(file='occupancy/occmod_v2.stan')
+occ_model_v3 <- stan_model(file='occupancy/occmod_v3.stan')
 
 yr <- 1997 # Test year: 1997
 
@@ -29,6 +30,11 @@ sp.data <- list(nspec=dim(X_subset)[3], nsite=dim(X_subset)[1], nrep=dim(X_subse
 # Test sampling a very small number of iterations. 
 occ_stanfit <- sampling(occ_model, data = sp.data, chains = 1, iter = 200, warmup = 100, thin = 1, init = 0.1)
 # It didn't give any rejection messages, so it seems like the 
+
+# Must load bayesplot because ggplot2 is no longer compatible with rstan.
+library(bayesplot)
+draws <- as.array(occ_stanfit, pars=c('u[101]','v[101]','mu_v[101]'))
+mcmc_trace(draws)
 
 # Test sampling a small number of iterations with a very big dataset.
 
