@@ -1,11 +1,12 @@
 # Fit occupancy model with same toy dataset in stan instead of jags.
+# Update 21 Sep 2017: new version of occupancy model.
 
 rm(list = ls())
 library(dplyr)
 library(rstan)
 
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/occmod_workspace.r')
-occ_model <- stan_model(file='occupancy/occmod.stan')
+occ_model <- stan_model(file='occupancy/occmod_v2.stan')
 
 yr <- 1997 # Test year: 1997
 
@@ -21,7 +22,7 @@ set.seed(5156)
 elev_subset <- sample(elev[!is.na(elev)], sites_to_sample)
 X_subset <- X[names(elev_subset), ,]
 
-sp.data <- list(nspec=dim(X_subset)[3], nsite=dim(X_subset)[1], nrep=dim(X_subset)[2], npred=1, X=X_subset, preds=matrix(as.numeric(scale(elev_subset)), ncol = 1))
+sp.data <- list(nspec=dim(X_subset)[3], nsite=dim(X_subset)[1], nrep=dim(X_subset)[2], X=X_subset)
 
 # Here, no attempt is made to set reasonable initial values. If it doesn't work well, we can change that.
 
