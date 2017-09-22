@@ -1,0 +1,84 @@
+---
+title: "SAR slope and geodiversity"
+author: "Quentin D. Read"
+date: "September 21, 2017"
+output: pdf_document
+---
+
+**Modified 22 September**: Added some new plots at the end of the document, and changed point plots to colored density plots.
+
+Scott suggested using methods similar to a paper by Gerstner et al. (2014, in *Diversity & Distributions*), to look at the relationship between the species-area slope and geodiversity. The species-area relationship is $S = cA^z$, or $\log S = c + z \log A$. Here is my attempt to look at the relationship between SAR slope of FIA plots and geodiversity. I threw this together very quickly so please critique the method. First, I used the gamma-diversity values for each FIA plot at increasing radii (the total richness in a bunch of concentric circles around each point) to fit the SAR at every point in the FIA Pacific Northwest region. I extracted the $z$ slope coefficients from those regressions. The circles used to fit the SAR go up to 500 km around each point. However I was not sure what to use as the predictor variable for geodiversity in the regression, since we have elevation variability at a lot of different radii. So for now I just regressed the SAR slope againt the different elevation standard deviations that I calculated earlier, to see where the relationship is the strongest.
+
+Here is the function I used to fit the SARs.
+
+```{r}
+# Function to fit SAR (S = cA^z), return intercept, slope, and R^2
+fit_sar <- function(A, S) {
+  sar <- lm(I(log(S)) ~ I(log(A)))
+  rsq <- summary(sar)$r.sq
+  return(data.frame(c = sar$coef[1], z = sar$coef[2], r.squared = rsq))
+}
+```
+
+Here I fit the SAR to all the FIA points.
+
+```{r, message = FALSE, warning = FALSE, results = 'hide'}
+# Load gamma diversity and elevational diversity
+fia_gamma <- read.csv('C:/Users/Q/Dropbox/projects/nasabiodiv/fia_gammadiv.csv', 
+                      stringsAsFactors = FALSE)
+ed <- read.csv('C:/Users/Q/Dropbox/projects/nasabiodiv/fia_elev_stats_noalaska.csv', 
+               stringsAsFactors = FALSE)
+
+
+library(dplyr)
+
+fia_sars <- fia_gamma %>%
+  mutate(area = pi * radius^2) %>%
+  filter(richness > 0) %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT, lat, lon) %>%
+  do(fit_sar(A = .$area, S = .$richness))
+```
+
+\newpage
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.ext='png'}
+library(cowplot)
+
+fsc <- scale_fill_gradientn(colours = colorRampPalette(RColorBrewer::brewer.pal(9, 'YlOrRd'), bias=2)(10))
+
+ed %>%
+  filter(radius >= 5) %>%
+  left_join(fia_sars) %>%
+  ggplot(aes(x = sd_elev, y = z)) +
+    geom_hex() + fsc +
+    stat_smooth(color = 'black', method = 'lm') +
+    facet_wrap(~ radius, labeller = labeller(radius = function(x) paste(x, 'km'))) +
+    panel_border(colour = 'black') +
+    theme(strip.background = element_blank()) +
+    scale_x_continuous(breaks = c(0,500,1000)) +  
+    labs(x = 'Standard deviation of elevation', y = 'z (slope of SAR)')
+```
+
+This plot has linear fits and looks like the SAR slope is lower where elevational variability is higher. Species are accumulating more slowly with increasing area in more geodiverse areas--this is regardless of what radius we use to characterize geodiversity. That is interesting and not really what I would have predicted. However the R-squared values are all 0.2 or less.
+
+\newpage
+## Relationship between slope, intercept, and local richness
+
+It's probably the case that the slope and intercept of the SAR are related, as Andrew suggested. It turns out they are extremely closely related because the circles used to create the SAR for each point all overlap and end up having the same global richness asymptote. So the SAR for a given point has to either have a high intercept, or a steep slope, to reach that same asymptote. You can see that this is the case in this figure relating the slope to the intercept:
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.ext='png', fig.height=3, fig.width=3}
+ggplot(fia_sars, aes(x = c, y = z)) +
+  geom_point() +
+  labs(x = 'c (intercept)', y = 'z (slope)')
+```
+
+This made me think that we are basically just reproducing a relationship with the local richness of each plot, because the intercept will be higher if there's a higher local richness. Here is the intercept plotted against the richness of the smallest circle (5 km) which seems to show that this is the case.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.ext='png', fig.height=3, fig.width=3}
+fia_gamma %>%
+  filter(radius == 5) %>%
+  left_join(fia_sars) %>%
+  ggplot(aes(x = richness, y = c)) +
+  geom_point() +
+  labs(x = 'richness at 5 km', y = 'c (intercept)')
+```

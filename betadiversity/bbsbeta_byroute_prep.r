@@ -3,6 +3,7 @@
 # QDR, 07 Mar 2017
 # Project: NASABioXGeo
 
+# Modification 22 Sep 2017: (1) phylo distance matrix based on a single consensus tree of 1000 samples, (2) make single presence-absence for entire time period 2007-2016.
 # Updated on 31 May 2017: new 2016 routes+coordinates.
 # Modification 05 May 2017: New coordinates (correct)
 # Rereforked on 18 April 2017: Do by route.
@@ -29,22 +30,12 @@ fixedbbsmat_byroute[, which(sppids == 6960)] <- 0
 
 bbsalbers <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
 
-# 4. Create cophenetic distance matrix from bird phylogeny. Use average branch lengths from the ten trees.
+# 4. Create cophenetic distance matrix from bird phylogeny. Use consensus tree calculatd from 1000 trees randomly sampled from the posterior distribution of 10000 trees.
+# (Update 22 sep 2017)
 
 library(ape)
-erictree <- read.nexus('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/bird_phylogeny/ericson1000.tre')
-treeids <- c(716, 566, 377, 568, 977, 141, 104, 194, 944, 67)
-# get distance matrix for each tree.
-ericdistlist <- list()
-for (i in treeids) ericdistlist[[length(ericdistlist) + 1]] <- cophenetic(erictree[[i]])
-
-# sort distance matrices so that the species names in rows and columns are the same for each.
-row_names <- dimnames(ericdistlist[[1]])[[1]]
-column_names <- dimnames(ericdistlist[[1]])[[2]]
-ericdistlist <- lapply(ericdistlist, function(x) x[row_names, column_names])
-
-# take mean phylogenetic distance matrix
-ericdist <- Reduce('+', ericdistlist)/length(ericdistlist)
+eric_cons_tree <- read.tree('/mnt/research/nasabio/data/bbs/ericson_cons.tre')
+ericdist <- cophenetic(eric_cons_tree)
 
 # 5. Create trait distance matrix (Gower) from bird traits.
 
@@ -80,7 +71,7 @@ for (i in 1:length(sppids)) {
 
 dimnames(fixedbbsmat_byroute)[[2]] <- dimnames_matrix
 
-tlabel1 <- erictree[[treeids[1]]]$tip.label
+tlabel1 <- eric_cons_tree$tip.label
 tlabel1 <- gsub('_', ' ', tlabel1)
 
 phymatchidx <- rep(NA,length(tlabel1))
@@ -97,6 +88,8 @@ for (i in 1:length(tlabelaou)) {
 }
 
 dimnames(ericdist)[[1]] <- dimnames(ericdist)[[2]] <- dimnames_tlabel
+
+save(ericdist, birdtraitdist, file = '/mnt/research/nasabio/data/bbs/bbspdfddist.r')
 
 # Remove nocturnal species, rows without coordinates, and rows and columns with zero sum.
 ns <- colSums(fixedbbsmat_byroute)
@@ -142,3 +135,27 @@ bbsnhb_r <- do.call('c', bbsnhb_list$l)
 
 save(bbsnhb_r, bbscov, bbscovmat, fixedbbsmat_byroute, file = '/mnt/research/nasabio/data/bbs/bbsworkspace_byroute.r')
 write.csv(fixedbbsmat_byroute, file = '/mnt/research/nasabio/data/bbs/bbs_plot_matrix.csv', row.names = FALSE)
+
+######
+# Combine 2007-2016 into a single year.
+
+consolidate_years <- function(x) {
+	mat_x <- fixedbbsmat_byroute[x$rowidx, , drop = FALSE]
+	as.numeric(apply(mat_x, 2, sum) > 0)
+}
+
+bbs_consol <- bbscov %>%
+	mutate(rowidx = 1:nrow(bbscov)) %>%
+	filter(year >= 2007) %>%
+	group_by(rteNo, lon, lat, lon_aea, lat_aea) %>%
+	do(x = consolidate_years(.))
+	
+bbsmat_byroute_oneyear <- do.call('rbind', bbs_consol$x)
+dimnames(bbsmat_byroute_oneyear)[[2]] <- dimnames(fixedbbsmat_byroute)[[2]]
+
+bbscov_oneyear <- bbs_consol %>% select(-x)
+bbscovmat_oneyear <- as.matrix(bbscov_oneyear)
+
+bbsnhb_list_oneyear <- getNeighbors(dat = as.data.frame(bbscovmat_oneyear), radius = 5e5)
+
+save(bbsnhb_list_oneyear, bbscov_oneyear, bbscovmat_oneyear, bbsmat_byroute_oneyear, file = '/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
