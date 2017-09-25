@@ -54,7 +54,7 @@ extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbd
 
 # Use precalculated distances to get the stats for the pixels within each radius.
 # idx_r should be loaded
-statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE) {
+statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE, trig = FALSE) {
 	require(raster)
 	if (!file.exists(boxfile)) return(NA)
 	x <- raster(boxfile)
@@ -64,6 +64,8 @@ statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150
 	stats_r <- list()
 	for (r in 1:ncol(idx_r)) {
 		vals_r <- xvals[idx_r[, r], , drop = FALSE]
+
+		if (!trig) {
 		means <- apply(vals_r, 2, mean, na.rm = TRUE)
 		sds <- apply(vals_r, 2, sd, na.rm = TRUE)
 		mins <- apply(vals_r, 2, min, na.rm = TRUE)
@@ -76,6 +78,22 @@ statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150
 								   min = mins,
 								   max = maxes,
 								   n = nums)
+		}
+		if (trig) {
+			sin_r <- sin(pi/180 * vals_r)
+			cos_r <- cos(pi/180* vals_r)
+			stats_r[[r]] <- data.frame(radius = radii[r],
+									   variable = names(xvals),
+									   mean_sin = apply(sin_r, 2, mean, na.rm = TRUE),
+									   sd_sin = apply(sin_r, 2, sd, na.rm = TRUE),
+									   min_sin = apply(sin_r, 2, min, na.rm = TRUE),
+									   max_sin = apply(sin_r, 2, max, na.rm = TRUE),
+									   mean_cos = apply(cos_r, 2, mean, na.rm = TRUE),
+									   sd_cos = apply(cos_r, 2, sd, na.rm = TRUE),
+									   min_cos = apply(cos_r, 2, min, na.rm = TRUE),
+									   max_cos = apply(cos_r, 2, max, na.rm = TRUE),
+									   n = apply(vals_r, 2, function(z) sum(!is.na(z))))
+		}
 	}
 	do.call('rbind', stats_r)	
 }

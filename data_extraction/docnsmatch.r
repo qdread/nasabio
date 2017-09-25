@@ -3,7 +3,8 @@
 # Load fuzzed
 
 library(dplyr)
-fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
+fiapnw <- read.csv('C:/Users/Q/Dropbox/projects/nasabiodiv/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
+#fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
 fiacoords <- fiapnw %>%
   group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
   summarize(lat = LAT_FUZZSWAP[1],
@@ -11,7 +12,8 @@ fiacoords <- fiapnw %>%
 
 # Load unfuzzed
 
-pnw_unf <- read.csv('~/data/pnw.csv', stringsAsFactors = FALSE)
+#pnw_unf <- read.csv('~/data/pnw.csv', stringsAsFactors = FALSE)
+pnw_unf <- read.csv('~/FIA/pnw.csv', stringsAsFactors = FALSE)
 
 pnw_unf <- pnw_unf %>%
 	rename(PLT_CN = CN) %>%
@@ -24,3 +26,20 @@ pnw_dists <- pnw_unf %>%
 
 table(pnw_dists > 1) # Almost all of them are less than 1 km except for 800 plots.
 # However there is something weird where there are a lot more plots in the new versus the old.
+
+
+# Figure out the distribution of plots.
+
+with(fiapnw, nrow(unique(cbind(STATECD, COUNTYCD, PLOT))))
+with(pnw_unf, nrow(unique(cbind(STATECD, COUNTYCD, PLOT))))
+
+matches <- fiacoords$PLT_CN %in% pnw_unf$CN
+
+plot(fiacoords$lon, fiacoords$lat, col = as.numeric(matches))
+with(fiacoords[matches,], plot(lon, lat))
+with(fiacoords[!matches,], plot(lon, lat))
+
+matches2 <- fiapnw$PLT_CN %in% pnw_unf$CN
+
+# The missing plots are all over the place and are distributed kind of randomly
+with(fiapnw[!matches2, ], table(MEASYEAR))

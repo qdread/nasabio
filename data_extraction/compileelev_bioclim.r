@@ -2,6 +2,7 @@
 # BBS and FIA
 # 04 Sep 2017 QDR
 
+# Edited 25 Sep 2017: add biocloud
 # Edited 13 Sep 2017: add geostats (footprint, soil type diversity, and geological age diversity)
 
 library(dplyr)
@@ -9,12 +10,13 @@ library(dplyr)
 ##############################
 # BBS
 
-get_stats <- function(fp, prefix, n, suffix) {
+get_stats <- function(fp, prefix, n, suffix, stacked = FALSE) {
 	file_names <- paste0(prefix, n, suffix)
 	all_stats <- list()
 	for (i in file_names) {
 		load(file.path(fp, i))
-		all_stats[[length(all_stats) + 1]] <- stats_by_point
+		if (!stacked) all_stats[[length(all_stats) + 1]] <- stats_by_point
+		if (stacked) all_stats[[length(all_stats) + 1]] <- lapply(stats_by_point, function(x) do.call('rbind', x))
 	}
 	do.call('c', all_stats)
 }
@@ -22,6 +24,8 @@ get_stats <- function(fp, prefix, n, suffix) {
 bbs_elev_stats <- get_stats('/mnt/research/nasabio/data/bbs/elevstats/30m', 'stats_', 1:1000, '.r')
 bbs_bioclim5k_stats <- get_stats('/mnt/research/nasabio/data/bbs/climstats', 'bioclim5k_', 1:500, '.r')
 bbs_bioclim1k_stats <- get_stats('/mnt/research/nasabio/data/bbs/climstats', 'bioclim1k_', 1:1000, '.r')
+bbs_biocloud5k_stats <- get_stats('/mnt/research/nasabio/data/bbs/climstats', 'biocloud5k_', 1:1000, '.r', stacked = TRUE)
+bbs_biocloud1k_stats <- get_stats('/mnt/research/nasabio/data/bbs/climstats', 'biocloud1k_', 1:1000, '.r', stacked = TRUE)
 bbs_footprint_stats <- get_stats('/mnt/research/nasabio/data/bbs/geostats', 'footprint_', 1:100, '.r')
 bbs_geoage_stats <- get_stats('/mnt/research/nasabio/data/bbs/geostats', 'geoage_', 1:100, '.r')
 bbs_soil_stats <- get_stats('/mnt/research/nasabio/data/bbs/geostats', 'soil_', 1:100, '.r')
@@ -41,7 +45,10 @@ bbs_night_missing <- bbs_night_stats[[1]]
 bbs_night_missing[, 3:7] <- NA
 bbs_dhi_missing <- bbs_dhi_stats[[1]]
 bbs_dhi_missing[, 3:7] <- NA
-
+bbs_cloud5k_missing <- bbs_biocloud5k_stats[[1]]
+bbs_cloud5k_missing[, 3:7] <- NA
+bbs_cloud1k_missing <- bbs_biocloud1k_stats[[1]]
+bbs_cloud1k_missing[, 3:7] <- NA
 
 # geological age and soil type diversity have different column labels, so they will need to be joined differently.
 bbs_geo_missing <- bbs_geoage_stats[[1]]
@@ -56,6 +63,10 @@ for (i in 1:length(bbs_elev_stats)) {
 	bbs_5k_i$variable <- paste0('bio', 1:19, '_5k')
 	bbs_1k_i <- if (class(bbs_bioclim1k_stats[[i]]) == 'data.frame') bbs_bioclim1k_stats[[i]] else bbs_1k_missing
 	bbs_1k_i$variable <- paste0('bio', 1:19,'_1k')
+	bbs_cloud5k_i <- if (class(bbs_biocloud5k_stats[[i]]) == 'data.frame') bbs_biocloud5k_stats[[i]] else bbs_cloud5k_missing
+	bbs_cloud5k_i$variable <- rep(paste0('biocloud', 1:8, '_5k'), each = 8)
+	bbs_cloud1k_i <- if (class(bbs_biocloud1k_stats[[i]]) == 'data.frame') bbs_biocloud1k_stats[[i]] else bbs_cloud1k_missing
+	bbs_cloud1k_i$variable <- rep(paste0('biocloud', 1:8, '_1k'), each = 8)
 	bbs_elev_i <- data.frame(radius = bbs_elev_stats[[i]][,'radius'], variable = 'elevation', bbs_elev_stats[[i]][,c('mean','sd','min','max')], n = NA)
 	bbs_foot_i <- if(class(bbs_footprint_stats[[i]]) == 'data.frame') bbs_footprint_stats[[i]] else bbs_foot_missing
 	bbs_foot_i$variable <- 'human_footprint'
@@ -68,7 +79,7 @@ for (i in 1:length(bbs_elev_stats)) {
 	bbs_dhi_i <- if(class(bbs_dhi_stats[[i]]) == 'data.frame') bbs_dhi_stats[[i]] else bbs_dhi_missing
 	bbs_dhi_i$variable <- rep(c('dhi_fpar', 'dhi_gpp', 'dhi_lai8', 'dhi_ndvi'), each = 8)
 	
-	bbs_all_stats[[i]] <- full_join(cbind(bbsll[i,], rbind(bbs_elev_i, bbs_5k_i, bbs_1k_i, bbs_foot_i, bbs_night_i, bbs_dhi_i)),
+	bbs_all_stats[[i]] <- full_join(cbind(bbsll[i,], rbind(bbs_elev_i, bbs_5k_i, bbs_1k_i, bbs_cloud5k_i, bbs_cloud1k_i, bbs_foot_i, bbs_night_i, bbs_dhi_i)),
 									cbind(bbsll[i,], rbind(bbs_geo_i, bbs_soil_i)))
 }
 
@@ -83,6 +94,8 @@ write.csv(bbs_all_stats, file = '/mnt/research/nasabio/data/bbs/bbs_geodiversity
 fia_elev_stats <- get_stats('/mnt/research/nasabio/data/fia/elevstats/newslice', 'stats_', 1:5000, '.r')
 fia_bioclim5k_stats <- get_stats('/mnt/research/nasabio/data/fia/climstats', 'bioclim5k_', 1:1000, '.r')
 fia_bioclim1k_stats <- get_stats('/mnt/research/nasabio/data/fia/climstats', 'bioclim1k_', 1:5000, '.r')
+fia_biocloud5k_stats <- get_stats('/mnt/research/nasabio/data/fia/climstats', 'biocloud5k_', 1:1000, '.r', stacked = TRUE)
+fia_biocloud1k_stats <- get_stats('/mnt/research/nasabio/data/fia/climstats', 'biocloud1k_', 1:5000, '.r', stacked = TRUE)
 fia_footprint_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'footprint_', 1:250, '.r')
 fia_geoage_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'geoage_', 1:250, '.r')
 fia_soil_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'soil_', 1:250, '.r')
@@ -101,6 +114,10 @@ fia_5k_missing <- fia_bioclim5k_stats[[10001]]
 fia_5k_missing[, 3:7] <- NA
 fia_1k_missing <- fia_bioclim1k_stats[[10001]]
 fia_1k_missing[, 3:7] <- NA
+fia_cloud5k_missing <- fia_biocloud5k_stats[[10001]]
+fia_cloud5k_missing[, 3:7] <- NA
+fia_cloud1k_missing <- fia_biocloud1k_stats[[10001]]
+fia_cloud1k_missing[, 3:7] <- NA
 fia_elev_missing <- fia_elev_stats[[10001]]
 fia_elev_missing[, 3:7] <- NA
 fia_foot_missing <- fia_footprint_stats[[10001]]
@@ -123,6 +140,11 @@ for (i in 1:length(fia_elev_stats)) {
 	fia_5k_i$variable <- paste0('bio', 1:19)
 	fia_1k_i <- if (class(fia_bioclim1k_stats[[i]]) == 'data.frame') fia_bioclim1k_stats[[i]] else fia_1k_missing
 	fia_1k_i$variable <- paste0('bio', 1:19,'_1k')
+	fia_cloud5k_i <- if (class(fia_biocloud5k_stats[[i]]) == 'data.frame') fia_biocloud5k_stats[[i]] else fia_cloud5k_missing
+	fia_cloud5k_i$variable <- rep(paste0('biocloud', 1:8, '_5k'), each = 11)
+	fia_cloud1k_i <- if (class(fia_biocloud1k_stats[[i]]) == 'data.frame') fia_biocloud1k_stats[[i]] else fia_cloud1k_missing
+	fia_cloud1k_i$variable <- rep(paste0('biocloud', 1:8, '_1k'), each = 11)
+
 	fia_elev_i <- if(class(fia_elev_stats[[i]]) == 'data.frame') fia_elev_stats[[i]] else fia_elev_missing
 	fia_elev_i$variable <- 'elevation'
 	fia_foot_i <- if(class(fia_footprint_stats[[i]]) == 'data.frame') fia_footprint_stats[[i]] else fia_foot_missing
@@ -137,7 +159,7 @@ for (i in 1:length(fia_elev_stats)) {
 	fia_dhi_i$variable <- rep(c('dhi_fpar', 'dhi_gpp', 'dhi_lai8', 'dhi_ndvi'), each = 13)
 	
 
-	fia_all_stats[[i]] <- full_join(cbind(fiall[i,], rbind(fia_elev_i, fia_5k_i, fia_1k_i, fia_foot_i, fia_night_i, fia_dhi_i)),
+	fia_all_stats[[i]] <- full_join(cbind(fiall[i,], rbind(fia_elev_i, fia_5k_i, fia_1k_i, fia_cloud5k_i, fia_cloud1k_i, fia_foot_i, fia_night_i, fia_dhi_i)),
 									cbind(fiall[i,], rbind(fia_geo_i, fia_soil_i)))
 }			
 
