@@ -27,6 +27,10 @@ pnw_dists <- pnw_unf %>%
 table(pnw_dists > 1) # Almost all of them are less than 1 km except for 800 plots.
 # However there is something weird where there are a lot more plots in the new versus the old.
 
+pnw_unf$fuzzdist <- NA
+pnw_unf$fuzzdist[!is.na(pnw_unf$lon)] <- as.numeric(pnw_dists$dist)
+
+table(pnw_unf$INVYR[pnw_unf$fuzzdist > 10])
 
 # Figure out the distribution of plots.
 
