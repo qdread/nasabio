@@ -151,3 +151,12 @@ plot3x3 <- ggplot(plotdat %>% mutate(diversity=factor(diversity,levels=c('alpha'
   scale_y_continuous(name = 'Taxonomic diversity', expand = c(0,0))
 
 ggsave(file.path(fpfig, 'plot_3x3.png'), plot3x3, height = fig_h - 2, width = fig_w, dpi = 400)  
+
+# R-squared values from GAM fits.
+library(mgcv)
+
+gamr2s <- plotdat %>%
+  group_by(radius, diversity) %>%
+  summarize(r2 = summary(gam(value ~ sd))$r.sq)
+
+write.csv(gamr2s, file.path(fpfig, 'r2s.csv'), row.names = FALSE)

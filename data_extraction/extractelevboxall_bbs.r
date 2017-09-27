@@ -1,4 +1,4 @@
-n_slices <- 1000
+n_slices <- 2000 
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 namepart1 <- '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_'
 namepart2 <- '_big.vrt'
@@ -28,7 +28,7 @@ for (j in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, j)
 	stats_j <- list()
 	for (k in 1:length(varname)) {
-	istrig <- ifelse(varname == 'aspect', TRUE, FALSE)
+	istrig <- ifelse(varname[k] == 'aspect', TRUE, FALSE)
 	extractBox(coords = with(bbsll, cbind(lon, lat))[j,,drop=FALSE],
 		   raster_file = paste0(namepart1, varname[k], namepart2),
 		   radius = 300,
@@ -43,4 +43,4 @@ stats_by_point[[length(stats_by_point) + 1]] <- stats_j
 
 close(pb)
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/elevstats/big30m/stats_',slice,'.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/bbs/elevstats/big30m/stats_',slice,'.r'))
