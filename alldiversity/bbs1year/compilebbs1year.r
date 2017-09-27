@@ -46,6 +46,7 @@ bbs_gammadiv <- list()
 
 for (i in radii) {
 	load(paste0('/mnt/research/nasabio/data/bbs/diversity1year/gamma',i,'.r'))
+	gamma_div <- cbind(radius = i, gamma_div)
 	bbs_gammadiv[[length(bbs_gammadiv) + 1]] <- gamma_div
 }
 

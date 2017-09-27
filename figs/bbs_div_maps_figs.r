@@ -346,6 +346,6 @@ bbs_xy_plot <- function(xdat, xvar, ydat, yvar, xlims, xbreaks, ylims, ybreaks, 
     scale_x_continuous(name = xname, limits=xlims, breaks=xbreaks) +
     scale_y_continuous(name = yname, limits=ylims, breaks=ybreaks, expand = c(0,0)) +
     theme(strip.background = element_blank()) +
-    panel_border(colour='black') +
+    panel_border(colour='black')
 }
 
