@@ -50,7 +50,7 @@ for (i in radii) {
 	bbs_gammadiv[[length(bbs_gammadiv) + 1]] <- gamma_div
 }
 
-bbs_gamma <- cbind(bbs_alphadiv[rep(1:nrow(bbs_alphadiv), each=8),c('rteNo','lon','lat','lon_aea','lat_aea')], do.call('rbind', bbs_gammadiv))
+bbs_gamma <- cbind(bbs_alphadiv[,c('rteNo','lon','lat','lon_aea','lat_aea')], do.call('rbind', bbs_gammadiv))
 
 write.csv(bbs_gamma, file = '/mnt/research/nasabio/data/bbs/bbs_gamma_1year.csv', row.names = FALSE)
 
