@@ -1,0 +1,184 @@
+---
+title: "Stratified random subsampling of circles"
+author: "Quentin D. Read"
+date: "October 5, 2017"
+output: pdf_document
+---
+
+# Algorithm
+
+This document is motivated by the idea that we need to avoid spatial pseudoreplication in the NASABIOXGEO project when we are looking at large spatial radii around BBS and FIA points to find the biodiversity and geodiversity at the target point. Although it's clear that local points are influenced by things going on at large spatial scales around them, if we put all the BBS or FIA points into a regression, we are using the same neighboring plots or pixels over and over to calculate biodiversity and geodiversity. A possible way of dealing with that would be to do stratified random subsampling so that we are sure to get a subset of points that satisfy these two conditions: (1) they cover the area as evenly possible and (2) if we draw a circle with a given radius centered at each point, none of them overlap. I've coded up the following algorithm to sample the points:
+
+1. Decide $r$, the radius of the biggest circle we want to investigate. This might be 100 km or even greater. 
+2. Decide $n$, how many points you want to sample (though it might not be possible to sample that many).
+3. Generate a hexagonal grid covering the entire region of interest. I think hexagons are better than squares in this case because it will let us pack circles in more tightly and waste less space in buffer zones. Also, it looks like a Settlers of Catan board. See `strimas.com/spatial/hexagonal_grids` for some background; that page also has some code that I used to generate the grid. The diameter of the hexagons $d$ has to be decided here: the bigger $d$ is, the fewer points we can sample because there are fewer hexagons and we will only get 1 point per hexagon, but the smaller $d$ is, the more space will be taken up by buffer zones and therefore the fewer points we will actually be able to sample because too many will overlap with the buffer zone. I determined from some simulation not shown here that the best value of $d$ is about $2.75r$.
+4. For each focal point (BBS route centroid or FIA plot), find the distance from that point to the edge of the hexagon containing it.
+5. If the distance from a point to the edge of its hexagon is greater than $r$, there's a possibility that its circle might overlap another point, so throw out those points.
+6. From the remaining points, randomly choose one per hexagon. Many hexagons will contain 0 points.
+7. If you have equal to or less than $n$ points, you are now done. If not, randomly sample $n$ points.
+8. Repeat this process with a new hexagonal grid randomly offset by a small amount, to make it possible to get different points.
+
+\newpage
+# Implementation
+
+Here is the code I've written to implement the above algorithm. The required inputs are the sampling region, the list of focal points, the radius of the biggest circle we want to investigate, the number of points we want to sample, and the diameter of the hexagons.
+
+First here is a function written by Matt Strimas-Mackey to impose a hexagonal grid on a polygon.
+
+```{r}
+make_hex_grid <- function(x, cell_diameter, cell_area, clip = FALSE, center_offset = c(0.5, 0.5)) {
+  require(sp)
+  require(raster)
+  require(rgeos)
+  if (missing(cell_diameter)) {
+    if (missing(cell_area)) {
+      stop("Must provide cell_diameter or cell_area")
+    } else {
+      cell_diameter <- sqrt(2 * cell_area / sqrt(3))
+    }
+  }
+  ext <- as(extent(x) + cell_diameter, "SpatialPolygons")
+  projection(ext) <- projection(x)
+  # generate array of hexagon centers
+  g <- spsample(ext, type = "hexagonal", cellsize = cell_diameter, 
+                offset = center_offset)
+  # convert center points to hexagons
+  g <- HexPoints2SpatialPolygons(g, dx = cell_diameter)
+  # clip to boundary of study area
+  if (clip) {
+    g <- gIntersection(g, x, byid = TRUE)
+  } else {
+    g <- g[x, ]
+  }
+  # clean up feature IDs
+  row.names(g) <- as.character(1:length(g))
+  return(g)
+}
+```
+
+Next, here is the function to do the SRS. You need to supply the polygon (for BBS it will be the boundaries of the USA), the list of points, the radius (diameter of hexagons is 2.75 times the radius if not specified), the number of samples you want, and the offset. The polygon and points should be SpatialPolygons and SpatialPoints objects in the Albers grid CRS. The radius should be in meters, and the offset should be a vector of two numbers between 0 and 1. It returns a vector of integers which are the indices of the sampled points in the originally provided SpatialPoints object. If it is impossible to reach the desired sample size, the smaller vector is returned with a warning.
+
+```{r, tidy = TRUE}
+SRS_hexagons <- function(region, focal_points, radius, n, hex_diameter = NULL, offset = NULL) {
+  
+  # If diameter and offset aren't specified, create them.
+  if (is.null(hex_diameter)) {
+    hex_diameter <- radius * 2.75
+  }
+  if (is.null(offset)) {
+    offset <- c(0.5, 0.5)
+  }
+  
+  # Superimpose hexagonal grid on the region polygon
+  hex_grid <- make_hex_grid(x = region, cell_diameter = hex_diameter, clip = FALSE, center_offset = offset)
+  
+  # Find which hexagon each point is in
+  inhex <- over(focal_points, hex_grid)
+  
+  # Convert polygons to lines so that the distance is calculated properly
+  hex_asline <- as(hex_grid, 'SpatialLines')
+  
+  # Distance from point to edge of hexagon
+  # Add error checker because a few points might not be in a hexagon for some odd reason
+  edge_dists <- sapply(1:length(focal_points), function(i) tryCatch(gDistance(focal_points[i], hex_asline[inhex[i]]), error = function(e) NA))
+  
+  # Throw out points that are too close to the edge of a hexagon
+  use_points <- edge_dists >= radius & !is.na(edge_dists)
+  
+  # If none are left, return NA with a warning.
+  if (sum(use_points) == 0) {
+    warning('There are no valid points!')
+    return(NA)
+  }
+  
+  # Subsample so that only one point per hexagon remains
+  unique_hex <- unique(inhex[use_points])
+  
+  final_points <- sort(sapply(unique_hex, function(i) as.numeric(sample(names(inhex[inhex==i & use_points]), size=1))))
+  
+  # If there are less than n points, return the points with a warning.
+  if (length(final_points) < n) {
+    warning('Final number of points is less than n.')
+    return(final_points)
+  }
+  
+  # Otherwise, take a sample of size n of the remaining points.
+  final_points <- sort(sample(final_points, size=n, replace=FALSE))
+  return(final_points)
+  
+}
+```
+
+\newpage
+# Example
+
+As a demonstration, let's take a sample of BBS points with 100-km radii that don't overlap. 
+
+```{r, tidy=TRUE, fig.show='hide', message=FALSE}
+# Load USA boundaries
+library(sp)
+library(maps)
+library(maptools)
+library(raster)
+library(rgeos)
+
+usabounds <- map('usa', fill=TRUE)
+usaIDs <- sapply(strsplit(usabounds$names, ":"), function(x) x[1])
+usapoly <- map2SpatialPolygons(usabounds, IDs = usaIDs, proj4string=CRS("+proj=longlat"))
+
+# Transform USA polygon to a grid reference system, using our Albers projection.
+aea_crs <- '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0'
+usapoly <- spTransform(usapoly, CRSobj = CRS(aea_crs))
+
+# Make bounding box of USA.
+usa_bbox <- as(extent(usapoly), 'SpatialPolygons')
+projection(usa_bbox) <- aea_crs
+
+# Create SpatialPoints objects from BBS centroids
+bbsll <- read.csv('C:/Users/Q/Dropbox/projects/nasabiodiv/bbs_correct_route_centroids.csv')
+bbs_aea <- SpatialPoints(coords=bbsll[,c('lon.1','lat.1')], proj4string = CRS(aea_crs))
+
+# Make a hexagonal grid with 275km diameter.
+usa_hex <- make_hex_grid(x = usa_bbox, cell_diameter = 275e3, clip = FALSE, center_offset = c(0.5, 0.5))
+```
+
+\newpage
+As you can see from the first plot, the blue circles (100 km radius) overlap all over the place. Pseudoreplicated much?
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Plot to illustrate
+library(plotrix)
+plot(usa_hex, type='n', main='All BBS points with 100 km radius')
+for (i in 1:nrow(bbsll)) {
+  draw.circle(x = bbsll[i,'lon.1'], y = bbsll[i,'lat.1'], radius=100e3, border='skyblue', lwd=0.5)
+}
+lines(usapoly)
+points(bbs_aea, col = 'red', pch = 19, cex = 0.5)
+lines(usa_hex, col='gray75')
+
+```
+
+\newpage
+Do a stratified random sample and plot the remaining points' locations. I shot for 200 but it seems there are not enough hexagons. Anyway, it does a great job covering the area with no overlaps!
+
+```{r}
+subsample_index <- SRS_hexagons(region = usa_bbox, 
+                                focal_points = bbs_aea, 
+                                radius = 100e3, 
+                                n = 200, 
+                                offset = c(0.5, 0.5))
+
+length(subsample_index)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+plot(usa_hex, type='n', main='Subsample of BBS points with 100 km radius drawn')
+for (i in 1:length(subsample_index)) {
+  draw.circle(x = bbsll[subsample_index[i],'lon.1'], y = bbsll[subsample_index[i],'lat.1'], radius=100e3, border='skyblue', lwd=0.5)
+}
+lines(usapoly)
+points(bbs_aea[subsample_index], col = 'red', pch = 19, cex = 0.5)
+lines(usa_hex, col='gray75')
+```
+
+This can be repeated as many times as you want with a different offset argument and a totally different set of points will be chosen!

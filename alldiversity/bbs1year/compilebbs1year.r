@@ -59,6 +59,21 @@ write.csv(bbs_gamma, file = '/mnt/research/nasabio/data/bbs/bbs_gamma_1year.csv'
 
 # Make an array of route x route x metric.
 
+bbs_betadiv <- list()
+
+for (i in 1:250) {
+	load(paste0('/mnt/research/nasabio/data/bbs/diversity1year/beta_', i, '.r'))
+	bbs_betadiv[[i]] <- beta_div
+}
+
+bbs_betadiv <- do.call('c', bbs_betadiv) # Flatten into one list. # All are 3382 rows x 19 columns.
+
+# Convert this to a 3382 x 3382 x 19 array.
+library(abind)
+bbs_betadiv_array <- abind(bbs_betadiv, along = 0)
+
+save(bbs_betadiv_array, file = '/mnt/research/nasabio/data/bbs/bbs_betadivtdpdfd_array_1year.r')
+
 ########################################################################
 # Beta diversity newer method
 

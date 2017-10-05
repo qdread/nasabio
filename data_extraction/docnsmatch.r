@@ -37,13 +37,18 @@ table(pnw_unf$INVYR[pnw_unf$fuzzdist > 10])
 with(fiapnw, nrow(unique(cbind(STATECD, COUNTYCD, PLOT))))
 with(pnw_unf, nrow(unique(cbind(STATECD, COUNTYCD, PLOT))))
 
-matches <- fiacoords$PLT_CN %in% pnw_unf$CN
+matches <- fiacoords$PLT_CN %in% pnw_unf$PLT_CN
 
 plot(fiacoords$lon, fiacoords$lat, col = as.numeric(matches))
 with(fiacoords[matches,], plot(lon, lat))
 with(fiacoords[!matches,], plot(lon, lat))
 
-matches2 <- fiapnw$PLT_CN %in% pnw_unf$CN
+matches2 <- fiapnw$PLT_CN %in% pnw_unf$PLT_CN
 
 # The missing plots are all over the place and are distributed kind of randomly
 with(fiapnw[!matches2, ], table(MEASYEAR))
+
+# Make list of CNs of the 2089 missing plots and export as CSV
+missingcns <- with(fiacoords[!matches, ], unique(PLT_CN))
+
+write.csv(data.frame(CN = missingcns), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/missingcns.csv', row.names = FALSE)
