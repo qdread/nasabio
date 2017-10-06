@@ -5,7 +5,13 @@ date: "October 5, 2017"
 output: pdf_document
 ---
 
-# Algorithm
+# Modification history
+
+**6 October**: Added code to exclude edge plots and coast plots.
+
+# Method 1: Hexagon grid
+
+## Algorithm
 
 This document is motivated by the idea that we need to avoid spatial pseudoreplication in the NASABIOXGEO project when we are looking at large spatial radii around BBS and FIA points to find the biodiversity and geodiversity at the target point. Although it's clear that local points are influenced by things going on at large spatial scales around them, if we put all the BBS or FIA points into a regression, we are using the same neighboring plots or pixels over and over to calculate biodiversity and geodiversity. A possible way of dealing with that would be to do stratified random subsampling so that we are sure to get a subset of points that satisfy these two conditions: (1) they cover the area as evenly possible and (2) if we draw a circle with a given radius centered at each point, none of them overlap. I've coded up the following algorithm to sample the points:
 
@@ -19,7 +25,7 @@ This document is motivated by the idea that we need to avoid spatial pseudorepli
 8. Repeat this process with a new hexagonal grid randomly offset by a small amount, to make it possible to get different points.
 
 \newpage
-# Implementation
+## Implementation
 
 Here is the code I've written to implement the above algorithm. The required inputs are the sampling region, the list of focal points, the radius of the biggest circle we want to investigate, the number of points we want to sample, and the diameter of the hexagons.
 
@@ -110,7 +116,7 @@ SRS_hexagons <- function(region, focal_points, radius, n, hex_diameter = NULL, o
 ```
 
 \newpage
-# Example
+## Example
 
 As a demonstration, let's take a sample of BBS points with 100-km radii that don't overlap. 
 
@@ -182,3 +188,255 @@ lines(usa_hex, col='gray75')
 ```
 
 This can be repeated as many times as you want with a different offset argument and a totally different set of points will be chosen!
+
+\newpage
+# Method 2: Iterative Search
+
+## Algorithm
+
+This method, suggested by Andy, is pretty simple. You do the following:
+
+1. Decide on your desired sample size $n$ and radius $r$.
+2. Pick a random point from your list of points and add it to the sample.
+3. Out of all the points at least $2r$ distance away from the points in the sample, find the one that's closest to the previously sampled points and add it to the sample.
+4. Repeat step 3 until $n$ is reached or until no points remain to be sampled.
+
+## Implementation
+
+Here is some code to implement the algorithm. The arguments are a SpatialPoints object to sample from (the region isn't needed), optionally a pre-calculated pairwise distance matrix (otherwise the function will calculate the distances), the radius in meters, the desired sample size, and optionally a fixed starting point (otherwise the function will pick one randomly).
+
+```{r, tidy = TRUE}
+SRS_iterative <- function(focal_points, dist_mat = NULL, radius, n, point = NULL) {
+  require(sp)
+  
+  if (is.null(point)) {
+    point <- sample(length(focal_points), 1)
+  }
+  if(is.null(dist_mat)) {
+    dist_mat <- spDists(focal_points, longlat = FALSE)
+  }
+  
+  dimnames(dist_mat) <- list(1:nrow(dist_mat), 1:ncol(dist_mat))
+  
+  final_points <- c()
+  tosample <- rep(TRUE, length(focal_points))
+  s <- 0
+  
+  # Keep going until the desired number of points is reached
+  while(s < n) {
+    final_points <- c(final_points, point)
+    s <- s+1
+    
+    # Cross off all points within 2*radius from the focal point
+    tosample[dist_mat[point, ] < 2*radius] <- FALSE
+    
+    # If none are left, quit.
+    if(!any(tosample)) {
+      warning('Final number of points is less than n.')
+      return(sort(final_points))
+    }
+    
+    # Find shortest distance in the remaining points to any one of the previously chosen points.
+    sub_dist <- dist_mat[final_points, tosample, drop = FALSE]
+    point <- as.integer(dimnames(sub_dist)[[2]][which(sub_dist == min(sub_dist), arr.ind = TRUE)[1,2]])
+  }
+  
+  return(sort(final_points))
+}
+```
+
+\newpage
+## Examples
+
+Here are some examples for a few different radii. I tried to get 500 points each time but this was obviously not possible for the larger radii.
+
+```{r}
+bbs_dist <- spDists(bbs_aea, longlat = FALSE)
+
+subsample_50k <- SRS_iterative(focal_points=bbs_aea, dist_mat=bbs_dist, radius=50e3, n=500)
+subsample_100k <- SRS_iterative(focal_points=bbs_aea, dist_mat=bbs_dist, radius=100e3, n=500)
+subsample_200k <- SRS_iterative(focal_points=bbs_aea, dist_mat=bbs_dist, radius=200e3, n=500)
+subsample_300k <- SRS_iterative(focal_points=bbs_aea, dist_mat=bbs_dist, radius=300e3, n=500)
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+plot(usapoly, main = '50 km radius')
+
+for (i in 1:length(subsample_50k)) {
+  draw.circle(x = bbsll[subsample_50k[i],'lon.1'], y = bbsll[subsample_50k[i],'lat.1'], radius=50e3, border='skyblue', lwd=0.5)
+}
+
+points(bbs_aea[subsample_50k], col = 'red', pch = 19, cex = 0.5)
+
+plot(usapoly, main = '100 km radius')
+
+for (i in 1:length(subsample_100k)) {
+  draw.circle(x = bbsll[subsample_100k[i],'lon.1'], y = bbsll[subsample_100k[i],'lat.1'], radius=100e3, border='skyblue', lwd=0.5)
+}
+
+points(bbs_aea[subsample_100k], col = 'red', pch = 19, cex = 0.5)
+
+plot(usapoly, main = '200 km radius')
+
+for (i in 1:length(subsample_200k)) {
+  draw.circle(x = bbsll[subsample_200k[i],'lon.1'], y = bbsll[subsample_200k[i],'lat.1'], radius=200e3, border='skyblue', lwd=0.5)
+}
+
+points(bbs_aea[subsample_200k], col = 'red', pch = 19, cex = 0.5)
+
+plot(usapoly, main = '300 km radius')
+
+for (i in 1:length(subsample_300k)) {
+  draw.circle(x = bbsll[subsample_300k[i],'lon.1'], y = bbsll[subsample_300k[i],'lat.1'], radius=300e3, border='skyblue', lwd=0.5)
+}
+
+points(bbs_aea[subsample_300k], col = 'red', pch = 19, cex = 0.5)
+```
+
+\newpage
+# Exclusion of edge and coast plots
+
+## Motivation
+
+A related issue to the pseudoreplication issue, and one that may also cause us to throw out plots, is edge effects. If we don't have biodiversity measurements for the entire radius for plots that are near the edge of the study region, we might underestimate gamma-diversity and beta-diversity for those plots at large radii because we are really only looking at a small radius. This is also a phenomenon that would occur along coasts, but that is different than political borders because the gamma-diversity within 100 km of a coastal plot really could be lower than the gamma diversity within 100 km of a landlocked plot. However the land borders really are just artifacts. To address this, I made a function that can flag points as having part of their radius extending into the ocean or into neighboring land areas. The function will work for either the entire USA (for BBS) or for only selected states (for FIA regions).
+
+## Code
+
+First, this function creates one or more hollow polygons for a given region including one or more US states and/or countries. This is used for both the focal region and the adjacent non-focal region.
+
+```{r, tidy = TRUE}
+make_map_polygons <- function(states = character(0), countries = character(0)) {
+  require(maps)
+  require(maptools)
+  require(raster)
+  
+  statepoly <- SpatialPolygons(list(), proj4string=CRS("+proj=longlat"))
+  countrypoly <- SpatialPolygons(list(), proj4string=CRS("+proj=longlat"))
+  
+  if (length(states) > 0) {
+    statebounds <- map('state', regions = tolower(states), fill = TRUE)
+    stateIDs <- sapply(strsplit(statebounds$names, ":"), function(x) x[1])
+    statepoly <- map2SpatialPolygons(statebounds, IDs=stateIDs, proj4string=CRS("+proj=longlat"))
+    # Workaround to deal with the fact that Alaska isn't in the state database
+    if ('alaska' %in% tolower(states)) {
+      usabounds <- map('world', regions = 'usa', fill = TRUE)
+      isak <- sapply(strsplit(usabounds$names, ":"), function(x) x[2])
+      akpoly <- map2SpatialPolygons(usabounds, IDs=isak, proj4string=CRS("+proj=longlat"))['Alaska']
+      statepoly <- bind(statepoly, akpoly)
+    }
+  }
+  
+  if (length(countries) > 0) {
+    countrybounds <- map('world', regions = tolower(countries), fill = TRUE)
+    countryIDs <- sapply(strsplit(countrybounds$names, ":"), function(x) x[1])
+    countrypoly <- map2SpatialPolygons(countrybounds, IDs=countryIDs, proj4string=CRS("+proj=longlat"))
+  }
+  
+  polys <- bind(statepoly, countrypoly)
+  
+}
+
+```
+
+This function flags both coast and edge plots. You need to input the focal points as a SpatialPoints object with Albers projection, and the desired radius in meters. In addition, define the states and/or countries the focal points are in, as well as the states and/or countries bordering the focal region. It will flag plots that are less than the radius distance away from a land border, as well as flagging plots that are near a coast but not near a land border, in case we want to throw those out as well.
+
+```{r, tidy = TRUE}
+# This function will flag coast plots
+# Here coast plots are defined as anything near an ocean that is NOT near a land border
+# So you need to first get the distance to the land borders for each point
+# Then get the distance to the edge of the focal region for each point
+# If the point is not close to the land border, but is close to the edge of the focal region, it's coast
+flag_coast_plots <- function(focal_points, radius, focal_states = 'usa', border_states=character(0), border_countries=character(0)) {
+  require(rgeos)
+  aea_crs <- '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0'
+  # Create single polygon of focal region
+  if (tolower(focal_states[1]) == 'usa') {
+    focalpoly <- make_map_polygons(countries = 'usa')
+  } else {
+    focalpoly <- make_map_polygons(states=tolower(focal_states))
+  }
+  focalpoly <- gBuffer(focalpoly, width = 0)
+  focalpoly <- as(focalpoly, 'SpatialLines')
+  focalpoly <- spTransform(focalpoly, CRSobj = CRS(aea_crs))
+  
+  # Create polygons of bordering regions
+  borderpoly <- make_map_polygons(states=border_states, countries=border_countries)
+  borderpoly <- spTransform(borderpoly, CRSobj = CRS(aea_crs))
+  
+  # Test whether each of the sampling points has a radius that extends into any of the border areas
+  # And test whether it's close to the edge of the focal area
+  edge_distances <- c()
+  coast_distances <- c()
+  for (i in 1:length(focal_points)) {
+    edge_distances[i] <- gDistance(focal_points[i], borderpoly)
+    coast_distances[i] <- gDistance(focal_points[i], focalpoly)
+  }
+  
+  # Return data frame with 3 columns, one is the distance, is_edge is whether it's an edge plot, and is_coast is whether it is a coast plot but not an edge plot.
+  data.frame(edge_distance = edge_distances, 
+             coast_distance = coast_distances, 
+             is_edge = edge_distances < radius,
+             is_coast = edge_distances >= radius & coast_distances < radius)
+  
+}
+
+```
+
+\newpage
+## Examples
+
+### FIA Pacific Northwest region
+
+```{r, tidy = TRUE, fig.show = 'hide', message = FALSE, warning = FALSE}
+library(dplyr)
+fiapnw <- read.csv('C:/Users/Q/Dropbox/projects/nasabiodiv/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
+fiacoords <- fiapnw %>%
+  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
+  summarize(lat = LAT_FUZZSWAP[1],
+            lon = LON_FUZZSWAP[1])
+
+fia_aea <- spTransform(SpatialPoints(coords=fiacoords[,c('lon','lat')], proj4string = CRS('+proj=longlat')), CRSobj = CRS(aea_crs))
+
+fia_coast100 <- flag_coast_plots(focal_points = fia_aea, radius = 100e3, focal_states = c('California','Oregon','Washington','Alaska'), border_states = c('Arizona','Idaho','Nevada'), border_countries = c('Canada', 'Mexico'))
+```
+
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE, fig.show = 'hide'}
+focalpoly_fia <- make_map_polygons(states = c('California','Oregon','Washington'))
+focalpoly_fia <- gBuffer(focalpoly_fia, width = 0)
+focalpoly_fia <- spTransform(focalpoly_fia, CRSobj = CRS(aea_crs))
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+plot(focalpoly_fia, main = 'FIA Pacific Northwest, 100 km buffer')
+points(fia_aea[!fia_coast100$is_edge & !fia_coast100$is_coast], pch=19, cex=0.3, col='green')
+points(fia_aea[fia_coast100$is_edge & !fia_coast100$is_coast], pch=19, cex=0.3, col='red')
+points(fia_aea[!fia_coast100$is_edge & fia_coast100$is_coast], pch=19, cex=0.3, col='blue')
+lines(gBuffer(focalpoly_fia, width = -100e3))
+```
+
+The plot does not show Alaska but the distances were also calculated for Alaska.
+
+\newpage
+### BBS (entire country)
+
+```{r, tidy = TRUE, fig.show='hide', warning = FALSE}
+bbs_coast100 <- flag_coast_plots(focal_points = bbs_aea, radius = 100e3, focal_states = 'USA', border_countries = c('Canada', 'Mexico'))
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE, fig.show = 'hide'}
+usabounds <- map('usa', fill=TRUE)
+usaIDs <- sapply(strsplit(usabounds$names, ":"), function(x) x[1])
+usapoly <- map2SpatialPolygons(usabounds, IDs = usaIDs, proj4string=CRS("+proj=longlat"))
+usapoly <- spTransform(usapoly, CRSobj = CRS(aea_crs))
+```
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+plot(usapoly, main = 'BBS, 100 km buffer')
+points(bbs_aea[!bbs_coast100$is_edge & !bbs_coast100$is_coast], pch=19, cex=0.3, col='green')
+points(bbs_aea[bbs_coast100$is_edge & !bbs_coast100$is_coast], pch=19, cex=0.3, col='red')
+points(bbs_aea[!bbs_coast100$is_edge & bbs_coast100$is_coast], pch=19, cex=0.3, col='blue')
+lines(gBuffer(usapoly, width = -100e3))
+```
+
+The displayed buffer line doesn't quite line up with the retained points on the above image because the Great Lakes do not count as coast for the purpose of throwing out points.
