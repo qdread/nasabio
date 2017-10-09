@@ -160,3 +160,81 @@ gamr2s <- plotdat %>%
   summarize(r2 = summary(gam(value ~ sd))$r.sq)
 
 write.csv(gamr2s, file.path(fpfig, 'r2s.csv'), row.names = FALSE)
+
+
+# Single radius maps ------------------------------------------------------
+
+# Added 09 Oct. 
+# Plot only 75 km radius
+# Fig 1 has 3 diversity types and elevation SD maps (2 columns, one with 3 and one with 1)
+# Fig 2 has 3 diversity type ~ elevation scatterplots.
+
+betamap <- draw_bbs_map(dat = beta_td %>% filter(radius == 75000) %>% arrange(total), zvar = 'total',  
+             the_arrow = small_low_arrow, northlabel = low_north, scalebar = scale_bar,
+             colscale = scale_colour_gradientn(name = 'Taxonomic beta-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9), breaks = c(0,.5,1), limits=c(0,1)),
+             write_to_file = FALSE, img_h = fig_h - 2, img_w = fig_w/2, n_columns = 1, by_rad = FALSE)
+
+ggsave(file.path(fpfig, 'beta_div_75.png'), betamap + theme(legend.title = element_blank(), legend.position = c(0.15, 0.15), legend.key.width = unit(0.15, 'inches'), legend.text = element_text(size = 6)) + ggtitle('Beta-diversity'), height = (fig_h - 2)/3, width = fig_w/2, dpi = 400)
+
+alphamap <- draw_bbs_map(dat = alpha_td %>% filter(radius == 75000) %>% arrange(richness), zvar = 'richness',  
+                        the_arrow = small_low_arrow, northlabel = low_north, scalebar = scale_bar,
+                        colscale = scale_colour_gradientn(name = 'Taxonomic alpha-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+                        write_to_file = FALSE, img_h = fig_h - 2, img_w = fig_w/2, n_columns = 1, by_rad = FALSE)
+
+ggsave(file.path(fpfig, 'alpha_div_75.png'), alphamap + theme(legend.title = element_blank(), legend.position = c(0.15, 0.15), legend.key.width = unit(0.15, 'inches'), legend.text = element_text(size = 6)) + ggtitle('Alpha-diversity'), height = (fig_h - 2)/3, width = fig_w/2, dpi = 400)
+
+gammamap <- draw_bbs_map(dat = gamma_td %>% filter(radius == 75000) %>% arrange(richness), zvar = 'richness',  
+                         the_arrow = small_low_arrow, northlabel = low_north, scalebar = scale_bar,
+                         colscale = scale_colour_gradientn(name = 'Taxonomic gamma-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+                         write_to_file = FALSE, img_h = fig_h - 2, img_w = fig_w/2, n_columns = 1, by_rad = FALSE)
+
+ggsave(file.path(fpfig, 'gamma_div_75.png'), gammamap + theme(legend.title = element_blank(), legend.position = c(0.15, 0.15), legend.key.width = unit(0.15, 'inches'), legend.text = element_text(size = 6)) + ggtitle('Gamma-diversity'), height = (fig_h - 2)/3, width = fig_w/2, dpi = 400)
+
+elevmap <- draw_bbs_map(dat = elev_sd %>% filter(radius == 75000) %>% arrange(sd), zvar = 'sd',  
+                         the_arrow = small_low_arrow, northlabel = low_north, scalebar = scale_bar,
+                         colscale = scale_colour_gradientn(name = 'Elevation\nstandard deviation', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+                         write_to_file = FALSE, img_h = fig_h - 2, img_w = fig_w/2, n_columns = 1, by_rad = FALSE)
+
+ggsave(file.path(fpfig, 'elev_div_75.png'), elevmap + theme(legend.title = element_blank(), legend.position = c(0.15, 0.15), legend.key.width = unit(0.15, 'inches'), legend.text = element_text(size = 6)) + ggtitle('Elevation variability'), height = (fig_h - 2)/3, width = fig_w/2, dpi = 400)
+
+bbs_xy_plot_1r <- function(xdat, xvar, ydat, yvar, xstat, xlims, xbreaks, ylims, ybreaks, xname, yname, radii) {
+  xdat %>%
+    filter(variable == xvar) %>%
+    right_join(ydat) %>%
+    mutate(radius = radius*1000) %>%
+    filter(radius %in% radii) %>%
+    ggplot(aes_string(x = xstat, y = yvar)) +
+    geom_point(alpha = 0.05, size = 0.25) +
+    stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+    scale_x_continuous(name = xname, limits=xlims, breaks=xbreaks) +
+    scale_y_continuous(name = yname, limits=ylims, breaks=ybreaks, expand = c(0,0)) +
+    theme(strip.background = element_blank()) +
+    panel_border(colour='black')
+}
+
+alpha_ed_plot <- bbs_xy_plot_1r(xdat = ed, ydat = ad, xvar = 'elevation', yvar = 'richness', xstat = 'sd', xlims = c(0, 1200), xbreaks = c(0, 500, 1000), ylims = c(0, 132), ybreaks = c(0, 50, 100), xname = 'Elevation standard deviation', yname = 'Taxonomic alpha-diversity', radii = c(75000))
+beta_ed_plot <- bbs_xy_plot_1r(xdat = ed, ydat = beta_td %>% mutate(radius=radius/1000), xvar = 'elevation', yvar = 'total', xstat = 'sd', xlims = c(0, 1200), xbreaks = c(0, 500, 1000), ylims = c(0, 1), ybreaks = c(0, .5, 1), xname = 'Elevation standard deviation', yname = 'Taxonomic beta-diversity', radii = c(75000))
+gamma_ed_plot <- bbs_xy_plot_1r(xdat = ed, ydat = gd, xvar = 'elevation', yvar = 'richness', xstat = 'sd', xlims = c(0, 1200), xbreaks = c(0, 500, 1000), ylims = c(0, 245), ybreaks = c(0, 50, 100, 150, 200), xname = 'Elevation standard deviation', yname = 'Taxonomic gamma-diversity', radii = c(75000))
+
+# Make them all into a stacked up plot.
+
+dat_list <- list(ad %>% filter(radius==75) %>% select(rteNo, richness) %>% rename(alpha = richness),
+                 beta_td %>% mutate(radius=radius/1000) %>% filter(radius==75) %>% select(rteNo, total) %>% rename(beta = total),
+                 gd %>% filter(radius==75) %>% select(rteNo, richness) %>% rename(gamma = richness),
+                 ed %>% filter(radius==75, variable=='elevation') %>% select(rteNo, sd))
+
+scatter_dat <- Reduce(full_join, dat_list)
+
+library(reshape2)
+scatter_dat <- melt(scatter_dat, id.vars = c('rteNo','sd'), variable.name='diversity_type', value.name='diversity_value')
+
+columnscatter <- ggplot(scatter_dat, aes(x = sd, y = diversity_value)) +
+  facet_grid(diversity_type ~ ., labeller = labeller(diversity_type = function(x) paste0(x, '-diversity')), scales = 'free_y') +
+  geom_point(alpha = 0.05, size = 0.25) +
+  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  scale_x_continuous(name = 'Elevation variability', limits=c(0,1200), breaks=c(0,500,1000)) +
+  scale_y_continuous(name = 'Diversity', expand = c(0,0)) +
+  theme(strip.background = element_blank()) +
+  panel_border(colour='black')
+
+ggsave(file.path(fpfig, 'scatter_column.png'), height = fig_h-2, width=fig_w/2, dpi=400)
