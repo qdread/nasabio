@@ -13,16 +13,16 @@ fiacoords <- fiapnw %>%
 # Load unfuzzed
 
 #pnw_unf <- read.csv('~/data/pnw.csv', stringsAsFactors = FALSE)
-pnw_unf <- read.csv('~/FIA/pnw.csv', stringsAsFactors = FALSE)
+pnw_unf <- read.csv('~/FIA/pnw2.csv', stringsAsFactors = FALSE)
 
 pnw_unf <- pnw_unf %>%
 	rename(PLT_CN = CN) %>%
 	left_join(fiacoords) 
 	
 pnw_dists <- pnw_unf %>%
-	filter(!is.na(lat), !is.na(lon)) %>%
+	filter(!is.na(lat), !is.na(lon), !is.na(ACTUAL_LAT), !is.na(ACTUAL_LON)) %>%
 	rowwise %>%
-	summarize(dist = sp::spDistsN1(cbind(lon_nad83, lat_nad83), cbind(lon, lat), longlat = TRUE))
+	summarize(dist = sp::spDistsN1(cbind(ACTUAL_LON, ACTUAL_LAT), cbind(lon, lat), longlat = TRUE))
 
 table(pnw_dists > 1) # Almost all of them are less than 1 km except for 800 plots.
 # However there is something weird where there are a lot more plots in the new versus the old.

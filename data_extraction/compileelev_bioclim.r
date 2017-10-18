@@ -163,12 +163,7 @@ fia_night_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'nightli
 fia_dhi_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'dhi_', 1:250, '.r')
 
 # FIA lat long coordinates
-library(dplyr)
-fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
-fiacoords <- fiapnw %>%
-  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
-  summarize(lat = LAT_FUZZSWAP[1],
-            lon = LON_FUZZSWAP[1])
+source('/mnt/research/nasabio/code/loadfia.r')
 
 fia_elevation_stats <- replace_na_df(fia_elevation_stats)
 fia_slope_stats <- replace_na_df(fia_slope_stats)

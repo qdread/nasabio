@@ -5,12 +5,7 @@ raster_file_name <- '/mnt/research/nasabio/data/human_impacts/hfp-global-geo-gri
 scratch_path <- Sys.getenv('TMPDIR')
 
 # FIA lat long coordinates
-library(dplyr)
-fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
-fiacoords <- fiapnw %>%
-  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
-  summarize(lat = LAT_FUZZSWAP[1],
-            lon = LON_FUZZSWAP[1])
+source('/mnt/research/nasabio/code/loadfia.r')
 
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')

@@ -4,12 +4,7 @@ raster_file_name <- '/mnt/research/nasabio/data/human_impacts/viirs_nightlights/
 scratch_path <- Sys.getenv('TMPDIR')
 
 # FIA lat long coordinates
-library(dplyr)
-fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
-fiacoords <- fiapnw %>%
-  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
-  summarize(lat = LAT_FUZZSWAP[1],
-            lon = LON_FUZZSWAP[1])
+source('/mnt/research/nasabio/code/loadfia.r')
 
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')
@@ -17,7 +12,7 @@ source('/mnt/research/nasabio/code/extractbox.r')
 load('/mnt/research/nasabio/data/precalcdist/distlogical_fia_nightlight.r')
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
-rowidx <- round(seq(0,nrow(bbsll),length.out=n_slices + 1))
+rowidx <- round(seq(0,nrow(fiacoords),length.out=n_slices + 1))
 rowidxmin <- rowidx[slice]+1
 rowidxmax <- rowidx[slice+1]
 
@@ -35,8 +30,8 @@ for (j in rowidxmin:rowidxmax) {
 		   raster_file = raster_file_name,
 		   radius = 500,
 		   fp = scratch_path,
-		   filetags = paste('fianight', row.names(bbsll)[j], sep = '_'))
-	file_j <- paste0(scratch_path, '/bbox_fianight_', row.names(bbsll)[j], '.tif')
+		   filetags = paste('fianight', row.names(fiacoords)[j], sep = '_'))
+	file_j <- paste0(scratch_path, '/bbox_fianight_', row.names(fiacoords)[j], '.tif')
 	stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_j, radii = radii, is_brick = FALSE)
 	if (file.exists(file_j)) deleteBox(file_j)
 }	

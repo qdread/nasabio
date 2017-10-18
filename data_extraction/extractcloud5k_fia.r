@@ -1,7 +1,8 @@
 
 n_slices <- 1000
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-raster_file_name <- '/mnt/research/nasabio/data/geology/geo_ages/GEA.vrt'
+namepart1 <- '/mnt/research/nasabio/data/bioclim/Biocloud5k/biocloud'
+namepart2 <- '_5k_20170613.vrt'
 scratch_path <- Sys.getenv('TMPDIR')
 
 # FIA lat long coordinates
@@ -10,7 +11,7 @@ source('/mnt/research/nasabio/code/loadfia.r')
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')
 
-load('/mnt/research/nasabio/data/precalcdist/distlogical_fia_gea.r')
+load('/mnt/research/nasabio/data/precalcdist/distlogical_fia_bio5.r')
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
 rowidx <- round(seq(0,nrow(fiacoords),length.out=n_slices + 1))
@@ -28,16 +29,22 @@ pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
 		   
 for (j in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, j)
+	stats_j <- list()
+	
+	for (k in 1:8) {
+	
 	extractBox(coords = with(fiacoords, cbind(lon, lat))[j,,drop=FALSE],
-		   raster_file = raster_file_name,
+		   raster_file = paste0(namepart1, k, namepart2),
 		   radius = 500,
 		   fp = scratch_path,
-		   filetags = paste('fiagea', row.names(fiacoords)[j], sep = '_'))
-	file_j <- paste0(scratch_path, '/bbox_fiagea_', row.names(fiacoords)[j], '.tif')
-	stats_by_point[[length(stats_by_point) + 1]] <- diversityByRadius(file_j, radii = radii, is_brick = FALSE)
+		   filetags = paste('fia5k', row.names(fiacoords)[j], k, sep = '_'))
+	file_j <- paste0(scratch_path, '/bbox_fia5k_', row.names(fiacoords)[j], '.tif')
+	stats_j[[k]] <- statsByRadius(file_j, radii = radii, is_brick = FALSE)
 	if (file.exists(file_j)) deleteBox(file_j)
+}
+stats_by_point[[length(stats_by_point) + 1]] <- stats_j
 }	
 
 close(pb)
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/geostats/geoage_',slice,'.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/climstats/biocloud5k_',slice,'.r'))

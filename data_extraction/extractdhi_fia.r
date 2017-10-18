@@ -5,12 +5,7 @@ raster_file_name <- paste0('/mnt/research/nasabio/data/dhi/dhi_', layers, '.vrt'
 scratch_path <- Sys.getenv('TMPDIR')
 
 # FIA lat long coordinates
-library(dplyr)
-fiapnw <- read.csv('/mnt/research/nasabio/data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv', stringsAsFactors = FALSE)
-fiacoords <- fiapnw %>%
-  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
-  summarize(lat = LAT_FUZZSWAP[1],
-            lon = LON_FUZZSWAP[1])
+source('/mnt/research/nasabio/code/loadfia.r')
 
 # Function to do the extracting
 source('/mnt/research/nasabio/code/extractbox.r')
@@ -43,8 +38,8 @@ for (j in rowidxmin:rowidxmax) {
 		   raster_file = raster_file_name[[ii]],
 		   radius = 500,
 		   fp = scratch_path,
-		   filetags = paste('fiadhi', layers[[ii]], row.names(bbsll)[j], sep = '_'))
-		file_j <- paste0(scratch_path, '/bbox_fiadhi_', layers[[ii]], '_', row.names(bbsll)[j], '.tif')
+		   filetags = paste('fiadhi', layers[[ii]], row.names(fiacoords)[j], sep = '_'))
+		file_j <- paste0(scratch_path, '/bbox_fiadhi_', layers[[ii]], '_', row.names(fiacoords)[j], '.tif')
 		point_stat[[ii]] <- statsByRadius(file_j, radii = radii, is_brick = FALSE)
 		point_stat[[ii]]$variable <- layers[[ii]]
 		if (file.exists(file_j)) deleteBox(file_j)
