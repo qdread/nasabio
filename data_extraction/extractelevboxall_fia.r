@@ -43,4 +43,4 @@ for (j in rowidxmin:rowidxmax) {
 
 close(pb)
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/elevstats/big30m/stats_',slice,'.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/elevstats/unfuzzed/stats_',slice,'.r'))

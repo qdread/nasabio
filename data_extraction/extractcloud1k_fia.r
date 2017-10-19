@@ -38,7 +38,7 @@ for (j in rowidxmin:rowidxmax) {
 		   radius = 500,
 		   fp = scratch_path,
 		   filetags = paste('fia1k', row.names(fiacoords)[j], k, sep = '_'))
-	file_j <- paste0(scratch_path, '/bbox_fia1k_', row.names(fiacoords)[j], '.tif')
+	file_j <- paste0(scratch_path, '/bbox_fia1k_', row.names(fiacoords)[j], '_', k, '.tif')
 	stats_j[[k]] <- statsByRadius(file_j, radii = radii, is_brick = FALSE)
 	if (file.exists(file_j)) deleteBox(file_j)
 }
