@@ -1,4 +1,4 @@
-n_slices <- 5000
+n_slices <- 10000
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 namepart1 <- '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_'
 namepart2 <- '_big.vrt'
@@ -6,7 +6,6 @@ varname <- c('dem','aspect','slope','TPI')
 scratch_path <- Sys.getenv('TMPDIR')
 
 # FIA lat long coordinates
-library(raster)
 source('/mnt/research/nasabio/code/loadfia.r')
 
 # Function to do the extracting
@@ -21,6 +20,7 @@ rowidxmin <- rowidx[slice]+1
 rowidxmax <- rowidx[slice+1]
 
 stats_by_point <- list()
+radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300) # in km
 
 pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
 		   
