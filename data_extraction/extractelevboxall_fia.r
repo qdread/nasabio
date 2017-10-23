@@ -28,7 +28,7 @@ for (j in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, j)
 	stats_j <- list()
 	for (k in 1:length(varname)) {
-	istrig <- ifelse(varname == 'aspect', TRUE, FALSE)
+	istrig <- ifelse(varname[k] == 'aspect', TRUE, FALSE)
 	extractBox(coords = with(fiacoords, cbind(lon, lat))[j,,drop=FALSE],
 		   raster_file = paste0(namepart1, varname[k], namepart2),
 		   radius = 300,

@@ -1,11 +1,13 @@
 # Modified 15 May: rearrange each matrix so that the focal plot is the first row of the resulting matrix.
 # Correction 22 Aug: use workspace 2, not old workspace
+# Modified 23 Oct: change to use unfuzzed coordinates
 
-radii <- c(1000,5000,7500,10000,20000,50000,100000)
+radii <- c(5,10,20,50,75,100,150,200,300) * 1000
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 r <- radii[task]
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
+plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv', stringsAsFactors = FALSE)
 
 library(dplyr)
 
@@ -19,20 +21,20 @@ area_by_sp <- function(dat, sppids) {
 
 all_mats <- list()
 
-for(p in 1:nrow(fiaalbers)) {
+for (p in 1:length(fianhb_r)) {
   if (class(fianhb_r[[p]]) == 'data.frame') {
 	if (any(fianhb_r[[p]]$dist <= r)) {
 		# Subset out the data frame with the nearest neighbors
 		neighbs <- subset(fianhb_r[[p]], dist <= r)
 		
 		# Subset out the data frame with the nearest neighbors
-       plotcns <- fiaalbers[c(p, neighbs$idx), ]$PLT_CN
+       plotcns <- plotmetadata[c(p, neighbs$idx), ]$PLT_CN
        dat_p <- subset(fiasums_plot, PLT_CN %in% plotcns)
        # Convert into a site x species matrix
        sppids <- sort(unique(dat_p$SPCD))
        mat_p <- dat_p %>% group_by(PLT_CN) %>% do(x = area_by_sp(., sppids))
 	   # Sort the output so that the focal plot will be the first row of the resulting matrix.
-	   focal_idx <- which(mat_p$PLT_CN == fiaalbers$PLT_CN[p])
+	   focal_idx <- which(mat_p$PLT_CN == plotmetadata$PLT_CN[p])
 	   mat_p <- mat_p[c(focal_idx, (1:nrow(mat_p))[-focal_idx]), ]
 		
 	   mat_p <- do.call('rbind', mat_p$x)
@@ -57,4 +59,4 @@ for(p in 1:nrow(fiaalbers)) {
 	if (p%%1000 == 0) print(p)
 }
 
-save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/newmat_',as.character(as.integer(r)),'.r'))
+save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/unfuzzedmat_',as.character(as.integer(r)),'.r'))

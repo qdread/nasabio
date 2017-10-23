@@ -1,6 +1,8 @@
 # FIA taxonomic and phylogenetic beta diversity calculation for the cluster.
 # Forked 17 April. Just preparatory work, actual diversity calculated in a different script.
 # Modified 17 May: add rows to matrix that have zero species.
+# Modified 22 Aug: add better imputed traits
+# Modified 20 Oct: new coordinates (workspace should now only contain pointers to the true coordinates)
 
 fp <- '/mnt/research/nasabio'
 fiapnw <- read.csv(file.path(fp, 'data/fia/finley_trees_pnw_2015evaluations_feb14_2017.csv'), stringsAsFactors = FALSE)
@@ -50,13 +52,10 @@ sppids <- sort(unique(fiasums_plot$SPCD))
 
 idx <- match(sppids, fiataxa$FIA.Code)
 
-fiacoords <- fiapnw %>%
-  group_by(STATECD, COUNTYCD, PLT_CN, PLOT) %>%
-  summarize(lat = LAT_FUZZSWAP[1],
-            lon = LON_FUZZSWAP[1])
-
-#fiaplotlist <- fiasums_plot %>% do(x = area_by_sp(., sppids))
-#fiaplotmat <- do.call('rbind', fiaplotlist$x)
+fiacoords <- read.csv('/mnt/home/qdr/data/pnw.csv', stringsAsFactors = FALSE)
+fiacoords <- fiacoords %>%
+	filter(!is.na(ACTUAL_LAT)) %>%
+	rename(PLT_CN = CN, lat = ACTUAL_LAT, lon = ACTUAL_LON)
 
 fiaplotlist <- list()
 pb <- txtProgressBar(0, nrow(fiacoords), style=3)
@@ -117,6 +116,9 @@ getNeighbors <- function(dat, radius) {
 
 fianhb_r <- getNeighbors(fiaalbers, radius = 5e5)
 
-#save(fianhb_r, fiadist, trydist, pnwphylo, problemspp, fiataxa, fiaplotmat, fiaalbers, fiasums_plot, sppids, file = '/mnt/research/nasabio/data/fia/fiaworkspace.r')
+#save(fianhb_r, fiadist, trydist, traits_imputed, pnwphylo, fiataxa, fiaspatial, fiaalbers, fiacoords, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace2.r')
 
-save(fianhb_r, fiadist, trydist, traits_imputed, pnwphylo, fiataxa, fiaspatial, fiaalbers, fiacoords, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace2.r')
+# New saved workspace that does not actually contain the coordinates.
+save(fianhb_r, fiadist, trydist, traits_imputed, pnwphylo, fiataxa, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
+save(fiaspatial, fiaalbers, fiacoords, file = '/mnt/home/qdr/data/fiaworkspace_spatial.r')
+write.csv(fiaalbers@data, file = '/mnt/research/nasabio/data/fia/fianocoords.csv', row.names = FALSE)
