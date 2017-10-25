@@ -1,7 +1,7 @@
 # Created on 09 June 2017 to run beta diversity using Baselga and Podani methods (taxonomic only)
 # Edit 16 Aug: very small slices
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-radii <- c(1, 5, 7.5, 10, 20, 50, 75, 100, 150, 200, 300) * 1000
+radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300) * 1000
 n_slices <- 250
 
 
@@ -11,10 +11,10 @@ r <- combos$radius[task]
 slice <- combos$slice[task]
 
 
-load(paste0('/mnt/research/nasabio/data/fia/mats/newmat_', as.character(as.integer(r)), '.r'))
+load(paste0('/mnt/research/nasabio/data/fia/mats/unfuzzedmat_', as.character(as.integer(r)), '.r'))
 fia_list <- list()
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace2.r') 
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r') 
 
 source('~/code/fia/beta_part_finalindex.r')
 
@@ -60,4 +60,4 @@ close(pb)
 # Compile all of these values into a single data frame and save.
 fia_betadiv <- as.data.frame(do.call('rbind', fia_list))
 
-write.csv(fia_betadiv, file = paste0('/mnt/research/nasabio/data/fia/betaoutput/sliced/betapartfinal_',as.character(as.integer(r)),'_',slice,'.csv'), row.names = FALSE)						  
+write.csv(fia_betadiv, file = paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/betapartfinal_',as.character(as.integer(r)),'_',slice,'.csv'), row.names = FALSE)						  

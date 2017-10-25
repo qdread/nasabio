@@ -6,7 +6,8 @@
 # Loop through each FIA plot.
 # Calculate all alpha diversity.
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
+plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv', stringsAsFactors = FALSE)
 source('~/code/fia/pairwise_beta_focal.r')
 
 library(sp)
@@ -28,7 +29,7 @@ alpha_div <- diversity_3ways(m = fiaplotmat[rowidxmin:rowidxmax,], flavor = 'alp
 											 dotd=T, dopd=T, dofd=T, abundance=T,
 											 pddist = fiadist, fddist = trydist,
 											 nnull = nnull,
-											 phylo_spp = pnwphylo$tip.label, func_problem_spp = problemspp, combine = F)
+											 phylo_spp = pnwphylo$tip.label, func_problem_spp = NULL, combine = F)
 
-alpha_div <- cbind(fiacoords[rowidxmin:rowidxmax,], alpha_div)
-save(alpha_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/alpha_', slice, '.r'))
+alpha_div <- cbind(plotmetadata[rowidxmin:rowidxmax,], alpha_div)
+save(alpha_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/alpha_', slice, '.r'))

@@ -10,7 +10,8 @@
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
+load('/mnt/home/qdr/data/fia/fiaworkspace_spatial.r')
 source('~/code/fia/pairwise_beta_focal.r')
 
 library(sp)
@@ -67,7 +68,7 @@ for (p in rowidxmin:rowidxmax) {
 	
 }
 
-save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/beta_', slice, '.r'))
+save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/beta_', slice, '.r'))
      
 close(pb)
 

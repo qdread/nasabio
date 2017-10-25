@@ -9,7 +9,7 @@
 # Do median alpha, and total gamma, for all the neighbors within each radius.
 # All others outside that radius get NA.
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace2.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
 source('~/code/fia/pairwise_beta_focal.r')
 
 library(sp)
@@ -19,7 +19,7 @@ source('~/code/fia/fixpicante.r')
 nnull <- 99
 trydist <- as.matrix(trydist)
 
-radii <- c(5, 10, 15, 20, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500)
+radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300)
 n_slices <- 250
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
@@ -30,26 +30,8 @@ rowidxmax <- rowidx[slice+1]
 
 # Declare structures to hold data
 
-pb <- txtProgressBar(rowidxmin, rowidxmax, style = 3)
+pb <- txtProgressBar(0, length(radii), style = 3)
 gamma_div <- array(NA, dim = c(nrow(fiaplotmat), length(radii), 11))
-
-for (p in rowidxmin:rowidxmax) {
-	setTxtProgressBar(pb, p)
-	# Distances between target plot and all other plots.
-	dist_p <- spDistsN1(pts=with(fiacoords, cbind(lon, lat)), pt = c(fiacoords$lon[p], fiacoords$lat[p]), longlat = TRUE)
-	
-	for (r in 1:length(radii)) {
-		neighbs <- fiaplotmat[dist_p <= radii[r], , drop = FALSE]
-		gamma_div[p, r, ] <- diversity_3ways(m = neighbs, flavor = 'gamma', 
-											 dotd=T, dopd=T, dofd=T, abundance=T,
-											 pddist = fiadist, fddist = trydist,
-											 nnull = nnull,
-											 phylo_spp = pnwphylo$tip.label, func_problem_spp = problemspp)
-	}
-
-}
-
-close(pb)
 
 cnames <- c('richness', 'shannon', 'evenness',
             'MPD_pa_z', 'MNTD_pa_z',
@@ -57,7 +39,28 @@ cnames <- c('richness', 'shannon', 'evenness',
             'MPDfunc_pa_z', 'MNTDfunc_pa_z',
             'MPDfunc_z', 'MNTDfunc_z')
 
+null_result <- rep(NA, length(cnames))
+
+for (r in 1:length(radii)) {
+	load(paste0('/mnt/research/nasabio/data/fia/mats/unfuzzedmat_', as.character(as.integer(radii[r] * 1000)), '.r'))
+	setTxtProgressBar(pb, r)
+	for (p in rowidxmin:rowidxmax) {
+		neighbs <- all_mats[[p]]
+		gamma_div[p, r, ] <- tryCatch(diversity_3ways(m = neighbs, flavor = 'gamma', 
+											 dotd=T, dopd=T, dofd=T, abundance=T,
+											 pddist = fiadist, fddist = trydist,
+											 nnull = nnull,
+											 phylo_spp = pnwphylo$tip.label, func_problem_spp = NULL),
+									  error = function(e) null_result)	
+	}
+
+}
+
+close(pb)
+
+
+
 dimnames(gamma_div)[[3]] <- cnames
 dimnames(gamma_div)[[2]] <- paste('r',radii,sep='_')
 
-save(gamma_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/gamma_', slice, '.r'))
+save(gamma_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/gamma_', slice, '.r'))

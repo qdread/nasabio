@@ -162,8 +162,9 @@ fia_soil_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'soil_', 
 fia_night_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'nightlight_', 1:250, '.r')
 fia_dhi_stats <- get_stats('/mnt/research/nasabio/data/fia/geostats', 'dhi_', 1:250, '.r')
 
-# FIA lat long coordinates
-source('/mnt/research/nasabio/code/loadfia.r')
+# FIA plot IDs (no coords)
+plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv', stringsAsFactors = FALSE)
+#source('/mnt/research/nasabio/code/loadfia.r')
 
 fia_elevation_stats <- replace_na_df(fia_elevation_stats)
 fia_slope_stats <- replace_na_df(fia_slope_stats)
@@ -199,7 +200,7 @@ fia_dhi_stats <- replace_varname(fia_dhi_stats, rep(c('dhi_fpar', 'dhi_gpp', 'dh
 fia_all_stats <- list()
 
 for (i in 1:length(fia_elevation_stats)) {
-	fia_all_stats[[i]] <- full_join(cbind(fiall[i,], rbind(fia_elevation_stats[[i]],
+	fia_all_stats[[i]] <- full_join(cbind(plotmetadata[i,], rbind(fia_elevation_stats[[i]],
 														   fia_slope_stats[[i]],
 														   fia_tpi_stats[[i]],
 														   fia_sin_aspect_stats[[i]],
@@ -211,7 +212,7 @@ for (i in 1:length(fia_elevation_stats)) {
 														   fia_footprint_stats[[i]],
 														   fia_night_stats[[i]],
 														   fia_dhi_stats[[i]])),
-									cbind(fiall[i,], rbind(fia_geoage_stats[[i]],
+									cbind(plotmetadata[i,], rbind(fia_geoage_stats[[i]],
 														   fia_soil_stats[[i]])))
 }
 
@@ -220,3 +221,16 @@ fia_all_stats <- do.call('rbind', fia_all_stats)
 fia_all_stats <- rename(fia_all_stats, richness_geodiv = richness, diversity_geodiv = diversity)
 
 write.csv(fia_all_stats, file = '/mnt/research/nasabio/data/fia/fia_geodiversity_stats.csv', row.names = FALSE)
+
+
+# Temporary: just DEM (23 Oct)
+fia_elevation_stats <- get_stats('/mnt/research/nasabio/data/fia/elevstats/unfuzzedjustelev', 'stats_', 1:10000, '.r')
+fia_elevation_stats <- replace_na_df(fia_elevation_stats)
+fia_elevation_stats <- replace_varname(fia_elevation_stats, 'elevation')
+plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv', stringsAsFactors = FALSE)
+
+for (i in 1:length(fia_elevation_stats)) {
+	fia_elevation_stats[[i]] <- cbind(plotmetadata[rep(i, nrow(fia_elevation_stats[[i]])),], fia_elevation_stats[[i]])
+}
+fia_elevation_stats <- do.call('rbind', fia_elevation_stats)
+write.csv(fia_elevation_stats, file = '/mnt/research/nasabio/data/fia/fia_elev_stats_unfuzzed.csv', row.names = FALSE)
