@@ -1,4 +1,4 @@
-SRS_iterative <- function(focal_points, dist_mat = NULL, radius, n, point = NULL) {
+SRS_iterative <- function(focal_points, dist_mat = NULL, radius, n, point = NULL, show_progress = FALSE) {
   require(sp)
   
   if (is.null(point)) {
@@ -18,6 +18,8 @@ SRS_iterative <- function(focal_points, dist_mat = NULL, radius, n, point = NULL
   while(s < n) {
     final_points <- c(final_points, point)
     s <- s+1
+    
+    if(show_progress) print(paste('Found', s, 'of', n, 'points.'))
     
     # Cross off all points within 2*radius from the focal point
     tosample[dist_mat[point, ] < 2*radius] <- FALSE
