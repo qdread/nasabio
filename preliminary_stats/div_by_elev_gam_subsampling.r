@@ -67,12 +67,16 @@ fiacoords_noedge <- subset(fiacoords, !is_edge & CN %in% biogeo$PLT_CN)
 # Calculate pairwise distances. (only takes ~1 min with brute force method)
 fia_pnw_dist <- spDists(fia_aea_noedge, longlat = FALSE)
 
-n_iter <- 10
+
+# Subsampling with gams ---------------------------------------------------
+
+n_iter <- 999
 subsample_size <- 20
 n_max <- 50
 
 # R2 of gam. array with number of diversity types (a,b,g) by number of radii by number of iterations
 r2_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
+r2_lm_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
 
 # x-values for predicted y-values
 xrange <- range(biogeo$elevation_sd, na.rm=TRUE)
@@ -80,6 +84,7 @@ newx <- round(seq(xrange[1], xrange[2], length.out = 20))
 
 # Predicted value array
 pred_val_array <- array(NA, dim = c(length(div_names), length(radii), n_iter, length(newx)))
+pred_val_lm_array <- array(NA, dim = c(length(div_names), length(radii), n_iter, length(newx)))
 
 pb <- txtProgressBar(0, prod(dim(r2_array)), style = 3)
 ii <- 0
@@ -107,12 +112,15 @@ for (k in 1:n_iter) {
       setTxtProgressBar(pb, ii)
       # Fit GAM.
       gam_fit <- gam(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat)
+      lm_fit <- lm(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat)
       
       # If possible, get predicted y-values for the gam. This can be used to make an interval on the figures.
       pred_val_array[i, j, k, ] <- predict.gam(object = gam_fit, newdata = data.frame(elevation_sd = newx))
+      pred_val_lm_array[i, j, k, ] <- predict.lm(object = lm_fit, newdata = data.frame(elevation_sd = newx))
       
       # Save r-squared.
       r2_array[i, j, k] <- summary(gam_fit)$r.sq
+      r2_lm_array[i, j, k] <- summary(lm_fit)$r.sq
     }
   }
 }
@@ -122,14 +130,23 @@ close(pb)
 # Convert array to data frame
 library(reshape2)
 dimnames(r2_array) <- list(div_names, radii, NULL)
+dimnames(r2_lm_array) <- list(div_names, radii, NULL)
 dimnames(pred_val_array) <- list(div_names, radii, NULL, NULL)
+dimnames(pred_val_lm_array) <- list(div_names, radii, NULL, NULL)
+
 
 r2_df <- melt(r2_array, varnames = c('diversity_type', 'radius', 'iteration'))
 pred_val_df <- melt(pred_val_array, varnames = c('diversity_type', 'radius', 'iteration', 'x'))
 pred_val_df$x <- newx[pred_val_df$x]
 
+r2_lm_df <- melt(r2_lm_array, varnames = c('diversity_type', 'radius', 'iteration'))
+pred_val_lm_df <- melt(pred_val_lm_array, varnames = c('diversity_type', 'radius', 'iteration', 'x'))
+pred_val_lm_df$x <- newx[pred_val_lm_df$x]
+
 # Plot
 library(cowplot)
+
+### GAMs
 # Variation explained
 ggplot(r2_df, aes(x = radius, y = value, group = interaction(radius, diversity_type), fill = diversity_type)) +
   geom_boxplot()
@@ -157,4 +174,42 @@ ggplot(biogeo) +
   geom_ribbon(data = pred_val_quant %>% filter(diversity_type == 'alpha_richness'), 
               aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
   geom_line(data = pred_val_quant %>% filter(diversity_type == 'alpha_richness'), 
+            aes(x = x, y = pred_y), color = 'blue', size = 1.5)
+
+ggplot(biogeo) + 
+  facet_grid(~ radius, scales = 'free') +
+  geom_point(aes(x = elevation_sd, y = gamma_richness), alpha = 0.05) +
+  geom_ribbon(data = pred_val_quant %>% filter(diversity_type == 'gamma_richness'), 
+              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
+  geom_line(data = pred_val_quant %>% filter(diversity_type == 'gamma_richness'), 
+            aes(x = x, y = pred_y), color = 'blue', size = 1.5)
+
+### LMs
+
+# Variation explained
+ggplot(r2_lm_df, aes(x = radius, y = value, group = interaction(radius, diversity_type), fill = diversity_type)) +
+  geom_boxplot()
+
+# Predicted values
+pred_val_lm_quant <- pred_val_lm_df %>%
+  group_by(diversity_type, radius, x) %>%
+  summarize(pred_y = quantile(value, probs = 0.5),
+            pred_y_min = quantile(value, probs = 0.025),
+            pred_y_max = quantile(value, probs = 0.975)) %>%
+  arrange(diversity_type, radius, x)
+
+ggplot(biogeo) + 
+  facet_grid(~ radius, scales = 'free') +
+  geom_point(aes(x = elevation_sd, y = alpha_richness), alpha = 0.05) +
+  geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'alpha_richness'), 
+              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
+  geom_line(data = pred_val_lm_quant %>% filter(diversity_type == 'alpha_richness'), 
+            aes(x = x, y = pred_y), color = 'blue', size = 1.5)
+
+ggplot(biogeo) + 
+  facet_grid(~ radius, scales = 'free') +
+  geom_point(aes(x = elevation_sd, y = gamma_richness), alpha = 0.05) +
+  geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'gamma_richness'), 
+              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
+  geom_line(data = pred_val_lm_quant %>% filter(diversity_type == 'gamma_richness'), 
             aes(x = x, y = pred_y), color = 'blue', size = 1.5)
