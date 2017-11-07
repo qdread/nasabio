@@ -40,3 +40,6 @@ vignettes/*.pdf
 *.pdf
 *.html
 *.png
+
+# Output from functional diversity calculations
+vert.txt

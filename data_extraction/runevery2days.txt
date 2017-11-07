@@ -1,2 +1,0 @@
-/mnt/research/nasabio/code/didjobrun.sh /mnt/research/nasabio/data/fia/elevstats/30m stats_ .r 250 /mnt/research/nasabio/code/vrtfia.sh
-/mnt/research/nasabio/code/didjobrun.sh /mnt/research/nasabio/data/bbs/elevstats/30m stats_ .r 250 /mnt/research/nasabio/code/vrtbbs.sh
