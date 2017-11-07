@@ -3,75 +3,30 @@
 # QDR 14 Sep 2017: NASABIOXGEO project
 # Modified 15 Sep 2017: added DHI and night light index.
 # Modified 21 Sep 2017: added 75km and 150km radius to the maps.
+# Modified 7 Nov 2017: replace with the diversity pooled across years.
 
 # Load data ---------------------------------------------------------------
 
 fpdata <- 'C:/Users/Q/Dropbox/projects/nasabiodiv' # Can be changed to /mnt/research/nasabio/data/bbs to get data from HPCC
 fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_diversity_maps/' # Directory to save images
 
-bd <- read.csv(file.path(fpdata, 'bbs_beta_byroute.csv'), stringsAsFactors = FALSE) # older beta-div, with td pd and fd
-bdpart <- read.csv(file.path(fpdata, 'bbs_betapart_byroute.csv'), stringsAsFactors = FALSE) # newer beta-div, with partitioning but no fd
-ad <- read.csv(file.path(fpdata, 'bbs_alphadiv.csv'), stringsAsFactors = FALSE) # alpha (individual plots)
-adradius <- read.csv(file.path(fpdata, 'bbs_alpha.csv'), stringsAsFactors = FALSE) # alpha (averaged by radius)
-gd <- read.csv(file.path(fpdata, 'bbs_gammadiv.csv'), stringsAsFactors = FALSE) # gamma
+bd <- read.csv(file.path(fpdata, 'bbs_betatdpdfd_1year.csv'), stringsAsFactors = FALSE) # older beta-div, with td pd and fd
+bdpart <- read.csv(file.path(fpdata, 'bbs_betapart_1year.csv'), stringsAsFactors = FALSE) # newer beta-div, with partitioning but no fd
+ad <- read.csv(file.path(fpdata, 'bbs_alpha_1year.csv'), stringsAsFactors = FALSE) # alpha (averaged by radius)
+gd <- read.csv(file.path(fpdata, 'bbs_gamma_1year.csv'), stringsAsFactors = FALSE) # gamma
 ed <- read.csv(file.path(fpdata, 'bbs_geodiversity_stats.csv'), stringsAsFactors = FALSE) # all geodiversity
-
-# Calculate means of all routes across years 1997-2016
-
-library(dplyr)
-
-bdpart_yrmeans <- bdpart %>%
-  filter(year >= 1997) %>%
-  group_by(rteNo, lon, lat, radius, diversity, partition) %>%
-  summarize(beta = mean(na.omit(beta)))
-
-ad_yrmeans <- ad %>%
-  filter(year >= 1997) %>%
-  group_by(rteNo, lon, lat) %>%
-  summarize(richness = mean(na.omit(richness)),
-            MPD_z = mean(na.omit(MPD_pa_z)),
-            MNTD_z = mean(na.omit(MNTD_pa_z)),
-            MPDfunc_z = mean(na.omit(MPDfunc_pa_z)),
-            MNTDfunc_z = mean(na.omit(MNTDfunc_pa_z)))
-
-adradius_yrmeans <- adradius %>%
-  filter(year >= 1997) %>%
-  group_by(rteNo, lon, lat, radius) %>%
-  summarize(richness = mean(na.omit(richness)),
-            MPD_z = mean(na.omit(MPD_pa_z)),
-            MNTD_z = mean(na.omit(MNTD_pa_z)),
-            MPDfunc_z = mean(na.omit(MPDfunc_pa_z)),
-            MNTDfunc_z = mean(na.omit(MNTDfunc_pa_z)))
-
-gd_yrmeans <- gd %>%
-  filter(year >= 1997) %>%
-  group_by(rteNo, lon, lat, radius) %>%
-  summarize(richness = mean(na.omit(richness)),
-            MPD_z = mean(na.omit(MPD_pa_z)),
-            MNTD_z = mean(na.omit(MNTD_pa_z)),
-            MPDfunc_z = mean(na.omit(MPDfunc_pa_z)),
-            MNTDfunc_z = mean(na.omit(MNTDfunc_pa_z)))
-
-bdold_yrmeans <- bd %>%
-  filter(year >= 1997) %>%
-  group_by(rteNo, lon, lat, radius) %>%
-  summarize(td = mean(na.omit(beta_td_pairwise_pa)),
-            pd = mean(na.omit(beta_pd_pairwise_pa)),
-            pd_z = mean(na.omit(beta_pd_pairwise_pa_z)),
-            fd = mean(na.omit(beta_fd_pairwise_pa)),
-            fd_z = mean(na.omit(beta_fd_pairwise_pa_z)))
-
 
 # Maps --------------------------------------------------------------------
 
 library(cowplot)
+library(dplyr)
 source('figs/bbs_map_drawing_fns.r')
 
 radii <- c(50000, 75000, 100000, 150000, 200000, 300000)
 
 library(reshape2)
 
-beta_td <- bdpart_yrmeans %>%
+beta_td <- bdpart %>%
   filter(diversity == 'taxonomic', radius %in% radii, !is.na(beta)) %>%
   select(-diversity) %>%
   dcast(rteNo + lon + lat + radius ~ partition) %>%
@@ -95,7 +50,7 @@ draw_bbs_map(dat = beta_td, zvar = 'prop_nested',
                   maptitle = 'BBS beta-diversity, taxonomic, incidence-based, proportion due to species nestedness',
                   fp = fpfig, fname = 'beta_div_tax_nestedness.png', img_h = img_height)
 
-beta_pd <- bdpart_yrmeans %>%
+beta_pd <- bdpart %>%
   filter(diversity == 'phylogenetic', radius %in% radii, !is.na(beta)) %>%
   select(-diversity) %>%
   dcast(rteNo + lon + lat + radius ~ partition) %>%
@@ -120,29 +75,18 @@ draw_bbs_map(dat = beta_pd, zvar = 'prop_nested',
 
 ### "Old" version of beta-diversity
 
-bdold_yrmeans %>%
+bd %>%
   mutate(radius = radius * 1000) %>%
-  filter(radius %in% radii, fd_z > -10) %>%
-  draw_bbs_map(zvar = 'fd_z',  
+  filter(radius %in% radii, beta_fd_pairwise_pa_z > -10) %>%
+  draw_bbs_map(zvar = 'beta_fd_pairwise_pa_z',  
                colscale = scale_colour_gradientn(name = 'Functional\nbeta-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
-               maptitle = 'BBS alpha-diversity, functional, incidence-based (z-score; a few outliers excluded)',
+               maptitle = 'BBS beta-diversity, functional, incidence-based (z-score; a few outliers excluded)',
                fp = fpfig, fname = 'beta_div_fun.png', img_h = img_height)
 
 ### Alpha-diversity maps
 
-# Single maps
-draw_bbs_map(dat = ad, zvar = 'richness', by_rad = FALSE,
-                         colscale = scale_colour_gradientn(name = 'Taxonomic\nalpha-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
-                         maptitle = 'BBS alpha-diversity, taxonomic, incidence-based (richness)',
-                         fp = fpfig, fname = 'alpha_div_tax.png', write_to_file = TRUE, img_h = 5, img_w = 8.5)
-
-draw_bbs_map(dat = ad, zvar = 'MPD_z', by_rad = FALSE,
-             colscale = scale_colour_gradientn(name = 'Phylogenetic\nalpha-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
-             maptitle = 'BBS alpha-diversity, phylogenetic, incidence-based (z-score)',
-             fp = fpfig, fname = 'alpha_div_phy.png', write_to_file = TRUE, img_h = 5, img_w = 8.5)
-
 # By radius
-adradius_yrmeans %>%
+ad %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii) %>%
 draw_bbs_map(zvar = 'richness',  
@@ -150,18 +94,18 @@ draw_bbs_map(zvar = 'richness',
              maptitle = 'BBS alpha-diversity, taxonomic, incidence-based (richness)',
              fp = fpfig, fname = 'alpha_div_tax.png', img_h = img_height)
 
-adradius_yrmeans %>%
+ad %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii) %>%
-  draw_bbs_map(zvar = 'MPD_z',  
+  draw_bbs_map(zvar = 'MPD_pa_z',  
                colscale = scale_colour_gradientn(name = 'Phylogenetic\nalpha-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
                maptitle = 'BBS alpha-diversity, phylogenetic, incidence-based (z-score)',
                fp = fpfig, fname = 'alpha_div_phy.png', img_h = img_height)
 
-adradius_yrmeans %>%
+ad %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii) %>%
-  draw_bbs_map(zvar = 'MPDfunc_z',  
+  draw_bbs_map(zvar = 'MPDfunc_pa_z',  
                colscale = scale_colour_gradientn(name = 'Functional\nalpha-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
                maptitle = 'BBS alpha-diversity, functional, incidence-based (z-score)',
                fp = fpfig, fname = 'alpha_div_fun.png', img_h = img_height)
@@ -169,7 +113,7 @@ adradius_yrmeans %>%
 ### Gamma-diversity maps
 
 # By radius
-gd_yrmeans %>%
+gd %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii) %>%
   draw_bbs_map(zvar = 'richness',  
@@ -177,18 +121,18 @@ gd_yrmeans %>%
                maptitle = 'BBS gamma-diversity, taxonomic, incidence-based (richness)',
                fp = fpfig, fname = 'gamma_div_tax.png', img_h = img_height)
 
-gd_yrmeans %>%
+gd %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii) %>%
-  draw_bbs_map(zvar = 'MPD_z',  
+  draw_bbs_map(zvar = 'MPD_pa_z',  
                colscale = scale_colour_gradientn(name = 'Phylogenetic\ngamma-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
                maptitle = 'BBS gamma-diversity, phylogenetic, incidence-based (z-score)',
                fp = fpfig, fname = 'gamma_div_phy.png', img_h = img_height)
 
-gd_yrmeans %>%
+gd %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii) %>%
-  draw_bbs_map(zvar = 'MPDfunc_z',  
+  draw_bbs_map(zvar = 'MPDfunc_pa_z',  
                colscale = scale_colour_gradientn(name = 'Functional\ngamma-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
                maptitle = 'BBS gamma-diversity, functional, incidence-based (z-score)',
                fp = fpfig, fname = 'gamma_div_fun.png', img_h = img_height)
@@ -334,18 +278,60 @@ ggsave(file.path(fpfig, 'plot_beta_phy_nestedness_by_elev_sd.png'), pd_nested_ed
 
 # Create loop of predictor by response variables and make bivariate plots of all of them.
 
-bbs_xy_plot <- function(xdat, xvar, ydat, yvar, xlims, xbreaks, ylims, ybreaks, xname, yname) {
+bbs_xy_plot <- function(xdat, xvar, ydat, yvar, xname, yname, radii) {
+  xcolumn <- ifelse(xvar %in% c('geological_age', 'soil_type'), 'diversity_geodiv', 'sd')
   xdat %>%
-    mutate(radius = radius*1000) %>%
-    filter(variable == xvar, radius %in% radii) %>%
+    filter(variable == xvar) %>%
     right_join(ydat) %>%
-    ggplot(aes_string(x = xvar, y = yvar)) +
-    geom_point(alpha = 0.05, size = 0.25) +
+    filter(radius %in% radii) %>%
+    ggplot(aes_string(x = xcolumn, y = yvar)) +
+    geom_hex() +
+    scale_fill_gradient(low = 'gray90', high = 'black') +
     stat_smooth(color = 'red', se = FALSE, method = 'auto') +
-    facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(as.integer(x)/1000, 'km'))) +
-    scale_x_continuous(name = xname, limits=xlims, breaks=xbreaks) +
-    scale_y_continuous(name = yname, limits=ylims, breaks=ybreaks, expand = c(0,0)) +
+    facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km'))) +
+    scale_x_continuous(name = xname) +
+    scale_y_continuous(name = yname, expand = c(0,0)) +
     theme(strip.background = element_blank()) +
     panel_border(colour='black')
 }
 
+# Loop through all the combinations and make a pdf. This can be used for some crude exploratory data analysis.
+# Just use the 1k bioclim.
+
+beta_td <- mutate(beta_td, radius = radius/1000)
+beta_pd <- mutate(beta_pd, radius = radius/1000)
+
+# Get rid of some outliers in beta functional diversity
+bd$beta_fd_pairwise_pa_z[bd$beta_fd_pairwise_pa_z < -10] <- NA
+
+xvars <- unique(ed$variable)
+xvars <- xvars[!grepl('5k', xvars)]
+xvars <- xvars[!grepl('bio2|bio3|bio7|bio8|bio9|bio10|bio11|bio16|bio17|bio18|bio19', xvars)]
+xvars <- xvars[!grepl('cloud5|cloud6|cloud7|cloud8', xvars)]
+
+ydats <- c('ad', 'ad', 'ad', 'beta_td', 'beta_pd', 'bd', 'gd', 'gd', 'gd', 'beta_td', 'beta_pd')
+yvars <- c('richness', 'MPD_pa_z', 'MPDfunc_pa_z', 'total', 'total', 'beta_fd_pairwise_pa_z', 'richness', 'MPD_pa_z', 'MPDfunc_pa_z', 'prop_nested', 'prop_nested')
+
+xnames <- c('Elevation stdev', 'Slope stdev', 'TPI stdev', 'sin(aspect) stdev', 'cos(aspect) stdev', 'Mean annual temp stdev', 'Temperature seasonality stdev', 'Max temp warmest month stdev', 'Min temp coldest month stdev', 'Mean annual precip stdev', 'Predip wettest month stdev', 'Precip driest month stdev', 'Precip seasonality stdev', 'Mean annual cloudiness stdev', 'Max monthly cloudiness stdev' , 'Min monthly cloudiness stdev', 'Cloudiness seasonality stdev', 'Human footprint index stdev', 'Night light index stdev', 'DHI fPAR stdev', 'DHI GPP stdev', 'DHI LAI stdev', 'DHI NDVI stdev', 'geological age diversity', 'soil type diversity')
+ynames <- c('Taxonomic alpha', 'Phylogenetic alpha', 'Functional alpha', 'Taxonomic beta', 'Phylogenetic beta', 'Functional beta', 'Taxonomic gamma', 'Phylogenetic gamma' , 'Functional gamma', 'Beta nestedness (tax)' , 'Beta nestedness (phy)')
+
+bbs_xy_list <- list()
+
+for (i in 1:length(xvars)) {
+  for (j in 1:length(yvars)) {
+    bbs_xy_list[[length(bbs_xy_list) + 1]] <- bbs_xy_plot(xdat = ed,
+                                                          xvar = xvars[i],
+                                                          ydat = get(ydats[j]),
+                                                          yvar = yvars[j],
+                                                          xname = xnames[i],
+                                                          yname = ynames[j],
+                                                          radii = c(50, 75, 100, 150, 200, 300))
+  }
+}
+
+# List of ggplots to multipage pdf
+pdf(file.path(fpfig, 'bbs_all_bioxgeo.pdf'), height = 4, width = 12, onefile = TRUE)
+  for (i in 1:length(bbs_xy_list)) {
+    print(bbs_xy_list[[i]])
+  }
+dev.off()
