@@ -1,6 +1,6 @@
 # Pipeline for NASA bioxgeo
 
-Last updated by QDR on 08 Nov 2017 (still incomplete but work in progress . . . )
+Last updated by QDR on 09 Nov 2017 (still incomplete but work in progress . . . )
 
 This is documentation explaining which R scripts should be used to extract biodiversity and geodiversity information from different data sources in the NASA bioxgeo project, and calculate summary metrics on them. In many cases, the R scripts mentioned will only calculate the metrics for a very small slice of the data. To get the metrics for all the data, you need to run the script many times in parallel on the MSU cluster, one for each slice. Each time, it will save an .R object or .CSV file. The files for each slice then need to be combined into a single output .CSV in yet another script.
 
@@ -22,52 +22,57 @@ All BBS diversity metrics are *incidence-only*. We do not use any information ab
 
 #### 1.1.1 Prepare matrices
 
-- `prep_diversity_files/bbsbeta_byroute_prep.r`: This script loads in a site-by-species matrix for BBS (this matrix was generated using code written for AquaXTerra project). It throws out nocturnal birds which are not analyzed, then calculates distances among plots to determine which plots will fall in the same neighborhoods. 
-- `prep_diversity_files/bbs_oneyear_getidx.r`: This script is run in parallel on the cluster. For each site by radius combination, it generates a site-by-species matrix containing the focal route and all its neighboring BBS routes in the radius. (The older version of this script that is done for each year separately is `prep_diversity_files/bbs_getidx.r`.)
+- `prep_diversity_files/bbsbeta_byroute_prep.r`: This script loads in a site-by-species matrix for BBS (this matrix was generated using code written for AquaXTerra project). It throws out nocturnal birds which are not analyzed, then calculates distances among plots to determine which plots will fall in the same neighborhoods. At the end of the script the R workspace is saved to `/mnt/research/nasabio/data/bbs`.
+- `prep_diversity_files/bbs_oneyear_getidx.r`: This script is run in parallel on the cluster. For each site by radius combination, it generates a site-by-species matrix containing the focal route and all its neighboring BBS routes in the radius. (The older version of this script that is done for each year separately is `prep_diversity_files/bbs_getidx.r`.) The output files are written to `/mnt/research/nasabio/data/bbs/mats`.
 
 #### 1.1.2 Find alpha-diversity
 
-- `run_compile_diversity/bbs1year/bbs_allplotsalpha.r`
+- `run_compile_diversity/bbs1year/bbs_allplotsalpha.r`: Calculates alpha diversity (TD, PD, and FD) for each BBS route. Run in parallel on cluster. The temporary output files are written to `/mnt/research/nasabio/data/bbs/diversity`.
 
 #### 1.1.3 Find gamma-diversity
 
-- `run_compile_diversity/bbs1year/bbs_allradiigamma.r`
+- `run_compile_diversity/bbs1year/bbs_allradiigamma.r`: Calculates gamma diversity (TD, PD, and FD) for each BBS route for each radius. Run in parallel on cluster. The temporary output files are written to `/mnt/research/nasabio/data/bbs/diversity`.
 
 #### 1.1.4 Find beta-diversity
 
-- `run_compile_diversity/bbs1year/bbs_allplotsbetapart.r`: New method
-- `run_compile_diversity/bbs1year/bbs_allpairsbeta.r`: Old method
+- `run_compile_diversity/bbs1year/bbs_allplotsbetapart.r`: New method (multisite index for each route and each radius, does not include FD). The temporary output files are written to `/mnt/research/nasabio/data/bbs/diversity`.
+- `run_compile_diversity/bbs1year/bbs_allpairsbeta.r`: Old method (pairwise indices for each pair of routes, includes FD). The temporary output files are written to `/mnt/research/nasabio/data/bbs/diversity`.
 
 #### 1.1.5 Combine slices and aggregate by radius
 
-- `run_compile_diversity/bbs1year/compilebbs1year.r`
+- `run_compile_diversity/bbs1year/compilebbs1year.r`: Combines the many output files from the alpha, beta, and gamma runs and exports single CSV files to `/mnt/research/nasabio/data/bbs`.
 
 ### 1.2 FIA
 
-We calculate FIA diversity metrics for both incidence and abundance. Our estimate of abundance is more robust than for BBS. In all cases, basal area of a species represents its abundance (counting stems is a poor measure of abundance).
+We calculate FIA diversity metrics for both incidence and abundance. We can do this because our estimate of abundance is more robust than for BBS. In all cases, basal area of a species represents its abundance (counting stems is a poor measure of abundance).
 
 #### 1.2.1 Prepare matrices
 
-- `prep_diversity_files/fiabeta_prep.r`
-- `prep_diversity_files/fia_getidx.r`
+- `prep_diversity_files/fiabeta_prep.r`: This script loads the raw FIA tree data and generates the site-by-species matrix. It also loads phylogenetic and functional information. The resulting workspace is saved to `/mnt/research/nasabio/data/fia`. Because of security, the FIA true coordinates are not saved in this workspace. Only the neighbor identities are needed to calculate diversity, not the true plot locations.
+- `prep_diversity_files/fia_getidx.r`: This script is run in parallel on the cluster. For each site by radius combination, it generates a site-by-species matrix containing the focal plot and all its neighboring BBS plots in the radius. The output files are written to `/mnt/research/nasabio/data/fia/mats`.
+- `prep_diversity_files/fiaprep_compilemats.r`: This script combines the slices in the previous script into single files.
 
 #### 1.2.2 Find alpha-diversity
 
-- `run_compile_diversity/fia_allplotsalpha.r`
+- `run_compile_diversity/fia_allplotsalpha.r`: Calculates alpha diversity (TD, PD, and FD) for each FIA plot. Run in parallel on cluster. The temporary output files are written to `/mnt/research/nasabio/data/fia/diversity`.
 
 #### 1.2.3 Find gamma-diversity
 
-- `run_compile_diversity/run_compile_diversity/fia_allradiigamma.r`
+- `run_compile_diversity/run_compile_diversity/fia_allradiigamma.r`: Calculates gamma diversity (TD, PD, and FD) for each FIA plot for each radius. Run in parallel on cluster. The temporary output files are written to `/mnt/research/nasabio/data/fia/diversity`.
 
 #### 1.2.4 Find beta-diversity
 
-- `run_compile_diversity/fia_allpairsbeta.r`: New method
-- `run_compile_diversity/fia_allplotsbetapart.r`: Old method
+- `run_compile_diversity/fia_allpairsbeta.r`: New method (multisite index for each plot and each radius, does not include FD). The temporary output files are written to `/mnt/research/nasabio/data/fia/diversity`.
+- `run_compile_diversity/fia_betapart_smallslice.r`: Old method (pairwise indices for each pair of plots, includes FD). The temporary output files are written to `/mnt/research/nasabio/data/fia/diversity`.
 
 #### 1.2.5 Combine slices and aggregate by radius
 
-- `fia_alpharadius.r`
-- `fiabeta_radius.r`
+Each script below exports final .csv files to `/mnt/research/nasabio/data/fia`.
+
+- `run_compile_diversity/fia_alpharadius.r`: Combines alpha-diversity slices and aggregates by radius.
+- `run_compile_diversity/fia_compilegamma.r`: Combines gamma-diversity slices.
+- `run_compile_diversity/fia_compilebetapart.r`: Combines new-method beta-diversity slices.
+- `run_compile_diversity/fiabeta_radius.r`: Combines old-method beta-diversity slices (this script may need to be updated for the unfuzzed plots).
 
 ## 2. Geodiversity
 
@@ -79,6 +84,8 @@ For now this is just the mean, standard deviation, minimum, and maximum for cont
 
 ### 2.1 Extract pixels from different radii and calculate summary metrics
 
+There is a separate R script for each raster that was extracted. For the most part I used the command line to create virtual rasters (.vrt) from all the .tif files, which makes it easier to read them in parallel. They are all in the `spatial_data_extraction` folder. Temporary output files are written to `climstats`, `elevstats`, and `geostats` subdirectories in either the `data/bbs` or `data/fia` directories on the cluster.
+
 ### 2.2 Combine slices into single output files
 
-- `spatial_data_extraction/compileelev_bioclim.r`: Combines all extracted geodiversity metrics for both BBS and FIA and exports them to single .CSV files, one for BBS and one for FIA.
+- `spatial_data_extraction/compileelev_bioclim.r`: Combines all extracted geodiversity metrics for both BBS and FIA and exports them to single .csv files, one for BBS and one for FIA. The master geodiversity .csv file is written to the `data/bbs` or `data/fia` directory on the cluster.
