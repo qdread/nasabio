@@ -29,13 +29,14 @@ for (j in rowidxmin:rowidxmax) {
 	stats_j <- list()
 	for (k in 1:length(varname)) {
 	istrig <- ifelse(varname[k] == 'aspect', TRUE, FALSE)
+	isabs <- ifelse(varname[k] == 'TPI', TRUE, FALSE)
 	extractBox(coords = with(bbsll, cbind(lon, lat))[j,,drop=FALSE],
 		   raster_file = paste0(namepart1, varname[k], namepart2),
 		   radius = 300,
 		   fp = scratch_path,
 		   filetags = paste('bbselev', row.names(bbsll)[j], k, sep = '_'))
 	file_j <- paste0(scratch_path, '/bbox_bbselev_', row.names(bbsll)[j], '_', k, '.tif')
-	stats_j[[k]] <- statsByRadius(file_j, radii = radii, is_brick = FALSE, trig = istrig)
+	stats_j[[k]] <- statsByRadius(file_j, radii = radii, is_brick = FALSE, trig = istrig, use_abs = isabs)
 	if (file.exists(file_j)) deleteBox(file_j)
 }	
 stats_by_point[[length(stats_by_point) + 1]] <- stats_j

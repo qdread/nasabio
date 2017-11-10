@@ -1,5 +1,6 @@
 # Function to loop through a coordinate list and a raster file
 # At each iteration, extract a square with given radius and save to .hdf somewhere
+# Edited 10 Nov: add option to get mean of absolute value (used for TPI)
 
 extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetags = 1:nrow(coords), progress = FALSE) {
 	require(sp)
@@ -54,7 +55,7 @@ extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbd
 
 # Use precalculated distances to get the stats for the pixels within each radius.
 # idx_r should be loaded
-statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE, trig = FALSE) {
+statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE, trig = FALSE, use_abs = FALSE) {
 	require(raster)
 	if (!file.exists(boxfile)) return(NA)
 	x <- raster(boxfile)
@@ -66,7 +67,11 @@ statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150
 		vals_r <- xvals[idx_r[, r], , drop = FALSE]
 
 		if (!trig) {
-		means <- apply(vals_r, 2, mean, na.rm = TRUE)
+			if (!use_abs) {
+				means <- apply(vals_r, 2, mean, na.rm = TRUE)
+			} else {
+				means <- apply(abs(vals_r), 2, mean, na.rm = TRUE)
+			}
 		sds <- apply(vals_r, 2, sd, na.rm = TRUE)
 		mins <- apply(vals_r, 2, min, na.rm = TRUE)
 		maxes <- apply(vals_r, 2, max, na.rm = TRUE)
@@ -78,8 +83,7 @@ statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150
 								   min = mins,
 								   max = maxes,
 								   n = nums)
-		}
-		if (trig) {
+		} else {
 			sin_r <- sin(pi/180 * vals_r)
 			cos_r <- cos(pi/180* vals_r)
 			stats_r[[r]] <- data.frame(radius = radii[r],
