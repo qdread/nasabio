@@ -14,7 +14,7 @@ for (r in 1:length(radii)) {
 	list_r <- list()
 	for (slice in 1:nslices[r]) {
 
-		dat <- read.csv(paste0('/mnt/research/nasabio/data/fia/betaoutput/sliced2/betabaselga_',as.character(as.integer(radii[r])),'_',slice,'.csv'))
+		dat <- read.csv(paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/betapartfinal_',as.character(as.integer(radii[r])),'_',slice,'.csv'))
 		list_r[[slice]] <- dat
 
 	}
@@ -23,10 +23,17 @@ fia_betapart[[r]] <- data.frame(radius = radii[r], do.call('rbind', list_r))
 
 }
 
-fia_betapart <- do.call('rbind', fia_betapart)
+
 
 # Add identifying information
 plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv')
 
-gamma_div_cast <- cbind(plotmetadata, gamma_div_cast[, !names(gamma_div_cast) %in% 'plot'])
-write.csv(gamma_div_cast, file = '/mnt/research/nasabio/data/fia/fia_gammadiv.csv')
+fia_betapart <- cbind(plotmetadata[rep(1:nrow(plotmetadata), each = 9), ], do.call('rbind', fia_betapart))
+
+write.csv(fia_betapart, file = '/mnt/research/nasabio/data/fia/fia_betapartfinal_to100.csv', row.names = FALSE)
+
+# Edit: make this into a wide format data frame, similar to the alpha and gamma ones.
+library(reshape2)
+fia_betapart_wide <- dcast(fia_betapart, PLT_CN + STATECD + COUNTYCD + PLOT + radius + nneighb ~ index + diversity + partition)
+
+write.csv(fia_betapart_wide, file = '/mnt/research/nasabio/data/fia/fia_betapartfinal_to100_wide.csv', row.names = FALSE)

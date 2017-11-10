@@ -1,4 +1,5 @@
 # Conceptual paper model fitting: FIA a,b,g diversity ~ elevation SD
+# Last edited 10 Nov: add beta-diversity and also add gam fit with no subsample.
 
 # Procedure in pseudocode:
 # Load a,b,g diversity data and elevation diversity data
@@ -22,6 +23,7 @@ fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/fia_unfuzzed'
 # Load the elevational diversity and abg diversity data
 ed <- read.csv(file.path(fp, 'fia_elev_stats_unfuzzed.csv'))
 ad <- read.csv(file.path(fp, 'fia_alpha.csv'))
+bd <- read.csv(file.path(fp, 'fia_betapartfinal_to100_wide.csv'))
 gd <- read.csv(file.path(fp, 'fia_gammadiv.csv'))
 
 radii <- c(5, 10, 20, 50, 100)
@@ -32,9 +34,9 @@ library(sp)
 library(mgcv)
 
 # Function for iterative search.
-source('~/GitHub/nasabio/methods/SRS_iterative.r')
+source('~/GitHub/nasabio/stats/SRS_iterative.r')
 # Functions for flagging edge plots
-source('~/GitHub/nasabio/methods/spatial_fns.r')
+source('~/GitHub/nasabio/stats/spatial_fns.r')
 
 # Combine into a single data frame.
 biogeo <- ed %>%
@@ -42,6 +44,7 @@ biogeo <- ed %>%
   filter(radius %in% radii) %>%
   rename(elevation_sd = sd) %>%
   left_join(ad %>% dplyr::select(PLT_CN, radius, richness) %>% rename(alpha_richness = richness)) %>%
+  left_join(bd %>% mutate(radius = radius/1000) %>% dplyr::select(PLT_CN, radius, sorensen_taxonomic_total) %>% rename(beta_richness = sorensen_taxonomic_total)) %>%
   left_join(gd %>% dplyr::select(PLT_CN, radius, richness) %>% rename(gamma_richness = richness))
 
 # Add latitude and longitudes from unfuzzed (on local drive only)
@@ -67,6 +70,16 @@ fiacoords_noedge <- subset(fiacoords, !is_edge & CN %in% biogeo$PLT_CN)
 # Calculate pairwise distances. (only takes ~1 min with brute force method)
 fia_pnw_dist <- spDists(fia_aea_noedge, longlat = FALSE)
 
+
+# Fit gams with no subsampling --------------------------------------------
+
+# This is just to return the R-squared for the GAMs. Added 10 Nov.
+
+biogeo %>% 
+  group_by(radius) %>%
+  summarize(r2_alpha = summary(gam(alpha_richness ~ elevation_sd))$r.sq,
+            r2_beta = summary(gam(beta_richness ~ elevation_sd))$r.sq,
+            r2_gamma = summary(gam(gamma_richness ~ elevation_sd))$r.sq)
 
 # Subsampling with gams ---------------------------------------------------
 
