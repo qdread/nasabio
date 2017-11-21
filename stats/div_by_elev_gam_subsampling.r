@@ -43,9 +43,9 @@ biogeo <- ed %>%
   dplyr::select(PLT_CN, radius, sd) %>%
   filter(radius %in% radii) %>%
   rename(elevation_sd = sd) %>%
-  left_join(ad %>% dplyr::select(PLT_CN, radius, richness) %>% rename(alpha_richness = richness)) %>%
-  left_join(bd %>% mutate(radius = radius/1000) %>% dplyr::select(PLT_CN, radius, sorensen_taxonomic_total) %>% rename(beta_richness = sorensen_taxonomic_total)) %>%
-  left_join(gd %>% dplyr::select(PLT_CN, radius, richness) %>% rename(gamma_richness = richness))
+  left_join(ad %>% dplyr::select(PLT_CN, radius, richness, shannon) %>% rename(alpha_richness = richness, alpha_diversity = shannon)) %>%
+  left_join(bd %>% mutate(radius = radius/1000) %>% dplyr::select(PLT_CN, radius, sorensen_taxonomic_total, bray_taxonomic_total) %>% rename(beta_richness = sorensen_taxonomic_total, beta_diversity = bray_taxonomic_total)) %>%
+  left_join(gd %>% dplyr::select(PLT_CN, radius, richness, shannon) %>% rename(gamma_richness = richness, gamma_diversity = shannon))
 
 # Add latitude and longitudes from unfuzzed (on local drive only)
 fiacoords <- read.csv('~/FIA/pnw.csv') %>% filter(complete.cases(.))
@@ -77,13 +77,16 @@ fia_pnw_dist <- spDists(fia_aea_noedge, longlat = FALSE)
 
 biogeo %>% 
   group_by(radius) %>%
-  summarize(r2_alpha = summary(gam(alpha_richness ~ elevation_sd))$r.sq,
-            r2_beta = summary(gam(beta_richness ~ elevation_sd))$r.sq,
-            r2_gamma = summary(gam(gamma_richness ~ elevation_sd))$r.sq)
+  summarize(r2_alpharich = summary(gam(alpha_richness ~ elevation_sd))$r.sq,
+            r2_betarich = summary(gam(beta_richness ~ elevation_sd))$r.sq,
+            r2_gammarich = summary(gam(gamma_richness ~ elevation_sd))$r.sq,
+            r2_alphadiv = summary(gam(alpha_diversity ~ elevation_sd))$r.sq,
+            r2_betadiv = summary(gam(beta_diversity ~ elevation_sd))$r.sq,
+            r2_gammadiv = summary(gam(gamma_diversity ~ elevation_sd))$r.sq)
 
 # Subsampling with gams ---------------------------------------------------
 
-n_iter <- 999
+n_iter <- 9999
 subsample_size <- 20
 n_max <- 50
 
