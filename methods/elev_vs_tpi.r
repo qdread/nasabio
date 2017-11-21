@@ -29,5 +29,13 @@ p + geom_point(aes(x = elevation_sd, y = TPI_max))
 p + geom_point(aes(x = elevation_range, y = TPI_range))
 
 # None of these will probably work. TPI_range is too noisy. Some quantile would be better, but I didn't pull quantiles.
-# What we need is the mean ABSOLUTE difference, because mean TPI is ~ 0.
+# Mean absolute difference is now added as of 20 Nov.
 hist(elev$TPI_mean)
+
+p + geom_point(aes(x = elevation_sd, y = TPI_mean))
+
+# Compare difference in elevation sd across radii, with difference in TPI mean across radii.
+
+# For example, compare elevation sd at 50 km with elevation sd at 200 km.
+
+p + 
