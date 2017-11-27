@@ -145,7 +145,7 @@ write.csv(bbs_all_stats, file = '/mnt/research/nasabio/data/bbs/bbs_geodiversity
 ##############################
 # FIA
 
-fia_elev_stats <- get_all_elev_stats('/mnt/research/nasabio/data/fia/elevstats/big30m', 'stats_', 1:5000, '.r')
+fia_elev_stats <- get_all_elev_stats('/mnt/research/nasabio/data/fia/elevstats/unfuzzed', 'stats_', 1:22531, '.r')
 fia_elevation_stats <- fia_elev_stats$elev
 fia_slope_stats <- fia_elev_stats$slope
 fia_tpi_stats <- fia_elev_stats$TPI
@@ -189,13 +189,13 @@ fia_sin_aspect_stats <- replace_varname(fia_sin_aspect_stats, 'sin_aspect')
 fia_cos_aspect_stats <- replace_varname(fia_cos_aspect_stats, 'cos_aspect')
 fia_bioclim5k_stats <- replace_varname(fia_bioclim5k_stats, paste0('bio', 1:19, '_5k'))
 fia_bioclim1k_stats <- replace_varname(fia_bioclim1k_stats, paste0('bio', 1:19,'_1k'))
-fia_biocloud5k_stats <- replace_varname(fia_biocloud5k_stats, rep(paste0('biocloud', 1:8, '_5k'), each = 8))
-fia_biocloud1k_stats <- replace_varname(fia_biocloud1k_stats, rep(paste0('biocloud', 1:8, '_1k'), each = 8))
+fia_biocloud5k_stats <- replace_varname(fia_biocloud5k_stats, rep(paste0('biocloud', 1:8, '_5k'), each = 13))
+fia_biocloud1k_stats <- replace_varname(fia_biocloud1k_stats, rep(paste0('biocloud', 1:8, '_1k'), each = 13))
 fia_footprint_stats <- replace_varname(fia_footprint_stats, 'human_footprint')
 fia_geoage_stats <- replace_varname(fia_geoage_stats, 'geological_age')
 fia_soil_stats <- replace_varname(fia_soil_stats, 'soil_type')
 fia_night_stats <- replace_varname(fia_night_stats, 'nightlight')
-fia_dhi_stats <- replace_varname(fia_dhi_stats, rep(c('dhi_fpar', 'dhi_gpp', 'dhi_lai8', 'dhi_ndvi'), each = 8))			
+fia_dhi_stats <- replace_varname(fia_dhi_stats, rep(c('dhi_fpar', 'dhi_gpp', 'dhi_lai8', 'dhi_ndvi'), each = 13))			
 
 fia_all_stats <- list()
 
@@ -222,6 +222,9 @@ fia_all_stats <- rename(fia_all_stats, richness_geodiv = richness, diversity_geo
 
 write.csv(fia_all_stats, file = '/mnt/research/nasabio/data/fia/fia_geodiversity_stats.csv', row.names = FALSE)
 
+# Also save just elevation from this.
+fia_allelev_stats <- subset(fia_all_stats, variable == 'elevation')
+write.csv(fia_allelev_stats, file = '/mnt/research/nasabio/data/fia/fia_elev_stats_unfuzzed.csv', row.names = FALSE)
 
 # Temporary: just DEM (23 Oct)
 fia_elevation_stats <- get_stats('/mnt/research/nasabio/data/fia/elevstats/unfuzzedjustelev', 'stats_', 1:10000, '.r')

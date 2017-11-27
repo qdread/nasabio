@@ -21,5 +21,6 @@ gamma_div_cast <- dcast(gamma_div_melt, formula = plot + radius ~ diversity_type
 # Add identifying information
 plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv')
 
-gamma_div_cast <- cbind(plotmetadata, gamma_div_cast[, !names(gamma_div_cast) %in% 'plot'])
-write.csv(gamma_div_cast, file = '/mnt/research/nasabio/data/fia/fia_gammadiv.csv')
+# Error corrected on 22 Nov 2017: the cbind must be done by repeating metadata rows as many times as there are radii values
+gamma_div_cast <- cbind(plotmetadata[rep(1:nrow(plotmetadata), each = dim(gamma_div_array)[2]), ], gamma_div_cast[, !names(gamma_div_cast) %in% 'plot'])
+write.csv(gamma_div_cast, file = '/mnt/research/nasabio/data/fia/fia_gammadiv.csv', row.names = FALSE)
