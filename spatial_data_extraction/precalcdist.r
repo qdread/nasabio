@@ -91,6 +91,7 @@ makeDistRaster(infile = '/mnt/research/nasabio/temp/bbox_bbstest5k_1.tif',
 # Added 11 Sep: Precalculate distances for **all** combinations of radius and raster tile size.
 # Use the same point for each.
 # Edited 15 Sep: add NightLights and DHI rasters.
+# Edited 28 Nov: add rasterToPoints() following suggestion on Stackoverflow.
 
 source('/mnt/research/nasabio/code/extractbox.r')
 
@@ -99,6 +100,7 @@ makeDistRaster <- function(infile, outfile, radii, lon, lat) {
 	x <- raster(infile)
 	
 	# Get proximity map internally
+	xpts <- rasterToPoints(x)
 	xvals <- as.data.frame(x)
 	xcoords <- xyFromCell(x, 1:ncell(x))
 	xdist <- spDistsN1(xcoords, c(lon,lat), longlat=TRUE)
@@ -123,7 +125,7 @@ lat1 <- 39.79797
 bbs_radii <- c(50, 75, 100, 150, 200, 300, 400, 500)
 fia_radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500)
 
-elevfile <- '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_dem.vrt'
+elevfile <- '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_dem_big.vrt'
 bio1file <- '/mnt/research/nasabio/data/bioclim/Bioclim1k/rasterstack/bioclim1k_20170613.vrt'
 bio5file <- '/mnt/research/nasabio/data/bioclim/Bioclim5k/rasterstack/bioclim5k_20170613.vrt'
 geafile <- '/mnt/research/nasabio/data/geology/geo_ages/GEA.vrt'
