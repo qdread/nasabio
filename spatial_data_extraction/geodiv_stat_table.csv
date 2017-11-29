@@ -1,0 +1,11 @@
+Dataset.name,File.location,File.name,Brick,Resolution.m,Max.radius.km,N.files,Use.abs.value,Use.trig,Use.categorical,N.slices.bbs,N.slices.fiapnw
+Bioclim 1k resolution,bioclim/Bioclim1k/rasterstack,bioclim1k_20170613.vrt,yes,1000,500,1,0,0,0,1000,5000
+Bioclim 5k resolution,bioclim/Bioclim5k/rasterstack,bioclim5k_20170613.vrt,yes,5000,500,1,0,0,0,500,1000
+Biocloud 1k resolution,bioclim/Biocloud1k,"biocloud1_1k_20170613.vrt,biocloud2_1k_20170613.vrt,biocloud3_1k_20170613.vrt,biocloud4_1k_20170613.vrt,biocloud5_1k_20170613.vrt,biocloud6_1k_20170613.vrt,biocloud7_1k_20170613.vrt,biocloud8_1k_20170613.vrt",no,1000,500,8,0,0,0,1000,5000
+Biocloud 5k resolution,bioclim/Biocloud5k,"biocloud1_5k_20170613.vrt,biocloud2_5k_20170613.vrt,biocloud3_5k_20170613.vrt,biocloud4_5k_20170613.vrt,biocloud5_5k_20170613.vrt,biocloud6_5k_20170613.vrt,biocloud7_5k_20170613.vrt,biocloud8_5k_20170613.vrt",no,5000,500,8,0,0,0,500,1000
+Dynamic habitat index,dhi,"dhi_fpar.vrt,dhi_gpp.vrt,dhi_lai8.vrt,dhi_ndvi.vrt",no,1000,500,4,0,0,0,100,250
+Elevation and other topographical variables,dem/SRTM_30m_DEM/VRTs,"conus_30m_dem_big.vrt,conus_30m_aspect_big.vrt,conus_30m_slope_big.vrt,conus_30m_TPI_big.vrt",no,30,300,4,4,2,0,2000,22531
+Human footprint,human_impacts/hfp-global-geo-grid,hf.vrt,no,1000,500,1,0,0,0,100,250
+Geological age,geology/geo_ages,GEA.vrt,no,1000,500,1,0,0,1,100,250
+Night light,human_impacts/viirs_nightlights,vcm_orm_ntl.vrt,no,500,500,1,0,0,0,100,250
+Soil type,geology/soils,stg.vrt,no,5000,500,1,0,0,1,100,250

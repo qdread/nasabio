@@ -1,6 +1,6 @@
 # Pipeline for NASA bioxgeo
 
-Last updated by QDR on 09 Nov 2017 (still incomplete but work in progress . . . )
+Last updated by QDR on 29 Nov 2017
 
 This is documentation explaining which R scripts should be used to extract biodiversity and geodiversity information from different data sources in the NASA bioxgeo project, and calculate summary metrics on them. In many cases, the R scripts mentioned will only calculate the metrics for a very small slice of the data. To get the metrics for all the data, you need to run the script many times in parallel on the MSU cluster, one for each slice. Each time, it will save an .R object or .CSV file. The files for each slice then need to be combined into a single output .CSV in yet another script.
 
@@ -80,7 +80,7 @@ For now this is just the mean, standard deviation, minimum, and maximum for cont
 
 ### 2.0 Define functions
 
-- `spatial_data_extraction/precalcdist.r`: Defines functions to precalculate distances and create square matrices that are TRUE where a point falls within a circle centered at the center of the matrix, and FALSE otherwise, then convert those matrices into tables for many different radii. This is used to quickly extract all the pixels within a circle of a given radius without having to run those calculations each time.
+- `spatial_data_extraction/extractbox.r`: Defines function `extractBox()` to extract a square raster from the large latitude-longitude rasters that include either the entire contiguous USA or the entire world. Next defines function `statsByRadius()` for continuous variables and `diversityByRadius()` for categorical variables treated as non-ordinal. The latter functions load the entire cropped square raster into RAM, take subsets of the various circle sizes you input, and calculate summary statistics on them. **Note**: I edited these on 29 November. Previously, these functions used pre-calculated distance tables which gave erroneous results. Any geodiversity statistics from before 29 November 2017 are wrong.
 
 ### 2.1 Extract pixels from different radii and calculate summary metrics
 

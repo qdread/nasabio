@@ -1,10 +1,12 @@
 # nasabio
 
-Readme documentation last updated by QDR on 07 November 2017
+Readme documentation last updated by QDR on 29 November 2017
 
 ## Description of repo
 
 This repository is dedicated to code for data processing and analysis for the NASA Biodiversity working group. Currently, almost all the scripts here are written in R, with a few shell scripts to run R code remotely on MSU's cluster. However most of the shell scripts are written on an as-needed basis directly on the cluster and so are not copied to the repository. Almost all the scripts here are specific to BBS and FIA datasets and would need to be edited if we decide to use other datasets.
+
+There is a more detailed description of the code pipeline for calculating biodiversity and geodiversity metrics. It's found on the repo at `methods/r_pipeline.md`.
 
 ## Other locations referred to by the repo
 
