@@ -2,7 +2,7 @@
 #PBS -l walltime=4:00:00
 #PBS -l nodes=1:ppn=1
 #PBS -l mem=96gb
-#PBS -N elev_fia
+#PBS -N extr
 #PBS -j oe
 #PBS -m n
 
@@ -18,5 +18,5 @@ cd $TMPDIR
 now="$(date +'%d%h%Y%H%M')"
 
 # Cobble together the R command using the environmental variables supplied.
-cmd="R CMD BATCH --no-save --no-restore '--args taxon=\""$taxon"\" geovar=\""$geovar"\"' master_extract.r /mnt/research/nasabio/code/routputfiles/extract_"$PBS_ARRAYID"_"$now".txt"
+cmd="R CMD BATCH --no-save --no-restore '--args taxon=\""$taxon"\" geovar=\""$geovar"\"' master_extract.r /mnt/research/nasabio/code/routputfiles/"$taxon"_"$geovar"_"$PBS_ARRAYID"_"$now".txt"
 eval $cmd
