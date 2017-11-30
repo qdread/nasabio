@@ -1,3 +1,4 @@
+#!/bin/bash
 # TIFs to single VRT
 # GDAL from command line
 

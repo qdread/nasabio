@@ -35,3 +35,8 @@ fnames <- paste0('/mnt/research/nasabio/temp/bbox_test_', varname, '.tif')
 xstack <- stack(as.list(fnames))
 system.time({xpts <- rasterToPoints(xstack)})
 # This is way too slow. Should either make a brick or do them all separately.
+
+# New test for statsByRadius function now defined in extractbox.r
+statsByRadius(boxfile = 'bbox_dhifpar500.tif', centerpoint = c(-98.6, 39.8), radii = c(5, 10, 20, 50, 100))
+statsByRadius(boxfile = 'bbox_dhifpar500.tif', centerpoint = c(-98.6, 39.8), radii = c(5, 10, 20, 50, 100), is_trig = TRUE)
+statsByRadius(boxfile = 'bbox_dhifpar500.tif', centerpoint = c(-98.6, 39.8), radii = c(5, 10, 20, 50, 100), is_brick = TRUE)

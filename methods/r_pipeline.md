@@ -1,6 +1,6 @@
 # Pipeline for NASA bioxgeo
 
-Last updated by QDR on 29 Nov 2017
+Last updated by QDR on 30 Nov 2017
 
 This is documentation explaining which R scripts should be used to extract biodiversity and geodiversity information from different data sources in the NASA bioxgeo project, and calculate summary metrics on them. In many cases, the R scripts mentioned will only calculate the metrics for a very small slice of the data. To get the metrics for all the data, you need to run the script many times in parallel on the MSU cluster, one for each slice. Each time, it will save an .R object or .CSV file. The files for each slice then need to be combined into a single output .CSV in yet another script.
 
@@ -76,16 +76,16 @@ Each script below exports final .csv files to `/mnt/research/nasabio/data/fia`.
 
 ## 2. Geodiversity
 
-For now this is just the mean, standard deviation, minimum, and maximum for continuous variables, and the richness (number of unique values) and diversity (Shannon entropy) for categorical variables.
+For now this is just the mean, standard deviation, minimum, and maximum for continuous variables, and the richness (number of unique values) and diversity (Shannon entropy) for categorical variables. As of 30 November 2017, there is a sexy new workflow that both generates correct results and is much cleaner! All extraction and calculation of the basic geodiversity metrics that ignore spatial arrangement of points can be done with a single control R script and a single shell script to submit the remote jobs.
 
 ### 2.0 Define functions
 
-- `spatial_data_extraction/extractbox.r`: Defines function `extractBox()` to extract a square raster from the large latitude-longitude rasters that include either the entire contiguous USA or the entire world. Next defines function `statsByRadius()` for continuous variables and `diversityByRadius()` for categorical variables treated as non-ordinal. The latter functions load the entire cropped square raster into RAM, take subsets of the various circle sizes you input, and calculate summary statistics on them. **Note**: I edited these on 29 November. Previously, these functions used pre-calculated distance tables which gave erroneous results. Any geodiversity statistics from before 29 November 2017 are wrong.
+- `spatial_data_extraction/extractbox.r`: Defines function `extractBox()` to extract a square raster from the large latitude-longitude rasters that include either the entire contiguous USA or the entire world. Next defines functions `summstats_continuous()` and `summstats_categorical()` to calculate summary statistics on continuous and (non-ordinal) categorical variables. Lastly defines function `statsByRadius()` to calculate the summary statistics on circles of various radii. The `statsByRadius()` function loads the entire cropped square raster into RAM, takes subsets of the various circle sizes you input, and calculates summary statistics on them. **Note**: I edited these on 30 November. Previously, these functions used pre-calculated distance tables which gave erroneous results. Any geodiversity statistics from before 30 November 2017 are wrong.
 
 ### 2.1 Extract pixels from different radii and calculate summary metrics
 
-There is a separate R script for each raster that was extracted. For the most part I used the command line to create virtual rasters (.vrt) from all the .tif files, which makes it easier to read them in parallel. They are all in the `spatial_data_extraction` folder. Temporary output files are written to `climstats`, `elevstats`, and `geostats` subdirectories in either the `data/bbs` or `data/fia` directories on the cluster.
+For the most part I used the command line to create virtual rasters (.vrt) from all the .tif files, which makes it easier to read them in parallel. To extract pixels from a given geo variable raster and a given set of points (either BBS route centroids or FIA plot centers), you need to pass the appropriate arguments to `spatial_data_extraction/geoextract.sh` when submitting to the cluster. This shell script runs `spatial_data_extraction/master_extract.r`. Temporary output files are written to the  `allgeodiv` subdirectory in either the `data/bbs` or `data/fia` directories on the cluster.
 
 ### 2.2 Combine slices into single output files
 
-- `spatial_data_extraction/compileelev_bioclim.r`: Combines all extracted geodiversity metrics for both BBS and FIA and exports them to single .csv files, one for BBS and one for FIA. The master geodiversity .csv file is written to the `data/bbs` or `data/fia` directory on the cluster.
+- `spatial_data_extraction/compileelev_bioclim.r`: Combines all extracted geodiversity metrics for both BBS and FIA and exports them to single .csv files, one for BBS and one for FIA. The master geodiversity .csv file is written to the `data/bbs` or `data/fia` directory on the cluster. **Note**: As of 30 November, this has not yet been updated for the new workflow. Please stand by for updates.

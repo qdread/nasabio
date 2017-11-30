@@ -52,15 +52,24 @@ pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
 		   
 for (j in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, j)
-	extractBox(coords = with(coords, cbind(lon, lat))[j,,drop=FALSE],
-		   raster_file = raster_file_name,
-		   radius = max_radius,
-		   fp = scratch_path,
-		   filetags = paste(taxon, geovar, row.names(coords)[j], sep = '_'))
+	focalpoint <- with(coords, cbind(lon, lat))[j,,drop=FALSE]	
+	extractBox(coords = focalpoint,
+			   raster_file = raster_file_name,
+			   radius = max_radius,
+			   fp = scratch_path,
+			   filetags = paste(taxon, geovar, row.names(coords)[j], sep = '_'))
 	file_j <- paste0(scratch_path, '/bbox_', taxon, '_', geovar, '_', row.names(coords)[j], '.tif')
-	if (!use_categorical) stats_by_point[[length(stats_by_point) + 1]] <- statsByRadius(file_j, radii = radii, is_brick = n_layers > 1, is_abs = use_abs, is_trig = use_trig)
-	if (use_categorical) stats_by_point[[length(stats_by_point) + 1]] <- diversityByRadius(file_j, radii = radii, is_brick = FALSE)
-	if (file.exists(file_j)) deleteBox(file_j)
+	stats_by_point[[length(stats_by_point) + 1]] <- 
+		statsByRadius(boxfile = file_j, 
+					  centerpoint = focalpoint, 
+					  radii = radii, 
+					  is_brick = n_layers > 1, 
+					  is_abs = use_abs, 
+					  is_trig = use_trig, 
+					  is_categorical = use_categorical)
+	if (file.exists(file_j)) {
+		deleteBox(file_j)
+	}
 }	
 
 close(pb)

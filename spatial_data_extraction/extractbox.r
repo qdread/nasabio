@@ -1,5 +1,6 @@
 # Function to loop through a coordinate list and a raster file
-# At each iteration, extract a square with given radius and save to .hdf somewhere
+# At each iteration, extract a square with given radius and save to .tif
+# Edited 30 Nov: new stats function that does not use precalculated distance matrix.
 # Edited 10 Nov: add option to get mean of absolute value (used for TPI)
 
 extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetags = 1:nrow(coords), progress = FALSE) {
@@ -53,79 +54,81 @@ extractBox <- function(coords, raster_file, radius, lonbds = c(-125, -67), latbd
 	if (progress) close(pb)
 }
 
-# Use precalculated distances to get the stats for the pixels within each radius.
-# idx_r should be loaded
-statsByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE, trig = FALSE, use_abs = FALSE) {
-	require(raster)
-	if (!file.exists(boxfile)) return(NA)
-	x <- raster(boxfile)
-	if(is_brick) x <- brick(boxfile)
-	xvals <- as.data.frame(x)
-	
-	stats_r <- list()
-	for (r in 1:ncol(idx_r)) {
-		vals_r <- xvals[idx_r[, r], , drop = FALSE]
-
-		if (!trig) {
-			if (!use_abs) {
-				means <- apply(vals_r, 2, mean, na.rm = TRUE)
-			} else {
-				means <- apply(abs(vals_r), 2, mean, na.rm = TRUE)
-			}
-		sds <- apply(vals_r, 2, sd, na.rm = TRUE)
-		mins <- apply(vals_r, 2, min, na.rm = TRUE)
-		maxes <- apply(vals_r, 2, max, na.rm = TRUE)
-		nums <- apply(vals_r, 2, function(z) sum(!is.na(z)))
-		stats_r[[r]] <- data.frame(radius = radii[r],
-								   variable = names(xvals),
-								   mean = means,
-								   sd = sds,
-								   min = mins,
-								   max = maxes,
-								   n = nums)
-		} else {
-			sin_r <- sin(pi/180 * vals_r)
-			cos_r <- cos(pi/180* vals_r)
-			stats_r[[r]] <- data.frame(radius = radii[r],
-									   variable = names(xvals),
-									   mean_sin = apply(sin_r, 2, mean, na.rm = TRUE),
-									   sd_sin = apply(sin_r, 2, sd, na.rm = TRUE),
-									   min_sin = apply(sin_r, 2, min, na.rm = TRUE),
-									   max_sin = apply(sin_r, 2, max, na.rm = TRUE),
-									   mean_cos = apply(cos_r, 2, mean, na.rm = TRUE),
-									   sd_cos = apply(cos_r, 2, sd, na.rm = TRUE),
-									   min_cos = apply(cos_r, 2, min, na.rm = TRUE),
-									   max_cos = apply(cos_r, 2, max, na.rm = TRUE),
-									   n = apply(vals_r, 2, function(z) sum(!is.na(z))))
-		}
-	}
-	do.call('rbind', stats_r)	
+# Definition of which summary stats we want to calculate
+# Add more here if you want.
+# Only summary stats that ignore the spatial arrangement of the points can be calculated here.
+summstats_continuous <- function(z) {
+	z <- na.omit(z)
+	c(mean = mean(z),
+	  sd = sd(z),
+	  min = min(z),
+	  max = max(z),
+	  n = length(z))
 }
 
-# For categorical data, use this function to get "diversity indices" for the different categories.
-diversityByRadius <- function(boxfile, radii = c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300), is_brick = FALSE, exclude_values = numeric(0)) {
-	require(raster)
-	require(vegan)
-	if (!file.exists(boxfile)) return(NA)
-	x <- raster(boxfile)
-	if(is_brick) x <- brick(boxfile)
-	xvals <- as.data.frame(x)
-	
-	stats_r <- list()
-	for (r in 1:ncol(idx_r)) {
-		vals_r <- xvals[idx_r[, r], , drop = FALSE]
-		vals_r[vals_r %in% exclude_values] <- NA
-		richnesses <- apply(vals_r, 2, function(z) length(unique(na.omit(z))))
-		diversities <- apply(vals_r, 2, function(z) diversity(as.numeric(table(na.omit(z))), index = 'shannon'))
-		nums <- apply(vals_r, 2, function(z) sum(!is.na(z)))
-		stats_r[[r]] <- data.frame(radius = radii[r],
-								   variable = names(xvals),
-								   richness = richnesses,
-								   diversity = diversities,
-								   n = nums)
+summstats_categorical <- function(z) {
+	z <- na.omit(z)
+	ztable <- table(z)
+	zprop <- ztable/sum(ztable)
+	c(richness = length(unique(z)),
+	  diversity = -sum(zprop * log(zprop)),
+	  n = length(z))
+}
 
+# Edited stats function 30 Nov.
+# Unfortunately the distance matrix must be calculated here.
+# This function now works for both categorical and continuous data.
+
+statsByRadius <- function(boxfile, 
+						  centerpoint, 
+						  radii, 
+						  is_brick = FALSE, 
+						  is_trig = FALSE, 
+						  is_abs = FALSE, 
+						  is_categorical = FALSE) {
+	require(raster)
+	if (!file.exists(boxfile)) {
+		return(NA)
 	}
-	do.call('rbind', stats_r)	
+	if (!is_brick) {
+		x <- raster(boxfile)
+	} else {
+		x <- brick(boxfile)
+	}
+	xpts <- rasterToPoints(x) # Convert raster to matrix of points
+	xdists <- spDistsN1(pts = xpts[, 1:2], pt = matrix(centerpoint, nrow=1), longlat = TRUE) # Calculate distance to center
+	xsubsets <- sapply(radii, function(z) xdists <= z) # Logicals for each radius circle
+	xvals <- apply(xsubsets, 2, function(z) xpts[z, -(1:2), drop = FALSE]) # Data indexed by the subsets
+	
+	# Calculation of summary statistics
+	
+	if (!is_categorical) {
+		# continuous data
+		if (!is_trig) {
+			if (is_abs) {
+				# convert to absolute value before calculating statistics
+				xvals <- lapply(xvals, abs)
+			}
+			# calculate summary statistics
+			xstats <- do.call('rbind', lapply(xvals, function(y) t(apply(y, 2, summstats_continuous))))
+		} else {
+			# find sin and cos and calculate stats on them (degrees to radians first)
+			xsin <- lapply(xvals, function(z) sin(pi/180 * z))
+			xcos <- lapply(xvals, function(z) cos(pi/180 * z))
+			sinstats <- lapply(xsin, function(y) t(apply(y, 2, summstats_continuous)))
+			cosstats <- lapply(xcos, function(y) t(apply(y, 2, summstats_continuous)))
+			# combine sin and cos summary stats into single data frame
+			xstats <- do.call('rbind', mapply(cbind, sinstats, cosstats, SIMPLIFY = FALSE))
+			dimnames(xstats)[[2]] <- paste(dimnames(xstats)[[2]], rep(c('sin', 'cos'), each = length(dimnames(xstats)[[2]])/2), sep = '_')
+		}
+	} else {
+		# categorical data
+		xstats <- do.call('rbind', lapply(xvals, function(y) t(apply(y, 2, summstats_categorical))))
+	}
+	# Add radius and variable information to the output data
+	data.frame(radius = rep(radii, each = ncol(xvals[[1]])),
+			   variable = dimnames(xstats)[[1]],
+			   xstats)
 }
 
 # delete pre-created tif
