@@ -48,10 +48,14 @@ rowidxmax <- rowidx[slice+1]
 # Call extraction function, specifying the raster from which to extract data.
 stats_by_point <- list()
 
-pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
+if (rowidxmin < rowidxmax) {
+	pb <- txtProgressBar(rowidxmin, rowidxmax, style=3)
+}
 		   
 for (j in rowidxmin:rowidxmax) {
-	setTxtProgressBar(pb, j)
+	if (rowidxmin < rowidxmax) { 
+		setTxtProgressBar(pb, j) 
+	}
 	focalpoint <- with(coords, cbind(lon, lat))[j,,drop=FALSE]	
 	extractBox(coords = focalpoint,
 			   raster_file = raster_file_name,
@@ -72,6 +76,8 @@ for (j in rowidxmin:rowidxmax) {
 	}
 }	
 
-close(pb)
+if (rowidxmin < rowidxmax) { 
+	close(pb) 
+}
 
 save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/allgeodiv/', geovar, '_', slice, '.r'))
