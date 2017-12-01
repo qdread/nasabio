@@ -11,20 +11,20 @@
 # All others outside that radius get NA.
 
 load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
-load('/mnt/home/qdr/data/fia/fiaworkspace_spatial.r')
-source('~/code/fia/pairwise_beta_focal.r')
+source('/mnt/research/nasabio/code/loadfia.r')
+source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 
 library(sp)
 library(vegan)
 library(vegetarian)
-source('~/code/fia/fixpicante.r')
+source('/mnt/research/nasabio/code/fixpicante.r')
 
 nnull <- 99 # Reduce to save time
 
 trydist <- as.matrix(trydist)
 
 max_radius <- 300 # Do 300 km for now.
-n_slices <- 250
+n_slices <- 10000
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # Determine row indices for the slice of the matrix to be used.
@@ -51,7 +51,7 @@ for (p in rowidxmin:rowidxmax) {
 												td=T, pd=T, fd=T, abundance=T,
 												pddist=fiadist, fddist=trydist,
 												nnull = nnull,
-												phylo_spp = pnwphylo$tip.label, func_problem_spp=problemspp)
+												phylo_spp = pnwphylo$tip.label, func_problem_spp = NULL)
 		}
 	}
 	

@@ -469,6 +469,8 @@ qsub geoextract.sh -N soil_fia -v taxon=fia,geovar=soil -t 1-250
 
 ### BBS
 
+# note: only a few bbs jobs were run. Everything will have to be restarted later.
+
 # Bioclim 1k
 
 qsub geoextract.sh -N clim1k_bbs -v taxon=bbs,geovar=bioclim1k -t 1-250
@@ -513,7 +515,6 @@ qsub geoextract.sh -N elev_bbs -v taxon=bbs,geovar=elevation -t 1751-2000
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 1-250
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 251-500
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 501-750
-### BBS 4 hour jobs submitted up to this point.
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 751-1000
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 1001-1250
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 1251-1500
@@ -557,3 +558,48 @@ qsub geoextract.sh -N night_bbs -v taxon=bbs,geovar=night -t 1-100
 # Soil type
 
 qsub geoextract.sh -N soil_bbs -v taxon=bbs,geovar=soil -t 1-100
+
+
+################################################
+# FIA old-school beta-diversity
+qsub fiabd.sh -t 3-250
+qsub fiabd.sh -t 251-500
+qsub fiabd.sh -t 501-750
+qsub fiabd.sh -t 751-1000
+qsub fiabd.sh -t 1001-1250
+qsub fiabd.sh -t 1251-1500
+qsub fiabd.sh -t 1501-1750
+qsub fiabd.sh -t 1751-2000
+qsub fiabd.sh -t 2001-2250
+qsub fiabd.sh -t 2251-2500
+qsub fiabd.sh -t 2501-2750
+qsub fiabd.sh -t 2751-3000
+qsub fiabd.sh -t 3001-3250
+qsub fiabd.sh -t 3251-3500
+qsub fiabd.sh -t 3501-3750
+qsub fiabd.sh -t 3751-4000
+qsub fiabd.sh -t 4001-4250
+qsub fiabd.sh -t 4251-4500
+qsub fiabd.sh -t 4501-4750
+qsub fiabd.sh -t 4751-5000
+qsub fiabd.sh -t 5001-5250
+qsub fiabd.sh -t 5251-5500
+qsub fiabd.sh -t 5501-5750
+qsub fiabd.sh -t 5751-6000
+qsub fiabd.sh -t 6001-6250
+qsub fiabd.sh -t 6251-6500
+qsub fiabd.sh -t 6501-6750
+qsub fiabd.sh -t 6751-7000
+# done 4hours up to here
+qsub fiabd.sh -t 7001-7250
+qsub fiabd.sh -t 7251-7500
+qsub fiabd.sh -t 7501-7750
+qsub fiabd.sh -t 7751-8000
+qsub fiabd.sh -t 8001-8250
+qsub fiabd.sh -t 8251-8500
+qsub fiabd.sh -t 8501-8750
+qsub fiabd.sh -t 8751-9000
+qsub fiabd.sh -t 9001-9250
+qsub fiabd.sh -t 9251-9500
+qsub fiabd.sh -t 9501-9750
+qsub fiabd.sh -t 9751-10000
