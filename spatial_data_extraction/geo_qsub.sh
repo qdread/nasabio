@@ -53,7 +53,6 @@ qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 10001-10250
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 10251-10500
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 10501-10750
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 10751-11000
-# done 4h
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 11001-11250
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 11251-11500
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 11501-11750
@@ -101,6 +100,8 @@ qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 21751-22000
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 22001-22250
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 22251-22500
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 22501-22531
+
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv elevation_ .r 1 22531
 
 # Bioclim 1k
 
@@ -512,6 +513,7 @@ qsub geoextract.sh -N elev_bbs -v taxon=bbs,geovar=elevation -t 1751-2000
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 1-250
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 251-500
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 501-750
+### BBS 4 hour jobs submitted up to this point.
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 751-1000
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 1001-1250
 qsub geoextract.sh -N aspect_bbs -v taxon=bbs,geovar=aspect -t 1251-1500
