@@ -20,6 +20,9 @@ length(unique(fiaallcoords$CN)) # Both of these agree, 135174 plots. PNW is 1/6 
 allfia_spcodes <- unique(fiaall$SPCD)
 write.csv(data.frame(SPCD = allfia_spcodes), file = 'spcds.csv', row.names = FALSE)
 
+###################
+# starting here, run locally from github working directory:
+
 allfia_spcodes <- read.csv('specieslists/spcds.csv')
 fiataxa <- read.csv('specieslists/fia_taxon_lookuptable.csv', stringsAsFactors = FALSE)
 all(allfia_spcodes$SPCD %in% fiataxa$FIA.Code) #yes
@@ -68,8 +71,8 @@ grep('^([^_]*_){2}[^_]*$', phylotaxa, value = TRUE) # Find all with exactly 2 un
 # Amelanchier sp, Prunus sp, Quercus sp, Fraxinus sp, Diospyros sp, Family Arecaceae, Ulmus sp, Carya sp, Morus sp, Larix sp, Tamarix sp, Populus sp, Magnolia sp, Celtis sp, Sorbus sp, Pinus sp, Juniperus sp, Acer sp, Picea sp, Abies sp, Aesculus sp, Prosopis sp, Betula sp
 
 ### example of how to deal with the ones above. This probably could be modified to add Arecaceae sp. too.
-library(phytools)
-fullphylo <- add.species.to.genus(tree = fullphylo, species = 'Fraxinus_sp', where = 'root')
+# library(phytools)
+# fullphylo <- add.species.to.genus(tree = fullphylo, species = 'Fraxinus_sp', where = 'root')
 
 # Unknown trees that will have to be thrown out (3): Tree unknown, Tree broadleaf, Tree evergreen
 
@@ -77,6 +80,65 @@ fullphylo <- add.species.to.genus(tree = fullphylo, species = 'Fraxinus_sp', whe
 
 # Trees whose species was lumped with another species and can be reassigned to that species (1): Abies shastensis (now under A. magnifica)
 
+############################################
+
+# Correct taxa names to match phylogeny.
+# 1. correct capitalization and replace the subspecies and variety with underscores, replace the hyphens with underscores too
+fiataxa <- fiataxa %>%
+  mutate(Species = tolower(Species),
+         Species = gsub('var\\.', '_', Species),
+         Species = gsub('ssp\\.', '_', Species),
+         Species = gsub('\\-', '_', Species),
+         binomial = paste(Genus, Species, sep = '_'))
+
+fiataxa_inplots <- fiataxa$binomial[match(allfia_spcodes$SPCD, fiataxa$FIA.Code)]
+
+table(fiataxa_inplots %in% phylotaxa)
+table(phylotaxa %in% fiataxa_inplots)
+
+# 2. Get rid of the below-species level classifications that are not in the phylogeny.
+spp_to_fix <- fiataxa_inplots[!fiataxa_inplots %in% phylotaxa]
+
+badsubspecies <- grep('^([^_]*_){2}[^_]*$', spp_to_fix, value = TRUE)
+
+# remove the 2nd underscore and everything following it.
+fixedsubspecies <- sapply(strsplit(badsubspecies, '_'), function(x) paste(x[1:2], collapse = '_'))
+
+fiataxa <- mutate(fiataxa, binomial_forphylo = binomial)
+fiataxa$binomial_forphylo[match(badsubspecies, fiataxa$binomial_forphylo)] <- fixedsubspecies
+
+fiataxa_inplots <- fiataxa$binomial_forphylo[match(allfia_spcodes$SPCD, fiataxa$FIA.Code)]
+
+table(fiataxa_inplots %in% phylotaxa)
+
+# 3. Add genera
+genera_to_add <- grep('_sp$', spp_to_fix, value = TRUE)
+library(phytools)
+for (i in genera_to_add) {
+  fullphylo <- add.species.to.genus(tree = fullphylo, species = i, where = 'root')
+}
+
+# Check whether this was successful
+genera_to_add %in% fullphylo$tip.label # One didn't work
+genera_to_add[!genera_to_add %in% fullphylo$tip.label] # Tamarix just isn't in the phylogeny either. Probably throw it out. It's only represented by invasives and probably is almost never in "forested" plots.
+
+phylotaxa <- fullphylo$tip.label
+table(fiataxa_inplots %in% phylotaxa)
+
+spp_to_fix <- fiataxa_inplots[!fiataxa_inplots %in% phylotaxa] 
+
+# Correct typo in phylogeny
+fullphylo$tip.label[fullphylo$tip.label == 'Quercus_margarettiae'] <- 'Quercus_margarettae'
+
+# Assign Prunus cerasus to Prunus avium, and assign Abies shastensis to Abies magnifica.
+fiataxa$binomial_forphylo[fiataxa$binomial_forphylo %in% c('Abies_shastensis', 'Prunus_cerasus')] <- c('Abies_magnifica', 'Prunus_avium')
+
+phylotaxa <- fullphylo$tip.label
+fiataxa_inplots <- fiataxa$binomial_forphylo[match(allfia_spcodes$SPCD, fiataxa$FIA.Code)]
+
+table(fiataxa_inplots %in% phylotaxa)
+
+spp_not_in_phylo <- fiataxa_inplots[!fiataxa_inplots %in% phylotaxa] 
 
 ############################################
 

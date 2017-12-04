@@ -45,12 +45,10 @@ bbs_elevation_stats <- get_stats(bbs_path, 'elevation_', 1:2000, '.r')
 bbs_slope_stats <- get_stats(bbs_path, 'slope_', 1:2000, '.r')
 bbs_tpi_stats <- get_stats(bbs_path, 'tpi_', 1:2000, '.r')
 bbs_aspect_stats <- get_stats(bbs_path, 'aspect_', 1:2000, '.r')
-bbs_sin_aspect_stats <- bbs_elev_stats$sin_aspect ### FIX
-bbs_cos_aspect_stats <- bbs_elev_stats$cos_aspect ### FIX
 
 bbs_bioclim5k_stats <- get_stats(bbs_path, 'bioclim5k_', 1:500, '.r')
 bbs_bioclim1k_stats <- get_stats(bbs_path, 'bioclim1k_', 1:1000, '.r')
-bbs_biocloud5k_stats <- get_stats(bbs_path, 'biocloud5k_', 1:1000, '.r')
+bbs_biocloud5k_stats <- get_stats(bbs_path, 'biocloud5k_', 1:500, '.r')
 bbs_biocloud1k_stats <- get_stats(bbs_path, 'biocloud1k_', 1:1000, '.r')
 bbs_footprint_stats <- get_stats(bbs_path, 'hf_', 1:100, '.r')
 bbs_geoage_stats <- get_stats(bbs_path, 'gea_', 1:100, '.r')
@@ -65,8 +63,7 @@ bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.cs
 bbs_elevation_stats <- replace_na_df(bbs_elevation_stats)
 bbs_slope_stats <- replace_na_df(bbs_slope_stats)
 bbs_tpi_stats <- replace_na_df(bbs_tpi_stats)
-bbs_sin_aspect_stats <- replace_na_df(bbs_sin_aspect_stats)
-bbs_cos_aspect_stats <- replace_na_df(bbs_cos_aspect_stats)
+bbs_aspect_stats <- replace_na_df(bbs_aspect_stats)
 bbs_bioclim5k_stats <- replace_na_df(bbs_bioclim5k_stats)
 bbs_bioclim1k_stats <- replace_na_df(bbs_bioclim1k_stats)
 bbs_biocloud5k_stats <- replace_na_df(bbs_biocloud5k_stats)
@@ -76,6 +73,10 @@ bbs_geoage_stats <- replace_na_df(bbs_geoage_stats)
 bbs_soil_stats <- replace_na_df(bbs_soil_stats)
 bbs_night_stats <- replace_na_df(bbs_night_stats)
 bbs_dhi_stats <- replace_na_df(bbs_dhi_stats)
+
+bbs_sin_aspect_stats <- lapply(bbs_aspect_stats, function(x) with(x, data.frame(radius=radius, variable=variable, mean=mean_sin, sd=sd_sin, min=min_sin, max=max_sin, n=n_sin)))
+bbs_cos_aspect_stats <- lapply(bbs_aspect_stats, function(x) with(x, data.frame(radius=radius, variable=variable, mean=mean_cos, sd=sd_cos, min=min_cos, max=max_cos, n=n_cos)))
+
 
 # Replace variable names
 bbs_elevation_stats <- replace_varname(bbs_elevation_stats, 'elevation')
@@ -126,8 +127,6 @@ fia_elevation_stats <- get_stats(fia_path, 'elevation_', 1:22531, '.r')
 fia_slope_stats <- get_stats(fia_path, 'slope_', 1:22531, '.r')
 fia_tpi_stats <- get_stats(fia_path, 'tpi_', 1:22531, '.r')
 fia_aspect_stats <- get_stats(fia_path, 'aspect_', 1:22531, '.r')
-fia_sin_aspect_stats <- fia_elev_stats$sin_aspect ### FIX
-fia_cos_aspect_stats <- fia_elev_stats$cos_aspect ### FIX
 
 fia_bioclim5k_stats <- get_stats(fia_path, 'bioclim5k_', 1:1000, '.r')
 fia_bioclim1k_stats <- get_stats(fia_path, 'bioclim1k_', 1:5000, '.r')
@@ -146,8 +145,7 @@ plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv', strin
 fia_elevation_stats <- replace_na_df(fia_elevation_stats)
 fia_slope_stats <- replace_na_df(fia_slope_stats)
 fia_tpi_stats <- replace_na_df(fia_tpi_stats)
-fia_sin_aspect_stats <- replace_na_df(fia_sin_aspect_stats)
-fia_cos_aspect_stats <- replace_na_df(fia_cos_aspect_stats)
+fia_aspect_stats <- replace_na_df(fia_aspect_stats)
 fia_bioclim5k_stats <- replace_na_df(fia_bioclim5k_stats)
 fia_bioclim1k_stats <- replace_na_df(fia_bioclim1k_stats)
 fia_biocloud5k_stats <- replace_na_df(fia_biocloud5k_stats)
@@ -157,6 +155,9 @@ fia_geoage_stats <- replace_na_df(fia_geoage_stats)
 fia_soil_stats <- replace_na_df(fia_soil_stats)
 fia_night_stats <- replace_na_df(fia_night_stats)
 fia_dhi_stats <- replace_na_df(fia_dhi_stats)
+
+fia_sin_aspect_stats <- lapply(fia_aspect_stats, function(x) with(x, data.frame(radius=radius, variable=variable, mean=mean_sin, sd=sd_sin, min=min_sin, max=max_sin, n=n_sin)))
+fia_cos_aspect_stats <- lapply(fia_aspect_stats, function(x) with(x, data.frame(radius=radius, variable=variable, mean=mean_cos, sd=sd_cos, min=min_cos, max=max_cos, n=n_cos)))
 
 # Replace variable names
 fia_elevation_stats <- replace_varname(fia_elevation_stats, 'elevation')
