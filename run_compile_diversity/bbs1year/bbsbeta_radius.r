@@ -1,5 +1,6 @@
 # Calculate median beta-diversity of bbs by radius. (old method)
 # Modified 08 June to include PD and FD.
+# Modified 05 Dec to use the mean rather than the median
 
 # Load bbs beta diversity and route coordinates
 load('/mnt/research/nasabio/data/bbs/bbs_betadivtdpdfd_array_1year.r')
@@ -21,7 +22,7 @@ neighbordivfromtable <- function(x) {
 	commdat <- list()
 	for (i in 1:length(radii)) {
 		neighbors_incircle <- bbs_betadiv_array[neighbordists <= radii[i], focalpointindex, , drop = FALSE]
-		commdat[[i]] <- c(radius = radii[i], apply(neighbors_incircle, 3, function(x) median(x[is.finite(x)])))
+		commdat[[i]] <- c(radius = radii[i], apply(neighbors_incircle, 3, function(x) mean(x[is.finite(x)])))
 
 	}
 	as.data.frame(do.call('rbind', commdat))

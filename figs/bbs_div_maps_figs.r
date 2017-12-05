@@ -357,7 +357,8 @@ for (i in 1:length(xvars)) {
                                                           yvar = yvars[j],
                                                           xname = xnames[i],
                                                           yname = ynames[j],
-                                                          radii = c(50, 75, 100, 150, 200, 300))
+                                                          radii = c(50, 75, 100, 150, 200, 300),
+                                                          summary_stat = 'sd')
   }
 }
 

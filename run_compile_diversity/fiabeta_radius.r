@@ -2,6 +2,7 @@
 # Modified 25 June to include PD and FD.
 # Modified 09 Sep to load a different object
 # Modified 04 Dec for the unfuzzed coordinates
+# Modified 05 Dec to use the mean rather than the median
 
 # Load bbs beta diversity and route coordinates
 load('/mnt/research/nasabio/data/fia/fia_betadivtdpdfd_listbymetric.r') # v. large (13gb on hard disk)
@@ -28,7 +29,7 @@ neighbordivfromtable <- function(x) {
 	commdat <- list()
 	for (i in 1:length(radii)) {
 		neighbors_incircle <- fia_betadiv_array[neighbordists <= radii[i], focalpointindex, , drop = FALSE]
-		commdat[[i]] <- c(radius = radii[i], apply(neighbors_incircle, 3, function(x) median(x[is.finite(x)])))
+		commdat[[i]] <- c(radius = radii[i], apply(neighbors_incircle, 3, function(x) mean(x[is.finite(x)])))
 
 	}
 	as.data.frame(do.call('rbind', commdat))
