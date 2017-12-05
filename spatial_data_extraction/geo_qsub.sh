@@ -219,7 +219,6 @@ qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12001-12250
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12251-12500
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12501-12750
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12751-13000
-# 4h to here
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 13001-13250
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 13251-13500
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 13501-13750
@@ -232,6 +231,7 @@ qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 15001-15250
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 15251-15500
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 15501-15750
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 15751-16000
+#4h
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 16001-16250
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 16251-16500
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 16501-16750

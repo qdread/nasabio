@@ -16,7 +16,7 @@ library(dplyr)
 
 # For each year and route number, get the median beta diversity within each radius.
 # The pairwise table was constructed to only go up to 300 km, so that is all we will have.
-radii <- c(10, 20, 50, 75, 100, 150, 200, 300) # in km
+radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300) # in km
 
 # Find the right matrix in the lookup table, and for each plot, get the median pairwise beta-diversity within each radius.
 
@@ -39,5 +39,5 @@ fia_beta <- fiacoords %>%
 	rowwise() %>%
 	do(neighbordivfromtable(.))
 
-fia_beta <- cbind(as.data.frame(fiacoords[rep(1:length(radii), times = nrow(fiacoords)), c('PLT_CN', 'STATECD', 'COUNTYCD', 'PLOT')]), as.data.frame(fia_beta))
+fia_beta <- cbind(as.data.frame(fiacoords[rep(1:nrow(fiacoords), each = length(radii)), c('PLT_CN', 'STATECD', 'COUNTYCD', 'PLOT')]), as.data.frame(fia_beta))
 write.csv(fia_beta, file = '/mnt/research/nasabio/data/fia/fia_beta.csv', row.names = FALSE)

@@ -1,5 +1,6 @@
 # Conceptual paper model fitting: FIA a,b,g diversity ~ elevation SD
-# Last edited 10 Nov: add beta-diversity and also add gam fit with no subsample.
+# edited 10 Nov: add beta-diversity and also add gam fit with no subsample.
+# edited 05 Dec: now elevation stats are correct, beta-diversity is based on pairwise and not multisite Soerensen.
 
 # Procedure in pseudocode:
 # Load a,b,g diversity data and elevation diversity data
@@ -23,11 +24,11 @@ fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/fia_unfuzzed'
 # Load the elevational diversity and abg diversity data
 ed <- read.csv(file.path(fp, 'fia_elev_stats_unfuzzed.csv'))
 ad <- read.csv(file.path(fp, 'fia_alpha.csv'))
-bd <- read.csv(file.path(fp, 'fia_betapartfinal_to100_wide.csv'))
+bd <- read.csv(file.path(fp, 'fia_beta.csv'))
 gd <- read.csv(file.path(fp, 'fia_gammadiv.csv'))
 
 radii <- c(5, 10, 20, 50, 100)
-div_names <- c('alpha_richness','beta_richness','gamma_richness')
+div_names <- c('alpha_diversity','beta_diversity','gamma_diversity')
 
 library(dplyr)
 library(sp)
@@ -40,12 +41,21 @@ source('~/GitHub/nasabio/stats/spatial_fns.r')
 
 # Combine into a single data frame.
 biogeo <- ed %>%
-  dplyr::select(PLT_CN, radius, sd) %>%
+  dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, sd) %>%
   filter(radius %in% radii) %>%
   rename(elevation_sd = sd) %>%
-  left_join(ad %>% dplyr::select(PLT_CN, radius, richness, shannon) %>% rename(alpha_richness = richness, alpha_diversity = shannon)) %>%
-  left_join(bd %>% mutate(radius = radius/1000) %>% dplyr::select(PLT_CN, radius, sorensen_taxonomic_total, bray_taxonomic_total) %>% rename(beta_richness = sorensen_taxonomic_total, beta_diversity = bray_taxonomic_total)) %>%
-  left_join(gd %>% dplyr::select(PLT_CN, radius, richness, shannon) %>% rename(gamma_richness = richness, gamma_diversity = shannon))
+  left_join(ad %>% 
+              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, richness, shannon) %>% 
+              rename(alpha_richness = richness, alpha_diversity = shannon) %>%
+              filter(radius %in% radii)) %>%
+  left_join(bd %>% 
+              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, beta_td_pairwise_pa, beta_td_pairwise) %>% 
+              rename(beta_richness = beta_td_pairwise_pa, beta_diversity = beta_td_pairwise) %>%
+              filter(radius %in% radii)) %>%
+  left_join(gd %>% 
+              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, richness, shannon) %>% 
+              rename(gamma_richness = richness, gamma_diversity = shannon) %>%
+              filter(radius %in% radii))
 
 # Add latitude and longitudes from unfuzzed (on local drive only)
 fiacoords <- read.csv('~/FIA/pnw.csv') %>% filter(complete.cases(.))
