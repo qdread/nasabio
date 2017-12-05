@@ -101,8 +101,6 @@ qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 22001-22250
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 22251-22500
 qsub geoextract.sh -N elev_fia -v taxon=fia,geovar=elevation -t 22501-22531
 
-./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv elevation_ .r 1 22531
-
 # Bioclim 1k
 
 qsub geoextract.sh -N clim1k_fia -v taxon=fia,geovar=bioclim1k -t 1-250
@@ -144,7 +142,6 @@ qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 1251-1500
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 1501-1750
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 1751-2000
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 2001-2250
-# 4h to here
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 2251-2500
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 2501-2750
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 2751-3000
@@ -155,7 +152,7 @@ qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 3751-4000
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 4001-4250
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 4251-4500
 qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 4501-4750
-qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 5751-5000
+qsub geoextract.sh -N cloud1k_fia -v taxon=fia,geovar=biocloud1k -t 4751-5000
 
 # Biocloud 5k
 
@@ -166,7 +163,7 @@ qsub geoextract.sh -N cloud5k_fia -v taxon=fia,geovar=biocloud5k -t 751-1000
 
 # DHI
 
-qsub geoextract.sh -N dhi_bbs -v taxon=bbs,geovar=dhi -t 1-100
+qsub geoextract.sh -N dhi_fia -v taxon=fia,geovar=dhi -t 1-250
 
 # Aspect
 
@@ -222,6 +219,7 @@ qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12001-12250
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12251-12500
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12501-12750
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 12751-13000
+# 4h to here
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 13001-13250
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 13251-13500
 qsub geoextract.sh -N aspect_fia -v taxon=fia,geovar=aspect -t 13501-13750
@@ -466,6 +464,23 @@ qsub geoextract.sh -N night_fia -v taxon=fia,geovar=night -t 1-250
 
 qsub geoextract.sh -N soil_fia -v taxon=fia,geovar=soil -t 1-250
 
+# Check whether jobs are done
+
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv bioclim1k_ .r 1 5000
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv bioclim5k_ .r 1 1000
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv biocloud1k_ .r 1 5000
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv biocloud5k_ .r 1 1000
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv dhi_ .r 1 250
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv elevation_ .r 1 22531
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv slope_ .r 1 22531
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv aspect_ .r 1 22531
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv tpi_ .r 1 22531
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv hf_ .r 1 250
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv gea_ .r 1 250
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv night_ .r 1 250
+./didjob.sh /mnt/research/nasabio/data/fia/allgeodiv soil_ .r 1 250
+
+
 ###################################################
 
 ### BBS
@@ -560,7 +575,7 @@ qsub geoextract.sh -N night_bbs -v taxon=bbs,geovar=night -t 1-100
 
 qsub geoextract.sh -N soil_bbs -v taxon=bbs,geovar=soil -t 1-100
 
-# all bbs jobs submitted to 4 hours 2 dec.
+# Check whether jobs are done
 
 ./didjob.sh /mnt/research/nasabio/data/bbs/allgeodiv bioclim1k_ .r 1 1000
 ./didjob.sh /mnt/research/nasabio/data/bbs/allgeodiv bioclim5k_ .r 1 500

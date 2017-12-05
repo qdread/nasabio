@@ -4,6 +4,7 @@
 # Modified 15 Sep 2017: added DHI and night light index.
 # Modified 21 Sep 2017: added 75km and 150km radius to the maps.
 # Modified 7 Nov 2017: replace with the diversity pooled across years.
+# Modified 5 Dec 2017: remake biogeo regressions and maps with corrected data; replace multisite with median pairwise beta-diversity
 
 # Load data ---------------------------------------------------------------
 
@@ -74,6 +75,22 @@ draw_bbs_map(dat = beta_pd, zvar = 'prop_nested',
 
 
 ### "Old" version of beta-diversity
+
+bd %>%
+  mutate(radius = radius * 1000) %>%
+  filter(radius %in% radii) %>%
+  draw_bbs_map(zvar = 'beta_pd_pairwise_pa_z',  
+               colscale = scale_colour_gradientn(name = 'Phylogenetic\nbeta-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+               maptitle = 'BBS beta-diversity, phylogenetic, incidence-based (z-score)',
+               fp = fpfig, fname = 'beta_div_phy_bettermethod.png', img_h = img_height)
+
+bd %>%
+  mutate(radius = radius * 1000) %>%
+  filter(radius %in% radii) %>%
+  draw_bbs_map(zvar = 'beta_td_pairwise_pa',  
+               colscale = scale_colour_gradientn(name = 'Taxonomic\nbeta-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9)),
+               maptitle = 'BBS beta-diversity, taxonomic, incidence-based',
+               fp = fpfig, fname = 'beta_div_tax_bettermethod.png', img_h = img_height)
 
 bd %>%
   mutate(radius = radius * 1000) %>%
@@ -194,7 +211,7 @@ ed %>%
 ed %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii, variable == 'geological_age') %>%
-  draw_bbs_map(zvar = 'diversity',  
+  draw_bbs_map(zvar = 'diversity_geodiv',  
                colscale = scale_colour_gradientn(name = 'Geological age\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.25)(9)),
                maptitle = 'BBS geodiversity: geological age',
                fp = fpfig, fname = 'geodiv_geologicalage.png', img_h = img_height)
@@ -202,22 +219,22 @@ ed %>%
 ed %>%
   mutate(radius = radius * 1000) %>%
   filter(radius %in% radii, variable == 'soil_type') %>%
-  draw_bbs_map(zvar = 'diversity',  
+  draw_bbs_map(zvar = 'diversity_geodiv',  
                colscale = scale_colour_gradientn(name = 'Soil type\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9)),
                maptitle = 'BBS geodiversity: soil type',
                fp = fpfig, fname = 'geodiv_soiltype.png', img_h = img_height)
 
 # Bivariate plots ---------------------------------------------------------
 
-radlabel <- labeller(radius = function(x) paste(as.integer(x)/1000, 'km'))
+radlabel <- labeller(radius = function(x) paste(as.integer(x), 'km'))
+radii <- c(50, 75, 100, 150, 200, 300)
 
 # Taxonomic beta-diversity by elevational diversity
 
 td_total_ed_plot <- ed %>%
-  mutate(radius = radius*1000) %>%
   filter(variable == 'elevation', radius %in% radii) %>%
-  right_join(beta_td) %>%
-  ggplot(aes(x = sd, y = total)) +
+  right_join(bd) %>%
+  ggplot(aes(x = sd, y = beta_td_pairwise_pa)) +
   geom_point(alpha = 0.05, size = 0.25) +
   stat_smooth(color = 'red', se = FALSE, method = 'auto') +
   facet_grid(. ~ radius, labeller = radlabel) +
@@ -227,59 +244,75 @@ td_total_ed_plot <- ed %>%
   scale_y_continuous(name = 'Taxonomic beta-diversity', expand = c(0,0), limits = c(0,1)) +
   labs(x = 'Elevation variability')
 
-td_nested_ed_plot <- ed %>%
-  mutate(radius = radius*1000) %>%
-  filter(variable == 'elevation', radius %in% radii) %>%
-  right_join(beta_td) %>%
-  ggplot(aes(x = sd, y = prop_nested)) +
-  geom_point(alpha = 0.05, size = 0.25) +
-  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
-  facet_grid(. ~ radius, labeller = radlabel) +
-  scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
-  theme(strip.background = element_blank()) +
-  panel_border(colour='black') +
-  scale_y_continuous(name = 'Nestedness proportion TD', expand = c(0,0), limits = c(0,1)) +
-  labs(x = 'Elevation variability')
+# td_nested_ed_plot <- ed %>%
+#   mutate(radius = radius*1000) %>%
+#   filter(variable == 'elevation', radius %in% radii) %>%
+#   right_join(beta_td) %>%
+#   ggplot(aes(x = sd, y = prop_nested)) +
+#   geom_point(alpha = 0.05, size = 0.25) +
+#   stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+#   facet_grid(. ~ radius, labeller = radlabel) +
+#   scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+#   theme(strip.background = element_blank()) +
+#   panel_border(colour='black') +
+#   scale_y_continuous(name = 'Nestedness proportion TD', expand = c(0,0), limits = c(0,1)) +
+#   labs(x = 'Elevation variability')
 
 # Phylogenetic beta diversity by elevation diversity
 
 pd_total_ed_plot <- ed %>%
-  mutate(radius = radius*1000) %>%
   filter(variable == 'elevation', radius %in% radii) %>%
-  right_join(beta_pd) %>%
-  ggplot(aes(x = sd, y = total)) +
+  right_join(bd) %>%
+  ggplot(aes(x = sd, y = beta_pd_pairwise_pa_z)) +
   geom_point(alpha = 0.05, size = 0.25) +
   stat_smooth(color = 'red', se = FALSE, method = 'auto') +
   facet_grid(. ~ radius, labeller = radlabel) +
   scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
   theme(strip.background = element_blank()) +
   panel_border(colour='black') +
-  scale_y_continuous(name = 'Phylogenetic beta-diversity', expand = c(0,0), limits = c(0,1)) +
+  scale_y_continuous(name = 'Phylogenetic beta-diversity (z-score)', expand = c(0,0)) +
   labs(x = 'Elevation variability')
 
-pd_nested_ed_plot <- ed %>%
-  mutate(radius = radius*1000) %>%
+# pd_nested_ed_plot <- ed %>%
+#   mutate(radius = radius*1000) %>%
+#   filter(variable == 'elevation', radius %in% radii) %>%
+#   right_join(beta_pd) %>%
+#   ggplot(aes(x = sd, y = prop_nested)) +
+#   geom_point(alpha = 0.05, size = 0.25) +
+#   stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+#   facet_grid(. ~ radius, labeller = radlabel) +
+#   scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
+#   theme(strip.background = element_blank()) +
+#   panel_border(colour='black') +
+#   scale_y_continuous(name = 'Nestedness proportion PD', expand = c(0,0), limits = c(0,1)) +
+#   labs(x = 'Elevation variability')
+
+# Functional beta-diversity by elevation diversity
+
+fd_total_ed_plot <- ed %>%
   filter(variable == 'elevation', radius %in% radii) %>%
-  right_join(beta_pd) %>%
-  ggplot(aes(x = sd, y = prop_nested)) +
+  right_join(bd) %>%
+  filter(beta_fd_pairwise_pa_z > -10) %>%
+  ggplot(aes(x = sd, y = beta_fd_pairwise_pa_z)) +
   geom_point(alpha = 0.05, size = 0.25) +
   stat_smooth(color = 'red', se = FALSE, method = 'auto') +
   facet_grid(. ~ radius, labeller = radlabel) +
   scale_x_continuous(limits=c(0,1250), breaks=c(0,500,1000)) +
   theme(strip.background = element_blank()) +
   panel_border(colour='black') +
-  scale_y_continuous(name = 'Nestedness proportion PD', expand = c(0,0), limits = c(0,1)) +
+  scale_y_continuous(name = 'Functional beta-diversity (z-score)', expand = c(0,0)) +
   labs(x = 'Elevation variability')
 
-ggsave(file.path(fpfig, 'plot_beta_tax_total_by_elev_sd.png'), td_total_ed_plot, height = 4, width = 12, dpi = 400)
-ggsave(file.path(fpfig, 'plot_beta_tax_nestedness_by_elev_sd.png'), td_nested_ed_plot, height = 4, width = 12, dpi = 400)
-ggsave(file.path(fpfig, 'plot_beta_phy_total_by_elev_sd.png'), pd_total_ed_plot, height = 4, width = 12, dpi = 400)
-ggsave(file.path(fpfig, 'plot_beta_phy_nestedness_by_elev_sd.png'), pd_nested_ed_plot, height = 4, width = 12, dpi = 400)
+ggsave(file.path(fpfig, 'plot_beta_tax_total_by_elev_sd_bettermethod.png'), td_total_ed_plot, height = 4, width = 12, dpi = 400)
+#ggsave(file.path(fpfig, 'plot_beta_tax_nestedness_by_elev_sd.png'), td_nested_ed_plot, height = 4, width = 12, dpi = 400)
+ggsave(file.path(fpfig, 'plot_beta_phy_total_by_elev_sd_bettermethod.png'), pd_total_ed_plot, height = 4, width = 12, dpi = 400)
+#ggsave(file.path(fpfig, 'plot_beta_phy_nestedness_by_elev_sd.png'), pd_nested_ed_plot, height = 4, width = 12, dpi = 400)
+ggsave(file.path(fpfig, 'plot_beta_fun_total_by_elev_sd_bettermethod.png'), fd_total_ed_plot, height = 4, width = 12, dpi = 400)
 
 # Create loop of predictor by response variables and make bivariate plots of all of them.
 
-bbs_xy_plot <- function(xdat, xvar, ydat, yvar, xname, yname, radii) {
-  xcolumn <- ifelse(xvar %in% c('geological_age', 'soil_type'), 'diversity_geodiv', 'sd')
+bbs_xy_plot <- function(xdat, xvar, ydat, yvar, xname, yname, radii, summary_stat = 'sd') {
+  xcolumn <- ifelse(xvar %in% c('geological_age', 'soil_type'), 'diversity_geodiv', summary_stat)
   xdat %>%
     filter(variable == xvar) %>%
     right_join(ydat) %>%
@@ -297,7 +330,6 @@ bbs_xy_plot <- function(xdat, xvar, ydat, yvar, xname, yname, radii) {
 
 # Loop through all the combinations and make a pdf. This can be used for some crude exploratory data analysis.
 # Just use the 1k bioclim.
-
 beta_td <- mutate(beta_td, radius = radius/1000)
 beta_pd <- mutate(beta_pd, radius = radius/1000)
 
@@ -309,11 +341,11 @@ xvars <- xvars[!grepl('5k', xvars)]
 xvars <- xvars[!grepl('bio2|bio3|bio7|bio8|bio9|bio10|bio11|bio16|bio17|bio18|bio19', xvars)]
 xvars <- xvars[!grepl('cloud5|cloud6|cloud7|cloud8', xvars)]
 
-ydats <- c('ad', 'ad', 'ad', 'beta_td', 'beta_pd', 'bd', 'gd', 'gd', 'gd', 'beta_td', 'beta_pd')
-yvars <- c('richness', 'MPD_pa_z', 'MPDfunc_pa_z', 'total', 'total', 'beta_fd_pairwise_pa_z', 'richness', 'MPD_pa_z', 'MPDfunc_pa_z', 'prop_nested', 'prop_nested')
+ydats <- c('ad', 'ad', 'ad', 'bd', 'bd', 'bd', 'gd', 'gd', 'gd')
+yvars <- c('richness', 'MPD_pa_z', 'MPDfunc_pa_z', 'beta_td_pairwise_pa', 'beta_pd_pairwise_pa_z', 'beta_fd_pairwise_pa_z', 'richness', 'MPD_pa_z', 'MPDfunc_pa_z')
 
 xnames <- c('Elevation stdev', 'Slope stdev', 'TPI stdev', 'sin(aspect) stdev', 'cos(aspect) stdev', 'Mean annual temp stdev', 'Temperature seasonality stdev', 'Max temp warmest month stdev', 'Min temp coldest month stdev', 'Mean annual precip stdev', 'Predip wettest month stdev', 'Precip driest month stdev', 'Precip seasonality stdev', 'Mean annual cloudiness stdev', 'Max monthly cloudiness stdev' , 'Min monthly cloudiness stdev', 'Cloudiness seasonality stdev', 'Human footprint index stdev', 'Night light index stdev', 'DHI fPAR stdev', 'DHI GPP stdev', 'DHI LAI stdev', 'DHI NDVI stdev', 'geological age diversity', 'soil type diversity')
-ynames <- c('Taxonomic alpha', 'Phylogenetic alpha', 'Functional alpha', 'Taxonomic beta', 'Phylogenetic beta', 'Functional beta', 'Taxonomic gamma', 'Phylogenetic gamma' , 'Functional gamma', 'Beta nestedness (tax)' , 'Beta nestedness (phy)')
+ynames <- c('Taxonomic alpha', 'Phylogenetic alpha', 'Functional alpha', 'Taxonomic beta', 'Phylogenetic beta', 'Functional beta', 'Taxonomic gamma', 'Phylogenetic gamma' , 'Functional gamma')
 
 bbs_xy_list <- list()
 
@@ -334,4 +366,31 @@ pdf(file.path(fpfig, 'bbs_all_bioxgeo.pdf'), height = 4, width = 12, onefile = T
   for (i in 1:length(bbs_xy_list)) {
     print(bbs_xy_list[[i]])
   }
+dev.off()
+
+### Means of variables (to contrast with standard deviation)
+
+xvars <- xvars[1:23]
+xnames <- c('Elevation mean', 'Slope mean', 'TPI mean', 'sin(aspect) mean', 'cos(aspect) mean', 'Mean annual temp mean', 'Temperature seasonality mean', 'Max temp warmest month mean', 'Min temp coldest month mean', 'Mean annual precip mean', 'Predip wettest month mean', 'Precip driest month mean', 'Precip seasonality mean', 'Mean annual cloudiness mean', 'Max monthly cloudiness mean' , 'Min monthly cloudiness mean', 'Cloudiness seasonality mean', 'Human footprint index mean', 'Night light index mean', 'DHI fPAR mean', 'DHI GPP mean', 'DHI LAI mean', 'DHI NDVI mean')
+
+bbs_xymean_list <- list()
+
+for (i in 1:length(xvars)) {
+  for (j in 1:length(yvars)) {
+    bbs_xymean_list[[length(bbs_xymean_list) + 1]] <- bbs_xy_plot(xdat = ed,
+                                                                  xvar = xvars[i],
+                                                                  ydat = get(ydats[j]),
+                                                                  yvar = yvars[j],
+                                                                  xname = xnames[i],
+                                                                  yname = ynames[j],
+                                                                  radii = c(50, 75, 100, 150, 200, 300),
+                                                                  summary_stat = 'mean')
+  }
+}
+
+# List of ggplots to multipage pdf
+pdf(file.path(fpfig, 'bbs_all_bioxgeoMEAN.pdf'), height = 4, width = 12, onefile = TRUE)
+for (i in 1:length(bbs_xymean_list)) {
+  print(bbs_xymean_list[[i]])
+}
 dev.off()
