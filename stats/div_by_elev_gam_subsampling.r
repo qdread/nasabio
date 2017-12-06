@@ -100,19 +100,26 @@ n_iter <- 999 # Increase later.
 subsample_size <- 20
 n_max <- 50
 
+library(betareg)
+
 # Get rid of the (very few) places where beta diversity is exactly 1
 biogeo$beta_diversity[biogeo$beta_diversity == 1] <- NA
 
-# R2 of gam. array with number of diversity types (a,b,g) by number of radii by number of iterations
-r2_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
-r2_lm_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
+# Transform alpha and gamma diversity to "true" equivalents
+biogeo <- mutate(biogeo,
+                alpha_diversity = exp(alpha_diversity),
+                gamma_diversity = exp(gamma_diversity))
 
 # x-values for predicted y-values
 xrange <- range(biogeo$elevation_sd, na.rm=TRUE)
 newx <- round(seq(xrange[1], xrange[2], length.out = 20))
 
+# R2 array with number of diversity types (a,b,g) by number of radii by number of iterations
+#r2_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
 # Predicted value array
-pred_val_array <- array(NA, dim = c(length(div_names), length(radii), n_iter, length(newx)))
+#pred_val_array <- array(NA, dim = c(length(div_names), length(radii), n_iter, length(newx)))
+
+r2_lm_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
 pred_val_lm_array <- array(NA, dim = c(length(div_names), length(radii), n_iter, length(newx)))
 
 pb <- txtProgressBar(0, prod(dim(r2_lm_array)), style = 3)
@@ -141,6 +148,9 @@ for (k in 1:n_iter) {
       setTxtProgressBar(pb, ii)
       # Fit GAM.
       #gam_fit <- gam(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat)
+      # If possible, get predicted y-values for the gam. This can be used to make an interval on the figures.
+      #pred_val_array[i, j, k, ] <- predict.gam(object = gam_fit, newdata = data.frame(elevation_sd = newx))
+      
       # Fit lm if alpha or gamma, fit beta-regression (oddly enough) if beta
       if (div_names[i] == 'beta_diversity') {
         betareg_fit <- betareg(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat)
@@ -151,10 +161,7 @@ for (k in 1:n_iter) {
         pred_val_lm_array[i, j, k, ] <- predict.lm(object = lm_fit, newdata = data.frame(elevation_sd = newx))
         r2_lm_array[i, j, k] <- summary(lm_fit)$r.sq
       }
-      
-      # If possible, get predicted y-values for the gam. This can be used to make an interval on the figures.
-      #pred_val_array[i, j, k, ] <- predict.gam(object = gam_fit, newdata = data.frame(elevation_sd = newx))
-      
+
     }
   }
 }
@@ -164,15 +171,13 @@ close(pb)
 # Convert array to data frame
 library(reshape2)
 #dimnames(r2_array) <- list(div_names, radii, NULL)
-dimnames(r2_lm_array) <- list(div_names, radii, NULL)
 #dimnames(pred_val_array) <- list(div_names, radii, NULL, NULL)
-dimnames(pred_val_lm_array) <- list(div_names, radii, NULL, NULL)
-
-
 #r2_df <- melt(r2_array, varnames = c('diversity_type', 'radius', 'iteration'))
 #pred_val_df <- melt(pred_val_array, varnames = c('diversity_type', 'radius', 'iteration', 'x'))
 #pred_val_df$x <- newx[pred_val_df$x]
 
+dimnames(r2_lm_array) <- list(div_names, radii, NULL)
+dimnames(pred_val_lm_array) <- list(div_names, radii, NULL, NULL)
 r2_lm_df <- melt(r2_lm_array, varnames = c('diversity_type', 'radius', 'iteration'))
 pred_val_lm_df <- melt(pred_val_lm_array, varnames = c('diversity_type', 'radius', 'iteration', 'x'))
 pred_val_lm_df$x <- newx[pred_val_lm_df$x]
@@ -231,10 +236,10 @@ ggplot(biogeo) +
 fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/fia_exploratory_plots'
 
 # Variation explained
-ggplot(r2_lm_df, aes(x = radius, y = value, group = interaction(radius, diversity_type), fill = diversity_type)) +
+r2plot <- ggplot(r2_lm_df, aes(x = radius, y = value, group = interaction(radius, diversity_type), fill = diversity_type)) +
   geom_boxplot() +
   theme(legend.position = 'bottom')
-ggsave(file.path(fpfig, 'fia_lm_rsquared.png'), height = 5, width = 6, dpi = 200)
+ggsave(file.path(fpfig, 'fia_lm_rsquared.png'), r2plot, height = 5, width = 6, dpi = 200)
 
 # Predicted values
 pred_val_lm_quant <- pred_val_lm_df %>%
@@ -244,43 +249,60 @@ pred_val_lm_quant <- pred_val_lm_df %>%
             pred_y_max = quantile(value, probs = 0.975, na.rm = TRUE)) %>%
   arrange(diversity_type, radius, x)
 
-ggplot(biogeo) + 
-  facet_grid(~ radius, scales = 'free') +
-  geom_point(aes(x = elevation_sd, y = alpha_diversity), alpha = 0.05) +
+# Get rid of values out of range.
+xranges <- biogeo %>% group_by(radius) %>% summarize_at(vars(elevation_sd), funs(sdmin = min, sdmax = max), na.rm = TRUE)
+pred_val_lm_quant <- pred_val_lm_quant %>%
+  ungroup %>%
+  left_join(xranges) %>%
+  filter(x <= sdmax)
+
+# Calculate mean (pseudo) r2s for plotting
+meanr2s <- r2_lm_df %>%
+  group_by(diversity_type, radius) %>%
+  summarize(r2 = mean(value),
+            r2expr = as.character(eval(substitute(expression(R^2 == x), list(x = round(r2, 2))))))
+
+hexfill <- scale_fill_gradient(low = 'gray90', high = 'black')
+hextheme <- theme(strip.background = element_blank())
+border <- panel_border(colour = 'black')
+radlabel <- labeller(radius = function(x) paste(as.integer(x), 'km'))
+
+alphaplot <- ggplot(biogeo) + 
+  facet_grid(~ radius, scales = 'free', labeller = radlabel) +
+  geom_hex(aes(x = elevation_sd, y = alpha_diversity)) +
   geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'alpha_diversity'), 
-              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
+              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'red', alpha = 0.3) +
   geom_line(data = pred_val_lm_quant %>% filter(diversity_type == 'alpha_diversity'), 
-            aes(x = x, y = pred_y), color = 'blue', size = 1.5)
+            aes(x = x, y = pred_y), color = 'red', size = 1.5) +
+  geom_text(data = subset(meanr2s, diversity_type == 'alpha_diversity'),
+            aes(x = -Inf, y = Inf, label = r2expr),
+            parse = TRUE, hjust = -0.5, vjust = 2) +
+  hexfill + hextheme + border + labs(x = 'Elevation standard deviation', y = 'Alpha-diversity')
 
-ggplot(biogeo) + 
-  facet_grid(~ radius, scales = 'free') +
-  geom_point(aes(x = elevation_sd, y = beta_diversity), alpha = 0.05) +
+betaplot <- ggplot(biogeo) + 
+  facet_grid(~ radius, scales = 'free', labeller = radlabel) +
+  geom_hex(aes(x = elevation_sd, y = beta_diversity)) +
   geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'beta_diversity'), 
-              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
+              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'red', alpha = 0.3) +
   geom_line(data = pred_val_lm_quant %>% filter(diversity_type == 'beta_diversity'), 
-            aes(x = x, y = pred_y), color = 'blue', size = 1.5)
+            aes(x = x, y = pred_y), color = 'red', size = 1.5) +
+  geom_text(data = subset(meanr2s, diversity_type == 'beta_diversity'),
+            aes(x = Inf, y = -Inf, label = r2expr),
+            parse = TRUE, hjust = 1.1, vjust = -2) +
+  hexfill + hextheme + border + labs(x = 'Elevation standard deviation', y = 'Beta-diversity')
 
-ggplot(biogeo) + 
-  facet_grid(~ radius, scales = 'free') +
-  geom_point(aes(x = elevation_sd, y = gamma_diversity), alpha = 0.05) +
+gammaplot <- ggplot(biogeo) + 
+  facet_grid(~ radius, scales = 'free', labeller = radlabel) +
+  geom_hex(aes(x = elevation_sd, y = gamma_diversity)) +
   geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'gamma_diversity'), 
-              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
+              aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'red', alpha = 0.3) +
   geom_line(data = pred_val_lm_quant %>% filter(diversity_type == 'gamma_diversity'), 
-            aes(x = x, y = pred_y), color = 'blue', size = 1.5)
+            aes(x = x, y = pred_y), color = 'red', size = 1.5) +
+  geom_text(data = subset(meanr2s, diversity_type == 'gamma_diversity'),
+            aes(x = -Inf, y = Inf, label = r2expr),
+            parse = TRUE, hjust = -0.5, vjust = 2) +
+  hexfill + hextheme + border + labs(x = 'Elevation standard deviation', y = 'Gamma-diversity')
 
-# lm separate for each radius.
-lmplot_beta <- lapply(radii, function(r) {
-  ggplot(subset(biogeo, radius == r)) + 
-    geom_point(aes(x = elevation_sd, y = beta_diversity), alpha = 0.05) +
-    scale_x_continuous(limits = range(biogeo$elevation_sd[biogeo$radius == r], na.rm=TRUE)) +
-    geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'beta_diversity', radius == r), 
-                aes(x = x, ymin = pred_y_min, ymax = pred_y_max), fill = 'blue', alpha = 0.3) +
-    geom_line(data = pred_val_lm_quant %>% filter(diversity_type == 'beta_diversity', radius == r), 
-              aes(x = x, y = pred_y), color = 'blue', size = 1.5) +
-    ggtitle(paste(r, 'km'))
-})
-
-library(gridExtra)
-png(file.path(fpfig, 'fia_betadiv_regressions.png'), height=4, width=12, res=300, units='in')
-  grid.arrange(grobs = lmplot_beta, nrow = 1)
-dev.off()  
+ggsave(file.path(fpfig, 'fia_alpha_regressions.png'), alphaplot, height = 4, width = 12, dpi = 300)
+ggsave(file.path(fpfig, 'fia_beta_regressions.png'), betaplot, height = 4, width = 12, dpi = 300)
+ggsave(file.path(fpfig, 'fia_gamma_regressions.png'), gammaplot, height = 4, width = 12, dpi = 300)
