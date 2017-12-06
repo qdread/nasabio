@@ -43,3 +43,6 @@ vignettes/*.pdf
 
 # Output from functional diversity calculations
 vert.txt
+
+# File I made to track jobs
+geo_qsub.sh
