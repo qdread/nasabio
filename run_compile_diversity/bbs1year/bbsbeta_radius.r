@@ -12,6 +12,9 @@ library(dplyr)
 # The pairwise table was constructed to only go up to 300 km, so that is all we will have.
 radii <- c(50, 75, 100, 150, 200, 300) # in km
 
+# Identify which means need to be done on logit transform.
+logit_vars <- which(dimnames(bbs_betadiv_array)[[3]] %in% c('beta_td_pairwise', 'beta_td_pairwise_pa'))
+
 # Find the right matrix in the lookup table, and for each plot, get the median pairwise beta-diversity within each radius.
 
 library(sp)
@@ -22,8 +25,9 @@ neighbordivfromtable <- function(x) {
 	commdat <- list()
 	for (i in 1:length(radii)) {
 		neighbors_incircle <- bbs_betadiv_array[neighbordists <= radii[i], focalpointindex, , drop = FALSE]
-		commdat[[i]] <- c(radius = radii[i], apply(neighbors_incircle, 3, function(x) mean(x[is.finite(x)])))
-
+		commdat[[i]] <- c(radius = radii[i], 
+						  apply(neighbors_incircle[, , logit_vars, drop = FALSE], 3, function(x) plogis(mean(qlogis(x[is.finite(x)])))),
+						  apply(neighbors_incircle[, , -(logit_vars), drop = FALSE], 3, function(x) mean(x[is.finite(x)])))
 	}
 	as.data.frame(do.call('rbind', commdat))
 }
