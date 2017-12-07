@@ -1,20 +1,22 @@
 # FIA maps formatted for paper.
 
+# NOTE: All needed CSVs are on the hpcc but I have downloaded them locally because it is faster. 
+# Change file path to the second file path to get files from hpcc.
+
+fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/fia_unfuzzed'
+#fp <- '/mnt/research/nasabio/data/fia'
+
+# Load the elevational diversity and abg diversity data
+ed <- read.csv(file.path(fp, 'fia_elev_stats_unfuzzed.csv'))
+ad <- read.csv(file.path(fp, 'fia_alpha.csv'))
+bd <- read.csv(file.path(fp, 'fia_beta.csv'))
+gd <- read.csv(file.path(fp, 'fia_gammadiv.csv'))
+
+library(dplyr)
+library(cowplot)
+
 # Customized function to add scale bars and north arrows to maps.
 # See http://stackoverflow.com/questions/39067838/parsimonious-way-to-add-north-arrow-and-scale-bar-to-ggmap
-
-# great circle distance
-# lat1 <- 34
-# lat2 <- 34
-# lon1 <- -116
-# lon2 <- -116 + 1.0848
-# 
-# lat1 <- lat1*pi/180
-# lat2 <- lat2*pi/180
-# lon1 <- lon1*pi/180
-# lon2 <- lon2*pi/180
-# a <- sin((lat1 - lat2)/2)^2 + cos(lat1) * cos(lat2) * sin((lon1 - lon2)/2)^2
-# d <- 6371 * 2 * atan2(sqrt(a), sqrt(1-a))
 
 # function to find delta longitude for two points separated by x km at a certain latitude
 deltalong <- function(d, lat) {
@@ -160,16 +162,37 @@ for (rad in radii) {
 # Make the figures according to specific, newer guidelines.
 # One big figure with a lot of panels.
 
-bdmapdat_facet <- bd %>% filter(!is.na(beta_pairwise_abundance), radius %in% radii) %>% arrange(radius, beta_pairwise_abundance)
-admapdat_facet <- ad %>% filter(radius %in% radii, !is.na(shannon)) %>% arrange(radius, shannon)
-edmapdat_facet <- bd %>% filter(radius %in% radii, !is.na(sd_elev)) %>% arrange(radius, sd_elev)
-gdmapdat_facet <- gd %>% filter(radius %in% radii, !is.na(shannon)) %>% arrange(radius, shannon)
+# Further edited 07 Dec.
+# Use unfuzzed data with fuzzed coordinates, and new diversity output, to remake maps.
+
+# Add "fuzzed" coordinates.
+fiacoords_fuzzed <- read.csv(file.path(fp, 'fia_pnw_coords_fuzzed.csv')) %>% rename(lon=lonfuzz, lat=latfuzz)
+
+bdmapdat_facet <- bd %>% 
+  filter(!is.na(beta_td_pairwise_pa), radius %in% radii) %>% 
+  left_join(fiacoords_fuzzed) %>%
+  arrange(radius, beta_td_pairwise_pa)
+admapdat_facet <- ad %>% 
+  filter(radius %in% radii, !is.na(shannon)) %>% 
+  mutate(shannon = exp(shannon)) %>%
+  left_join(fiacoords_fuzzed) %>%
+  arrange(radius, shannon)
+edmapdat_facet <- ed %>% 
+  filter(radius %in% radii, !is.na(sd)) %>% 
+  left_join(fiacoords_fuzzed) %>%
+  arrange(radius, sd)
+gdmapdat_facet <- gd %>% 
+  filter(radius %in% radii, !is.na(shannon)) %>% 
+  left_join(fiacoords_fuzzed) %>%
+  mutate(shannon = exp(shannon)) %>%
+  arrange(radius, shannon)
 
 colscalebeta <- scale_colour_gradientn(name = 'Taxonomic\nbeta-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.2)(9), breaks = c(0,.5,1), limits=c(0,1))
 colscalealpha <- scale_colour_gradientn(name = 'Taxonomic\nalpha-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9))
 colscalegamma <- scale_colour_gradientn(name = 'Taxonomic\ngamma-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9))
 colscaleelev <- scale_colour_gradientn(name = 'Elevation\nvariability', colours = RColorBrewer::brewer.pal(9, 'YlOrRd'))
 
+ptsize <- 0.05
 
 fiamap_bd_facet <- ggplot(bdmapdat_facet, 
                     aes(x = lon, y = lat)) +
@@ -177,7 +200,7 @@ fiamap_bd_facet <- ggplot(bdmapdat_facet,
   borders('world', 'canada', fill = 'gray90') +
   borders('world', 'usa', fill = 'gray90') +
   borders('state') +
-  geom_point(aes(color = beta_pairwise_abundance), size = 0.5) +
+  geom_point(aes(color = beta_td_pairwise_pa), size = ptsize) +
   #geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
   #          show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
   #geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F) +
@@ -197,7 +220,7 @@ fiamap_ed_facet <- ggplot(edmapdat_facet,
   borders('world', 'canada', fill = 'gray90') +
   borders('world', 'usa', fill = 'gray90') +
   borders('state') +
-  geom_point(aes(color = sd_elev), size = 0.5) +
+  geom_point(aes(color = sd), size = ptsize) +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
   geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.5) +
@@ -214,7 +237,7 @@ fiamap_ad_facet <- ggplot(admapdat_facet,
   borders('world', 'canada', fill = 'gray90') +
   borders('world', 'usa', fill = 'gray90') +
   borders('state') +
-  geom_point(aes(color = shannon), size = 0.5) +
+  geom_point(aes(color = shannon), size = ptsize) +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
   geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.5) +
@@ -231,7 +254,7 @@ fiamap_gd_facet <- ggplot(gdmapdat_facet,
   borders('world', 'canada', fill = 'gray90') +
   borders('world', 'usa', fill = 'gray90') +
   borders('state') +
-  geom_point(aes(color = shannon), size = 0.5) +
+  geom_point(aes(color = shannon), size = ptsize) +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
   geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.5) +
@@ -374,9 +397,3 @@ psetg <- set_panel_size(p = fia_gamma_plot + theme(axis.text = element_text(size
 png(file.path(fpfig, 'SuppFig_gammadiv_fits.png'), width=fwidth, height=fwidth*0.34, units = 'mm', res = 600)
 grid.draw(psetg)
 dev.off()
-
-
-
-####################################
-
-# Set panel sizes for each of the three rows and 

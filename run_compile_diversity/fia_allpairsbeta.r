@@ -2,11 +2,11 @@
 # do a certain number of the pairwise comparisons. 
 # at first, just do taxonomic.
 
-# Split into 250 groups.
+# Split into 10k groups.
 # Use precalculated matrix.
 # Loop through each FIA plot.
 # First, calculate spatial distances between that plot and all other plots.
-# Identify the plots within 500 km of the target plot.
+# Identify the plots within 300 km of the target plot.
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
@@ -41,7 +41,7 @@ for (p in rowidxmin:rowidxmax) {
 	setTxtProgressBar(pb, p)
 	# Distances between target plot and all other plots.
 	dist_p <- spDistsN1(pts=with(fiacoords, cbind(lon, lat)), pt = c(fiacoords$lon[p], fiacoords$lat[p]), longlat = TRUE)
-	beta_div_p <- matrix(NA, nrow=nrow(fiaplotmat), ncol=19)
+	beta_div_p <- matrix(NA, nrow=nrow(fiaplotmat), ncol=21)
 		
 	for (p2 in 1:nrow(fiaplotmat)) {
 		# Loop through all other FIA plots, check if plot is in radius
@@ -55,15 +55,17 @@ for (p in rowidxmin:rowidxmax) {
 		}
 	}
 	
-	dimnames(beta_div_p)[[2]] <- c('beta_td_pairwise_pa', 'beta_td_pairwise', 'beta_td_shannon', 
-	                                'beta_pd_pairwise_pa', 'beta_pd_pairwise_pa_z',
-	                                'beta_pd_nt_pa', 'beta_pd_nt_pa_z',
-	                                'beta_pd_pairwise', 'beta_pd_pairwise_z',
-	                                'beta_pd_nt', 'beta_pd_nt_z',
-	                                'beta_fd_pairwise_pa', 'beta_fd_pairwise_pa_z',
-	                                'beta_fd_nt_pa', 'beta_fd_nt_pa_z',
-	                                'beta_fd_pairwise', 'beta_fd_pairwise_z',
-	                                'beta_fd_nt', 'beta_fd_nt_z')
+	dimnames(beta_div_p)[[2]] <- c('beta_td_pairwise_pa', 'beta_td_sorensen_pa',
+									'beta_td_pairwise', 'beta_td_sorensen',
+									'beta_td_shannon', 
+									'beta_pd_pairwise_pa', 'beta_pd_pairwise_pa_z',
+									'beta_pd_nt_pa', 'beta_pd_nt_pa_z',
+									'beta_pd_pairwise', 'beta_pd_pairwise_z',
+									'beta_pd_nt', 'beta_pd_nt_z',
+									'beta_fd_pairwise_pa', 'beta_fd_pairwise_pa_z',
+									'beta_fd_nt_pa', 'beta_fd_nt_pa_z',
+									'beta_fd_pairwise', 'beta_fd_pairwise_z',
+									'beta_fd_nt', 'beta_fd_nt_z')
 	beta_div[[length(beta_div) + 1]] <- beta_div_p
 	
 }
