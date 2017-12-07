@@ -3,8 +3,9 @@
 Author: QDR  
 Project: NASA Biodiversity (and AquaXTerra)
 Date created: 05 March 2017
-Last modified: 04 October 2017
+Last modified: 07 December 2017
 
+**Edits on 07 December 2017**: Went back to some of the old methods for beta-diversity (pairwise rather than multi-site). All methods are still presented but I recommend using pairwise for analyses that have a large number of plots.
 **Edits on 04 October 2017**: added percent ambiguous individuals, edited occupancy modeling description, added consensus tree based on 1000 trees, edit description of FIA traits, say we pooled BBS occurrence across years, also made changes to the diversity methods updating them with the newer methods. This reflects our consensus on what the best methods are.
 
 ## 1. Breeding Bird Survey: preparation of dataset
@@ -60,7 +61,8 @@ We calculated alpha, beta, and gamma diversity at a number of different radii ar
 
 ### 3.1 Alpha and gamma diversity
 
-We calculated taxonomic, functional, and phylogenetic alpha-diversity (diversity of a local community) for tree and bird communities. For the bird communities, we calculated diversity indices for communities aggregated at the route level (aggregating the 50 point counts along one route). For the tree communities, we calculated diversity indices for communities aggregated at the plot level (aggregating the four subplots making up one plot). For each plot/route and radius, we calculated alpha diversity within that radius by taking the median diversity value for all plots or routes (including the focal plot) located inside the circle defined by the radius around the focal plot/route. For gamma diversity, we aggregated all the plots/routes within the focal circle to a single community, and calculated taxonomic, functional, and phylogenetic diversity of that community.
+We calculated taxonomic, functional, and phylogenetic alpha-diversity (diversity of a local community) for tree and bird communities. For the bird communities, we calculated diversity indices for communities aggregated at the route level (aggregating the 50 point counts along one route). For the tree communities, we calculated diversity indices for communities aggregated at the plot level (aggregating the four subplots making up one plot). For each plot/route and radius, we calculated alpha diversity within that radius by taking the median diversity value for all plots or routes (including the focal plot) located inside the circle defined by the radius around the focal plot/route. For gamma diversity, we aggregated all the plots/routes within the focal circle to a single community, and calculated taxonomic, functional, and phylogenetic diversity of that community. We expressed Shannon diversity as true diversity, or effective species number, with q = 1 by exponentiating Shannon diversity.
+
 
 #### 3.1.1 Taxonomic
 
@@ -82,18 +84,18 @@ We calculated two distance-based metrics of phylogenetic diversity using functio
 
 ### 3.2 Beta diversity 
 
-We calculated taxonomic, functional, and phylogenetic beta-diversity (turnover of diversity among local communities) for tree and bird communities. Beta-diversity is defined as the variation in community composition across multiple local communities. To determine beta-diversity at a point, it is necessary to define the kernel or radius within which variation in community composition is taken into account. For the FIA dataset, we aggregated species abundances of each plot and calculated beta-diversity for each plot at a number of different radii around the focal plot; as the radius increases, the number of pairwise comparisons among plots also increases as more plots fall within the kernel. 
+We calculated taxonomic, functional, and phylogenetic beta-diversity (turnover of diversity among local communities) for tree and bird communities. Beta-diversity is defined as the variation in community composition across multiple local communities. To determine beta-diversity at a point, it is necessary to define the kernel or radius within which variation in community composition is taken into account. For the FIA dataset, we aggregated species abundances of each plot and calculated beta-diversity for each plot at a number of different radii around the focal plot; as the radius increases, the number of pairwise comparisons among plots also increases as more plots fall within the kernel. Here, we present methods for both the pairwise and multi-site indices. 
 
 Things to do here, if desired:
 - Use rarefaction-based estimate of effective number of communities as the denominator in the multi-site mean pairwise dissimilarity metric, rather than the raw number of sites sampled
 
 #### 3.2.1 Taxonomic
 
-**Old way** 
+**Pairwise method** 
 
-We calculated taxonomic beta-diversity using the d() function from the R package vegetarian (diversity partitioning method). We also calculated beta-diversity with the pairwise dissimilarity method using the vegdist() function from the R package vegan and taking the mean of the pairwise Jaccard dissimilarity of all local communities within a particular radius of the focal plot. As before, we calculated both abundance-weighted and presence-only metrics for FIA communities, and only presence-only metrics for BBS communities. 
+We calculated taxonomic beta-diversity using the d() function from the R package vegetarian (diversity partitioning method). We also calculated beta-diversity with the pairwise dissimilarity method using the vegdist() function from the R package vegan and taking the mean of the pairwise S&oslash;rensen and Jaccard dissimilarity of all local communities within a particular radius of the focal plot. As before, we calculated both abundance-weighted and presence-only metrics for FIA communities, and only presence-only metrics for BBS communities. When calculating means of beta-diversity metrics ranging between 0 and 1, we used the arcsine-square root transform.
 
-**New way**
+**Multi-site method**
 
 We calculated taxonomic beta-diversity using the `betapart()` family of functions from the R package *betapart*. We opted to use the pairwise distance-based method rather than Whittaker's diversity-partitioning method because it allows us to use more consistent methods across taxonomic, functional, and phylogenetic diversity calculations. We calculated multi-site indices based on the Sorensen dissimilarities among communities. Each of these represent the mean pairwise dissimilarity among plots or routes within a given radius. We were additionally interested in the relative contributions of nestedness and turnover to beta-diversity at different spatial scales. There are two commonly used methods to partition the multi-site index (cite Baselga, cite Podani). We opted to use Baselga's method.  
 
@@ -103,11 +105,11 @@ We calculated functional beta-diversity using the `comdist()` and `comdistnt()` 
 
 #### 3.2.3 Phylogenetic
 
-**Old way**
+**Pairwise method**
 
 We calculated phylogenetic beta-diversity with the same set of metrics as we used for functional beta-diversity (including pairwise and nearest-neighbor, and abundance-weighted metrics for FIA plots only). We used the phylogenies described above to generate pairwise distance matrices for all species in each survey.
 
-**New way**
+**Multi-site method**
 
 We calculated phylogenetic beta-diversity using the `betapart()` family of functions, in a similar manner as for taxonomic diversity. We also partitioned phylogenetic beta-diversity into nestedness and turnover components, following Baselga's method, as we did for taxonomic diversity.
 
