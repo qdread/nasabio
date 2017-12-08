@@ -73,6 +73,16 @@ extractBox(input_file = '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_
 		   output_file_path = '/mnt/home/qdr/data/ninarasters',
 		   output_file_name = 'slope_30m_mi.tif')
 		   
+# Extract elevation DEM		   
+extractBox(input_file = '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_dem_big.vrt',
+		   lonbds = lonbds,
+		   latbds = latbds,
+		   input_proj = wgs_crs,
+		   output_proj = migeoref_crs,
+		   output_res = 30,
+		   output_file_path = '/mnt/research/plz-lab/DATA/HWA_MISGP/statewide_hemlock_map/raw_data',
+		   output_file_name = 'elevation_30m_mi.tif')
+		   
 # Test one prism layer
 extractBox(input_file = '/mnt/research/plz-lab/NEON/external_data/raw_external_data/prismtmp/PRISM_ppt_30yr_normal_800mM2_01_bil/PRISM_ppt_30yr_normal_800mM2_01_bil.bil',
 		   lonbds = lonbds,

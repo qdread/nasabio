@@ -206,6 +206,7 @@ nolegtheme <- theme(legend.position = 'none',
 
 legend1 <- g_legend(fiamap_bd_facet + leftlegtheme)
 legend2 <- g_legend(fiamap_ed_facet + leftlegtheme)
+legend3 <- g_legend(fiamap_gd_facet + leftlegtheme + scale_colour_gradientn(name = 'Gamma-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9)))
 
 library(grid)
 
@@ -217,12 +218,17 @@ png(file.path(fpfig, 'legend2.png'), height=fwidth*0.25, width=20, units = 'mm',
 grid.draw(legend2)
 dev.off()
 
+png(file.path(fpfig, 'legend3.png'), height=fwidth*0.25, width=20, units = 'mm', res=600)
+grid.draw(legend3)
+dev.off()
+
 # Save plots
 ggsave(file.path(fpfig, 'SuppFig_alphadiv_maps.png'), fiamap_ad_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
 ggsave(file.path(fpfig, 'SuppFig_gammadiv_maps.png'), fiamap_gd_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
 
 ggsave(file.path(fpfig, 'fig2_toprow3_betamap.png'), fiamap_bd_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
 ggsave(file.path(fpfig, 'fig2_middlerow3_elevmap.png'), fiamap_ed_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'fig2_toprow_gammamap.png'), fiamap_gd_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
 
 
 # Plot the r2 values.
@@ -317,5 +323,14 @@ psetg <- set_panel_size(p =  gammaplot + theme(legend.position = 'none', axis.te
                         width = unit(26.5,'mm'),
                         height = unit(fwidth * 0.23,'mm'))
 png(file.path(fpfig, 'SuppFig_gammadiv_fits.png'), width=fwidth, height=fwidth*0.34, units = 'mm', res = 600)
+grid.draw(psetg)
+dev.off()
+
+# Alternate gamma plot for putting in figure (no column label)
+psetg <- set_panel_size(p =  gammaplot + theme(legend.position = 'none', axis.text = element_text(size = 7.5), axis.title = element_text(size=10.5), strip.background = element_blank(), strip.text.x = element_blank()), 
+                        margin = unit(2,'mm'),
+                        width = unit(26.5,'mm'),
+                        height = unit(fwidth * 0.23,'mm'))
+png(file.path(fpfig, 'fig2_bottomrow_alternate_gammafits.png'), width=fwidth, height=fwidth*0.34, units = 'mm', res = 600)
 grid.draw(psetg)
 dev.off()
