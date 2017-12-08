@@ -82,6 +82,57 @@ extractBox(input_file = '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_
 		   output_res = 30,
 		   output_file_path = '/mnt/research/plz-lab/DATA/HWA_MISGP/statewide_hemlock_map/raw_data',
 		   output_file_name = 'elevation_30m_mi.tif')
+
+extractBox_noreproject <- function(input_file, lonbds, latbds, input_proj, output_file_path, output_file_name) {
+	require(sp)
+	require(rgdal)
+	require(raster)
+	# make box bounded by lonbds and latbds
+	b_box <- SpatialPoints(coords = cbind(lonbds, latbds), proj4string = CRS('+proj=longlat +ellps=WGS84 +no_defs'))
+	# Project lat long of box into the raster's CRS
+	b_box <- spTransform(b_box, CRSobj = CRS(input_proj))
+
+	# define function to make the polygon into a json
+	polygon2json <- function(p) {
+		paste('{"type": "Polygon", "coordinates": [ [', paste(apply(p, 1, function(x){paste("[",x[1],", ",x[2],"]",sep="")}), collapse=","), '] ]}', sep="")
+	}
+	
+	# Create geojson object from bounding box
+	box_json <- polygon2json(as(extent(b_box), 'SpatialPolygons')@polygons[[1]]@Polygons[[1]]@coords)
+	box_geojson <- readOGR(box_json, "OGRGeoJSON", verbose = FALSE,  p4s = input_proj)
+	# write the geojson to .shp
+	writeOGR(box_geojson, output_file_path, "temp_bbox", driver="ESRI Shapefile")
+	
+	# define arguments for system call
+	call_args <- paste("-crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(output_file_path, "temp_bbox.shp"), input_file, file.path(output_file_path,output_file_name))
+	# call GDAL to clip the box.
+	system2(command="gdalwarp", args=call_args)	
+	
+	# Remove temporary shapefile
+	for (file_ext in c('.shp', '.shx', '.prj', '.dbf')) system2(command="rm", args=file.path(output_file_path, paste0("temp_bbox", file_ext)))
+		
+}
+		   
+extractBox_noreproject(input_file = '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_dem_big.vrt',
+		   lonbds = lonbds,
+		   latbds = latbds,
+		   input_proj = wgs_crs,
+		   output_file_path = '/mnt/research/plz-lab/DATA/HWA_MISGP/statewide_hemlock_map/raw_data',
+		   output_file_name = 'elevation_30m_mi_latlong.tif')
+
+extractBox_noreproject(input_file = '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_aspect_big.vrt',
+		   lonbds = lonbds,
+		   latbds = latbds,
+		   input_proj = wgs_crs,
+		   output_file_path = '/mnt/research/plz-lab/DATA/HWA_MISGP/statewide_hemlock_map/raw_data',
+		   output_file_name = 'aspect_30m_mi_latlong.tif')
+
+extractBox_noreproject(input_file = '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_30m_slope_big.vrt',
+		   lonbds = lonbds,
+		   latbds = latbds,
+		   input_proj = wgs_crs,
+		   output_file_path = '/mnt/research/plz-lab/DATA/HWA_MISGP/statewide_hemlock_map/raw_data',
+		   output_file_name = 'slope_30m_mi_latlong.tif')
 		   
 # Test one prism layer
 extractBox(input_file = '/mnt/research/plz-lab/NEON/external_data/raw_external_data/prismtmp/PRISM_ppt_30yr_normal_800mM2_01_bil/PRISM_ppt_30yr_normal_800mM2_01_bil.bil',

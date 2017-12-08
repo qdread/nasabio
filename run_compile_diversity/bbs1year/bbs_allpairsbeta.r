@@ -32,11 +32,12 @@ rowidxmax <- rowidx[slice+1]
 
 # Initialize structures to hold data
 
-pb <- txtProgressBar(rowidxmin, rowidxmax, style = 3)
+# Only use progress bar if >1 plot
+if (rowidxmin < rowidxmax) pb <- txtProgressBar(rowidxmin, rowidxmax, style = 3)
 beta_div <- list()
 
 for (p in rowidxmin:rowidxmax) {
-	setTxtProgressBar(pb, p)
+	if (rowidxmin < rowidxmax) setTxtProgressBar(pb, p)
 	# Distances between target plot and all other plots.
 	dist_p <- spDistsN1(pts=with(bbscov_oneyear, cbind(lon, lat)), pt = c(bbscov_oneyear$lon[p], bbscov_oneyear$lat[p]), longlat = TRUE)
 	beta_div_p <- matrix(NA, nrow=nrow(bbsmat_byroute_oneyear), ncol=21)
@@ -70,5 +71,5 @@ for (p in rowidxmin:rowidxmax) {
 
 save(beta_div, file = paste0('/mnt/research/nasabio/data/bbs/diversity1year/beta_', slice, '.r'))
      
-close(pb)
+if (rowidxmin < rowidxmax) close(pb)
 
