@@ -42,13 +42,12 @@ p + geom_point(aes(x = elevation_sd, y = TPI_mean))
 
 # For example, compare elevation sd at 50 km with elevation sd at 200 km.
 
-# Use FIA for now although we do not have the correct TPI mean, because we have the small radii.
-# Right now, we just have bioclim and elevation standard deviations.
+# Edited 11 Dec to compare elevation with the absolute topographic position mean.
 
 fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/fia_unfuzzed'
 #fp <- '/mnt/research/nasabio/data/fia'
 
-ed <- read.csv(file.path(fp, 'fia_elev_stats_unfuzzed.csv'))
+ed <- read.csv(file.path(fp, 'fia_pnw_elev_stats.csv'))
 
 library(dplyr)
 library(reshape2)
@@ -58,14 +57,24 @@ library(GGally)
 # Put in wide format with different columns for different radii
 
 elev_by_rad <- ed %>%
-  select(-variable) %>%
   mutate(range = max - min, cv = mean/sd, radius = paste('r', radius, sep = '_')) %>%
-  filter(!is.na(mean)) %>%
+  filter(!is.na(mean), variable == 'elevation') %>%
+  select(-variable) %>%
   melt(id.vars = c('PLT_CN', 'STATECD', 'COUNTYCD', 'PLOT', 'radius'), variable.name='summary_stat') %>%
   dcast(PLT_CN + STATECD + COUNTYCD + PLOT ~ radius + summary_stat)
 
 sds_by_rad <- elev_by_rad %>% 
   select(contains('sd'))
+
+tpi_by_rad <- ed %>%
+  mutate(range = max - min, cv = mean/sd, radius = paste('r', radius, sep = '_')) %>%
+  filter(!is.na(mean), variable == 'TPI') %>%
+  select(-variable) %>%
+  melt(id.vars = c('PLT_CN', 'STATECD', 'COUNTYCD', 'PLOT', 'radius'), variable.name='summary_stat') %>%
+  dcast(PLT_CN + STATECD + COUNTYCD + PLOT ~ radius + summary_stat)
+
+tpimean_by_rad <- tpi_by_rad %>%
+  select(contains('mean'))
 
 # Plot paired plots
 my_hex <- function(data, mapping, ...){
@@ -81,4 +90,26 @@ ggpairs(sds_by_rad[, c('r_5_sd', 'r_10_sd', 'r_20_sd', 'r_50_sd', 'r_100_sd')],
         diag = list(continuous = wrap('barDiag', bins=20)),
         lower = list(continuous = my_hex)) + 
   theme_bw()
+dev.off()
+
+# Comparison of SD elevation and mean TPI at different radii
+elev_tpi_plots <- list()
+for (i in c(5,10,20,50,100)) {
+  dat <- data.frame(elev_sd = sds_by_rad[,paste('r',i,'sd',sep='_')],
+                    tpi_mean = tpimean_by_rad[,paste('r',i,'mean',sep='_')])
+  r2 <- summary(lm(tpi_mean~elev_sd, data=dat))$r.sq
+  plot_i <- ggplot(dat, aes(x = elev_sd, y = tpi_mean)) +
+    geom_hex() +
+    geom_text(data = data.frame(elev_sd=-Inf, tpi_mean=Inf, lab=paste('R^2 ==', round(r2,2))), aes(label=lab), parse = TRUE, hjust = -1, vjust = 1) +
+    scale_fill_continuous(low = 'gray90', high = 'black') +
+    theme_bw() +
+    ggtitle(paste(i, 'km')) +
+    labs(x = 'Elevation SD', y = 'Absolute topographic difference mean') +
+    theme(legend.position = 'none')
+  elev_tpi_plots[[length(elev_tpi_plots) + 1]] <- plot_i
+}
+
+library(gridExtra)
+pdf('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/fia_exploratory_plots/tpi_mean_vs_elev_sd.pdf', height = 4, width = 12)
+grid.arrange(grobs = elev_tpi_plots, nrow = 1)
 dev.off()

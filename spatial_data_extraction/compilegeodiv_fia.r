@@ -104,7 +104,9 @@ for (i in 1:length(fia_elevation_stats)) {
 }
 
 
-fia_all_stats <- do.call('rbind', fia_all_stats)
+# Edit 11 Dec. Use the much faster dplyr analog to do.call rbind
+fia_all_stats <- bind_rows(fia_all_stats)
+
 fia_all_stats <- rename(fia_all_stats, richness_geodiv = richness, diversity_geodiv = diversity)
 
 write.csv(fia_all_stats, file = '/mnt/research/nasabio/data/fia/geodiv/fia_pnw_geodiversity_stats.csv', row.names = FALSE)
