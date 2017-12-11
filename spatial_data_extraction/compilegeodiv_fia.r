@@ -1,11 +1,5 @@
-# Compile summary statistics: elevation and bioclim.
-# BBS and FIA
-# 04 Sep 2017 QDR
-
-# Edited 01 Dec 2017: updated for new workflow (just for FIA elevation, other datasets will be updated as needed)
-# Edited 04 Oct 2017: add new elevation stats that include elevation, slope, sin aspect, cos aspect, and TPI
-# Edited 25 Sep 2017: add biocloud
-# Edited 13 Sep 2017: add geostats (footprint, soil type diversity, and geological age diversity)
+# FIA compile geodiversity stats (Pacific Northwest only so far)
+# Submit job because it is too big to run on dev node, as usual
 
 library(dplyr)
 
@@ -35,91 +29,6 @@ replace_varname <- function(dflist, varname) {
 		x
 	})
 }
-
-##############################
-# BBS
-
-bbs_path <- '/mnt/research/nasabio/data/bbs/allgeodiv'
-
-bbs_elevation_stats <- get_stats(bbs_path, 'elevation_', 1:2000, '.r')
-bbs_slope_stats <- get_stats(bbs_path, 'slope_', 1:2000, '.r')
-bbs_tpi_stats <- get_stats(bbs_path, 'tpi_', 1:2000, '.r')
-bbs_aspect_stats <- get_stats(bbs_path, 'aspect_', 1:2000, '.r')
-
-bbs_bioclim5k_stats <- get_stats(bbs_path, 'bioclim5k_', 1:500, '.r')
-bbs_bioclim1k_stats <- get_stats(bbs_path, 'bioclim1k_', 1:1000, '.r')
-bbs_biocloud5k_stats <- get_stats(bbs_path, 'biocloud5k_', 1:500, '.r')
-bbs_biocloud1k_stats <- get_stats(bbs_path, 'biocloud1k_', 1:1000, '.r')
-bbs_footprint_stats <- get_stats(bbs_path, 'hf_', 1:100, '.r')
-bbs_geoage_stats <- get_stats(bbs_path, 'gea_', 1:100, '.r')
-bbs_soil_stats <- get_stats(bbs_path, 'soil_', 1:100, '.r')
-bbs_night_stats <- get_stats(bbs_path, 'night_', 1:100, '.r')
-bbs_dhi_stats <- get_stats(bbs_path, 'dhi_', 1:100, '.r')
-
-# Find and replace any NA entries in the list of data frames with a data frame of the same dimensions but filled with NAs
-
-bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors = FALSE)
-
-bbs_elevation_stats <- replace_na_df(bbs_elevation_stats)
-bbs_slope_stats <- replace_na_df(bbs_slope_stats)
-bbs_tpi_stats <- replace_na_df(bbs_tpi_stats)
-bbs_aspect_stats <- replace_na_df(bbs_aspect_stats)
-bbs_bioclim5k_stats <- replace_na_df(bbs_bioclim5k_stats)
-bbs_bioclim1k_stats <- replace_na_df(bbs_bioclim1k_stats)
-bbs_biocloud5k_stats <- replace_na_df(bbs_biocloud5k_stats)
-bbs_biocloud1k_stats <- replace_na_df(bbs_biocloud1k_stats)
-bbs_footprint_stats <- replace_na_df(bbs_footprint_stats)
-bbs_geoage_stats <- replace_na_df(bbs_geoage_stats)
-bbs_soil_stats <- replace_na_df(bbs_soil_stats)
-bbs_night_stats <- replace_na_df(bbs_night_stats)
-bbs_dhi_stats <- replace_na_df(bbs_dhi_stats)
-
-bbs_sin_aspect_stats <- lapply(bbs_aspect_stats, function(x) with(x, data.frame(radius=radius, variable=variable, mean=mean_sin, sd=sd_sin, min=min_sin, max=max_sin, n=n_sin)))
-bbs_cos_aspect_stats <- lapply(bbs_aspect_stats, function(x) with(x, data.frame(radius=radius, variable=variable, mean=mean_cos, sd=sd_cos, min=min_cos, max=max_cos, n=n_cos)))
-
-
-# Replace variable names
-bbs_elevation_stats <- replace_varname(bbs_elevation_stats, 'elevation')
-bbs_slope_stats <- replace_varname(bbs_slope_stats, 'slope')
-bbs_tpi_stats <- replace_varname(bbs_tpi_stats, 'TPI')
-bbs_sin_aspect_stats <- replace_varname(bbs_sin_aspect_stats, 'sin_aspect')
-bbs_cos_aspect_stats <- replace_varname(bbs_cos_aspect_stats, 'cos_aspect')
-bbs_bioclim5k_stats <- replace_varname(bbs_bioclim5k_stats, paste0('bio', 1:19, '_5k'))
-bbs_bioclim1k_stats <- replace_varname(bbs_bioclim1k_stats, paste0('bio', 1:19,'_1k'))
-bbs_biocloud5k_stats <- replace_varname(bbs_biocloud5k_stats, paste0('biocloud', 1:8, '_5k'))
-bbs_biocloud1k_stats <- replace_varname(bbs_biocloud1k_stats, paste0('biocloud', 1:8, '_1k'))
-bbs_footprint_stats <- replace_varname(bbs_footprint_stats, 'human_footprint')
-bbs_geoage_stats <- replace_varname(bbs_geoage_stats, 'geological_age')
-bbs_soil_stats <- replace_varname(bbs_soil_stats, 'soil_type')
-bbs_night_stats <- replace_varname(bbs_night_stats, 'nightlight')
-bbs_dhi_stats <- replace_varname(bbs_dhi_stats, c('dhi_fpar', 'dhi_gpp', 'dhi_lai8', 'dhi_ndvi'))
-
-bbs_all_stats <- list()
-
-for (i in 1:length(bbs_elevation_stats)) {
-	bbs_all_stats[[i]] <- full_join(cbind(bbsll[i,], rbind(bbs_elevation_stats[[i]],
-														   bbs_slope_stats[[i]],
-														   bbs_tpi_stats[[i]],
-														   bbs_sin_aspect_stats[[i]],
-														   bbs_cos_aspect_stats[[i]],
-														   bbs_bioclim5k_stats[[i]],
-														   bbs_bioclim1k_stats[[i]],
-														   bbs_biocloud5k_stats[[i]],
-														   bbs_biocloud1k_stats[[i]],
-														   bbs_footprint_stats[[i]],
-														   bbs_night_stats[[i]],
-														   bbs_dhi_stats[[i]])),
-									cbind(bbsll[i,], rbind(bbs_geoage_stats[[i]],
-														   bbs_soil_stats[[i]])))
-}
-
-bbs_all_stats <- do.call('rbind', bbs_all_stats)
-bbs_all_stats <- rename(bbs_all_stats, lon_aea = lon.1, lat_aea = lat.1, richness_geodiv = richness, diversity_geodiv = diversity)
-
-write.csv(bbs_all_stats, file = '/mnt/research/nasabio/data/bbs/bbs_geodiversity_stats.csv', row.names = FALSE)
-
-##############################
-# FIA
 
 fia_path <- '/mnt/research/nasabio/data/fia/allgeodiv'
 
@@ -212,16 +121,3 @@ write.csv(filter(fia_all_stats, variable %in% bio5k_vars), file = '/mnt/research
 write.csv(filter(fia_all_stats, variable %in% bio1k_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_pnw_bio1k_stats.csv', row.names = FALSE)
 write.csv(filter(fia_all_stats, variable %in% biocloud_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_pnw_biocloud_stats.csv', row.names = FALSE)
 write.csv(filter(fia_all_stats, variable %in% other_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_pnw_other_stats.csv', row.names = FALSE)
-
-##############################
-# Temporary: just DEM (01 Dec)
-fia_elevation_stats <- get_stats(fia_path, 'elevation_', 1:22531, '.r')
-fia_elevation_stats <- replace_na_df(fia_elevation_stats)
-fia_elevation_stats <- replace_varname(fia_elevation_stats, 'elevation')
-plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv', stringsAsFactors = FALSE)
-
-for (i in 1:length(fia_elevation_stats)) {
-	fia_elevation_stats[[i]] <- cbind(plotmetadata[rep(i, nrow(fia_elevation_stats[[i]])),], fia_elevation_stats[[i]])
-}
-fia_elevation_stats <- do.call('rbind', fia_elevation_stats)
-write.csv(fia_elevation_stats, file = '/mnt/research/nasabio/data/fia/fia_elev_stats_unfuzzed.csv', row.names = FALSE)

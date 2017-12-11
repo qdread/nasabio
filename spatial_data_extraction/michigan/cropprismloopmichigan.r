@@ -53,15 +53,15 @@ library(foreach)
 library(doParallel)
 registerDoParallel(cores = 12)
 
+# Edit 11 Dec. keep unprojected.
+
 foreach(i = 1:nrow(vm)) %dopar% {
 	file_name <- paste('PRISM', vm[i, 1], '30yr_normal_800mM2', vm[i, 2], 'bil', sep = '_')
-	extractBox(input_file = file.path(fp, file_name, paste0(file_name, '.bil')),
+	extractBox_noreproject(input_file = file.path(fp, file_name, paste0(file_name, '.bil')),
 			   lonbds = lonbds,
 			   latbds = latbds,
 			   input_proj = nad_crs,
-			   output_proj = migeoref_crs,
-			   output_res = 30,
-			   output_file_path = '/mnt/home/qdr/data/ninarasters',
+			   output_file_path = '/mnt/research/plz-lab/DATA/HWA_MISGP/statewide_hemlock_map/raw_data/PRISM',
 			   output_file_name = paste('prism', vm[i,1], vm[i,2], 'mi.tif', sep = '_'),
 			   temp_file_name = paste0('temp_bbox_', i))
 }

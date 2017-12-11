@@ -83,7 +83,7 @@ extractBox(input_file = '/mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs/conus_
 		   output_file_path = '/mnt/research/plz-lab/DATA/HWA_MISGP/statewide_hemlock_map/raw_data',
 		   output_file_name = 'elevation_30m_mi.tif')
 
-extractBox_noreproject <- function(input_file, lonbds, latbds, input_proj, output_file_path, output_file_name) {
+extractBox_noreproject <- function(input_file, lonbds, latbds, input_proj, output_file_path, output_file_name, temp_file_name = 'temp_bbox') {
 	require(sp)
 	require(rgdal)
 	require(raster)
@@ -101,15 +101,15 @@ extractBox_noreproject <- function(input_file, lonbds, latbds, input_proj, outpu
 	box_json <- polygon2json(as(extent(b_box), 'SpatialPolygons')@polygons[[1]]@Polygons[[1]]@coords)
 	box_geojson <- readOGR(box_json, "OGRGeoJSON", verbose = FALSE,  p4s = input_proj)
 	# write the geojson to .shp
-	writeOGR(box_geojson, output_file_path, "temp_bbox", driver="ESRI Shapefile")
+	writeOGR(box_geojson, output_file_path, temp_file_name, driver="ESRI Shapefile")
 	
 	# define arguments for system call
-	call_args <- paste("-crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(output_file_path, "temp_bbox.shp"), input_file, file.path(output_file_path,output_file_name))
+	call_args <- paste("-crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(output_file_path, paste0(temp_file_name, '.shp')), input_file, file.path(output_file_path,output_file_name))
 	# call GDAL to clip the box.
 	system2(command="gdalwarp", args=call_args)	
 	
 	# Remove temporary shapefile
-	for (file_ext in c('.shp', '.shx', '.prj', '.dbf')) system2(command="rm", args=file.path(output_file_path, paste0("temp_bbox", file_ext)))
+	for (file_ext in c('.shp', '.shx', '.prj', '.dbf')) system2(command="rm", args=file.path(output_file_path, paste0(temp_file_name, file_ext)))
 		
 }
 		   

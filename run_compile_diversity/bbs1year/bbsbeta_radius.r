@@ -1,6 +1,7 @@
 # Calculate median beta-diversity of bbs by radius. (old method)
 # Modified 08 June to include PD and FD.
 # Modified 05 Dec to use the mean rather than the median
+# Modified 11 Dec to include both Sorensen and Jaccard.
 
 # Load bbs beta diversity and route coordinates
 load('/mnt/research/nasabio/data/bbs/bbs_betadivtdpdfd_array_1year.r')
@@ -9,11 +10,11 @@ load('/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
 library(dplyr)
 
 # For each year and route number, get the median beta diversity within each radius.
-# The pairwise table was constructed to only go up to 300 km, so that is all we will have.
-radii <- c(50, 75, 100, 150, 200, 300) # in km
+# The pairwise table was constructed to only go up to 500 km, so that is all we will have.
+radii <- c(50, 75, 100, 150, 200, 300, 400, 500) # in km
 
 # Identify which means need to be done on proportion transform.
-prop_vars <- which(dimnames(bbs_betadiv_array)[[3]] %in% c('beta_td_pairwise', 'beta_td_pairwise_pa'))
+prop_vars <- which(dimnames(bbs_betadiv_array)[[3]] %in% c('beta_td_pairwise', 'beta_td_sorensen', 'beta_td_pairwise_pa', 'beta_td_sorensen_pa'))
 
 # Find the right matrix in the lookup table, and for each plot, get the median pairwise beta-diversity within each radius.
 

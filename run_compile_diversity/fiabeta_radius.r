@@ -21,7 +21,7 @@ library(dplyr)
 radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300) # in km
 
 # Identify which means need to be done on proportion transform.
-prop_vars <- which(dimnames(fia_betadiv_array)[[3]] %in% c('beta_td_pairwise', 'beta_td_pairwise_pa'))
+prop_vars <- which(dimnames(fia_betadiv_array)[[3]] %in% c('beta_td_pairwise', 'beta_td_sorensen', 'beta_td_pairwise_pa', 'beta_td_sorensen_pa'))
 
 
 # Find the right matrix in the lookup table, and for each plot, get the median pairwise beta-diversity within each radius.

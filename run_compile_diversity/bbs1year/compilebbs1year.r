@@ -61,14 +61,15 @@ write.csv(bbs_gamma, file = '/mnt/research/nasabio/data/bbs/bbs_gamma_1year.csv'
 
 bbs_betadiv <- list()
 
-for (i in 1:250) {
+for (i in 1:2000) {
 	load(paste0('/mnt/research/nasabio/data/bbs/diversity1year/beta_', i, '.r'))
 	bbs_betadiv[[i]] <- beta_div
+	print(i)
 }
 
-bbs_betadiv <- do.call('c', bbs_betadiv) # Flatten into one list. # All are 3382 rows x 19 columns.
+bbs_betadiv <- do.call('c', bbs_betadiv) # Flatten into one list. # All are 3382 rows x 21 columns.
 
-# Convert this to a 3382 x 3382 x 19 array.
+# Convert this to a 3382 x 3382 x 21 array.
 library(abind)
 bbs_betadiv_array <- abind(bbs_betadiv, along = 0)
 
