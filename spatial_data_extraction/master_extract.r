@@ -1,5 +1,6 @@
 # MASTER GEODIVERSITY EXTRACTION SCRIPT
 # Works with any taxon and geodiversity variable
+# Edited 11 Dec: FIA now for entire (continental) USA, not just Pacific Northwest!
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 scratch_path <- Sys.getenv('TMPDIR')
 
@@ -32,8 +33,8 @@ if (taxon == 'bbs') {
 	radii <- c(50, 75, 100, 150, 200, 300, 400, 500)
 }	
 if (taxon == 'fia') {
-	n_slices <- vartable$N.slices.fiapnw[k]
-	source('/mnt/research/nasabio/code/loadfia.r')
+	n_slices <- vartable$N.slices.fiaall[k]
+	source('/mnt/research/nasabio/code/loadfiaall.r')
 	coords <- fiacoords
 	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500)
 }

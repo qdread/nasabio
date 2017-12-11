@@ -1,14 +1,14 @@
-Dataset.name,File.location,File.name,variable.id,N.layers,Resolution.m,Max.radius.km,Use.abs.value,Use.trig,Use.categorical,N.slices.bbs,N.slices.fiapnw
-Bioclim 1k resolution,bioclim/Bioclim1k/rasterstack,bioclim1k_20170613.vrt,bioclim1k,19,1000,500,no,no,no,1000,5000
-Bioclim 5k resolution,bioclim/Bioclim5k/rasterstack,bioclim5k_20170613.vrt,bioclim5k,19,5000,500,no,no,no,500,1000
-Biocloud 1k resolution,bioclim/Biocloud1k,biocloud1k.vrt,biocloud1k,8,1000,500,no,no,no,1000,5000
-Biocloud 5k resolution,bioclim/Biocloud5k,biocloud5k.vrt,biocloud5k,8,5000,500,no,no,no,500,1000
-Dynamic habitat index fpar,dhi,dhi.vrt,dhi,4,1000,500,no,no,no,100,250
-Elevation,dem/SRTM_30m_DEM/VRTs,conus_30m_dem_big.vrt,elevation,1,30,300,no,no,no,2000,22531
-Aspect,dem/SRTM_30m_DEM/VRTs,conus_30m_aspect_big.vrt,aspect,1,30,300,no,yes,no,2000,22531
-Slope,dem/SRTM_30m_DEM/VRTs,conus_30m_slope_big.vrt,slope,1,30,300,no,no,no,2000,22531
-TPI,dem/SRTM_30m_DEM/VRTs,conus_30m_TPI_big.vrt,tpi,1,30,300,yes,no,no,2000,22531
-Human footprint,human_impacts/hfp-global-geo-grid,hf.vrt,hf,1,1000,500,no,no,no,100,250
-Geological age,geology/geo_ages,GEA.vrt,gea,1,1000,500,no,no,yes,100,250
-Night light,human_impacts/viirs_nightlights,vcm_orm_ntl.vrt,night,1,500,500,no,no,no,100,250
-Soil type,geology/soils,stg.vrt,soil,1,5000,500,no,no,yes,100,250
+Dataset.name,File.location,File.name,variable.id,N.layers,Resolution.m,Max.radius.km,Use.abs.value,Use.trig,Use.categorical,N.slices.bbs,N.slices.fiapnw,N.slices.fiaall,RAM
+Bioclim 1k resolution,bioclim/Bioclim1k/rasterstack,bioclim1k_20170613.vrt,bioclim1k,19,1000,500,no,no,no,1000,5000,30000,16
+Bioclim 5k resolution,bioclim/Bioclim5k/rasterstack,bioclim5k_20170613.vrt,bioclim5k,19,5000,500,no,no,no,500,1000,6000,16
+Biocloud 1k resolution,bioclim/Biocloud1k,biocloud1k.vrt,biocloud1k,8,1000,500,no,no,no,1000,5000,30000,16
+Biocloud 5k resolution,bioclim/Biocloud5k,biocloud5k.vrt,biocloud5k,8,5000,500,no,no,no,500,1000,6000,16
+Dynamic habitat index fpar,dhi,dhi.vrt,dhi,4,1000,500,no,no,no,100,250,1500,8
+Elevation,dem/SRTM_30m_DEM/VRTs,conus_30m_dem_big.vrt,elevation,1,30,300,no,no,no,2000,22531,135174,80
+Aspect,dem/SRTM_30m_DEM/VRTs,conus_30m_aspect_big.vrt,aspect,1,30,300,no,yes,no,2000,22531,135174,80
+Slope,dem/SRTM_30m_DEM/VRTs,conus_30m_slope_big.vrt,slope,1,30,300,no,no,no,2000,22531,135174,80
+TPI,dem/SRTM_30m_DEM/VRTs,conus_30m_TPI_big.vrt,tpi,1,30,300,yes,no,no,2000,22531,135174,80
+Human footprint,human_impacts/hfp-global-geo-grid,hf.vrt,hf,1,1000,500,no,no,no,100,250,1500,8
+Geological age,geology/geo_ages,GEA.vrt,gea,1,1000,500,no,no,yes,100,250,1500,8
+Night light,human_impacts/viirs_nightlights,vcm_orm_ntl.vrt,night,1,500,500,no,no,no,100,250,1500,8
+Soil type,geology/soils,stg.vrt,soil,1,5000,500,no,no,yes,100,250,1500,8
