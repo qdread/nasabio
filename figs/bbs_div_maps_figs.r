@@ -226,6 +226,16 @@ ed %>%
 
 # Bivariate plots ---------------------------------------------------------
 
+# Edit 12 Dec 2017: Compare Sorensen and Jaccard beta taxonomic.
+ggplot(bd, aes(x = beta_td_pairwise_pa, y = beta_td_sorensen_pa)) +
+  geom_hex() +
+  geom_abline(slope=1, linetype='dotted', color ='forestgreen') +
+  scale_fill_gradient(low = 'gray90', high = 'black') +
+  facet_wrap(~ radius) +
+  theme_bw() +
+  labs(x = 'Jaccard', y = 'Sorensen')
+ggsave(file.path(fpfig, 'bbs_sorensen_vs_jaccard.pdf'), height=8, width=8)
+
 radlabel <- labeller(radius = function(x) paste(as.integer(x), 'km'))
 radii <- c(50, 75, 100, 150, 200, 300)
 
