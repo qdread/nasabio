@@ -144,3 +144,138 @@ spp_not_in_phylo <- fiataxa_inplots[!fiataxa_inplots %in% phylotaxa]
 
 # Traits.
 # The imputation was only done for the Pacific Northwest trees. I have to redo it for all the trees.
+
+# Load traits and make sure that every species in the FIA dataset is in the trait dataset with at least some traits.
+
+# Code copied from the tryandstevens script (get TRY data and Stevens data)
+
+# Load TRY
+
+trait_try <- read.csv('C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/fia_try_17aug/try_trait_byspecies.csv', stringsAsFactors = FALSE)
+
+# Process SLA related traits
+slanames <- grep('SLA', names(trait_try), value=T)
+slatraits <- trait_try[,slanames]
+# Remove outliers.
+slatraits[slatraits > 200] <- NA
+
+SLA <- apply(slatraits, 1, mean, na.rm=TRUE)
+
+trait_try_use <- trait_try %>% select(AccSpeciesName, Bark.thickness, Plant.lifespan.years, Root.rooting.depth, Seed.dry.mass, Stem.dry.mass.per.stem.fresh.volume..stem.specific.density..SSD..wood.density.) %>%
+  rename(Scientific_Name = AccSpeciesName, Plant.lifespan=Plant.lifespan.years, Rooting.depth=Root.rooting.depth, SSD=Stem.dry.mass.per.stem.fresh.volume..stem.specific.density..SSD..wood.density.) %>%
+  cbind(SLA) %>%
+  mutate(Scientific_Name = gsub('\\ ', '_', Scientific_Name))
+
+# Correct typos in try scientific names (wrong on left, right on right)
+try_name_correction <- c('Quercus_margaretta' = 'Quercus_margarettae',
+                         'Gymnocladus_dioica' = 'Gymnocladus_dioicus')
+
+trait_try_use$Scientific_Name[match(names(try_name_correction), trait_try_use$Scientific_Name)] <- try_name_correction
+
+library(XLConnect)
+trait_stevens <- readWorksheetFromFile('C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/Traits_Stevens_FIA.xlsx', sheet = 'Master')
+
+# Convert to numerics where needed.
+numeric_cols <- c(2,5:ncol(trait_stevens))
+trait_stevens[, numeric_cols] <- lapply(trait_stevens[,numeric_cols], as.numeric)
+
+# Convert "spp." to "sp"
+trait_stevens <- mutate(trait_stevens, Scientific_Name = gsub('spp.', 'sp', Scientific_Name))
+
+# Convert hyphens to underscores
+trait_stevens <- mutate(trait_stevens, Scientific_Name = gsub('-', '_', Scientific_Name))
+
+# Correct names that are typos or obsolete names in trait_stevens (wrong on left, right on right)
+name_correction <- c('Chamaecyparis_lawsonia' = 'Chamaecyparis_lawsoniana',
+                     'Aesculus_octandra' = 'Aesculus_flava',
+                     "Carya_illinoensis" = "Carya_illinoinensis" ,
+                     'Carya_tomentosa' = 'Carya_alba',
+                     'Populus_trichocarpa' = "Populus_balsamifera_trichocarpa",
+                     "Quercus_chrysolepsis" = 'Quercus_chrysolepis',
+                     'Quercus_nutallii' = 'Quercus_texana',
+                     'Quercus_wislizenii' = 'Quercus_wislizeni',
+                     'Tilia_heterophylla' = 'Tilia_americana_heterophylla',
+                     'Ulmus_pumilia' = 'Ulmus_pumila',
+                     'Quercus_engelmanni' = 'Quercus_engelmannii')
+
+trait_stevens$Scientific_Name[match(names(name_correction), trait_stevens$Scientific_Name)] <- name_correction
+
+
+# Get rid of subspecies and genus-level trait values (skip for now)
+# trait_stevens <- filter(trait_stevens, Scientific_Name != 'Tree_unknown', Subsp %in% c(0,0.5), Generic != 1)
+
+# Get rid of ones that aren't even in the FIA inventory anyway since they will never come up.
+unneeded_spp <- trait_stevens$Scientific_Name[!trait_stevens$Scientific_Name %in% fiataxa_inplots]
+
+trait_stevens <- filter(trait_stevens, !Scientific_Name %in% unneeded_spp)
+
+# How many of Stevens scientific names are in there.
+spmatch <- trait_stevens$Scientific_Name %in% fullphylo$tip.label
+table(spmatch)
+trait_stevens$Scientific_Name[!spmatch]
+
+# Ginkgo, Tamarix, and unknown trees cannot be phylogenetically imputed because they are not in the phylogeny.
+
+# Get the traits we want only.
+trait_stevens_use <- trait_stevens %>% select(Scientific_Name, Bark.thickness, SLA, Plant.lifespan, Seed.dry.mass, SSD)
+
+
+# Combine TRY and Stevens
+table(trait_try_use$Scientific_Name %in% trait_stevens_use$Scientific_Name)
+
+trait_trystevens_use <- full_join(trait_try_use, trait_stevens_use, by = "Scientific_Name")
+
+# Use newer TRY value for other traits. If NA, then use Stevens value.
+trait_trystevens_use$Plant.lifespan.x[is.na(trait_trystevens_use$Plant.lifespan.x)] <- trait_trystevens_use$Plant.lifespan.y[is.na(trait_trystevens_use$Plant.lifespan.x)]
+trait_trystevens_use$SSD.x[is.na(trait_trystevens_use$SSD.x)] <- trait_trystevens_use$SSD.y[is.na(trait_trystevens_use$SSD.x)]
+trait_trystevens_use$SLA.x[is.na(trait_trystevens_use$SLA.x)] <- trait_trystevens_use$SLA.y[is.na(trait_trystevens_use$SLA.x)]
+trait_trystevens_use$Seed.dry.mass.x[is.na(trait_trystevens_use$Seed.dry.mass.x)] <- trait_trystevens_use$Seed.dry.mass.y[is.na(trait_trystevens_use$Seed.dry.mass.x)]
+
+
+trait_all_use <- with(trait_trystevens_use, data.frame(Scientific_Name=Scientific_Name,
+                                                       Bark.thickness = Bark.thickness.y,
+                                                       SLA = SLA.x,
+                                                       SSD = SSD.x, 
+                                                       Seed.dry.mass = Seed.dry.mass.x,
+                                                       Rooting.depth = Rooting.depth,
+                                                       Plant.lifespan = Plant.lifespan.x))
+
+# Do phylogenetic imputation.
+
+library(Rphylopars)
+imputation_tree <- drop.tip(fullphylo, tip = fullphylo$tip.label[!fullphylo$tip.label %in% trait_all_use$Scientific_Name])
+
+trait_spp_not_in_phylo <- trait_all_use$Scientific_Name[!(trait_all_use$Scientific_Name %in% imputation_tree$tip.label)] 
+
+traits_goodspp <- trait_all_use[!trait_all_use$Scientific_Name %in% trait_spp_not_in_phylo,] 
+# Remove uniques:
+traits_goodspp <- traits_goodspp[match(unique(traits_goodspp$Scientific_Name), traits_goodspp$Scientific_Name), ]
+dimnames(traits_goodspp)[[1]] <- traits_goodspp$Scientific_Name
+
+set.seed(313 + nchar('fuck free world!'))
+phyimp <- phylopars(trait_data = traits_goodspp %>%
+                      rename(species = Scientific_Name) %>% 
+                      mutate(Plant.lifespan = log(Plant.lifespan),
+                             Seed.dry.mass = log(Seed.dry.mass)), 
+                    tree = imputation_tree,
+                    model = 'OU')
+apply(phyimp$anc_recon, 2, min) # check for validity
+
+# Back-transform and combine everything together.
+traits_imputed <- phyimp$anc_recon[1:nrow(traits_goodspp),] %>%
+  as.data.frame %>%
+  mutate(Plant.lifespan = exp(Plant.lifespan),
+         Seed.dry.mass = exp(Seed.dry.mass))
+
+dimnames(traits_imputed)[[1]] <- dimnames(phyimp$anc_recon)[[1]][1:nrow(traits_imputed)]
+
+table(dimnames(traits_imputed)[[1]] %in% fiataxa_inplots)
+fiataxa_inplots[!fiataxa_inplots %in% dimnames(traits_imputed)[[1]]] # These are mostly very rare species. We don't have to worry about them for now.
+
+traits_imputed <- cbind(Scientific_Name = dimnames(traits_imputed)[[1]], traits_imputed)
+write.csv(traits_imputed, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/traits_imputed_allfia.csv', row.names = FALSE)
+save(fullphylo, imputation_tree, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/phylogenies_allfia.r')
+
+# Also save lookup table
+fiataxa_inplots_lookup <- fiataxa[match(allfia_spcodes$SPCD, fiataxa$FIA.Code), ]
+write.csv(fiataxa_inplots_lookup, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/lookup_table_allfia.csv', row.names = FALSE)

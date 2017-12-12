@@ -1,14 +1,27 @@
 # Modified 15 May: rearrange each matrix so that the focal plot is the first row of the resulting matrix.
-# Correction 22 Aug: use workspace 2, not old workspace
-# Modified 23 Oct: change to use unfuzzed coordinates
-# Modified 13 Dec: change input data to entire USA.
+# Forked 22 June: do in parallel for 300 only
+# Forked 24 Oct: do in parallel for everything 100 and above.
+# Edited 13 Dec: change input data to entire USA and make entire thing parallel.
 
-radii <- c(5,10,20,50,75,100,150,200,300) * 1000
+# Get radius and slice. Total 2125 tasks. Can specify how many slices per radius.
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-r <- radii[task]
+radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300) * 1000
+n_tasks <- c(25, 25, 25, 25, 25, 500, 500, 500, 500)
+
+combos <- data.frame(radius = rep(radii, n_tasks),
+					 slice = unlist(sapply(n_tasks, function(x) 1:x)),
+					 n = rep(n_tasks, n_tasks))
+
+r <- combos$radius[task]
+slice <- combos$slice[task]
+n_slices <- combos$n[task]
 
 load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa.r')
 plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords_wholeusa.csv', stringsAsFactors = FALSE)
+
+rowidx <- round(seq(0, nrow(plotmetadata), length.out = n_slices + 1))
+rowidxmin <- rowidx[slice]+1
+rowidxmax <- rowidx[slice+1]
 
 library(dplyr)
 
@@ -22,7 +35,7 @@ area_by_sp <- function(dat, sppids) {
 
 all_mats <- list()
 
-for (p in 1:length(fianhb_r)) {
+for(p in rowidxmin:rowidxmax){
   if (class(fianhb_r[[p]]) == 'data.frame') {
 	if (any(fianhb_r[[p]]$dist <= r)) {
 		# Subset out the data frame with the nearest neighbors
@@ -57,7 +70,6 @@ for (p in 1:length(fianhb_r)) {
   else {
 	all_mats[[length(all_mats) + 1]] <- NA
   }
-	if (p%%1000 == 0) print(p)
 }
 
-save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/usamat_',as.character(as.integer(r)),'.r'))
+save(all_mats, file = paste0('/mnt/research/nasabio/data/fia/mats/usamat_',as.character(as.integer(r)),'_',slice,'.r'))
