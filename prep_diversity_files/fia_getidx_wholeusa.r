@@ -2,6 +2,7 @@
 # Forked 22 June: do in parallel for 300 only
 # Forked 24 Oct: do in parallel for everything 100 and above.
 # Edited 13 Dec: change input data to entire USA and make entire thing parallel.
+# Edited 14 Dec: change so that neighbor data is a matrix not a data frame (less memory)
 
 # Get radius and slice. Total 2125 tasks. Can specify how many slices per radius.
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
@@ -36,13 +37,13 @@ area_by_sp <- function(dat, sppids) {
 all_mats <- list()
 
 for(p in rowidxmin:rowidxmax){
-  if (class(fianhb_r[[p]]) == 'data.frame') {
-	if (any(fianhb_r[[p]]$dist <= r)) {
+  if (class(fianhb_r[[p]]) == 'matrix') {
+	if (any(fianhb_r[[p]][,2] <= r)) {
 		# Subset out the data frame with the nearest neighbors
-		neighbs <- subset(fianhb_r[[p]], dist <= r)
+		neighbs <- fianhb_r[[p]][fianhb_r[[p]][,2] <= r]
 		
 		# Subset out the data frame with the nearest neighbors
-       plotcns <- plotmetadata[c(p, neighbs$idx), ]$PLT_CN
+       plotcns <- plotmetadata[c(p, neighbs[,1]), ]$PLT_CN
        dat_p <- subset(fiasums_plot, PLT_CN %in% plotcns)
        # Convert into a site x species matrix
        sppids <- sort(unique(dat_p$SPCD))

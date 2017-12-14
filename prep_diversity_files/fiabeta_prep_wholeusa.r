@@ -4,6 +4,7 @@
 # Modified 22 Aug: add better imputed traits
 # Modified 20 Oct: new coordinates (workspace should now only contain pointers to the true coordinates)
 # New forked version created 13 Dec: do the entire USA.
+# Modified 14 Dec: use spDistsN1() which is faster than dnearneigh()
 
 fp <- '/mnt/research/nasabio'
 fiaall <- read.csv(file.path(fp, 'data/fia/treedata10nov/finley_trees_continental_US_most_recent_evaluations_nov8_2017.csv'), stringsAsFactors = FALSE)
@@ -101,28 +102,22 @@ library(FD)
 
 trydist <- gowdis(scale(traits_imputed))
 
-# Fast function to get neighbor distances
-# Refer to http://gis.stackexchange.com/questions/132384/distance-to-nearest-point-for-every-point-same-spatialpointsdataframe-in-r
-getNeighbors <- function(dat, radius) {
-  library(spdep)
-  idlist <- dnearneigh(coordinates(dat), 0, radius)
-  distlist <- nbdists(idlist, coordinates(dat))
-  dflist <- list()
-  pb <- txtProgressBar(0, length(idlist), style = 3)
-  for (i in 1:length(idlist)) {
-    if (any(distlist[[i]] <= radius)) {
-      dflist[[i]] <- data.frame(idx = idlist[[i]], dist = distlist[[i]][distlist[[i]] <= radius])
-    }
-    else {
-      dflist[[i]] <- NA
-    }
+# Fast function to get neighbor distances (use spDistsN1)
+# List of matrices where column 1 is the row index and column 2 is the distance
+# Only include distances up to 500 km.
+max_radius <- 500e3
+
+fianhb_r <- list()
+pb <- txtProgressBar(0, nrow(fiaalbers), style = 3)
+
+for (i in 1:nrow(fiaalbers)) {
 	setTxtProgressBar(pb, i)
-  }
-  close(pb)
-  dflist
+	dists <- spDistsN1(pts = fiaalbers, pt = fiaalbers[i,], longlat = FALSE)
+    dids <- which(dists > 0 & dists <= max_radius)
+    fianhb_r[[i]] <- cbind(dids, dists[dids]) 
 }
 
-fianhb_r <- getNeighbors(fiaalbers, radius = 5e5)
+close(pb)
 
 # New saved workspace that does not actually contain the coordinates.
 save(fianhb_r, fiadist, trydist, traits_imputed, fullphylo, fiataxa, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa.r')
