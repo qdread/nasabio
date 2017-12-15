@@ -40,10 +40,10 @@ for(p in rowidxmin:rowidxmax){
   if (class(fianhb_r[[p]]) == 'matrix') {
 	if (any(fianhb_r[[p]][,2] <= r)) {
 		# Subset out the data frame with the nearest neighbors
-		neighbs <- fianhb_r[[p]][fianhb_r[[p]][,2] <= r]
+		neighbs <- fianhb_r[[p]][fianhb_r[[p]][,2] <= r, , drop = FALSE]
 		
 		# Subset out the data frame with the nearest neighbors
-       plotcns <- plotmetadata[c(p, neighbs[,1]), ]$PLT_CN
+       plotcns <- plotmetadata$PLT_CN[c(p, neighbs[,1])]
        dat_p <- subset(fiasums_plot, PLT_CN %in% plotcns)
        # Convert into a site x species matrix
        sppids <- sort(unique(dat_p$SPCD))
