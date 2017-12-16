@@ -47,3 +47,7 @@ Night light 1k roughness,tri_tpi,night_roughness.vrt,night_roughness,1,500,500,n
 Night light 5k TRI,tri_tpi,night_5k_TRI.vrt,night_5k_tri,1,5000,500,no,no,no,100,250,1500,8
 Night light 5k TPI,tri_tpi,night_5k_TPI.vrt,night_5k_tpi,1,5000,500,yes,no,no,100,250,1500,8
 Night light 5k roughness,tri_tpi,night_5k_roughness.vrt,night_5k_roughness,1,5000,500,no,no,no,100,250,1500,8
+Elevation 5k,dem/SRTM_30m_DEM/VRTs,conus_5k_dem.vrt,elevation_5k,1,5000,500,no,no,no,100,250,1500,8
+DHI 5k,dhi,dhi_5k.vrt,dhi_5k,4,5000,500,no,no,no,100,250,1500,8
+Human footprint 5k,human_impacts/hfp-global-geo-grid,hf_5k.vrt,hf_5k,1,5000,500,no,no,no,100,250,1500,8
+Night light 5k,human_impacts/viirs_nightlights,vcm_orm_ntl_5k.vrt,night_5k,1,5000,500,no,no,no,100,250,1500,8
