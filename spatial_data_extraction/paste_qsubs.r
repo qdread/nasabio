@@ -14,7 +14,8 @@ write.table(unlist(qsub_calls$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabi
 
 # Do this for the TRI rasters too. (BBS and FIA)
 
-x <- read.csv('spatial_data_extraction/geodiv_tritpi_table.csv', stringsAsFactors = FALSE)
+x <- read.csv('spatial_data_extraction/geodiv_stat_table_separate.csv', stringsAsFactors = FALSE)
+x <- x[-(1:13),]
 
 library(dplyr)
 
