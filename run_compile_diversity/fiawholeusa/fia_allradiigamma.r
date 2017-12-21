@@ -3,21 +3,23 @@
 
 # Split into 250 groups.
 # Use precalculated matrix of all communities within each radius of focal plot.
-# The matrices are in 100 chunks for the radii 100 and up, and are in single r objects for anything less than 100. 
+# The matrices are in 500 chunks for the radii 100 and up, and are in single r objects for anything less than 100. 
 # Load the appropriate one.
+# Edited 21 Dec for whole USA
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
-source('~/code/fia/pairwise_beta_focal.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa.r')
+source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
+source('/mnt/research/nasabio/code/nofuncspp.r')
 
 library(sp)
 library(vegan)
-source('~/code/fia/fixpicante.r')
+source('/mnt/research/nasabio/code/fixpicante.r')
 
 nnull <- 99
 trydist <- as.matrix(trydist)
 
 radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300)
-n_slices <- 100
+n_slices <- 500
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # Determine row indices for the slice of the matrix to be used.
@@ -40,19 +42,19 @@ null_result <- rep(NA, length(cnames))
 
 for (r in 1:length(radii)) {
   if (radii[r] < 100) {
-    load(paste0('/mnt/research/nasabio/data/fia/mats/unfuzzedmat_', as.character(as.integer(radii[r] * 1000)), '.r'))
+    load(paste0('/mnt/research/nasabio/data/fia/mats/usamat_', as.character(as.integer(radii[r] * 1000)), '.r'))
   }
   if (radii[r] >= 100) {
-    load(paste0('/mnt/research/nasabio/data/fia/mats/slices/unfuzzedmat_', as.character(as.integer(radii[r] * 1000)), '_', slice, '.r'))
+    load(paste0('/mnt/research/nasabio/data/fia/mats/slices/usamat_', as.character(as.integer(radii[r] * 1000)), '_', slice, '.r'))
   }
   setTxtProgressBar(pb, r)
   for (p in rowidxmin:rowidxmax) {
     neighbs <- if (radii[r] < 100) all_mats[[p]] else all_mats[[p - rowidxmin + 1]]
     gamma_div[p - rowidxmin + 1, r, ] <- tryCatch(diversity_3ways(m = neighbs, flavor = 'gamma', 
-                                                                  dotd=T, dopd=T, dofd=T, abundance=T,
+                                                                  dotd = TRUE, dopd = TRUE, dofd = TRUE, abundance = TRUE,
                                                                   pddist = fiadist, fddist = trydist,
                                                                   nnull = nnull,
-                                                                  phylo_spp = pnwphylo$tip.label, func_problem_spp = NULL),
+                                                                  phylo_spp = fullphylo$tip.label, func_problem_spp = nofuncspp),
                                                   error = function(e) null_result)	
   }
   
@@ -65,4 +67,4 @@ close(pb)
 dimnames(gamma_div)[[3]] <- cnames
 dimnames(gamma_div)[[2]] <- paste('r',radii,sep='_')
 
-save(gamma_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/gamma_', slice, '.r'))
+save(gamma_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa/gamma_', slice, '.r'))

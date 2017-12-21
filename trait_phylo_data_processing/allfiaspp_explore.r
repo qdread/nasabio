@@ -270,7 +270,9 @@ traits_imputed <- phyimp$anc_recon[1:nrow(traits_goodspp),] %>%
 dimnames(traits_imputed)[[1]] <- dimnames(phyimp$anc_recon)[[1]][1:nrow(traits_imputed)]
 
 table(dimnames(traits_imputed)[[1]] %in% fiataxa_inplots)
-fiataxa_inplots[!fiataxa_inplots %in% dimnames(traits_imputed)[[1]]] # These are mostly very rare species. We don't have to worry about them for now.
+nofuncspp <- fiataxa_inplots[!fiataxa_inplots %in% dimnames(traits_imputed)[[1]]] # These are mostly very rare species. We don't have to worry about them for now.
+
+dput(nofuncspp)
 
 traits_imputed <- cbind(Scientific_Name = dimnames(traits_imputed)[[1]], traits_imputed)
 write.csv(traits_imputed, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/traits_imputed_allfia.csv', row.names = FALSE)

@@ -272,7 +272,7 @@ alphaplot <- ggplot(biogeo %>% mutate(alpha_diversity=exp(alpha_diversity))) +
   geom_text(data = subset(r2_lm_quant, diversity_type == 'alpha_diversity'),
             aes(x = -Inf, y = Inf, label = r2expr),
             parse = TRUE, hjust = -0.5, vjust = 1.5) +
-  hexfill + hextheme + border + labs(x = 'Elevation variability', y = 'Alpha-diversity')
+  hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Alpha-diversity')
 
 betaplot <- ggplot(biogeo) + 
   facet_grid(~ radius, scales = 'free', labeller = radlabel) +
@@ -285,7 +285,7 @@ betaplot <- ggplot(biogeo) +
             aes(x = Inf, y = -Inf, label = r2expr),
             parse = TRUE, hjust = 1.1, vjust = -0.7) +
   scale_x_continuous(labels=seq(0,1200,300), breaks=seq(0,1200,300)) +
-  hexfill + hextheme + border + labs(x = 'Elevation variability', y = 'Beta-diversity')
+  hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Beta-diversity')
 
 gammaplot <- ggplot(biogeo %>% mutate(gamma_diversity = exp(gamma_diversity))) + 
   facet_grid(~ radius, scales = 'free', labeller = radlabel) +
@@ -297,7 +297,7 @@ gammaplot <- ggplot(biogeo %>% mutate(gamma_diversity = exp(gamma_diversity))) +
   geom_text(data = subset(r2_lm_quant, diversity_type == 'gamma_diversity'),
             aes(x = -Inf, y = Inf, label = r2expr),
             parse = TRUE, hjust = -0.5, vjust = 1.5) +
-  hexfill + hextheme + border + labs(x = 'Elevation variability', y = 'Gamma-diversity')
+  hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Gamma-diversity')
 
 # Set panel size of bottom row.
 source('~/R/setpanelsize.r') # See https://stackoverflow.com/questions/30571198/how-achieve-identical-facet-sizes-and-scales-in-several-multi-facet-ggplot2-grap/30571289#30571289

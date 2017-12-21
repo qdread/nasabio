@@ -1,8 +1,7 @@
-# in each slice, load calculated fia matrix.
-# do a certain number of the pairwise comparisons. 
-# at first, just do taxonomic.
+# FIA all pairs beta-diversity
+# Edited 21 Dec for entire USA
 
-# Split into 10k groups.
+# Split into 50k groups.
 # Use precalculated matrix.
 # Loop through each FIA plot.
 # First, calculate spatial distances between that plot and all other plots.
@@ -10,9 +9,10 @@
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial.r')
-source('/mnt/research/nasabio/code/loadfia.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_whole.r')
+source('/mnt/research/nasabio/code/loadfiaall.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
+source('/mnt/research/nasabio/code/nofuncspp.r')
 
 library(sp)
 library(vegan)
@@ -24,7 +24,7 @@ nnull <- 99 # Reduce to save time
 trydist <- as.matrix(trydist)
 
 max_radius <- 300 # Do 300 km for now.
-n_slices <- 10000
+n_slices <- 50000
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # Determine row indices for the slice of the matrix to be used.
@@ -48,10 +48,10 @@ for (p in rowidxmin:rowidxmax) {
 		# If plot is within radius, calculate diversity between that plot and target plot. 
 		if (dist_p[p2] > 0 & dist_p[p2] <= max_radius) {
 			beta_div_p[p2,] <- singlepair_beta(p1 = fiaplotmat[p,], p2 = fiaplotmat[p2,], 
-												td=T, pd=T, fd=T, abundance=T,
+												td = TRUE, pd = TRUE, fd = TRUE, abundance = TRUE,
 												pddist=fiadist, fddist=trydist,
 												nnull = nnull,
-												phylo_spp = pnwphylo$tip.label, func_problem_spp = NULL)
+												phylo_spp = fullphylo$tip.label, func_problem_spp = nofuncspp)
 		}
 	}
 	
@@ -70,7 +70,7 @@ for (p in rowidxmin:rowidxmax) {
 	
 }
 
-save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/beta_', slice, '.r'))
+save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa/beta_', slice, '.r'))
      
 close(pb)
 
