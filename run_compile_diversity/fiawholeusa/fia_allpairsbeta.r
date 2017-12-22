@@ -9,7 +9,7 @@
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_whole.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa.r')
 source('/mnt/research/nasabio/code/loadfiaall.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
