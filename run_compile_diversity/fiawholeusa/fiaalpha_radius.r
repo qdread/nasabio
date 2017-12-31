@@ -7,16 +7,19 @@
 # Edited 31 December: Whole USA unfuzzed.
 
 alphadiv_list <- list()
-for (i in 1:250) {
-	load(paste0('/mnt/research/nasabio/data/fia/diversity/unfuzzed/alpha_', i, '.r'))
+for (i in 1:1500) {
+	load(paste0('/mnt/research/nasabio/data/fia/diversity/usa/alpha_', i, '.r'))
 	alphadiv_list[[i]] <- alpha_div
 }
 
 fia_alphadiv <- do.call('rbind', alphadiv_list)
-write.csv(fia_alphadiv, file = '/mnt/research/nasabio/data/fia/fia_alphadiv.csv', row.names = FALSE)
+names(fia_alphadiv)[1] <- 'PLT_CN'
 
-fia_alphadiv <- read.csv('/mnt/research/nasabio/data/fia/fia_alphadiv.csv')
-load('~/data/fiaworkspace_spatial.r')
+write.csv(fia_alphadiv, file = '/mnt/research/nasabio/data/fia/fiausa_alphadiv.csv', row.names = FALSE)
+
+fia_alphadiv <- read.csv('/mnt/research/nasabio/data/fia/fiausa_alphadiv.csv')
+
+load('~/data/fiaworkspace_spatial_wholeusa.r')
 
 radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300)
 
@@ -46,8 +49,8 @@ neighbordiv <- function(x, plot_diversity=fia_alphadiv, plot_metadata = fiacoord
 
 fia_alpha <- fiacoords %>%
   rowwise %>% 
-  do(neighbordiv(.)) # Takes 4 minutes on my machine.
-
-fia_alpha <- cbind(fiacoords[rep(1:nrow(fiacoords), each=9), 1:4], fia_alpha)  
+  do(neighbordiv(.)) # Takes a few hours for the whole USA
   
-write.csv(fia_alpha, '/mnt/research/nasabio/data/fia/fia_alpha.csv', row.names = FALSE)
+fia_alpha <- cbind(fiacoords[rep(1:nrow(fiacoords), each = length(radii)), 1:4], fia_alpha)  
+  
+write.csv(fia_alpha, '/mnt/research/nasabio/data/fia/fiausa_alpha.csv', row.names = FALSE)
