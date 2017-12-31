@@ -10,7 +10,7 @@ qsub_calls <- x %>%
   rowwise %>%
   do(qsubs = sapply(seq(1, .$N.slices.fiaall, by = 250), function(x) qsub_string(taxon = 'fia', var = .$variable.id, mem = .$RAM, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.fiaall))))))
 
-write.table(unlist(qsub_calls$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/geo_qsub_all.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
+write.table(unlist(qsub_calls$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 # Do this for the TRI rasters too. (BBS and FIA)
 
@@ -25,10 +25,16 @@ qsub_calls <- x %>%
   rowwise %>%
   do(qsubs = sapply(seq(1, .$N.slices.fiaall, by = 250), function(x) qsub_string(taxon = 'fia', var = .$variable.id, mem = .$RAM, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.fiaall))))))
 
-write.table(unlist(qsub_calls$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/tri_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
+write.table(unlist(qsub_calls$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/tri_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 qsub_calls_bbs <- x %>%
   rowwise %>%
   do(qsubs = sapply(seq(1, .$N.slices.bbs, by = 250), function(x) qsub_string(taxon = 'bbs', var = .$variable.id, mem = .$RAM, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.bbs))))))
 
-write.table(unlist(qsub_calls_bbs$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/tri_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE, append = TRUE)
+write.table(unlist(qsub_calls_bbs$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/tri_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE, append = TRUE)
+
+# Beta-diversity qsubs
+
+starts <- seq(1, 135174, by = 250)
+qsub_calls <- paste('qsub fiabd.sh -t ', starts, '-', starts+249, sep='')
+write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)

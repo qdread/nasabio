@@ -4,6 +4,7 @@
 # Subset by radius, then calculate the median.
 # Edited 19 May: use the new alpha diversity from the HPCC.
 # Edited 25 October: Use coordinates of new unfuzzed plots.
+# Edited 31 December: Whole USA unfuzzed.
 
 alphadiv_list <- list()
 for (i in 1:250) {
