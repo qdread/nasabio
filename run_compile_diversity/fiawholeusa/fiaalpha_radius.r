@@ -51,6 +51,6 @@ fia_alpha <- fiacoords %>%
   rowwise %>% 
   do(neighbordiv(.)) # Takes a few hours for the whole USA
   
-fia_alpha <- cbind(fiacoords[rep(1:nrow(fiacoords), each = length(radii)), 1:4], fia_alpha)  
+fia_alpha <- cbind(fiacoords[rep(1:nrow(fiacoords), each = length(radii)), 1:3], fia_alpha)  
   
 write.csv(fia_alpha, '/mnt/research/nasabio/data/fia/fiausa_alpha.csv', row.names = FALSE)
