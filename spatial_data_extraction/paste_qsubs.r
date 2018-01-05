@@ -38,3 +38,9 @@ write.table(unlist(qsub_calls_bbs$qsubs), file = 'C:/Users/Q/Dropbox/projects/na
 starts <- seq(1, 135174, by = 250)
 qsub_calls <- paste('qsub fiabd.sh -t ', starts, '-', starts+249, sep='')
 write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+# Elevation GDAL-only qsubs
+starts <- seq(1, 10000, by = 250)
+vars <- c('elevation', 'slope', 'roughness', 'tri')
+
+qsub_calls <- apply(expand.grid(starts, vars), 1, function(x) paste0('qsub elevextract.sh -N ', x[2], ' -v geovar=', x[2], ' -l mem=1gb -t ', x[1], '-', as.character(as.integer(min(as.numeric(x[1])+249, 135174)))))

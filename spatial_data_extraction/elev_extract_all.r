@@ -7,7 +7,7 @@
 
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 scratch_path <- Sys.getenv('TMPDIR')
-n_slices <- 2000
+n_slices <- 10000
 
 # Boilerplate code to get the arguments passed in
 args=(commandArgs(TRUE))
@@ -59,7 +59,7 @@ for (i in rowidxmin:rowidxmax) {
 						  nlayers = 1)
 						  
 	if (file.exists(file_i)) {
-		deleteBox(file.path(scratch_path, 'bbox_test.tif'))
+		deleteBox(file_i)
 	}
 }
 
