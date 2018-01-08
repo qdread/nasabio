@@ -3,6 +3,7 @@
 # Project: NASABIOXGEO
 # Date: 17 May 2017
 
+# Modified 05 Jan 2018: change file names and don't remove the temp files.
 # Last modified: 04 Jan 2018: remove text progress bar.
 # Last modified: 04 Aug 2017 (added some config options to gdalwarp, attempting to make parallel read possible)
 # Last modified: 22 Jun 2017 (changed tif to hdf)
@@ -22,7 +23,7 @@
 # make a system call to GDAL to clip the raster to the circle, writing it to a square .tif with missing values for pixels with centers outside the circle.
 # call GDAL again to get summary stats and parse the GDAL output file in R.
 
-extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetag = '', nlayers) {
+extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetag = '', nlayers, delete_temp = FALSE) {
 	require(sp)
 	require(rgdal)
 
@@ -70,12 +71,12 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 					circle_json <- polygon2json(circle_r)
 					circle_geojson <- readOGR(circle_json, "OGRGeoJSON", verbose = F,  p4s = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
 					# write the geojson to .shp
-					writeOGR(circle_geojson, fp, paste0("temp_circle_", filetag), driver="ESRI Shapefile")
+					writeOGR(circle_geojson, fp, paste0("temp_circle_", r, "_", filetag), driver="ESRI Shapefile")
 					# define arguments for system call
-					call_args <- paste("--config VRT_SHARED_SOURCE 0 --config GDAL_MAX_DATASET_POOL_SIZE 1024 -crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(fp, paste0("temp_circle_", filetag, ".shp")), raster_file, file.path(fp,paste0("temp_circle_extracted", filetag, ".hdf")))
+					call_args <- paste("--config VRT_SHARED_SOURCE 0 --config GDAL_MAX_DATASET_POOL_SIZE 1024 -crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(fp, paste0("temp_circle_", r, "_", filetag, ".shp")), raster_file, file.path(fp,paste0("temp_circle_extracted", r, "_", filetag, ".hdf")))
 					# call GDAL twice, first to clip circle, then to calculate summary statistics on it.
 					system2(command="gdalwarp", args=call_args)
-					g.info <- system2(command="gdalinfo", args=paste("-stats", file.path(fp,paste0("temp_circle_extracted", filetag, ".hdf"))), stdout=TRUE) 
+					g.info <- system2(command="gdalinfo", args=paste("-stats", file.path(fp,paste0("temp_circle_extracted", r, "_", filetag, ".hdf"))), stdout=TRUE) 
 					
 					# Extract stats from g.info 
 					rowids <- grep('^Band*', g.info) # header rows for each layer.
@@ -87,7 +88,9 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 					}
 					
 					# Delete the temporarily created files between each iteration because GDAL gets mad if you overwrite an existing file.
-					system2(command="rm", args=file.path(fp, paste0("temp_circle*", filetag, "*")))
+					if (delete_temp) {
+						system2(command="rm", args=file.path(fp, paste0("temp_circle*", filetag, "*")))
+					}
 				}
 		
 			}
