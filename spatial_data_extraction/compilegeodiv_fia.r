@@ -1,5 +1,7 @@
-# FIA compile geodiversity stats (Pacific Northwest only so far)
+# FIA compile geodiversity stats (entire USA)
 # Submit job because it is too big to run on dev node, as usual
+
+# Edited 09 Jan: compile elevation only for entire USA (ignore other variables for the moment)
 
 library(dplyr)
 
@@ -8,11 +10,14 @@ library(dplyr)
 get_stats <- function(fp, prefix, n, suffix, stacked = FALSE) {
 	file_names <- paste0(prefix, n, suffix)
 	all_stats <- list()
-	for (i in file_names) {
-		load(file.path(fp, i))
+	pb <- txtProgressBar(0, length(file_names), style = 3)
+	for (i in 1:length(file_names)) {
+		setTxtProgressBar(pb, i)
+		load(file.path(fp, file_names[i]))
 		if (!stacked) all_stats[[length(all_stats) + 1]] <- stats_by_point
 		if (stacked) all_stats[[length(all_stats) + 1]] <- lapply(stats_by_point, function(x) do.call('rbind', x))
 	}
+	close(pb)
 	do.call('c', all_stats)
 }
 
@@ -30,12 +35,14 @@ replace_varname <- function(dflist, varname) {
 	})
 }
 
-fia_path <- '/mnt/research/nasabio/data/fia/allgeodiv'
+fia_path <- '/mnt/research/nasabio/data/fia/elevstats_usa'
 
-fia_elevation_stats <- get_stats(fia_path, 'elevation_', 1:22531, '.r')
-fia_slope_stats <- get_stats(fia_path, 'slope_', 1:22531, '.r')
-fia_tpi_stats <- get_stats(fia_path, 'tpi_', 1:22531, '.r')
-fia_aspect_stats <- get_stats(fia_path, 'aspect_', 1:22531, '.r')
+fia_elevation_stats <- get_stats(fia_path, 'elevation_', 1:10000, '.r', stacked = TRUE)
+fia_slope_stats <- get_stats(fia_path, 'slope_', 1:10000, '.r', stacked = TRUE)
+fia_tpi_stats <- get_stats(fia_path, 'tri_', 1:10000, '.r', stacked = TRUE)
+fia_aspect_stats <- get_stats(fia_path, 'roughness_', 1:10000, '.r', stacked = TRUE)
+
+# Add aspect here.
 
 fia_bioclim5k_stats <- get_stats(fia_path, 'bioclim5k_', 1:1000, '.r')
 fia_bioclim1k_stats <- get_stats(fia_path, 'bioclim1k_', 1:5000, '.r')
@@ -48,7 +55,7 @@ fia_night_stats <- get_stats(fia_path, 'night_', 1:250, '.r')
 fia_dhi_stats <- get_stats(fia_path, 'dhi_', 1:250, '.r')
 
 # FIA plot IDs (no coords)
-plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords.csv', stringsAsFactors = FALSE)
+plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords_wholeusa.csv', stringsAsFactors = FALSE)
 #source('/mnt/research/nasabio/code/loadfia.r')
 
 fia_elevation_stats <- replace_na_df(fia_elevation_stats)
@@ -123,3 +130,7 @@ write.csv(filter(fia_all_stats, variable %in% bio5k_vars), file = '/mnt/research
 write.csv(filter(fia_all_stats, variable %in% bio1k_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_pnw_bio1k_stats.csv', row.names = FALSE)
 write.csv(filter(fia_all_stats, variable %in% biocloud_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_pnw_biocloud_stats.csv', row.names = FALSE)
 write.csv(filter(fia_all_stats, variable %in% other_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_pnw_other_stats.csv', row.names = FALSE)
+
+# Added 09 Jan: write elevation only.
+fia_elevation_stats <- cbind(PLT_CN = rep(plotmetadata$PLT_CN, each = 11), bind_rows(fia_elevation_stats))
+write.csv(fia_elevation_stats, file = '/mnt/research/nasabio/data/fia/geodiv/fia_usa_elev_only.csv', row.names = FALSE)

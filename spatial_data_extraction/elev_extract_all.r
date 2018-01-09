@@ -2,6 +2,7 @@
 # Uses only GDAL commands for less memory usage.
 
 # Edited 08 Jan 2018: Use $SCRATCH and $TMPDIR
+# Edited 09 Jan 2018: Read directly from $SCRATCH, write to $TMPDIR
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
@@ -9,8 +10,7 @@
 
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 tmp_path <- Sys.getenv('TMPDIR')
-scratch_path <- Sys.getenv('SCRATCH')
-n_slices <- 10000
+scratch_path <- file.path(Sys.getenv('SCRATCH'), 'geo')
 
 # Boilerplate code to get the arguments passed in
 args=(commandArgs(TRUE))
@@ -20,25 +20,16 @@ for (i in 1:length(args)) {
 }
 
 # Names of vrts
-raster_file_names <- c(elevation = 'dem/conus_30m_dem_big_singlefile.vrt',
-					   slope = 'dem/VRTs/conus_30m_slope_big.vrt',
-					   roughness = 'tri_tpi/conus_30m_dem_roughness.vrt',
-					   tpi = 'tri_tpi/conus_30m_dem_TPI.vrt',
-					   tri = 'tri_tpi/conus_30m_dem_TRI.vrt'))
+raster_file_names <- c(elevation = 'conus_30m_dem_big_singlefile.vrt',
+					   slope = 'conus_30m_slope_big.vrt',
+					   roughness = 'conus_30m_dem_roughness.vrt',
+					   tpi = 'conus_30m_dem_TPI.vrt',
+					   tri = 'conus_30m_dem_TRI.vrt')
 
-# Names of tifs
-raw_file_names <- c(elevation = 'dem/conus_30m_dem_big.tif',
-				    slope = 'dem/conus_30m_slope_big.tif',
-				    roughness = 'tri_tpi/conus_30m_roughness_big.tif',
-				    tpi = 'tri_tpi/conus_30m_TPI_big.tif',
-				    tri = 'tri_tpi/conus_30m_TRI_big.tif'))				   
+all_n_slices <- c(elevation = 10000, slope = 10000, roughness = 10000, tpi = 10000, tri = 10000)					   
 					   
-# Copy VRT and its corresponding TIF to TMPDIR.
 raster_file_name <- raster_file_names[geovar]
-raw_file_name <- raw_file_names[geovar]
-system2('cp', args = paste(file.path(scratch_path, raster_file_name), tmp_path)
-system2('cp', args = paste(file.path(scratch_path, raw_file_name), tmp_path)
-raster_file_name <- file_path(tmp_path, raster_file_name)
+n_slices <- all_n_slices[geovar]
 
 max_radius <- 300
 radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300)
@@ -60,7 +51,7 @@ for (i in rowidxmin:rowidxmax) {
 	focalpoint <- with(fiacoords, cbind(lon, lat))[i,,drop=FALSE]	
 	
 	extractBox(coords = focalpoint,
-			   raster_file = raster_file_name,
+			   raster_file = file.path(scratch_path, raster_file_name),
 			   radius = max_radius,
 			   fp = tmp_path,
 			   filetags = paste(geovar, i, sep = '_'))
