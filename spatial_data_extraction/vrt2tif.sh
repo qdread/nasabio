@@ -17,3 +17,23 @@ gdaldem slope conus_5k_dem.vrt conus_5k_slope.tif
 gdaldem aspect conus_5k_dem.vrt conus_5k_aspect.tif
 gdalbuildvrt conus_5k_slope.vrt conus_5k_slope.tif
 gdalbuildvrt conus_5k_aspect.vrt conus_5k_aspect.tif
+
+# Use anaconda to do raster arithmetic 10 Jan 2018
+
+source ~/.bashrc
+
+try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
+try:
+    from osgeo import gdalnumeric
+except ImportError:
+    import gdalnumeric
+
+export PATH="/mnt/home/qdr/anaconda2/bin:/opt/software/Stata/15.0/SE:/opt/software/R/2.15.1--GCC-4.4.5/bin:/opt/software/MATLAB/R2014a/bin:/opt/software/cmake/2.8.5--GCC-4.4.5/bin:/opt/software/OpenMPI/1.4.3--GCC-4.4.5/bin:/usr/lib64/qt-3.3/bin:/opt/software/lmod/bin:/opt/moab/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/hpcc/bin:/opt/ibutils/bin"
+	
+	
+cd /mnt/research/nasabio/data/dem/SRTM_30m_DEM/VRTs
+
+~/code/fia/gdal_calc.py -A conus_5k_aspect.tif --outfile=conus_5k_aspect_cos.tif --calc="cos(A*pi/180)"

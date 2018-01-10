@@ -51,3 +51,4 @@ Elevation 5k,dem/SRTM_30m_DEM/VRTs,conus_5k_dem.vrt,elevation_5k,1,5000,500,no,n
 DHI 5k,dhi,dhi_5k.vrt,dhi_5k,4,5000,500,no,no,no,100,250,1500,8
 Human footprint 5k,human_impacts/hfp-global-geo-grid,hf_5k.vrt,hf_5k,1,5000,500,no,no,no,100,250,1500,8
 Night light 5k,human_impacts/viirs_nightlights,vcm_orm_ntl_5k.vrt,night_5k,1,5000,500,no,no,no,100,250,1500,8
+Geological age 5k,geology/geo_ages,GEA_5k.vrt,gea_5k,1,5000,500,no,no,yes,100,250,1500,8
