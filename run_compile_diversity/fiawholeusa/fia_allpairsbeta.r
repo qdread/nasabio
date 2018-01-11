@@ -11,7 +11,7 @@
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
-load(file.path(Sys.getenv('SCRATCH'), 'fiaworkspace_nospatial_wholeusa.r'))
+load('/mnt/ls15/scratch/groups/plz-lab/NASA/fiaworkspace_nospatial_wholeusa.r')
 source('/mnt/research/nasabio/code/loadfiaall.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
