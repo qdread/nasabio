@@ -5,8 +5,6 @@ Biocloud 1k resolution,biocloud1k.vrt,biocloud1k,8,1000,500,500,5000
 Biocloud 5k resolution,biocloud5k.vrt,biocloud5k,8,5000,500,250,1000
 Dynamic habitat index,dhi.vrt,dhi,4,1000,500,100,500
 Elevation,conus_30m_dem_big.vrt,elevation,1,30,300,500,10000
-Aspect sin,conus_30m_aspect_sin.vrt,aspect_sin,1,30,300,500,10000
-Aspect cos,conus_30m_aspect_cos.vrt,aspect_cos,1,30,300,500,10000
 Slope,conus_30m_slope_big.vrt,slope,1,30,300,500,10000
 Human footprint,hf.vrt,hf,1,1000,500,100,500
 Night light,vcm_orm_ntl.vrt,night,1,500,500,100,500
@@ -42,3 +40,8 @@ Elevation 5k,conus_5k_dem.vrt,elevation_5k,1,5000,500,100,500
 DHI 5k,dhi_5k.vrt,dhi_5k,4,5000,500,100,500
 Human footprint 5k,hf_5k.vrt,hf_5k,1,5000,500,100,500
 Night light 5k,vcm_orm_ntl_5k.vrt,night_5k,1,5000,500,100,500
+Aspect sin,conus_30m_aspect_sin.vrt,aspect_sin,1,30,300,500,10000
+Aspect cos,conus_30m_aspect_cos.vrt,aspect_cos,1,30,300,500,10000
+Geological age,GEA.vrt,gea,1,1000,500,100,500
+Soil type,stg.vrt,soil,1,5000,500,100,500
+Geological age 5k,GEA_5k.vrt,gea_5k,1,5000,500,100,500

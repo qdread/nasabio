@@ -3,6 +3,7 @@
 # Project: NASABIOXGEO
 # Date: 17 May 2017
 
+# Modified 11 Jan 2018: include categorical variable option. This will require using R.
 # Modified 05 Jan 2018: change file names and don't remove the temp files.
 # Last modified: 04 Jan 2018: remove text progress bar.
 # Last modified: 04 Aug 2017 (added some config options to gdalwarp, attempting to make parallel read possible)
@@ -23,7 +24,7 @@
 # make a system call to GDAL to clip the raster to the circle, writing it to a square .tif with missing values for pixels with centers outside the circle.
 # call GDAL again to get summary stats and parse the GDAL output file in R.
 
-extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetag = '', nlayers, delete_temp = FALSE) {
+extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67), latbds = c(25, 50), fp, filetag = '', nlayers, delete_temp = FALSE, is_categorical = FALSE) {
 	require(sp)
 	require(rgdal)
 
@@ -51,7 +52,11 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 	# Initialize data structure to hold the summary stats for each radius at each point.
 	# It is a list of data frames.
 	# For now, it's just mean, sd, min, and max. More can be added if needed.
-	emptydf <- data.frame(radius = rep(radii, each = nlayers), layer = 1:nlayers, mean = NA, sd = NA, min = NA, max = NA)
+	if (!is_categorical) {
+		emptydf <- data.frame(radius = rep(radii, each = nlayers), layer = 1:nlayers, mean = NA, sd = NA, min = NA, max = NA)
+	} else {
+		emptydf <- data.frame(radius = rep(radii, each = nlayers), layer = 1:nlayers, richness = NA, diversity = NA, mode = NA)
+	}
 	stats_by_point <- replicate(nrow(coords), emptydf, simplify = FALSE)
 	
 	if (nrow(coords) > 1) pb <- txtProgressBar(1, nrow(coords), style=3) # Tracks progress
@@ -76,15 +81,28 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 					call_args <- paste("--config VRT_SHARED_SOURCE 0 --config GDAL_MAX_DATASET_POOL_SIZE 1024 -crop_to_cutline -overwrite -dstnodata NULL -cutline", file.path(fp, paste0("temp_circle_", r, "_", filetag, ".shp")), raster_file, file.path(fp,paste0("temp_circle_extracted", r, "_", filetag, ".hdf")))
 					# call GDAL twice, first to clip circle, then to calculate summary statistics on it.
 					system2(command="gdalwarp", args=call_args)
-					g.info <- system2(command="gdalinfo", args=paste("-stats", file.path(fp,paste0("temp_circle_extracted", r, "_", filetag, ".hdf"))), stdout=TRUE) 
 					
-					# Extract stats from g.info 
-					rowids <- grep('^Band*', g.info) # header rows for each layer.
+					if (!is_categorical) {
+						g.info <- system2(command="gdalinfo", args=paste("-stats", file.path(fp,paste0("temp_circle_extracted", r, "_", filetag, ".hdf"))), stdout=TRUE) 
+						
+						# Extract stats from g.info 
+						rowids <- grep('^Band*', g.info) # header rows for each layer.
 
-					for (layer in 1:nlayers) {
-					  a <- g.info[rowids[layer]+(4:7)] # rows containing summary stats for the layer.
-					  summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # extract the summary stats.
-					  stats_by_point[[i]][layer + nlayers*(r-1), 3:6] <- summary_stats[c(3,4,1,2)] # write summary stats to the output list.
+						for (layer in 1:nlayers) {
+						  a <- g.info[rowids[layer]+(4:7)] # rows containing summary stats for the layer.
+						  summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # extract the summary stats.
+						  stats_by_point[[i]][layer + nlayers*(r-1), 3:6] <- summary_stats[c(3,4,1,2)] # write summary stats to the output list.
+						}
+					} else {
+						require(raster)
+						z <- raster(file.path(fp,paste0("temp_circle_extracted", r, "_", filetag, ".hdf")))
+						zpts <- rasterToPoints(z)[,3]
+						ztable <- table(zpts) # Third column is always value.
+						zprop <- ztable/sum(ztable)
+						zmode <- names(ztable)[which.max(ztable)[1]]
+						stats_by_point[[i]][r, 3:5] <- c(richness = length(unique(zpts)),
+																			 diversity = -sum(zprop * log(zprop)),
+																			 mode = zmode)
 					}
 					
 					# Delete the temporarily created files between each iteration because GDAL gets mad if you overwrite an existing file.

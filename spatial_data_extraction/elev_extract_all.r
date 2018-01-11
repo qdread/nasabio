@@ -3,6 +3,7 @@
 
 # Edited 08 Jan 2018: Use $SCRATCH and $TMPDIR
 # Edited 09 Jan 2018: Read directly from $SCRATCH, write to $TMPDIR
+# Edited 11 Jan 2018: Get all variables from table.
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
@@ -19,27 +20,37 @@ for (i in 1:length(args)) {
     eval(parse(text=args[[i]]))
 }
 
-# Names of vrts
-raster_file_names <- c(elevation = 'conus_30m_dem_big_singlefile.vrt',
-					   slope = 'conus_30m_slope_big.vrt',
-					   roughness = 'conus_30m_dem_roughness.vrt',
-					   tpi = 'conus_30m_dem_TPI.vrt',
-					   tri = 'conus_30m_dem_TRI.vrt')
-
-all_n_slices <- c(elevation = 10000, slope = 10000, roughness = 10000, tpi = 10000, tri = 10000)					   
-					   
-raster_file_name <- raster_file_names[geovar]
-n_slices <- all_n_slices[geovar]
-
-max_radius <- 300
-radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300)
-
+# Load functions to do the extraction
 source('/mnt/research/nasabio/code/extractbox.r')
 source('/mnt/research/nasabio/code/extractfromcircle_stack.r')
-source('/mnt/research/nasabio/code/loadfiaall.r')
+
+# Load variable table
+vartable <- read.csv('/mnt/research/nasabio/data/geodiv_table_for_gdal.csv', stringsAsFactors = FALSE)
+
+# Get all options from variable table.
+k <- which(vartable$variable.id == geovar)
+n_layers <- vartable$N.layers[k]
+raster_file_name <- vartable$File.name[k]
+max_radius <- vartable$Max.radius[k]
+categorical <- geovar %in% c('gea','gea_5k','soil')
+
+# Load coordinates for correct taxon.	
+if (taxon == 'bbs') {
+	n_slices <- vartable$N.slices.bbs[k]
+	coords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
+	radii <- c(50, 75, 100, 150, 200, 300, 400, 500)
+}	
+if (taxon == 'fia') {
+	n_slices <- vartable$N.slices.fiaall[k]
+	source('/mnt/research/nasabio/code/loadfiaall.r')
+	coords <- fiacoords
+	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500)
+}
+
+radii <- radii[radii <= max_radius]
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
-rowidx <- round(seq(0,nrow(fiacoords),length.out=n_slices + 1))
+rowidx <- round(seq(0,nrow(coords),length.out=n_slices + 1))
 rowidxmin <- rowidx[slice]+1
 rowidxmax <- rowidx[slice+1]
 
@@ -48,7 +59,7 @@ stats_by_point <- list()
 for (i in rowidxmin:rowidxmax) {
 	print(i)
 	
-	focalpoint <- with(fiacoords, cbind(lon, lat))[i,,drop=FALSE]	
+	focalpoint <- with(coords, cbind(lon, lat))[i,,drop=FALSE]	
 	
 	extractBox(coords = focalpoint,
 			   raster_file = file.path(scratch_path, raster_file_name),
@@ -64,11 +75,12 @@ for (i in rowidxmin:rowidxmax) {
 						  radii = radii,
 						  fp = tmp_path,
 						  filetag = paste(geovar, i, sep = '_'),
-						  nlayers = 1)
+						  nlayers = n_layers,
+						  is_categorical = categorical)
 						  
 	if (file.exists(file_i)) {
 		deleteBox(file_i)
 	}
 }
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/fia/elevstats_usa/', geovar, '_', slice, '.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/elevstats_usa/', geovar, '_', slice, '.r'))
