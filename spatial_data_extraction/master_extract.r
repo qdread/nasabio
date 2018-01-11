@@ -83,4 +83,4 @@ for (i in rowidxmin:rowidxmax) {
 	}
 }
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/elevstats_usa/', geovar, '_', slice, '.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/allgeodiv_v2/', geovar, '_', slice, '.r'))
