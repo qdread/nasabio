@@ -1,20 +1,19 @@
 Dataset.name,File.name,variable.id,N.layers,Resolution.m,Max.radius.km,N.slices.bbs,N.slices.fiaall
-Bioclim 1k resolution,bioclim1k_20170613.vrt,bioclim1k,19,1000,500,500,5000
+Bioclim 1k resolution,bioclim1k_20170613.vrt,bioclim1k,19,1000,500,1000,20000
 Bioclim 5k resolution,bioclim5k_20170613.vrt,bioclim5k,19,5000,500,250,1000
-Biocloud 1k resolution,biocloud1k.vrt,biocloud1k,8,1000,500,500,5000
+Biocloud 1k resolution,biocloud1k.vrt,biocloud1k,8,1000,500,1000,20000
 Biocloud 5k resolution,biocloud5k.vrt,biocloud5k,8,5000,500,250,1000
 Dynamic habitat index,dhi.vrt,dhi,4,1000,500,100,500
 Elevation,conus_30m_dem_big.vrt,elevation,1,30,300,500,10000
 Slope,conus_30m_slope_big.vrt,slope,1,30,300,500,10000
 Human footprint,hf.vrt,hf,1,1000,500,100,500
 Night light,vcm_orm_ntl.vrt,night,1,500,500,100,500
-Bioclim 1k TRI,bioclim1k_TRI.vrt,bioclim1k_tri,19,1000,500,500,5000
-Bioclim 1k TPI,bioclim1k_TPI.vrt,bioclim1k_tpi,19,1000,500,500,5000
-Bioclim 1k roughness,bioclim1k_roughness.vrt,bioclim1k_roughness,19,1000,500,500,5000
+Bioclim 1k TRI,bioclim1k_TRI.vrt,bioclim1k_tri,19,1000,500,1000,20000
+Bioclim 1k roughness,bioclim1k_roughness.vrt,bioclim1k_roughness,19,1000,500,1000,20000
 Bioclim 5k TRI,bioclim5k_TRI.vrt,bioclim5k_tri,19,5000,500,250,1000
 Bioclim 5k roughness,bioclim5k_roughness.vrt,bioclim5k_roughness,19,5000,500,250,1000
-Biocloud 1k TRI,biocloud1k_TRI.vrt,biocloud1k_tri,8,1000,500,500,5000
-Biocloud 1k roughness,biocloud1k_roughness.vrt,biocloud1k_roughness,8,1000,500,500,5000
+Biocloud 1k TRI,biocloud1k_TRI.vrt,biocloud1k_tri,8,1000,500,1000,20000
+Biocloud 1k roughness,biocloud1k_roughness.vrt,biocloud1k_roughness,8,1000,500,1000,20000
 Biocloud 5k TRI,biocloud5k_TRI.vrt,biocloud5k_tri,8,5000,500,250,1000
 Biocloud 5k roughness,biocloud5k_roughness.vrt,biocloud5k_roughness,8,5000,500,250,1000
 Elevation 30m TRI,conus_30m_dem_TRI.vrt,tri,1,30,300,500,10000

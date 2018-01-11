@@ -1,6 +1,8 @@
 # FIA all pairs beta-diversity
 # Edited 21 Dec for entire USA
 # Edited 23 Dec: only do a single point per slice
+# Edited 29 Dec (hpcc version only): max radius is now 200 to save time
+# Edited 11 Jan 2018: Move all files to SCRATCH and/or TMPDIR.
 
 # Use precalculated matrix.
 # One FIA plot per slice.
@@ -9,7 +11,7 @@
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa.r')
+load(file.path(Sys.getenv('SCRATCH'), 'fiaworkspace_nospatial_wholeusa.r'))
 source('/mnt/research/nasabio/code/loadfiaall.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
@@ -23,7 +25,7 @@ nnull <- 99 # Reduce to save time
 
 trydist <- as.matrix(trydist)
 
-max_radius <- 300 # Do 300 km for now.
+max_radius <- 200 
 p <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # Distances between target plot and all other plots.
