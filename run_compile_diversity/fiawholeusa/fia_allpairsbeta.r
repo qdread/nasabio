@@ -31,8 +31,11 @@ p <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 # Distances between target plot and all other plots.
 dist_p <- spDistsN1(pts=with(fiacoords, cbind(lon, lat)), pt = c(fiacoords$lon[p], fiacoords$lat[p]), longlat = TRUE)
 beta_div <- matrix(NA, nrow=nrow(fiaplotmat), ncol=21)
+
+pb <- txtProgressBar(0, nrow(fiaplotmat), style = 3)
 	
 for (p2 in 1:nrow(fiaplotmat)) {
+	setTxtProgressBar(pb, i)
 	# Loop through all other FIA plots, check if plot is in radius
 	# If plot is within radius, calculate diversity between that plot and target plot. 
 	if (dist_p[p2] > 0 & dist_p[p2] <= max_radius) {
@@ -43,6 +46,8 @@ for (p2 in 1:nrow(fiaplotmat)) {
 											phylo_spp = fullphylo$tip.label, func_problem_spp = nofuncspp)
 	}
 }
+
+close(pb)
 
 dimnames(beta_div)[[2]] <- c('beta_td_pairwise_pa', 'beta_td_sorensen_pa',
 							'beta_td_pairwise', 'beta_td_sorensen',
