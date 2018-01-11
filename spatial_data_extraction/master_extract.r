@@ -1,9 +1,9 @@
-# ELEVATION EXTRACTION BATCH SCRIPT
+# GEODIVERSITY EXTRACTION BATCH SCRIPT v2
 # Uses only GDAL commands for less memory usage.
 
 # Edited 08 Jan 2018: Use $SCRATCH and $TMPDIR
 # Edited 09 Jan 2018: Read directly from $SCRATCH, write to $TMPDIR
-# Edited 11 Jan 2018: Get all variables from table.
+# Edited 11 Jan 2018: Get all variables from table. (rename to master_extract.r)
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
