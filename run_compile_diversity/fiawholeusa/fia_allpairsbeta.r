@@ -35,7 +35,7 @@ beta_div <- matrix(NA, nrow=nrow(fiaplotmat), ncol=21)
 pb <- txtProgressBar(0, nrow(fiaplotmat), style = 3)
 	
 for (p2 in 1:nrow(fiaplotmat)) {
-	setTxtProgressBar(pb, i)
+	setTxtProgressBar(pb, p2)
 	# Loop through all other FIA plots, check if plot is in radius
 	# If plot is within radius, calculate diversity between that plot and target plot. 
 	if (dist_p[p2] > 0 & dist_p[p2] <= max_radius) {
