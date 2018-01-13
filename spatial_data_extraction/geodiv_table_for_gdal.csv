@@ -4,7 +4,7 @@ Bioclim 5k resolution,bioclim5k_20170613.vrt,bioclim5k,19,5000,500,250,1000
 Biocloud 1k resolution,biocloud1k.vrt,biocloud1k,8,1000,500,1000,20000
 Biocloud 5k resolution,biocloud5k.vrt,biocloud5k,8,5000,500,250,1000
 Dynamic habitat index,dhi.vrt,dhi,4,1000,500,100,500
-Elevation,conus_30m_dem_big.vrt,elevation,1,30,300,500,10000
+Elevation,conus_30m_dem_big_singlefile.vrt,elevation,1,30,300,500,10000
 Slope,conus_30m_slope_big.vrt,slope,1,30,300,500,10000
 Human footprint,hf.vrt,hf,1,1000,500,100,500
 Night light,vcm_orm_ntl.vrt,night,1,500,500,100,500
