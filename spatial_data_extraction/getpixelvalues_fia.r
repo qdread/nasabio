@@ -1,10 +1,16 @@
-# Extract just pixel values for geo variables
-# BBS (FIA done in parallel)
-# QDR 12 Jan 2018
-# Nasabioxgeo project
+# Get pixel values for FIA
+# Done in parallel
 
-# Load coordinates
-coords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
+source('/mnt/research/nasabio/code/loadfiaall.r')
+coords <- fiacoords
+slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+n_slices <- 100
+
+# Get row indexes for the slice of coordinate matrix to be extracted.
+rowidx <- round(seq(0,nrow(fiacoords),length.out=n_slices + 1))
+rowidxmin <- rowidx[slice]+1
+rowidxmax <- rowidx[slice+1]
+coords <- coords[rowidxmin:rowidxmax, ]
 
 # Get table of raster file locations
 vartable <- read.csv('/mnt/research/nasabio/data/geodiv_table_for_pixel.csv', stringsAsFactors = FALSE)
@@ -23,7 +29,6 @@ for (i in 1:(nrow(vartable))) {
 }
 
 # Assemble output.
-names(coords)[4:5] <- c('lon_aea', 'lat_aea')
 values <- do.call('cbind', values)
 class(values) <- 'numeric'
 values[values == -9999] <- NA
@@ -42,6 +47,6 @@ var_names <- c(paste0('bio', 1:19,'_1k'), paste0('biocloud', 1:8, '_1k'),
                'TRI_nightlight_500m')
 
 names(values) <- var_names
-values <- cbind(as.data.frame(coords), values)
+values <- cbind(PLT_CN = coords$PLT_CN, values)
 
-write.csv(values, '/mnt/research/nasabio/data/bbs/bbs_geo_by_point.csv', row.names = FALSE)
+write.csv(values, paste0('/mnt/research/nasabio/data/fia/allgeodiv_v2/fia_geo_by_point_', slice, '.csv'), row.names = FALSE)
