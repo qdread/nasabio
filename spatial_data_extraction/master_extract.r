@@ -11,7 +11,7 @@
 
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 tmp_path <- Sys.getenv('TMPDIR')
-scratch_path <- file.path(Sys.getenv('SCRATCH'), 'geo')
+scratch_path <- '/mnt/ls15/scratch/groups/plz-lab/NASA/VRTs'
 
 # Boilerplate code to get the arguments passed in
 args=(commandArgs(TRUE))

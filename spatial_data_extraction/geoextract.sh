@@ -12,10 +12,10 @@
 # geovar = one of the following: bioclim1k, bioclim5k, biocloud1k, biocloud5k, dhi, elevation, aspect, slope, tpi, hf, gea, night, soil
 
 module load R/3.2.0 GDAL
-cp /mnt/research/nasabio/code/master_extract.r $TMPDIR
+cp /mnt/research/nasabio/code/master_extract.r $TMPDIR/rcode.r
 cd $TMPDIR
 now="$(date +'%d%h%Y%H%M')"
 
 # Cobble together the R command using the environmental variables supplied.
-cmd="R CMD BATCH --no-save --no-restore '--args taxon=\""$taxon"\" geovar=\""$geovar"\"' master_extract.r /mnt/research/nasabio/code/routputfiles/"$taxon"_"$geovar"_"$PBS_ARRAYID"_"$now".txt"
+cmd="R CMD BATCH --no-save --no-restore '--args taxon=\""$taxon"\" geovar=\""$geovar"\"' rcode.r /mnt/ls15/scratch/groups/plz-lab/NASA/routputfiles/"$taxon"_"$geovar"_"$PBS_ARRAYID"_"$now".txt"
 eval $cmd
