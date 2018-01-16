@@ -206,7 +206,7 @@ nolegtheme <- theme(legend.position = 'none',
 
 legend1 <- g_legend(fiamap_bd_facet + leftlegtheme)
 legend2 <- g_legend(fiamap_ed_facet + leftlegtheme)
-legend3 <- g_legend(fiamap_gd_facet + leftlegtheme + scale_colour_gradientn(name = 'Gamma-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9)))
+legend3 <- g_legend(fiamap_gd_facet + leftlegtheme + scale_colour_gradientn(name = 'Gamma-\ndiversity', breaks = c(1, 5, 10, 14.9), colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9)))
 
 library(grid)
 
@@ -297,6 +297,7 @@ gammaplot <- ggplot(biogeo %>% mutate(gamma_diversity = exp(gamma_diversity))) +
   geom_text(data = subset(r2_lm_quant, diversity_type == 'gamma_diversity'),
             aes(x = -Inf, y = Inf, label = r2expr),
             parse = TRUE, hjust = -0.5, vjust = 1.5) +
+  scale_x_continuous(breaks = c(0,500,1000)) +
   hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Gamma-diversity')
 
 # Set panel size of bottom row.
