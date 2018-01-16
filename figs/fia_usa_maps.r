@@ -39,8 +39,8 @@ whitemaptheme <- theme_bw() + theme(panel.grid = element_blank(),
 
 longn <- seq(-120, -70, by = 10)
 latn <- seq(25, 50, by = 5)
-fia_xs <- scale_x_continuous(breaks = longn, labels = paste0(longn, '° W'))
-fia_ys <- scale_y_continuous(breaks = latn, labels = paste0(latn, '° W'))
+fia_xs <- scale_x_continuous(breaks = longn, labels = paste0(abs(longn), '° W'))
+fia_ys <- scale_y_continuous(breaks = latn, labels = paste0(latn, '° N'))
 
 fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/fia_diversity_maps'
 
@@ -85,4 +85,20 @@ for (rad in radii) {
   ggsave(file.path(fpfig, paste0('fia_usa_stdev_elev_', rad, '_km.png')), ed_map, height = 8, width = 12, dpi = 400)
 }
 
+# Add the incidence-based metrics to maps too.
 
+for (rad in radii) {
+  
+  bdmapdat <- bd %>% dplyr::filter(radius == rad, !is.na(beta_td_sorensen_pa)) %>% arrange(beta_td_sorensen_pa)
+  admapdat <- ad %>% dplyr::filter(radius == rad, !is.na(richness)) %>% arrange(richness)
+  gdmapdat <- gd %>% dplyr::filter(radius == rad, !is.na(richness)) %>% arrange(richness)
+  
+  ad_map <- single_fia_map(dat = admapdat, zvar = 'richness', colscale = colscalealpha, title = 'FIA taxonomic alpha-diversity', subtitle = paste('Richness,', rad, 'km radius'))
+  bd_map <- single_fia_map(dat = bdmapdat, zvar = 'beta_td_sorensen_pa', colscale = colscalebeta, title = 'FIA taxonomic beta-diversity', subtitle = paste('Sorensen, incidence,', rad, 'km radius'))
+  gd_map <- single_fia_map(dat = gdmapdat, zvar = 'richness', colscale = colscalegamma, title = 'FIA taxonomic gamma-diversity', subtitle = paste('Richness,', rad, 'km radius'))
+
+  
+  ggsave(file.path(fpfig, paste0('fia_usa_alpha_richness_', rad, '_km.png')), ad_map, height = 8, width = 12, dpi = 400)
+  ggsave(file.path(fpfig, paste0('fia_usa_beta_sorensenincidence_', rad, '_km.png')), bd_map, height = 8, width = 12, dpi = 400)
+  ggsave(file.path(fpfig, paste0('fia_usa_gamma_richness_', rad, '_km.png')), gd_map, height = 8, width = 12, dpi = 400)
+}
