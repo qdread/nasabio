@@ -39,6 +39,14 @@ starts <- seq(1, 135174, by = 250)
 qsub_calls <- paste('qsub fiabd.sh -t ', starts, '-', starts+249, sep='')
 write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
+# Edit for Jan 18: beta diversity
+starts <- seq(1, 135174, by = 250)
+isbig <- starts >= 100000
+
+qsub_calls <- paste('qsub fiabd.sh -v isbig=', ifelse(isbig,'yes','no'), ' -t ', ifelse(isbig, as.integer(starts-100000), as.integer(starts)), '-', ifelse(isbig, as.integer(starts-100000+249), as.integer(starts+249)), sep='')
+write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+
 # Elevation GDAL-only qsubs
 starts <- seq(1, 10000, by = 250)
 vars <- c('elevation', 'slope', 'roughness', 'tri')

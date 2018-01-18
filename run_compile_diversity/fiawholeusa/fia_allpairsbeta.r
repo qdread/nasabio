@@ -3,6 +3,7 @@
 # Edited 23 Dec: only do a single point per slice
 # Edited 29 Dec (hpcc version only): max radius is now 200 to save time
 # Edited 11 Jan 2018: Move all files to SCRATCH and/or TMPDIR.
+# Edited 18 Jan 2018: Deal with jobs being over 100000.
 
 # Use precalculated matrix.
 # One FIA plot per slice.
@@ -10,6 +11,13 @@
 # Identify the plots within 300 km of the target plot.
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
+
+# Boilerplate code to get the arguments passed in
+args=(commandArgs(TRUE))
+
+for (i in 1:length(args)) {
+    eval(parse(text=args[[i]]))
+}
 
 load('/mnt/ls15/scratch/groups/plz-lab/NASA/fiaworkspace_nospatial_wholeusa.r')
 source('/mnt/research/nasabio/code/loadfiaall.r')
@@ -27,6 +35,8 @@ trydist <- as.matrix(trydist)
 
 max_radius <- 200 
 p <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+if (isbig == 'yes') p <- p + 100000
+print(p)
 
 # Distances between target plot and all other plots.
 dist_p <- spDistsN1(pts=with(fiacoords, cbind(lon, lat)), pt = c(fiacoords$lon[p], fiacoords$lat[p]), longlat = TRUE)
