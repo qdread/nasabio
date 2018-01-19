@@ -57,6 +57,7 @@ write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/elev
 
 ###########################################
 # 11 Jan: GDAL only. All for both BBS and FIA. Delete the ones that are already done.
+# Edit 19 Jan: add aspect sin and cos since we have now calculated that!
 
 x <- read.csv('spatial_data_extraction/geodiv_table_for_gdal.csv', stringsAsFactors = FALSE)
 
@@ -72,7 +73,8 @@ qsub_calls_bbs <- x %>%
   rowwise %>%
   do(qsubs = sapply(seq(1, .$N.slices.bbs, by = 250), function(x) qsub_string(taxon = 'bbs', var = .$variable.id, mem = 1, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.bbs))))))
 
-qsub_calls_fia <- qsub_calls_fia[!x$variable.id %in% c('elevation','slope','roughness','tri','aspect_sin', 'aspect_cos'), ]
-qsub_calls_bbs <- qsub_calls_bbs[!x$variable.id %in% c('aspect_sin', 'aspect_cos'), ]
+# Remove whatever has already been completed.
+qsub_calls_fia <- qsub_calls_fia[!x$variable.id %in% c('elevation','slope','roughness','tri'), ]
+#qsub_calls_bbs <- qsub_calls_bbs[!x$variable.id %in% c('aspect_sin', 'aspect_cos'), ]
 
 write.table(c(unlist(qsub_calls_fia$qsubs), unlist(qsub_calls_bbs$qsubs)), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
