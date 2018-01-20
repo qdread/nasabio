@@ -9,7 +9,8 @@ cd /mnt/research/nasabio/data/fia/diversity/usa
 # Loop through all the variables, then the number of jobs
 	jobsleft=0
 	needtorun=""
-	for i in $(seq 1 135174); do
+	njob=135174
+	for i in $(seq 1 $njob); do
 		# Construct file name and check if it exists.
 		# If not, add that job number to the needtorun string.
 		fname="beta_${i}.r"
