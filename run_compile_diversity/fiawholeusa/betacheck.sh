@@ -16,7 +16,11 @@ cd /mnt/research/nasabio/data/fia/diversity/usa
 		fname="beta_${i}.r"
 		if [ ! -e "$fname" ]; then
                 ((jobsleft++))
-                needtorun+="$i,"
+				ii=$i
+				if [ "$i" -gt "100000" ]; then
+					((ii-=100000))
+				fi
+                needtorun+="$ii,"
         fi
 		# If the number of jobs equals 250 or if we have reached the last job with some to run,
 		# create a qsub string and paste it at the bottom of the qsub file.
