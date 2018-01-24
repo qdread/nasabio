@@ -87,11 +87,14 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 						
 						# Extract stats from g.info 
 						rowids <- grep('^Band*', g.info) # header rows for each layer.
-
-						for (layer in 1:nlayers) {
-						  a <- g.info[rowids[layer]+(4:7)] # rows containing summary stats for the layer.
-						  summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # extract the summary stats.
-						  stats_by_point[[i]][layer + nlayers*(r-1), 3:6] <- summary_stats[c(3,4,1,2)] # write summary stats to the output list.
+						# Error catching added 24 Jan 2018: if no valid pixels, gdalinfo will still return output but it will give bad results
+						# Skip the whole summary stats calculation for that radius if rowids are too close together (meaning g.info contains no data)
+						if (rowids[2] - rowids[1] == 8) {
+							for (layer in 1:nlayers) {
+							  a <- g.info[rowids[layer]+(4:7)] # rows containing summary stats for the layer.
+							  summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # extract the summary stats.
+							  stats_by_point[[i]][layer + nlayers*(r-1), 3:6] <- summary_stats[c(3,4,1,2)] # write summary stats to the output list.
+							}
 						}
 					} else {
 						require(raster)
