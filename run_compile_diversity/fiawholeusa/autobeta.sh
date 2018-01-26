@@ -4,7 +4,7 @@
 cd /mnt/research/nasabio/code
 
 # Extract number of jobs currently in queue from the output of showq.
-active_jobs=`/opt/moab/bin/showq -u $USER | awk '/^Total/ { print $3 }'`
+active_jobs=$(($(qstat -t -u $USER|wc -l) - 5))
 
 if [ "$active_jobs" -le "750" ]; then
         # Scan the text file until we find a line not containing the word "DONE"
