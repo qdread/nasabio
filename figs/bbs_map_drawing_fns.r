@@ -82,3 +82,4 @@ whitemaptheme_bbs <- theme_bw() + theme(panel.grid = element_blank(),
                                     legend.direction = 'horizontal',
                                     axis.title = element_blank(),
                                     strip.background = element_blank())
+

@@ -35,8 +35,10 @@ All BBS diversity metrics are *incidence-only*. We do not use any information ab
 
 #### 1.1.4 Find beta-diversity
 
+**NOTE:** Pairwise indices for each pair has been updated (along with alpha and gamma) to correct some small errors that were noticed on 31 January 2018. I did not update the partitioning beta diversity to reflect this correction because it takes a long time to run and it's unclear whether we are going to use it.
+
 - `run_compile_diversity/bbs1year/bbs_allplotsbetapart.r`: New method (multisite index for each route and each radius, does not include FD). The temporary output files are written to `/mnt/research/nasabio/data/bbs/diversity`.
-- `run_compile_diversity/bbs1year/bbs_allpairsbeta.r`: Old method (pairwise indices for each pair of routes, includes FD). The temporary output files are written to `/mnt/research/nasabio/data/bbs/diversity`.
+- `run_compile_diversity/bbs1year/bbs_allpairsbeta.r`: Old method (pairwise indices for each pair of routes, includes FD). The temporary output files are written to `/mnt/research/nasabio/data/bbs/diversity`. 
 
 #### 1.1.5 Combine slices and aggregate by radius
 
