@@ -1,6 +1,6 @@
 # FIA diversity maps and biodiversity-geodiversity regressions: whole USA
 
-QDR, 16 January 2017
+QDR, 16 January 2018
 
 All the stats and maps we generated so far for FIA data have been for the Pacific Northwest (PNW) only because (1) it was the first region where we could get access to the true plot locations and (2) it is a relatively manageable area to work with in terms of both low species richness and not having to deal with all 135,000 forested FIA plots across the continental United States. I mapped out alpha, beta, and gamma biodiversity (taxonomic only for starters) across the 22,000 forested FIA plots in the PNW, and the first guess at a relevant geodiversity variable which was standard deviation of elevation within all the different radii and also ran regressions using elevation geodiversity to predict the 3 flavors of biodiversity. You can see those results in the conceptual paper: in the PNW, there is a strong positive relationship with gamma diversity especially at larger scales (50-100 km), a moderately strong positive relationship with beta diversity at intermediate to large scales, and little to no relationship with alpha diversity at any scale.
 

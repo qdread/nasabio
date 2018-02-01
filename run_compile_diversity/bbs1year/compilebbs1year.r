@@ -4,14 +4,7 @@
 ########################################################################
 # Alpha diversity
 
-bbs_alphadiv <- list()
-
-for (i in 1:250) {
-	load(paste0('/mnt/research/nasabio/data/bbs/diversity1year/alpha_',i,'.r'))
-	bbs_alphadiv[[i]] <- alpha_div
-}
-
-bbs_alphadiv <- do.call('rbind', bbs_alphadiv)
+bbs_alphadiv <- read.csv('/mnt/research/nasabio/data/bbs/diversity1year/bbs_alphadiv.csv', stringsAsFactors = FALSE)
 
 library(dplyr)
 
