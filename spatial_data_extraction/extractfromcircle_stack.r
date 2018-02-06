@@ -3,6 +3,7 @@
 # Project: NASABIOXGEO
 # Date: 17 May 2017
 
+# Modified 06 Feb 2018: debug rowids conditional statement
 # Modified 11 Jan 2018: include categorical variable option. This will require using R.
 # Modified 05 Jan 2018: change file names and don't remove the temp files.
 # Last modified: 04 Jan 2018: remove text progress bar.
@@ -89,7 +90,7 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 						rowids <- grep('^Band*', g.info) # header rows for each layer.
 						# Error catching added 24 Jan 2018: if no valid pixels, gdalinfo will still return output but it will give bad results
 						# Skip the whole summary stats calculation for that radius if rowids are too close together (meaning g.info contains no data)
-						if (rowids[2] - rowids[1] == 8) {
+						if ((length(rowids) == 1 || rowids[2] - rowids[1] == 8) & length(g.info) - rowids[length(rowids)] > 4) {
 							for (layer in 1:nlayers) {
 							  a <- g.info[rowids[layer]+(4:7)] # rows containing summary stats for the layer.
 							  summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # extract the summary stats.
