@@ -35,14 +35,14 @@ neighbordiv <- function(x, plot_diversity=fia_alphadiv, plot_metadata = fiacoord
 											   richness = median(richness,na.rm=T), 
 											   shannon = median(shannon, na.rm=T), 
 											   evenness = median(evenness, na.rm=T),
-											   MPD = median(MPD_z, na.rm=T), 
-											   MNTD = median(MNTD_z, na.rm=T), 
-											   MPDfunc = median(MPDfunc_z, na.rm=T), 
-											   MNTDfunc = median(MNTDfunc_z, na.rm=T),
-											   MPD_pa = median(MPD_pa_z, na.rm=T), 
-											   MNTD_pa = median(MNTD_pa_z, na.rm=T), 
-											   MPDfunc_pa = median(MPDfunc_pa_z, na.rm=T), 
-											   MNTDfunc_pa = median(MNTDfunc_pa_z, na.rm=T)))
+											   MPD_z = median(MPD_z, na.rm=T), 
+											   MNTD_z = median(MNTD_z, na.rm=T), 
+											   MPDfunc_z = median(MPDfunc_z, na.rm=T), 
+											   MNTDfunc_z = median(MNTDfunc_z, na.rm=T),
+											   MPD_pa_z = median(MPD_pa_z, na.rm=T), 
+											   MNTD_pa_z = median(MNTD_pa_z, na.rm=T), 
+											   MPDfunc_pa_z = median(MPDfunc_pa_z, na.rm=T), 
+											   MNTDfunc_pa_z = median(MNTDfunc_pa_z, na.rm=T)))
   }
   as.data.frame(do.call('rbind', commdat))
 }
