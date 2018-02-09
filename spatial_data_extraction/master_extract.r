@@ -4,6 +4,7 @@
 # Edited 08 Jan 2018: Use $SCRATCH and $TMPDIR
 # Edited 09 Jan 2018: Read directly from $SCRATCH, write to $TMPDIR
 # Edited 11 Jan 2018: Get all variables from table. (rename to master_extract.r)
+# Edited 09 Feb 2018: Update scratch path.
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
@@ -11,7 +12,7 @@
 
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 tmp_path <- Sys.getenv('TMPDIR')
-scratch_path <- '/mnt/ls15/scratch/groups/plz-lab/NASA/VRTs'
+scratch_path <- '/mnt/ls15/scratch/groups/nasabio/VRTs'
 
 # Boilerplate code to get the arguments passed in
 args=(commandArgs(TRUE))

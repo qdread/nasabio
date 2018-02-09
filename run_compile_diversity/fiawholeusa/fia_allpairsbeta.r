@@ -4,6 +4,7 @@
 # Edited 29 Dec (hpcc version only): max radius is now 200 to save time
 # Edited 11 Jan 2018: Move all files to SCRATCH and/or TMPDIR.
 # Edited 18 Jan 2018: Deal with jobs being over 100000.
+# Edited 09 Feb 2018: Update scratch path
 
 # Use precalculated matrix.
 # One FIA plot per slice.
@@ -19,7 +20,7 @@ for (i in 1:length(args)) {
     eval(parse(text=args[[i]]))
 }
 
-load('/mnt/ls15/scratch/groups/plz-lab/NASA/fiaworkspace_nospatial_wholeusa.r')
+load('/mnt/ls15/scratch/groups/nasabio/fiaworkspace_nospatial_wholeusa.r')
 source('/mnt/research/nasabio/code/loadfiaall.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
