@@ -1,0 +1,123 @@
+---
+title: "Simulated bioxgeo"
+author: "Quentin D. Read"
+date: "February 13, 2018"
+output: pdf_document
+---
+
+# Description of simulation
+
+Andy Finley and I discussed the issue that the scale dependence of the slope and goodness-of-fit of the regression relating biodiversity to geodiversity (elevation standard deviation) might be because there are more points averaged in the larger radii which would lead to a tighter fit. It might not reflect a truly scale dependent process. He suggested simulating some data without the scale dependence to see if the same pattern would come out. 
+
+What I did was create an underlying surface of geodiversity (true value of elevation standard deviation). In the simulation, geodiversity decreases the farther you are from the center of the region. Next I generated elevation values for the 1000x1000 grid at random from a normal distribution with the underlying true standard deviation at that point. So the elevation values are more variable near the middle but there is no scale-dependent process used to generate them (purely local).
+
+```{r, warning=FALSE}
+set.seed(555)
+
+# Make an underlying grid of "geodiversity" decreasing as you go away from the origin (representing true elevation SD at that point, no scale dependence)
+# The elevation values have the same mean but SD is dependent on the distance from the origin
+
+sd_max <- 10
+
+# sd gets smaller as you go away from origin
+sd_distance <- function(d, sd0) sd0 - .01 * d
+
+# Create tiled surface of values with that sd
+geo_mat <- matrix(NA, nrow=1000, ncol=1000)
+sd_mat <- matrix(NA, nrow=1000, ncol=1000)
+for (i in 1:1000) {
+  for (j in 1:1000) {
+    sd_mat[i,j] <- sd_distance(sqrt((i-500)^2 + (j-500)^2), sd_max)
+    geo_mat[i,j] <- rnorm(1, mean = 0, sd = sd_mat[i,j])
+  }
+}
+
+```
+
+```{r, echo=FALSE}
+library(raster)
+plot(raster(geo_mat), main = 'Simulated elevations')
+plot(raster(sd_mat), main = 'Simulated underlying geodiversity')
+```
+
+
+Next I made biodiversity values as a linear function of the underlying standard deviation at 1000 randomly chosen points in the region, with noise added.
+
+```{r, warning=FALSE}
+set.seed(666)
+
+b0 <- 10
+b1 <- 5
+
+x <- runif(1000, 0, 1000)
+y <- runif(1000, 0, 1000)
+bio <- numeric(1000)
+for (i in 1:1000) {
+  bio[i] <- b0 + b1 * sd_mat[ceiling(x[i]), ceiling(y[i])] + rnorm(1000, 0, 10)
+}
+dat <- data.frame(x, y, bio)
+```
+
+
+Finally I calculated average biodiversity and realized standard deviation of geodiversity for the 1000 randomly chosen points at 5 different radii, in exactly the same way as I did for BBS and FIA.
+
+```{r, warning=FALSE}
+radii <- c(5, 10, 20, 50, 100)
+
+bio_avg <- matrix(NA, nrow = nrow(dat), ncol = length(radii))
+geo_avg <- matrix(NA, nrow = nrow(dat), ncol = length(radii))
+n_points <- matrix(NA, nrow = nrow(dat), ncol = length(radii))
+
+biggrid <- expand.grid(x=1:1000,y=1:1000)
+
+for (i in 1:nrow(dat)) {
+  dist_i <- sqrt((dat$x[i] - dat$x)^2 + (dat$y[i] - dat$y)^2)
+  grid_dist_i <- sqrt((dat$x[i] - biggrid$x)^2 + (dat$y[i] - biggrid$y)^2)
+  for (j in 1:length(radii)) {
+    idx_ij <- which(dist_i <= radii[j])
+    bio_avg[i, j] <- mean(dat$bio[idx_ij])
+    # Calculate geodiversity inside the radius. 
+    # (sd of all the geo pixel values within the radius)
+    grididx_ij <- which(grid_dist_i <= radii[j])
+    geo_pts <- numeric(0)
+    for (k in 1:length(grididx_ij)) {
+      geo_pts[k] <- geo_mat[biggrid$x[grididx_ij[k]], biggrid$y[grididx_ij[k]]]
+    }
+    geo_avg[i, j] <- sd(geo_pts)
+    n_points[i, j] <- length(idx_ij)
+  }
+}
+
+```
+
+\newpage
+# Results
+
+Here are the regression slopes and R-squared values for the simulated data.
+
+```{r}
+lms <- list()
+
+for (i in 1:length(radii)) {
+  lms[[i]] <- lm(bio_avg[,i] ~ geo_avg[,i])
+}
+
+lmsumm <- lapply(lms, summary)
+data.frame(radius = radii,
+           slope = sapply(lms, function(x) coef(x)[1]),
+           r.squared = sapply(lmsumm, function(x) x$r.squared))
+```
+
+As you can see in the figure, the goodness of fit goes up dramatically as the radius increases. So it seems like that is an artifact that we would expect from our method even if there were no scale dependence in the relationship between geodiversity and biodiversity. Given that I would recommend focusing on other parts of the question, like the dissimilarity modeling based questions, importance of different predictors between birds and trees, and the relative importance of different predictors in different regions (or interaction effects).
+
+```{r, echo = FALSE, fig.height = 3, fig.width = 7}
+par(mfrow = c(1,5))
+
+for (i in 1:length(radii)) {
+  plot(x = geo_avg[,i], y = bio_avg[,i], main = paste('radius', radii[i]), xlab = 'geo st dev', ylab = 'bio mean', ylim = c(0, 80), xlim = c(2, 10))
+  abline(a = coef(lms[[i]])[1], b = coef(lms[[i]])[2], lwd = 2, col = 'red')
+  mtext(paste('r2 = ', round(summary(lms[[i]])$r.sq, 2)), side = 1, line = 4.5)
+  
+}
+```
+
