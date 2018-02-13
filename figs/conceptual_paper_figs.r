@@ -22,6 +22,8 @@ library(cowplot)
 
 load(file.path(fp, 'fiafitplotdat.R'))
 
+radii <- c(5, 10, 20, 50, 100)
+
 # Combine into a single data frame.
 biogeo <- ed %>%
   dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, sd) %>%
@@ -89,7 +91,7 @@ fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/conceptual_paper'
 latbds = c(33,50)
 lonbds <- c(-125, -114)
 
-radii <- c(5, 10, 20, 50, 100)
+
 
 
 # Add "fuzzed" coordinates.
@@ -224,6 +226,7 @@ dev.off()
 
 # Save plots
 ggsave(file.path(fpfig, 'SuppFig_alphadiv_maps.png'), fiamap_ad_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'SuppFig_betadiv_maps.png'), fiamap_bd_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
 ggsave(file.path(fpfig, 'SuppFig_gammadiv_maps.png'), fiamap_gd_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
 
 ggsave(file.path(fpfig, 'fig2_toprow3_betamap.png'), fiamap_bd_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
