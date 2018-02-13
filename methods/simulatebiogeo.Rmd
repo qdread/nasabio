@@ -108,15 +108,15 @@ data.frame(radius = radii,
            r.squared = sapply(lmsumm, function(x) x$r.squared))
 ```
 
-As you can see in the figure, the goodness of fit goes up dramatically as the radius increases. So it seems like that is an artifact that we would expect from our method even if there were no scale dependence in the relationship between geodiversity and biodiversity. Given that I would recommend focusing on other parts of the question, like the dissimilarity modeling based questions, importance of different predictors between birds and trees, and the relative importance of different predictors in different regions (or interaction effects).
+As you can see in the figure, the goodness of fit goes up dramatically as the radius increases. So it seems like that is an artifact that we would expect from our method even if there were no scale dependence in the relationship between geodiversity and biodiversity. Given that, I would recommend focusing on other parts of the question, like the dissimilarity modeling based questions, importance of different predictors between birds and trees, and the relative importance of different predictors in different regions (or interaction effects).
 
-```{r, echo = FALSE, fig.height = 3, fig.width = 7}
-par(mfrow = c(1,5))
+```{r, echo = FALSE, fig.height = 4, fig.width = 7}
+par(mfrow = c(1,5), mar = c(5.3, 3.8, 4.1, 2.1))
 
 for (i in 1:length(radii)) {
   plot(x = geo_avg[,i], y = bio_avg[,i], main = paste('radius', radii[i]), xlab = 'geo st dev', ylab = 'bio mean', ylim = c(0, 80), xlim = c(2, 10))
   abline(a = coef(lms[[i]])[1], b = coef(lms[[i]])[2], lwd = 2, col = 'red')
-  mtext(paste('r2 = ', round(summary(lms[[i]])$r.sq, 2)), side = 1, line = 4.5)
+  mtext(paste('r2 = ', round(summary(lms[[i]])$r.sq, 2)), side = 1, line = 4.3, cex = 0.8)
   
 }
 ```
