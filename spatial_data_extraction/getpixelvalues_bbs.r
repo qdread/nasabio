@@ -4,10 +4,23 @@
 
 coords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors=FALSE)
 
+slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+n_slices <- 25
+
+# Get row indexes for the slice of coordinate matrix to be extracted.
+rowidx <- round(seq(0,nrow(coords),length.out=n_slices + 1))
+rowidxmin <- rowidx[slice]+1
+rowidxmax <- rowidx[slice+1]
+coords <- coords[rowidxmin:rowidxmax, ]
+
 # Get table of raster file locations
 vartable <- read.csv('/mnt/research/nasabio/data/geodiv_table_for_pixel.csv', stringsAsFactors = FALSE)
 
 scratch_path <- file.path(Sys.getenv('SCRATCH'), 'geo')
+
+
+######################################
+# Serial version
 
 values <- list()
 
@@ -22,6 +35,8 @@ for (i in 1:(nrow(vartable))) {
   }
   close(pb)
 }
+
+######################################
 
 # Assemble output.
 values <- do.call('cbind', values)
@@ -42,6 +57,6 @@ var_names <- c(paste0('bio', 1:19,'_1k'), paste0('biocloud', 1:8, '_1k'),
                'TRI_nightlight_500m')
 
 names(values) <- var_names
-values <- cbind(PLT_CN = coords$CN, values)
+values <- cbind(rteNo = coords$rteNo, values)
 
-write.csv(values, '/mnt/research/nasabio/data/bbs/bbs_geo_by_point.csv', row.names = FALSE)
+write.csv(values, paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_',slice,'.csv'), row.names = FALSE)

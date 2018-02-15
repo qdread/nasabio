@@ -17,7 +17,7 @@
 # }}}
 
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-fp <- '/mnt/research/nasabio/data/fia'
+fp <- '/mnt/research/nasabio/data/fia/pnw_files'
 
 # Load the elevational diversity and abg diversity data
 ed <- read.csv(file.path(fp, 'fia_elev_stats_unfuzzed.csv'))
