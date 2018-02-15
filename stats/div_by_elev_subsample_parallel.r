@@ -101,6 +101,8 @@ newx <- round(seq(xrange[1], xrange[2], length.out = n_predict))
 
 # R2 array with number of diversity types (a,b,g) by number of radii by number of iterations
 r2_lm_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
+# Added 15 Feb: Save slopes or coefficients of beta regression as well.
+coef_array <- array(NA, dim = c(length(div_names), length(radii), n_iter))
 # Predicted value array (n of diversity types by number of radii by number of iterations by number of predicted values)
 pred_val_lm_array <- array(NA, dim = c(length(div_names), length(radii), n_iter, n_predict))
 
@@ -134,10 +136,12 @@ for (k in 1:n_iter) {
         betareg_fit <- betareg(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat)
         pred_val_lm_array[i, j, k, ] <- predict(object = betareg_fit, newdata = data.frame(elevation_sd = newx))
         r2_lm_array[i, j, k] <- betareg_fit$pseudo.r.squared
+		coef_array[i, j, k] <- coef(betareg_fit)[2]
       } else { 
         lm_fit <- lm(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat)
         pred_val_lm_array[i, j, k, ] <- predict.lm(object = lm_fit, newdata = data.frame(elevation_sd = newx))
         r2_lm_array[i, j, k] <- summary(lm_fit)$r.sq
+		coef_array[i, j, k] <- coef(lm_fit)[2]
       }
 
     }
@@ -147,4 +151,4 @@ for (k in 1:n_iter) {
 close(pb)
 
 # Convert array to data frame
-save(r2_lm_array, pred_val_lm_array, file = paste0('/mnt/research/nasabio/data/fia/modelfits/fit_', task, '.r'))
+save(r2_lm_array, pred_val_lm_array, coef_array, file = paste0('/mnt/research/nasabio/data/fia/modelfits/fit_', task, '.r'))
