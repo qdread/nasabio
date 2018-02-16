@@ -77,7 +77,8 @@ for (i in rowidxmin:rowidxmax) {
 						  fp = tmp_path,
 						  filetag = paste(geovar, i, sep = '_'),
 						  nlayers = n_layers,
-						  is_categorical = categorical)
+						  is_categorical = categorical,
+						  delete_temp = TRUE)
 						  
 	if (file.exists(file_i)) {
 		deleteBox(file_i)

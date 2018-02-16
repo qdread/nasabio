@@ -63,15 +63,15 @@ x <- read.csv('spatial_data_extraction/geodiv_table_for_gdal.csv', stringsAsFact
 
 library(dplyr)
 
-qsub_string <- function(taxon, var, mem, start, end, walltime='4:00:00') paste0('qsub geoextract.sh -N ', var, '_', taxon, ' -v taxon=', taxon, ',geovar=', var, ' -l walltime=', walltime, ',mem=', mem, 'gb -t ', start, '-', end)
+qsub_string <- function(taxon, var, mem, start, end, walltime='4:00:00') paste0('qsub geoextract.sh -N ', var, '_', taxon, ' -v taxon=', taxon, ',geovar=', var, ' -l walltime=', walltime, ',mem=', mem, 'gb,file=', tmpmem, 'gb -t ', start, '-', end)
 
 qsub_calls_fia <- x %>%
   rowwise %>%
-  do(qsubs = sapply(seq(1, .$N.slices.fiaall, by = 250), function(x) qsub_string(taxon = 'fia', var = .$variable.id, mem = 1, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.fiaall))))))
+  do(qsubs = sapply(seq(1, .$N.slices.fiaall, by = 250), function(x) qsub_string(taxon = 'fia', var = .$variable.id, mem = 2, tmpmem = 4, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.fiaall))))))
 
 qsub_calls_bbs <- x %>%
   rowwise %>%
-  do(qsubs = sapply(seq(1, .$N.slices.bbs, by = 250), function(x) qsub_string(taxon = 'bbs', var = .$variable.id, mem = 1, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.bbs))))))
+  do(qsubs = sapply(seq(1, .$N.slices.bbs, by = 250), function(x) qsub_string(taxon = 'bbs', var = .$variable.id, mem = 2, tmpmem = 4, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.bbs))))))
 
 # Remove whatever has already been completed.
 qsub_calls_fia <- qsub_calls_fia[!x$variable.id %in% c('elevation','slope','roughness','tri'), ]

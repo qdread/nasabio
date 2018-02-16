@@ -35,9 +35,9 @@ for j in $(seq 2 $nvars); do
 		# create a qsub string and paste it at the bottom of the qsub file.
 		if [ "$jobsleft" -eq "250" ] || ([ "$i" -eq "${njob}" ] && [ "$jobsleft" -gt "0" ]); then
 			# Create qsub string
-			qsub_string="qsub geoextract.sh -N ${taxon}_${var} -v taxon=${taxon},geovar=${var} -l walltime=${walltime},mem=1gb -t ${needtorun%?}"
+			qsub_string="qsub geoextract.sh -N ${taxon}_${var} -v taxon=${taxon},geovar=${var} -l walltime=${walltime},mem=2gb,file=4gb -t ${needtorun%?}"
 			# Paste qsub string at the bottom of qsub file
-			echo $qsub_string >> /mnt/research/nasabio/code/geo_qsub_all.txt
+			echo $qsub_string >> /mnt/research/nasabio/code/geo_qsub_all_fia.txt
 			# Reset jobs left and needtorun
 			jobsleft=0
 			needtorun=""

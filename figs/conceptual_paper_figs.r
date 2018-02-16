@@ -20,7 +20,7 @@ gd <- read.csv(file.path(fp, 'fia_gammadiv.csv'))
 library(dplyr)
 library(cowplot)
 
-load(file.path(fp, 'fiafitplotdat.R'))
+load(file.path(fp, 'fiafitplotdat_pnw.R'))
 
 radii <- c(5, 10, 20, 50, 100)
 
@@ -246,6 +246,31 @@ r2_plot <- ggplot(r2_lm_quant, aes(x = radius_plot, group = interaction(radius, 
   theme(axis.text = element_text(size=7.5), axis.title = element_text(size=9))
 
 ggsave(file.path(fpfig, 'fig2_verybottomrow_r2s.png'), r2_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
+
+# Plot the slopes too.
+coef_quant$radius_plot <- coef_quant$radius + rep(c(-1,0,1), each = 5)
+
+coef_plot <- ggplot(coef_quant, aes(x = radius_plot, group = interaction(radius, diversity_type), color = diversity_type)) +
+  geom_line(aes(y = coef, group = diversity_type), size = 0.25) +
+  geom_segment(aes(xend = radius_plot, y = coef_q25, yend = coef_q75), size = 0.5) +
+  geom_point(aes(y = coef), size = 1) +
+  scale_color_discrete(name = 'Diversity', labels = c('alpha','beta','gamma')) +
+  labs(x = 'Radius (km)', y = 'Slope coefficient') +
+  theme(axis.text = element_text(size=7.5), axis.title = element_text(size=9))
+
+ggsave(file.path(fpfig, 'fig2_verybottomrow_coefs.png'), coef_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
+
+# Separate coefficient plots for each variable
+coef_plot_1x3 <- ggplot(coef_quant, aes(x = radius)) +
+  facet_wrap( ~ diversity_type, scales = 'free', labeller = labeller(diversity_type = c(alpha_diversity = 'alpha', beta_diversity = 'beta', gamma_diversity = 'gamma'))) +
+  geom_line(aes(y = coef, group = diversity_type), size = 0.25) +
+  geom_segment(aes(xend = radius, y = coef_q25, yend = coef_q75), size = 0.5) +
+  geom_point(aes(y = coef), size = 1) +
+  scale_x_continuous(breaks=radii, labels=radii) +
+  labs(x = 'Radius (km)', y = 'Slope coefficient') +
+  theme(axis.text = element_text(size=6), axis.title = element_text(size=9), strip.background = element_blank())
+
+ggsave(file.path(fpfig, 'coefs_separate.png'), coef_plot_1x3, width = fwidth * 0.8, height = fwidth * 0.25, units = 'mm', dpi = 600)
 
 # Get rid of values out of range.
 xranges <- biogeo %>% group_by(radius) %>% summarize_at(vars(elevation_sd), funs(sdmin = min, sdmax = max), na.rm = TRUE)

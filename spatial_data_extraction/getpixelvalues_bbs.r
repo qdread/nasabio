@@ -60,3 +60,11 @@ names(values) <- var_names
 values <- cbind(rteNo = coords$rteNo, values)
 
 write.csv(values, paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_',slice,'.csv'), row.names = FALSE)
+
+
+####################################
+
+# Combine output.
+bbs_geo <- lapply(1:25, function(slice) read.csv(paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_', slice, '.csv'), stringsAsFactors = FALSE))
+bbs_geo <- do.call(rbind, bbs_geo)
+write.csv(bbs_geo, '/mnt/research/nasabio/data/bbs/bbs_geo_by_point.csv', row.names = FALSE)
