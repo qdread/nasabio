@@ -63,7 +63,7 @@ x <- read.csv('spatial_data_extraction/geodiv_table_for_gdal.csv', stringsAsFact
 
 library(dplyr)
 
-qsub_string <- function(taxon, var, mem, start, end, walltime='4:00:00') paste0('qsub geoextract.sh -N ', var, '_', taxon, ' -v taxon=', taxon, ',geovar=', var, ' -l walltime=', walltime, ',mem=', mem, 'gb,file=', tmpmem, 'gb -t ', start, '-', end)
+qsub_string <- function(taxon, var, mem, tmpmem, start, end, walltime='4:00:00') paste0('qsub geoextract.sh -N ', var, '_', taxon, ' -v taxon=', taxon, ',geovar=', var, ' -l walltime=', walltime, ',mem=', mem, 'gb,file=', tmpmem, 'gb -t ', start, '-', end)
 
 qsub_calls_fia <- x %>%
   rowwise %>%
@@ -76,5 +76,8 @@ qsub_calls_bbs <- x %>%
 # Remove whatever has already been completed.
 qsub_calls_fia <- qsub_calls_fia[!x$variable.id %in% c('elevation','slope','roughness','tri'), ]
 #qsub_calls_bbs <- qsub_calls_bbs[!x$variable.id %in% c('aspect_sin', 'aspect_cos'), ]
+
+write.table(unlist(qsub_calls_bbs$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all_bbs.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
+
 
 write.table(c(unlist(qsub_calls_fia$qsubs), unlist(qsub_calls_bbs$qsubs)), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)

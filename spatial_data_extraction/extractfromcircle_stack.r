@@ -3,6 +3,7 @@
 # Project: NASABIOXGEO
 # Date: 17 May 2017
 
+# Modified 16 Feb 2018: try to debug the delete_temp statement
 # Modified 06 Feb 2018: debug rowids conditional statement
 # Modified 11 Jan 2018: include categorical variable option. This will require using R.
 # Modified 05 Jan 2018: change file names and don't remove the temp files.
@@ -111,7 +112,7 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 					
 					# Delete the temporarily created files between each iteration because GDAL gets mad if you overwrite an existing file.
 					if (delete_temp) {
-						system2(command="rm", args=file.path(fp, paste0("temp_circle*", filetag, "*")))
+						system2(command="rm", args=file.path(fp, 'temp_circle*'))
 					}
 				}
 		
