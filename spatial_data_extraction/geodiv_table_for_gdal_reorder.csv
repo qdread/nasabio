@@ -1,0 +1,46 @@
+Dataset.name,File.name,variable.id,N.layers,Resolution.m,Max.radius.km,N.slices.bbs,N.slices.fiaall
+Elevation,conus_30m_dem_big_singlefile.vrt,elevation,1,30,300,500,10000
+Elevation 30m TRI,conus_30m_dem_TRI.vrt,tri,1,30,300,500,10000
+Elevation 30m roughness,conus_30m_dem_roughness.vrt,roughness,1,30,300,500,10000
+Elevation 5k,conus_5k_dem.vrt,elevation_5k,1,5000,500,100,500
+Elevation 5k TRI,conus_5k_dem_TRI.vrt,tri_5k,1,5000,500,100,500
+Elevation 5k roughness,conus_5k_dem_roughness.vrt,roughness_5k,1,5000,500,100,500
+Slope,conus_30m_slope_big.vrt,slope,1,30,300,500,10000
+Slope 5k,conus_5k_slope.vrt,slope_5k,1,5000,500,100,500
+Aspect sin,conus_30m_aspect_sin.vrt,aspect_sin,1,30,300,500,10000
+Aspect cos,conus_30m_aspect_cos.vrt,aspect_cos,1,30,300,500,10000
+Aspect 5k sin,conus_5k_aspect_sin.vrt,aspect_sin_5k,1,5000,500,100,500
+Aspect 5k cos,conus_5k_aspect_cos.vrt,aspect_cos_5k,1,5000,500,100,500
+Bioclim 1k resolution,bioclim1k_20170613.vrt,bioclim1k,19,1000,500,1000,40000
+Bioclim 1k TRI,bioclim1k_TRI.vrt,bioclim1k_tri,19,1000,500,1000,40000
+Bioclim 1k roughness,bioclim1k_roughness.vrt,bioclim1k_roughness,19,1000,500,1000,40000
+Bioclim 5k resolution,bioclim5k_20170613.vrt,bioclim5k,19,5000,500,250,1000
+Bioclim 5k TRI,bioclim5k_TRI.vrt,bioclim5k_tri,19,5000,500,250,1000
+Bioclim 5k roughness,bioclim5k_roughness.vrt,bioclim5k_roughness,19,5000,500,250,1000
+Biocloud 1k resolution,biocloud1k.vrt,biocloud1k,8,1000,500,1000,20000
+Biocloud 1k TRI,biocloud1k_TRI.vrt,biocloud1k_tri,8,1000,500,1000,20000
+Biocloud 1k roughness,biocloud1k_roughness.vrt,biocloud1k_roughness,8,1000,500,1000,20000
+Biocloud 5k resolution,biocloud5k.vrt,biocloud5k,8,5000,500,250,1000
+Biocloud 5k TRI,biocloud5k_TRI.vrt,biocloud5k_tri,8,5000,500,250,1000
+Biocloud 5k roughness,biocloud5k_roughness.vrt,biocloud5k_roughness,8,5000,500,250,1000
+Dynamic habitat index,dhi.vrt,dhi,4,1000,500,100,500
+DHI 1k TRI,dhi_TRI.vrt,dhi_tri,4,1000,500,100,500
+DHI 1k roughness,dhi_roughness.vrt,dhi_roughness,4,1000,500,100,500
+DHI 5k,dhi_5k.vrt,dhi_5k,4,5000,500,100,500
+DHI 5k TRI,dhi_5k_TRI.vrt,dhi_5k_tri,4,5000,500,100,500
+DHI 5k roughness,dhi_5k_roughness.vrt,dhi_5k_roughness,4,5000,500,100,500
+Human footprint,hf.vrt,hf,1,1000,500,100,500
+Human footprint 1k TRI,hf_TRI.vrt,hf_tri,1,1000,500,100,500
+Human footprint 1k roughness,hf_roughness.vrt,hf_roughness,1,1000,500,100,500
+Human footprint 5k,hf_5k.vrt,hf_5k,1,5000,500,100,500
+Human footprint 5k TRI,hf_5k_TRI.vrt,hf_5k_tri,1,5000,500,100,500
+Human footprint 5k roughness,hf_5k_roughness.vrt,hf_5k_roughness,1,5000,500,100,500
+Night light,vcm_orm_ntl.vrt,night,1,500,500,100,500
+Night light 500m TRI,night_TRI.vrt,night_tri,1,500,500,100,500
+Night light 500m roughness,night_roughness.vrt,night_roughness,1,500,500,100,500
+Night light 5k,vcm_orm_ntl_5k.vrt,night_5k,1,5000,500,100,500
+Night light 5k TRI,night_5k_TRI.vrt,night_5k_tri,1,5000,500,100,500
+Night light 5k roughness,night_5k_roughness.vrt,night_5k_roughness,1,5000,500,100,500
+Geological age,GEA.vrt,gea,1,1000,500,100,500
+Geological age 5k,GEA_5k.vrt,gea_5k,1,5000,500,100,500
+Soil type,stg.vrt,soil,1,5000,500,100,500

@@ -3,6 +3,7 @@
 # Project: NASABIOXGEO
 # Date: 17 May 2017
 
+# Modified 18 Feb 2018: debug the categorical section to not throw error if there are no valid points
 # Modified 16 Feb 2018: try to debug the delete_temp statement
 # Modified 06 Feb 2018: debug rowids conditional statement
 # Modified 11 Jan 2018: include categorical variable option. This will require using R.
@@ -105,14 +106,19 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 						ztable <- table(zpts) # Third column is always value.
 						zprop <- ztable/sum(ztable)
 						zmode <- names(ztable)[which.max(ztable)[1]]
-						stats_by_point[[i]][r, 3:5] <- c(richness = length(unique(zpts)),
-																			 diversity = -sum(zprop * log(zprop)),
-																			 mode = zmode)
+						if (length(zpts) > 0) {
+							res <- c(richness = length(unique(zpts)),
+									 diversity = -sum(zprop * log(zprop)),
+									 mode = zmode)
+						} else {
+							res <- c(richness = NA, diversity = NA, mode = NA)
+						}
+						stats_by_point[[i]][r, 3:5] <- res
 					}
 					
 					# Delete the temporarily created files between each iteration because GDAL gets mad if you overwrite an existing file.
 					if (delete_temp) {
-						system2(command="rm", args=file.path(fp, 'temp_circle*'))
+						system2(command = "rm", args = paste("\'", fp, "\'", "/temp_circle_*", sep=""))
 					}
 				}
 		

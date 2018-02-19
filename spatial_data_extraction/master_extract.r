@@ -5,6 +5,7 @@
 # Edited 09 Jan 2018: Read directly from $SCRATCH, write to $TMPDIR
 # Edited 11 Jan 2018: Get all variables from table. (rename to master_extract.r)
 # Edited 09 Feb 2018: Update scratch path.
+# Edited 19 Feb 2018: Add escape characters to file path.
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
@@ -68,8 +69,8 @@ for (i in rowidxmin:rowidxmax) {
 			   fp = tmp_path,
 			   filetags = paste(geovar, i, sep = '_'))
 
-	file_i <- file.path(tmp_path, paste0('bbox_', geovar, '_', i, '.tif'))		   
-			   
+	file_i <- paste("\'", tmp_path, "\'", "/bbox_", geovar, "_", i, ".tif", sep="")
+	
 	stats_by_point[[length(stats_by_point) + 1]] <- 
 		extractFromCircle(coords = focalpoint,
 						  raster_file = file_i,
@@ -80,7 +81,7 @@ for (i in rowidxmin:rowidxmax) {
 						  is_categorical = categorical,
 						  delete_temp = TRUE)
 						  
-	if (file.exists(file_i)) {
+	if (file.exists(paste(tmp_path, "/bbox_", geovar, "_", i, ".tif", sep=""))) {
 		deleteBox(file_i)
 	}
 }

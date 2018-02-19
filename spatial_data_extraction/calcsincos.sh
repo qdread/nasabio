@@ -38,3 +38,6 @@ gdalbuildvrt conus_30m_aspect_sin.vrt conus_30m_aspect_sin.tif
 gdalbuildvrt conus_30m_aspect_cos_manytiles.vrt cos_aspect_*.tif 
 gdal_translate conus_30m_aspect_cos_manytiles.vrt conus_30m_aspect_cos.tif
 gdalbuildvrt conus_30m_aspect_cos.vrt conus_30m_aspect_cos.tif
+
+gdalbuildvrt conus_5k_aspect_cos.vrt conus_5k_aspect_cos.tif
+gdalbuildvrt conus_5k_aspect_sin.vrt conus_5k_aspect_sin.tif
