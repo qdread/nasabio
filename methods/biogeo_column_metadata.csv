@@ -1,0 +1,141 @@
+Column name,Category,Description,Units
+PLT_CN (FIA); rteNo (BBS),ID,unique number identifying route or plot,categorical
+lat (bbs only),ID,latitude,decimal degrees
+lon (bbs only),ID,longitude,decimal degrees
+elevation_point,geo,elevation at the point,m
+MAT_point,geo,mean annual temperature at the point,C
+MAP_point,geo,mean annual precipitation at the point,mm y-1
+geoage_point,geo,geological age category at the point,categorical
+HUC4,ID,unique number identifying HUC4 of the point,categorical
+MAT_5_sd,geo,"standard deviation of MAT within 5 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_10_sd,geo,"standard deviation of MAT within 10 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_20_sd,geo,"standard deviation of MAT within 20 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_30_sd,geo,"standard deviation of MAT within 30 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_40_sd,geo,"standard deviation of MAT within 40 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_50_sd,geo,"standard deviation of MAT within 50 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_75_sd,geo,"standard deviation of MAT within 75 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_100_sd,geo,"standard deviation of MAT within 100 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_150_sd,geo,"standard deviation of MAT within 150 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_200_sd,geo,"standard deviation of MAT within 200 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_300_sd,geo,"standard deviation of MAT within 300 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_400_sd,geo,"standard deviation of MAT within 400 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_500_sd,geo,"standard deviation of MAT within 500 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAP_5_sd,geo,"standard deviation of MAP within 5 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_10_sd,geo,"standard deviation of MAP within 10 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_20_sd,geo,"standard deviation of MAP within 20 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_30_sd,geo,"standard deviation of MAP within 30 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_40_sd,geo,"standard deviation of MAP within 40 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_50_sd,geo,"standard deviation of MAP within 50 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_75_sd,geo,"standard deviation of MAP within 75 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_100_sd,geo,"standard deviation of MAP within 100 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_150_sd,geo,"standard deviation of MAP within 150 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_200_sd,geo,"standard deviation of MAP within 200 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_300_sd,geo,"standard deviation of MAP within 300 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_400_sd,geo,"standard deviation of MAP within 400 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_500_sd,geo,"standard deviation of MAP within 500 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+elevation_5_sd,geo,"standard deviation of elevation within 5 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_10_sd,geo,"standard deviation of elevation within 10 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_20_sd,geo,"standard deviation of elevation within 20 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_30_sd,geo,"standard deviation of elevation within 30 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_40_sd,geo,"standard deviation of elevation within 40 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_50_sd,geo,"standard deviation of elevation within 50 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_75_sd,geo,"standard deviation of elevation within 75 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_100_sd,geo,"standard deviation of elevation within 100 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_150_sd,geo,"standard deviation of elevation within 150 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_200_sd,geo,"standard deviation of elevation within 200 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_300_sd,geo,"standard deviation of elevation within 300 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_400_sd,geo,"standard deviation of elevation within 400 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_500_sd,geo,"standard deviation of elevation within 500 km radius, derived from 5 km aggregated SRTM pixels",m
+MAT_5_mean,geo,"mean of MAT within 5 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_10_mean,geo,"mean of MAT within 10 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_20_mean,geo,"mean of MAT within 20 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_30_mean,geo,"mean of MAT within 30 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_40_mean,geo,"mean of MAT within 40 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_50_mean,geo,"mean of MAT within 50 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_75_mean,geo,"mean of MAT within 75 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_100_mean,geo,"mean of MAT within 100 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_150_mean,geo,"mean of MAT within 150 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_200_mean,geo,"mean of MAT within 200 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_300_mean,geo,"mean of MAT within 300 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_400_mean,geo,"mean of MAT within 400 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAT_500_mean,geo,"mean of MAT within 500 km radius, derived from 5 km aggregated Bioclim pixels",C
+MAP_5_mean,geo,"mean of MAP within 5 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_10_mean,geo,"mean of MAP within 10 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_20_mean,geo,"mean of MAP within 20 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_30_mean,geo,"mean of MAP within 30 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_40_mean,geo,"mean of MAP within 40 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_50_mean,geo,"mean of MAP within 50 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_75_mean,geo,"mean of MAP within 75 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_100_mean,geo,"mean of MAP within 100 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_150_mean,geo,"mean of MAP within 150 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_200_mean,geo,"mean of MAP within 200 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_300_mean,geo,"mean of MAP within 300 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_400_mean,geo,"mean of MAP within 400 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+MAP_500_mean,geo,"mean of MAP within 500 km radius, derived from 5 km aggregated Bioclim pixels",mm y-1
+elevation_5_mean,geo,"mean of elevation within 5 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_10_mean,geo,"mean of elevation within 10 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_20_mean,geo,"mean of elevation within 20 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_30_mean,geo,"mean of elevation within 30 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_40_mean,geo,"mean of elevation within 40 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_50_mean,geo,"mean of elevation within 50 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_75_mean,geo,"mean of elevation within 75 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_100_mean,geo,"mean of elevation within 100 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_150_mean,geo,"mean of elevation within 150 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_200_mean,geo,"mean of elevation within 200 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_300_mean,geo,"mean of elevation within 300 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_400_mean,geo,"mean of elevation within 400 km radius, derived from 5 km aggregated SRTM pixels",m
+elevation_500_mean,geo,"mean of elevation within 500 km radius, derived from 5 km aggregated SRTM pixels",m
+geoage_5_diversity,geo,"diversity of geological age within 5 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_10_diversity,geo,"diversity of geological age within 10 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_20_diversity,geo,"diversity of geological age within 20 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_30_diversity,geo,"diversity of geological age within 30 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_40_diversity,geo,"diversity of geological age within 40 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_50_diversity,geo,"diversity of geological age within 50 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_75_diversity,geo,"diversity of geological age within 75 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_100_diversity,geo,"diversity of geological age within 100 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_150_diversity,geo,"diversity of geological age within 150 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_200_diversity,geo,"diversity of geological age within 200 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_300_diversity,geo,"diversity of geological age within 300 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_400_diversity,geo,"diversity of geological age within 400 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_500_diversity,geo,"diversity of geological age within 500 km radius, derived from 5 km aggregated geo age pixels",unitless
+geoage_5_mode,geo,"mode of geological age within 5 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_10_mode,geo,"mode of geological age within 10 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_20_mode,geo,"mode of geological age within 20 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_30_mode,geo,"mode of geological age within 30 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_40_mode,geo,"mode of geological age within 40 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_50_mode,geo,"mode of geological age within 50 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_75_mode,geo,"mode of geological age within 75 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_100_mode,geo,"mode of geological age within 100 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_150_mode,geo,"mode of geological age within 150 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_200_mode,geo,"mode of geological age within 200 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_300_mode,geo,"mode of geological age within 300 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_400_mode,geo,"mode of geological age within 400 km radius, derived from 5 km aggregated geo age pixels",categorical
+geoage_500_mode,geo,"mode of geological age within 500 km radius, derived from 5 km aggregated geo age pixels",categorical
+alpha_point,bio,"alpha diversity at point (BBS: richness, FIA: effective species number)",number of species
+alpha_5,bio,"average alpha diversity in 5 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_10,bio,"average alpha diversity in 10 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_20,bio,"average alpha diversity in 20 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_50,bio,"average alpha diversity in 50 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_75,bio,"average alpha diversity in 75 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_100,bio,"average alpha diversity in 100 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_150,bio,"average alpha diversity in 150 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_200,bio,"average alpha diversity in 200 km radius (BBS: richness, FIA: effective species number)",number of species
+alpha_300,bio,"average alpha diversity in 300 km radius (BBS: richness, FIA: effective species number)",number of species
+beta_5,bio,"average beta diversity in 5 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_10,bio,"average beta diversity in 10 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_20,bio,"average beta diversity in 20 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_50,bio,"average beta diversity in 50 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_75,bio,"average beta diversity in 75 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_100,bio,"average beta diversity in 100 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_150,bio,"average beta diversity in 150 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_200,bio,"average beta diversity in 200 km radius (BBS: incidence based, FIA: abundance based)",proportion
+beta_300,bio,"average beta diversity in 300 km radius (BBS: incidence based, FIA: abundance based)",proportion
+gamma_5,bio,"average gamma diversity in 5 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_10,bio,"average gamma diversity in 10 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_20,bio,"average gamma diversity in 20 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_50,bio,"average gamma diversity in 50 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_75,bio,"average gamma diversity in 75 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_100,bio,"average gamma diversity in 100 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_150,bio,"average gamma diversity in 150 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_200,bio,"average gamma diversity in 200 km radius (BBS: richness, FIA: effective species number)",number of species
+gamma_300,bio,"average gamma diversity in 300 km radius (BBS: richness, FIA: effective species number)",number of species

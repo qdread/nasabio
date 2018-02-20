@@ -71,17 +71,19 @@ bbs_path <- '/mnt/research/nasabio/data/bbs/allgeodiv_v2'
 bbs_stats <- list()
 
 for (i in 1:nrow(vartable)) {
-	bbs_stats[[i]] <- get_stats(bbs_path, paste0(vartable$variable.id[i], '_'), 1:vartable$N.slices.bbs, '.r', stacked = TRUE)
+	bbs_stats[[i]] <- get_stats(bbs_path, paste0(vartable$variable.id[i], '_'), 1:vartable$N.slices.bbs[i], '.r', stacked = TRUE)
 	bbs_stats[[i]] <- replace_na_df(bbs_stats[[i]])
 	bbs_stats[[i]] <- replace_varname(bbs_stats[[i]], correct_var_names[[i]])
 }
 
 bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors = FALSE)
 
+bbs_all_stats <- list()
+
 for (i in 1:length(bbs_stats[[1]])) {
 	stats_i <- lapply(bbs_stats, '[[', i)
-	bbs_all_stats[[i]] <- full_join(cbind(plotmetadata[i,], bind_rows(stats_i[1:42])),
-									cbind(plotmetadata[i,], bind_rows(stats_i[43:45])))
+	bbs_all_stats[[i]] <- full_join(cbind(bbsll[i,], bind_rows(stats_i[1:42])),
+									cbind(bbsll[i,], bind_rows(stats_i[43:45])))
 }
 
 bbs_all_stats <- bind_rows(bbs_all_stats)
@@ -107,8 +109,8 @@ fia_all_stats <- list()
 
 for (i in 1:length(fia_stats[[1]])) {
 	stats_i <- lapply(fia_stats, '[[', i)
-	fia_all_stats[[i]] <- full_join(cbind(plotmetadata[i,], bind_rows(stats_i[1:42])),
-									cbind(plotmetadata[i,], bind_rows(stats_i[43:45])))
+	fia_all_stats[[i]] <- full_join(cbind(PLT_CN = plotmetadata[i,], bind_rows(stats_i[1:42])),
+									cbind(PLT_CN = plotmetadata[i,], bind_rows(stats_i[43:45])))
 }
 
 fia_all_stats <- bind_rows(fia_all_stats)
@@ -129,3 +131,59 @@ write.csv(filter(fia_all_stats, variable %in% bio1k_vars), file = '/mnt/research
 write.csv(filter(fia_all_stats, variable %in% biocloud_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_usa_biocloud.csv', row.names = FALSE)
 write.csv(filter(fia_all_stats, variable %in% other_vars), file = '/mnt/research/nasabio/data/fia/geodiv/fia_usa_other.csv', row.names = FALSE)
 
+################################################
+# 19 Feb: Read BBS and FIA data only for the few variables we decided to use first.
+use_rows <- c(4, 16, 44) # Only 5K resolution.
+vartable <- vartable[use_rows,]
+correct_var_names <- correct_var_names[use_rows]
+
+bbs_path <- '/mnt/research/nasabio/data/bbs/allgeodiv_v2'
+bbs_stats <- list()
+
+for (i in 1:nrow(vartable)) {
+	bbs_stats[[i]] <- get_stats(bbs_path, paste0(vartable$variable.id[i], '_'), 1:vartable$N.slices.bbs[i], '.r', stacked = TRUE)
+	bbs_stats[[i]] <- replace_na_df(bbs_stats[[i]])
+	bbs_stats[[i]] <- replace_varname(bbs_stats[[i]], correct_var_names[[i]])
+}
+
+bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors = FALSE)
+
+bbs_all_stats <- list()
+
+for (i in 1:length(bbs_stats[[1]])) {
+	stats_i <- lapply(bbs_stats, '[[', i)
+	bbs_all_stats[[i]] <- full_join(cbind(bbsll[i,], bind_rows(stats_i[1:2])),
+									cbind(bbsll[i,], bind_rows(stats_i[3])))
+}
+
+bbs_all_stats <- bind_rows(bbs_all_stats)
+bbs_all_stats <- rename(bbs_all_stats, richness_geodiv = richness, diversity_geodiv = diversity)
+
+write.csv(bbs_all_stats, file = '/mnt/research/nasabio/data/bbs/bbs_geodiversity_reduced.csv', row.names = FALSE)
+
+###
+
+fia_path <- '/mnt/research/nasabio/data/fia/allgeodiv_v2'
+fia_stats <- list()
+
+
+for (i in 1:nrow(vartable)) {
+	fia_stats[[i]] <- get_stats(fia_path, paste0(vartable$variable.id[i], '_'), 1:vartable$N.slices.fiaall[i], '.r', stacked = TRUE)
+	fia_stats[[i]] <- replace_na_df(fia_stats[[i]])
+	fia_stats[[i]] <- replace_varname(fia_stats[[i]], correct_var_names[[i]])
+}
+
+plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords_wholeusa.csv', stringsAsFactors = FALSE)
+
+fia_all_stats <- list()
+
+for (i in 1:length(fia_stats[[1]])) {
+	stats_i <- lapply(fia_stats, '[[', i)
+	fia_all_stats[[i]] <- full_join(cbind(PLT_CN = plotmetadata[i,], bind_rows(stats_i[1:2])),
+									cbind(PLT_CN = plotmetadata[i,], bind_rows(stats_i[3])))
+}
+
+fia_all_stats <- bind_rows(fia_all_stats)
+fia_all_stats <- rename(fia_all_stats, richness_geodiv = richness, diversity_geodiv = diversity)
+
+write.csv(fia_all_stats, file = '/mnt/research/nasabio/data/fia/fia_geodiversity_reduced.csv', row.names = FALSE)
