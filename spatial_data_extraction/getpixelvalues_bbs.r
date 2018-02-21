@@ -16,7 +16,7 @@ coords <- coords[rowidxmin:rowidxmax, ]
 # Get table of raster file locations
 vartable <- read.csv('/mnt/research/nasabio/data/geodiv_table_for_pixel.csv', stringsAsFactors = FALSE)
 
-scratch_path <- file.path(Sys.getenv('SCRATCH'), 'geo')
+scratch_path <- '/mnt/ls15/scratch/groups/nasabio/VRTs'
 
 
 ######################################
@@ -46,17 +46,23 @@ values[abs(values) > 1e100] <- NA
 values <- as.data.frame(values)
 
 # Give meaningful column names to values.
-var_names <- c(paste0('bio', 1:19,'_1k'), paste0('biocloud', 1:8, '_1k'), 
-               'dhi_fpar_1k', 'dhi_gpp_1k', 'dhi_lai8_1k', 'dhi_ndvi_1k',
-               'elevation_30m', 'slope_30m', 'human_footprint_1k', 'nightlight_500m',
-               'geological_age_1k', 'soil_type_5k',
-               paste0('TRI_bio', 1:19,'_1k'), paste0('TRI_biocloud', 1:8,'_1k'), 
-               'TRI_elevation_30m', 
-               'TRI_dhi_fpar_1k', 'TRI_dhi_gpp_1k', 'TRI_dhi_lai8_1k', 'TRI_dhi_ndvi_1k',
-               'TRI_human_footprint_1k',
-               'TRI_nightlight_500m')
+correct_var_names <- list('elevation_30m', 'elevation_30m_tri', 'elevation_30m_roughness',
+						  'slope_30m', 
+						  'aspect_sin_30m', 'aspect_cos_30m', 
+						  paste0('bio', 1:19,'_1k'),
+						  paste0('bio', 1:19,'_1k_tri'),
+						  paste0('bio', 1:19,'_1k_roughness'),
+						  paste0('biocloud', 1:8,'_1k'),
+						  paste0('biocloud', 1:8,'_1k_tri'),
+						  paste0('biocloud', 1:8,'_1k_roughness'),
+						  c('dhi_fpar_1k', 'dhi_gpp_1k', 'dhi_lai8_1k', 'dhi_ndvi_1k'),
+						  c('dhi_fpar_1k_tri', 'dhi_gpp_1k_tri', 'dhi_lai8_1k_tri', 'dhi_ndvi_1k_tri'),
+						  c('dhi_fpar_1k_roughness', 'dhi_gpp_1k_roughness', 'dhi_lai8_1k_roughness', 'dhi_ndvi_1k_roughness'),
+						  'human_footprint_1k', 'human_footprint_1k_tri', 'human_footprint_1k_roughness',
+						  'nightlight_500m', 'nighlight_500m_tri', 'nightlight_500m_roughness',
+						  'geological_age_1k', 'soil_type_5k')
 
-names(values) <- var_names
+names(values) <- correct_var_names
 values <- cbind(rteNo = coords$rteNo, values)
 
 write.csv(values, paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_',slice,'.csv'), row.names = FALSE)
@@ -65,6 +71,6 @@ write.csv(values, paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by
 ####################################
 
 # Combine output.
-bbs_geo <- lapply(1:25, function(slice) read.csv(paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_', slice, '.csv'), stringsAsFactors = FALSE))
-bbs_geo <- do.call(rbind, bbs_geo)
-write.csv(bbs_geo, '/mnt/research/nasabio/data/bbs/bbs_geo_by_point.csv', row.names = FALSE)
+#bbs_geo <- lapply(1:25, function(slice) read.csv(paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_', slice, '.csv'), stringsAsFactors = FALSE))
+#bbs_geo <- do.call(rbind, bbs_geo)
+#write.csv(bbs_geo, '/mnt/research/nasabio/data/bbs/bbs_geo_by_point.csv', row.names = FALSE)

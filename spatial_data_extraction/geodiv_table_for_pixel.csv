@@ -1,16 +1,24 @@
 Dataset.name,File.name,variable.id,N.layers,Resolution.m
-Bioclim 1k resolution,bioclim1k_20170613.vrt,bioclim1k,19,1000
-Biocloud 1k resolution,biocloud1k.vrt,biocloud1k,8,1000
-Dynamic habitat index,dhi.vrt,dhi,4,1000
 Elevation,conus_30m_dem_big_singlefile.vrt,elevation,1,30
+Elevation 30m TRI,conus_30m_dem_TRI.vrt,tri,1,30
+Elevation 30m roughness,conus_30m_dem_roughness.vrt,roughness,1,30
 Slope,conus_30m_slope_big.vrt,slope,1,30
+Aspect sin,conus_30m_aspect_sin.vrt,aspect_sin,1,30
+Aspect cos,conus_30m_aspect_cos.vrt,aspect_cos,1,30
+Bioclim 1k resolution,bioclim1k_20170613.vrt,bioclim1k,19,1000
+Bioclim 1k TRI,bioclim1k_TRI.vrt,bioclim1k_tri,19,1000
+Bioclim 1k roughness,bioclim1k_roughness.vrt,bioclim1k_roughness,19,1000
+Biocloud 1k resolution,biocloud1k.vrt,biocloud1k,8,1000
+Biocloud 1k TRI,biocloud1k_TRI.vrt,biocloud1k_tri,8,1000
+Biocloud 1k roughness,biocloud1k_roughness.vrt,biocloud1k_roughness,8,1000
+Dynamic habitat index,dhi.vrt,dhi,4,1000
+DHI 1k TRI,dhi_TRI.vrt,dhi_tri,4,1000
+DHI 1k roughness,dhi_roughness.vrt,dhi_roughness,4,1000
 Human footprint,hf.vrt,hf,1,1000
+Human footprint 1k TRI,hf_TRI.vrt,hf_tri,1,1000
+Human footprint 1k roughness,hf_roughness.vrt,hf_roughness,1,1000
 Night light,vcm_orm_ntl.vrt,night,1,500
+Night light 500m TRI,night_TRI.vrt,night_tri,1,500
+Night light 500m roughness,night_roughness.vrt,night_roughness,1,500
 Geological age,GEA.vrt,gea,1,1000
 Soil type,stg.vrt,soil,1,5000
-Bioclim 1k TRI,bioclim1k_TRI.vrt,bioclim1k_tri,19,1000
-Biocloud 1k TRI,biocloud1k_TRI.vrt,biocloud1k_tri,8,1000
-Elevation 30m TRI,conus_30m_dem_TRI.vrt,tri,1,30
-DHI 1k TRI,dhi_TRI.vrt,dhi_tri,4,1000
-Human footprint 1k TRI,hf_TRI.vrt,hf_tri,1,1000
-Night light 500m TRI,night_TRI.vrt,night_tri,1,500

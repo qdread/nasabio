@@ -152,3 +152,50 @@ names(bbsdat) <- gsub('bio12_', 'MAP_', names(bbsdat))
 names(bbsdat) <- gsub('geological_age', 'geoage', names(bbsdat))		
 
 write.csv(bbsdat, file = file.path(fpdata, 'bbs/bbs_biogeo_joined.csv'), row.names = FALSE)
+
+###############################################################
+
+# 21 Feb 2018
+# All geodiversity variables in a single wide format data frame for BBS.
+
+library(dplyr)
+library(reshape2)
+fpdata <- '/mnt/research/nasabio/data'
+
+bbsgeopt <- read.csv(file.path(fpdata, 'bbs/bbs_geo_by_point.csv'), stringsAsFactors = FALSE)
+bbshuc <- read.csv(file.path(fpdata, 'bbs/bbs_huc4.csv'), stringsAsFactors = FALSE)
+bbsll <- read.csv(file.path(fpdata, 'bbs/bbs_correct_route_centroids.csv'), stringsAsFactors = FALSE)
+
+bbsdat <- bbsgeopt %>%
+	left_join(bbsll) %>%
+	select(rteNo, lat, lon, elevation_30m, bio1_1k, bio12_1k, geological_age_1k) %>%
+	rename(elevation_point = elevation_30m, MAT_point = bio1_1k, MAP_point = bio12_1k, geoage_point = geological_age_1k) %>%
+	left_join(bbshuc) %>%
+	select(rteNo, HUC4, everything())
+
+# Radius values
+
+bbsgeorad <- read.csv(file.path(fpdata, 'bbs/bbs_geodiversity.csv'), stringsAsFactors = FALSE)
+
+bbsgeorad <- bbsgeorad %>%
+	select(rteNo, radius, mean, sd, variable, richness_geodiv, diversity_geodiv, mode) 
+
+discrete_vars <- grep('soil|geol', unique(bbsgeorad$variable), value = TRUE)
+	
+# Create wide format.
+bbsgeorad_wide_sd <- bbsgeorad %>% filter(!variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'sd') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'sd', sep = '_')))
+bbsgeorad_wide_mean <- bbsgeorad %>% filter(!variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'mean') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'mean', sep = '_')))
+bbsgeorad_wide_div <- bbsgeorad %>% filter(variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'diversity_geodiv') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'diversity', sep = '_')))
+bbsgeorad_wide_rich <- bbsgeorad %>% filter(variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'richness_geodiv') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'richness', sep = '_')))
+bbsgeorad_wide_mode <- bbsgeorad %>% filter(variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'mode') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'mode', sep = '_')))
+
+# Join all
+
+bbsdat <- bbsdat %>%
+	left_join(bbsgeorad_wide_sd) %>%
+	left_join(bbsgeorad_wide_mean) %>%
+	left_join(bbsgeorad_wide_div) %>%
+	left_join(bbsgeorad_wide_rich) %>%
+	left_join(bbsgeorad_wide_mode)
+	
+	

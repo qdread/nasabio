@@ -87,7 +87,10 @@ for (i in 1:length(bbs_stats[[1]])) {
 }
 
 bbs_all_stats <- bind_rows(bbs_all_stats)
-bbs_all_stats <- rename(bbs_all_stats, richness_geodiv = richness, diversity_geodiv = diversity)
+bbs_all_stats <- bbs_all_stats %>%
+	rename(richness_geodiv = richness, diversity_geodiv = diversity, lon_aea = lon.1, lat_aea = lat.1) %>%
+	select(-layer) %>%
+	select(rteNo, lon, lat, lon_aea, lat_aea, variable, radius, everything())
 
 write.csv(bbs_all_stats, file = '/mnt/research/nasabio/data/bbs/bbs_geodiversity.csv', row.names = FALSE)
 
@@ -114,7 +117,10 @@ for (i in 1:length(fia_stats[[1]])) {
 }
 
 fia_all_stats <- bind_rows(fia_all_stats)
-fia_all_stats <- rename(fia_all_stats, richness_geodiv = richness, diversity_geodiv = diversity)
+fia_all_stats <- fia_all_stats %>%
+	rename(richness_geodiv = richness, diversity_geodiv = diversity) %>%
+	select(-layer) %>%
+	select(rteNo, variable, radius, everything())
 
 write.csv(fia_all_stats, file = '/mnt/research/nasabio/data/fia/geodiv/fia_usa_geodiversity.csv', row.names = FALSE)
 

@@ -3,6 +3,7 @@
 # Project: NASABIOXGEO
 # Date: 17 May 2017
 
+# Modified 21 Feb 2018: debug the parsing of g.info so it won't throw an error if one (but not all) layers are missing for a radius
 # Modified 18 Feb 2018: debug the categorical section to not throw error if there are no valid points
 # Modified 16 Feb 2018: try to debug the delete_temp statement
 # Modified 06 Feb 2018: debug rowids conditional statement
@@ -92,13 +93,14 @@ extractFromCircle <- function(coords, raster_file, radii, lonbds = c(-125, -67),
 						rowids <- grep('^Band*', g.info) # header rows for each layer.
 						# Error catching added 24 Jan 2018: if no valid pixels, gdalinfo will still return output but it will give bad results
 						# Skip the whole summary stats calculation for that radius if rowids are too close together (meaning g.info contains no data)
-						if ((length(rowids) == 1 || rowids[2] - rowids[1] == 8) & length(g.info) - rowids[length(rowids)] > 4) {
+							n_out <- diff(c(rowids, length(g.info) + 1))
 							for (layer in 1:nlayers) {
-							  a <- g.info[rowids[layer]+(4:7)] # rows containing summary stats for the layer.
-							  summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # extract the summary stats.
-							  stats_by_point[[i]][layer + nlayers*(r-1), 3:6] <- summary_stats[c(3,4,1,2)] # write summary stats to the output list.
+							  if (n_out[layer] >= 8) {
+								  a <- g.info[rowids[layer]+(4:7)] # rows containing summary stats for the layer.
+								  summary_stats <- as.numeric(sapply(strsplit(a, split="="), "[[", 2)) # extract the summary stats.
+								  stats_by_point[[i]][layer + nlayers*(r-1), 3:6] <- summary_stats[c(3,4,1,2)] # write summary stats to the output list.
+							  }
 							}
-						}
 					} else {
 						require(raster)
 						z <- raster(file.path(fp,paste0("temp_circle_extracted", r, "_", filetag, ".hdf")))
