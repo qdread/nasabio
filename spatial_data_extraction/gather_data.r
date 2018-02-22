@@ -168,10 +168,10 @@ bbsll <- read.csv(file.path(fpdata, 'bbs/bbs_correct_route_centroids.csv'), stri
 
 bbsdat <- bbsgeopt %>%
 	left_join(bbsll) %>%
-	select(rteNo, lat, lon, elevation_30m, bio1_1k, bio12_1k, geological_age_1k) %>%
-	rename(elevation_point = elevation_30m, MAT_point = bio1_1k, MAP_point = bio12_1k, geoage_point = geological_age_1k) %>%
 	left_join(bbshuc) %>%
-	select(rteNo, HUC4, everything())
+	select(-lon.1, -lat.1) %>%
+	select(rteNo, lat, lon, HUC4, everything()) %>%
+	setNames(c(names(.)[1:4], paste(names(.)[-(1:4)], 'point', sep = '_')))
 
 # Radius values
 
@@ -198,4 +198,28 @@ bbsdat <- bbsdat %>%
 	left_join(bbsgeorad_wide_rich) %>%
 	left_join(bbsgeorad_wide_mode)
 	
+write.csv(bbsdat, file = file.path(fpdata, 'bbs/bbs_allgeo_wide.csv'), row.names = FALSE)
+
+# All biodiversity in a single wide format data frame for BBS.
+bbsalphapt <- read.csv(file.path(fpdata, 'bbs/bbs_alphadiv_1year.csv'), stringsAsFactors = FALSE) %>% select(rteNo, richness) %>% rename(alpha_point = richness)
+
+library(data.table)
+
+# Radius values
+bbsalpharadius <- read.csv(file.path(fpdata, 'bbs/bbs_alpha_1year.csv'), stringsAsFactors = FALSE) %>% 
+	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
+	setDT %>%
+	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
+	setNames(c(names(.)[1], paste('alpha', names(.)[-1], sep = '_')))
+
+bbsbetaradius <- read.csv(file.path(fpdata, 'bbs/bbs_betatdpdfd_1year.csv'), stringsAsFactors = FALSE) %>% 
+	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
+	setDT %>%
+	dcast(rteNo ~ radius, value.var = names(bbsbetaradius)[-(1:6)])
+	
+bbsgammaradius <- read.csv(file.path(fpdata, 'bbs/bbs_gamma_1year.csv'), stringsAsFactors = FALSE) %>% 
+	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
+	setDT %>%
+	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
+	setNames(c(names(.)[1], paste('gamma', names(.)[-1], sep = '_')))
 	

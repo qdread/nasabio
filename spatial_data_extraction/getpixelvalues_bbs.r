@@ -62,7 +62,7 @@ correct_var_names <- list('elevation_30m', 'elevation_30m_tri', 'elevation_30m_r
 						  'nightlight_500m', 'nighlight_500m_tri', 'nightlight_500m_roughness',
 						  'geological_age_1k', 'soil_type_5k')
 
-names(values) <- correct_var_names
+names(values) <- unlist(correct_var_names)
 values <- cbind(rteNo = coords$rteNo, values)
 
 write.csv(values, paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_',slice,'.csv'), row.names = FALSE)
@@ -71,6 +71,6 @@ write.csv(values, paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by
 ####################################
 
 # Combine output.
-#bbs_geo <- lapply(1:25, function(slice) read.csv(paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_', slice, '.csv'), stringsAsFactors = FALSE))
-#bbs_geo <- do.call(rbind, bbs_geo)
-#write.csv(bbs_geo, '/mnt/research/nasabio/data/bbs/bbs_geo_by_point.csv', row.names = FALSE)
+bbs_geo <- lapply(1:25, function(slice) read.csv(paste0('/mnt/research/nasabio/data/bbs/allgeodiv_v2/bbs_geo_by_point_', slice, '.csv'), stringsAsFactors = FALSE))
+bbs_geo <- do.call(rbind, bbs_geo)
+write.csv(bbs_geo, '/mnt/research/nasabio/data/bbs/bbs_geo_by_point.csv', row.names = FALSE)

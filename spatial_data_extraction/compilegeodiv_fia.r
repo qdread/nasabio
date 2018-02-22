@@ -120,7 +120,7 @@ fia_all_stats <- bind_rows(fia_all_stats)
 fia_all_stats <- fia_all_stats %>%
 	rename(richness_geodiv = richness, diversity_geodiv = diversity) %>%
 	select(-layer) %>%
-	select(rteNo, variable, radius, everything())
+	select(PLT_CN, variable, radius, everything())
 
 write.csv(fia_all_stats, file = '/mnt/research/nasabio/data/fia/geodiv/fia_usa_geodiversity.csv', row.names = FALSE)
 
