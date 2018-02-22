@@ -201,7 +201,9 @@ bbsdat <- bbsdat %>%
 write.csv(bbsdat, file = file.path(fpdata, 'bbs/bbs_allgeo_wide.csv'), row.names = FALSE)
 
 # All biodiversity in a single wide format data frame for BBS.
-bbsalphapt <- read.csv(file.path(fpdata, 'bbs/bbs_alphadiv_1year.csv'), stringsAsFactors = FALSE) %>% select(rteNo, richness) %>% rename(alpha_point = richness)
+bbsalphapt <- read.csv(file.path(fpdata, 'bbs/bbs_alphadiv_1year.csv'), stringsAsFactors = FALSE) %>% 
+	select(rteNo, lon, lat, lon_aea, lat_aea, richness, MPD_pa_z, MNTD_pa_z, MPDfunc_pa_z, MNTDfunc_pa_z) %>%
+	setNames(c(names(.)[1:5], paste('alpha', names(.)[-(1:5)], 'point', sep = '_')))
 
 library(data.table)
 
@@ -215,7 +217,7 @@ bbsalpharadius <- read.csv(file.path(fpdata, 'bbs/bbs_alpha_1year.csv'), strings
 bbsbetaradius <- read.csv(file.path(fpdata, 'bbs/bbs_betatdpdfd_1year.csv'), stringsAsFactors = FALSE) %>% 
 	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
 	setDT %>%
-	dcast(rteNo ~ radius, value.var = names(bbsbetaradius)[-(1:6)])
+	dcast(rteNo ~ radius, value.var = c("beta_td_pairwise_pa", "beta_td_sorensen_pa",  "beta_pd_pairwise_pa", "beta_pd_pairwise_pa_z", "beta_pd_nt_pa", "beta_pd_nt_pa_z", "beta_fd_pairwise_pa", "beta_fd_pairwise_pa_z", "beta_fd_nt_pa", "beta_fd_nt_pa_z"))
 	
 bbsgammaradius <- read.csv(file.path(fpdata, 'bbs/bbs_gamma_1year.csv'), stringsAsFactors = FALSE) %>% 
 	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
@@ -223,3 +225,9 @@ bbsgammaradius <- read.csv(file.path(fpdata, 'bbs/bbs_gamma_1year.csv'), strings
 	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
 	setNames(c(names(.)[1], paste('gamma', names(.)[-1], sep = '_')))
 	
+bbsbiodat <- bbsalphapt %>%
+	left_join(bbsalpharadius) %>%
+	left_join(bbsbetaradius) %>%
+	left_join(bbsgammaradius)
+	
+write.csv(bbsbiodat, file = file.path(fpdata, 'bbs/bbs_allbio_wide.csv'), row.names = FALSE)
