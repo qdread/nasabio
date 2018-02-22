@@ -231,3 +231,99 @@ bbsbiodat <- bbsalphapt %>%
 	left_join(bbsgammaradius)
 	
 write.csv(bbsbiodat, file = file.path(fpdata, 'bbs/bbs_allbio_wide.csv'), row.names = FALSE)
+
+#############################################################
+# 22 Feb. 2018
+
+# Geodiversity variables in wide format for FIA.
+# Must be done in separate data frames because they are so big.
+
+library(dplyr)
+library(reshape2)
+fpdata <- '/mnt/research/nasabio/data'
+
+# Point values
+fiageopt <- read.csv(file.path(fpdata, 'fia/fia_geo_by_point.csv'), stringsAsFactors = FALSE)
+fiahuc <- read.csv(file.path(fpdata, 'fia/fia_huc4.csv'), stringsAsFactors = FALSE)
+
+fiageopt <- fiageopt %>%
+	left_join(fiahuc) %>%
+	select(PLT_CN, HUC4, everything()) %>%
+	setNames(c(names(.)[1:2], paste(names(.)[-(1:2)], 'point', sep = '_')))
+	
+write.csv(fiageopt, file.path(fpdata, 'fia/fia_geo_by_point.csv'), row.names = FALSE) # Overwrite with HUC4 added.
+
+# Radius values
+var_categ <- c('bio1k','bio5k','biocloud','elev','other')
+
+csv_names <- file.path(fpdata, 'fia/geodiv', paste0('fia_usa_', var_categ, '.csv'))
+
+read_reduced <- function(x) {
+	read.csv(x, stringsAsFactors = FALSE) %>% select(PLT_CN, radius, mean, sd, variable, richness_geodiv, diversity_geodiv, mode) 
+}
+
+fiageorad <- lapply(csv_names, read_reduced)
+	
+
+discrete_vars <- grep('soil|geol', unique(fiageorad[[5]]$variable), value = TRUE)
+
+get_stat <- function(x, stat) {
+	x %>%
+		dcast(PLT_CN ~ variable + radius, value.var = stat) %>%
+		setNames(c(names(.)[1], paste(names(.)[-1], stat, sep = '_')))
+}
+
+fiageorad_discrete <- filter(fiageorad[[5]], variable %in% discrete_vars)
+fiageorad[[5]] <- filter(fiageorad[[5]], !variable %in% discrete_vars)
+
+fiageorad_wide_sd <- lapply(fiageorad, get_stat, stat = 'sd')
+fiageorad_wide_mean <- lapply(fiageorad, get_stat, stat = 'mean')
+fiageorad_wide_div <- get_stat(fiageorad_discrete, stat = 'diversity_geodiv')
+fiageorad_wide_rich <- get_stat(fiageorad_discrete, stat = 'richness_geodiv')
+fiageorad_wide_mode <- get_stat(fiageorad_discrete, stat = 'mode')
+
+fiageorad_wide_sd[[5]] <- fiageorad_wide_sd[[5]] %>% left_join(fiageorad_wide_div) %>% left_join(fiageorad_wide_rich)
+fiageorad_wide_mean[[5]] <- fiageorad_wide_mean[[5]] %>% left_join(fiageorad_wide_mode)
+
+for (i in 1:length(var_categ)) {
+
+	write.csv(fiageorad_wide_sd[[i]], file.path(fpdata, 'fia/geodiv' , paste0('fia_', var_categ[i], '_sd_wide.csv')), row.names = FALSE)
+	write.csv(fiageorad_wide_mean[[i]], file.path(fpdata, 'fia/geodiv' , paste0('fia_', var_categ[i], '_mean_wide.csv')), row.names = FALSE)
+}
+
+
+# FIA biodiversity
+
+fiaalphapt <- read.csv(file.path(fpdata, 'fia/fiausa_alphadiv.csv'), stringsAsFactors = FALSE) %>% 
+	setNames(c(names(.)[1], paste('alpha', names(.)[-(1)], 'point', sep = '_')))
+
+library(data.table)
+
+# Radius values
+fiaalpharadius <- read.csv(file.path(fpdata, 'fia/fiausa_alpha.csv'), stringsAsFactors = FALSE)
+fiabetaradius <- read.csv(file.path(fpdata, 'fia/fiausa_betatd.csv'), stringsAsFactors = FALSE)
+fiagammaradius <- read.csv(file.path(fpdata, 'fia/fiausa_gamma.csv'), stringsAsFactors = FALSE)
+n_alpha <- names(fiaalpharadius)[-(1:2)]
+n_beta <- names(fiabetaradius)[-(1:2)]
+n_gamma <- names(fiagammaradius)[-(1:2)]
+
+fiaalpharadius <- fiaalpharadius %>%
+	setDT %>%
+	dcast(PLT_CN ~ radius, value.var = n_alpha) %>%
+	setNames(c(names(.)[1], paste('alpha', names(.)[-1], sep = '_')))
+
+fiabetaradius <- fiabetaradius %>%	
+	setDT %>%
+	dcast(PLT_CN ~ radius, value.var = n_beta)
+	
+fiagammaradius <- fiagammaradius %>%
+	setDT %>%
+	dcast(PLT_CN ~ radius, value.var = n_gamma) %>%
+	setNames(c(names(.)[1], paste('gamma', names(.)[-1], sep = '_')))
+	
+fiabiodat <- fiaalphapt %>%
+	left_join(fiaalpharadius) %>%
+	left_join(fiabetaradius) %>%
+	left_join(fiagammaradius)
+	
+write.csv(fiabiodat, file = file.path(fpdata, 'fia/fia_allbio_wide.csv'), row.names = FALSE)
