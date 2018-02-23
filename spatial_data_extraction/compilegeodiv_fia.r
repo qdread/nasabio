@@ -61,7 +61,7 @@ correct_var_names <- list('elevation_30m', 'elevation_30m_tri', 'elevation_30m_r
 						  c('dhi_fpar_5k_roughness', 'dhi_gpp_5k_roughness', 'dhi_lai8_5k_roughness', 'dhi_ndvi_5k_roughness'),
 						  'human_footprint_1k', 'human_footprint_1k_tri', 'human_footprint_1k_roughness',
 						  'human_footprint_5k', 'human_footprint_5k_tri', 'human_footprint_5k_roughness',
-						  'nightlight_500m', 'nighlight_500m_tri', 'nightlight_500m_roughness',
+						  'nightlight_500m', 'nightlight_500m_tri', 'nightlight_500m_roughness',
 						  'nightlight_5k', 'nightlight_5k_tri', 'nightlight_5k_roughness',
 						  'geological_age_1k', 'geological_age_5k', 'soil_type_5k')
 
