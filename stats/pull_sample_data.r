@@ -109,3 +109,11 @@ for (i in dir(file.path(fp, 'geodiv'), pattern = 'wide')) {
 fiasub <- Reduce(left_join, geo_list)
 fiasub <- left_join(fiabiosub, fiasub)
 write.csv(fiasub, file = '/mnt/research/nasabio/data/fia/fia_subset_wideform.csv', row.names = FALSE)
+
+
+###
+# Get the columns in the right place
+fia_dat <- fia_dat %>% select(PLT_CN, HUC4, lon,lat,lon_aea,lat_aea,everything())
+bbs_dat <- bbs_dat %>% select(rteNo, HUC4, lon,lat,lon_aea,lat_aea,everything())
+write.csv(fia_dat, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/SampleData/fia_subset_wideform.csv', row.names = FALSE)
+write.csv(bbs_dat, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/SampleData/bbs_subset_wideform.csv', row.names = FALSE)
