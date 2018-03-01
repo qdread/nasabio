@@ -27,6 +27,10 @@ bbsbio <- bbsbio %>%
 bbsgeo <- bbsgeo %>%
   select(rteNo, lat, lon, HUC4, contains('point'), matches('5k.*100'))
 
+# Get rid of roughness index as it correlates very closely with TRI, and richness of soil and geo since it's correlated with diversity
+# Get rid of night light since human footprint contains night light
+bbsgeo <- bbsgeo %>%
+  select(-contains('roughness'), -contains('richness'), -contains('night'))
 
 # Ordinations on bbs geodiversity -----------------------------------------
 
@@ -173,7 +177,7 @@ cv_alpha_glm <- cv.glm(bbsalpha_dat[,-1], alpha_glm, K = 10) # tenfold cross val
 lasso_mod <- glmnet(x = as.matrix(bbsalpha_dat[,-(1:2)]), y = bbsalpha_dat$alpha, alpha = 1, lambda = lambdas)
 lasso_pred <- predict(lasso_mod, s = cv_out$lambda.min, newx = as.matrix(bbsalpha_dat[, -(1:2)]))
 plot(bbsalpha_dat$alpha ~ lasso_pred)
-sqrt(mean((lasso_pred - test_y)^2)) #RMSE, it's off by 14.
+sqrt(mean((lasso_pred - bbsalpha_dat$alpha)^2)) #RMSE, it's off by 14.
 abline(0,1,col='red')
 
 lasso_coef <- predict(lasso_mod, type = 'coefficients', s = cv_out$lambda.min) # 97 of the 248 coefficients are not zero. If all data are used with 10 fold CV, there are still 183 coefficients preserved.
