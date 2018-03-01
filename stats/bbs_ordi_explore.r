@@ -160,13 +160,23 @@ lasso_mod <- glmnet(x = dat_x, y = dat_y, alpha = 1, lambda = lambdas)
 set.seed(2003)
 cv_out <- cv.glmnet(x = dat_x, y = dat_y, alpha = 1)
 
+# With full model
+set.seed(2004)
+cv_out <- cv.glmnet(x = as.matrix(bbsalpha_dat[,-(1:2)]), y = bbsalpha_dat$alpha, alpha = 1)
+
+# Compare to linear model
+alpha_glm <- glm(alpha ~ ., data = bbsalpha_dat[,-1], family = 'gaussian')
+library(boot) 
+cv_alpha_glm <- cv.glm(bbsalpha_dat[,-1], alpha_glm, K = 10) # tenfold cross validation shows that lasso model is better than full.
+
 # Best lambda is chosen to be near zero
-lasso_pred <- predict(lasso_mod, s = cv_out$lambda.min, newx = as.matrix(bbsalpha_dat[-train_idx, -(1:2)]))
-plot(test_y ~ lasso_pred)
+lasso_mod <- glmnet(x = as.matrix(bbsalpha_dat[,-(1:2)]), y = bbsalpha_dat$alpha, alpha = 1, lambda = lambdas)
+lasso_pred <- predict(lasso_mod, s = cv_out$lambda.min, newx = as.matrix(bbsalpha_dat[, -(1:2)]))
+plot(bbsalpha_dat$alpha ~ lasso_pred)
 sqrt(mean((lasso_pred - test_y)^2)) #RMSE, it's off by 14.
 abline(0,1,col='red')
 
-lasso_coef <- predict(lasso_mod, type = 'coefficients', s = cv_out$lambda.min) # 97 of the 248 coefficients are not zero.
+lasso_coef <- predict(lasso_mod, type = 'coefficients', s = cv_out$lambda.min) # 97 of the 248 coefficients are not zero. If all data are used with 10 fold CV, there are still 183 coefficients preserved.
 
 ### 
 # Prediction of beta diversity
