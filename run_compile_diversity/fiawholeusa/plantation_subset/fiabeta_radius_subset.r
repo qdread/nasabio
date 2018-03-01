@@ -76,4 +76,7 @@ for (i in 1:250) {
 
 fia_beta_list <- do.call('rbind', fia_beta_list)
 
+plantation <- read.csv('/mnt/research/nasabio/data/fia/plotcond/plantation.csv')
+fia_beta_list <- subset(fia_beta_list, PLT_CN %in% plantation$PLT_CN[!plantation$plantation])
+
 write.csv(fia_beta_list, file = '/mnt/research/nasabio/data/fia/fiausa_natural_betatd.csv', row.names = FALSE)
