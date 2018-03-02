@@ -2,6 +2,11 @@
 # Same format as the BBS maps previously in the book chapter
 # QDR 22 Feb 2018
 
+# Function for iterative search.
+source('~/GitHub/nasabio/stats/SRS_iterative.r')
+# Functions for flagging edge plots
+source('~/GitHub/nasabio/stats/spatial_fns.r')
+
 fig_h <- 11 - 2*(2.5/2.54)
 fig_w <- 8.5 - 2*(2.5/2.54)
 
@@ -22,6 +27,18 @@ source('stats/spatial_fns.r')
 west_poly <- make_map_polygons(states = western_states)
 fia_west <- SpatialPoints(fiacoords[,c('lon','lat')], proj4string = CRS(proj4string(west_poly))) %over% west_poly
 fiacoords$east <- is.na(fia_west) 
+
+# Get rid of edge plots
+# Convert to albers
+aea_crs <- '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0'
+fia_aea <- spTransform(SpatialPoints(coords=fiacoords[,c('lon','lat')], proj4string = CRS('+proj=longlat')), CRSobj = CRS(aea_crs))
+
+# Throw out the ones that are within 100 km of Mexico or Canada or the eastern edge
+fia_coast100 <- flag_coast_plots(focal_points = fia_aea, radius = 100e3, border_countries = c('Canada', 'Mexico'))
+
+fiacoords <- cbind(fiacoords, fia_coast100)
+fia_aea_noedge <- fia_aea[!fiacoords$is_edge & fiacoords$east]
+
 
 # Load the elevational diversity and abg diversity data
 ed <- read.csv(file.path(fp, 'fia_usa_elev_only.csv')) %>% left_join(fiacoords)
@@ -210,19 +227,106 @@ edplotdat <- ed %>%
   dplyr::filter(east, radius == rad, !is.na(sd), lon > -100, sd <= 500) %>%
   dplyr::select(PLT_CN, sd)
   
-scatter_dat <- Reduce(full_join, list(adplotdat, bdplotdat, gdplotdat, edplotdat))
+scatter_dat <- Reduce(full_join, list(adplotdat, bdplotdat, gdplotdat, edplotdat)) %>%
+  left_join(fiacoords[,c('PLT_CN','is_edge')])
+
+sd_grid <- seq(0,400,5)
+
+
+# Do subsetting and fit models each time ----------------------------------
+
+# Alpha: Natural spline df = 3
+# Beta: beta-regression, also natural spline df = 3
+# Gamma: Natural spline df = 3
+
+n_iter <- 999 # Increase later.
+subsample_size <- 500
+n_max <- 500
+
+library(betareg)
+
+r2_mat <- matrix(NA, nrow = 3, ncol = n_iter)
+pred_val_array <- array(NA, dim = c(3, n_iter, length(sd_grid)))
+
+div_names <- c('alpha','beta','gamma')
+
+pb <- txtProgressBar(0, prod(dim(r2_mat)), style = 3)
+ii <- 0
+set.seed(919)
+
+for (k in 1:n_iter) {
+  
+  # Subsample using the largest radius (100 km)
+  sample_idx <- SRS_iterative_N1(focal_points = fia_aea_noedge, radius = 50e3, n = n_max)
+  
+  # If too many are subsampled, take a random subset of the subsample.
+  if (length(sample_idx) > subsample_size) {
+    plots_in_sample <- fiacoords$PLT_CN[sample(sample_idx, subsample_size)]
+  } else {
+    plots_in_sample <- fiacoords$PLT_CN[sample_idx]
+  }
+  
+  
+    
+    dat <- scatter_dat %>%
+      filter(PLT_CN %in% plots_in_sample)
+    
+    for (i in 1:length(div_names)) {
+      ii <- ii + 1
+      setTxtProgressBar(pb, ii)
+
+      # Fit lm if alpha or gamma, fit beta-regression (oddly enough) if beta. Either way use ns with 3 df
+      if (div_names[i] == 'beta') {
+        betareg_fit <- betareg(formula(paste(div_names[i], 'ns(sd, df = 3)', sep = '~')), data = dat, subset = beta < 1)
+        pred_val_array[i, k, ] <- predict(object = betareg_fit, newdata = data.frame(sd = sd_grid))
+        r2_mat[i, k] <- betareg_fit$pseudo.r.squared
+      } else { 
+        lm_fit <- lm(formula(paste(div_names[i], 'ns(sd, df = 3)', sep = '~')), data = dat)
+        pred_val_array[i, k, ] <- predict.lm(object = lm_fit, newdata = data.frame(sd = sd_grid))
+        r2_mat[i, k] <- summary(lm_fit)$r.sq
+      }
+      
+    }
+  
+}
+
 
 library(reshape2)
-scatter_dat <- melt(scatter_dat, id.vars = c('PLT_CN','sd'), variable.name='diversity_type', value.name='diversity_value')
+scatter_dat_long <- scatter_dat %>% 
+  filter(!is_edge) %>%
+  dplyr::select(-is_edge) %>%
+  melt(id.vars = c('PLT_CN','sd'), variable.name='diversity_type', value.name='diversity_value')
 
-columnscatter <- ggplot(scatter_dat, aes(x = sd, y = diversity_value)) +
+dimnames(r2_mat)[[1]] <- div_names
+dimnames(pred_val_array)[[1]] <- div_names
+r2_df <- melt(r2_mat, varnames = c('diversity_type', 'iteration'))
+pred_val_df <- melt(pred_val_array, varnames = c('diversity_type', 'iteration', 'x'))
+pred_val_df$x <- sd_grid[pred_val_df$x] 
+
+pred_val_quantiles <- pred_val_df %>%
+  group_by(diversity_type, x) %>%
+  summarize(pred_y = quantile(value, probs = 0.5, na.rm = TRUE),
+            pred_y_q025 = quantile(value, probs = 0.025, na.rm = TRUE),
+            pred_y_q975 = quantile(value, probs = 0.975, na.rm = TRUE),
+            pred_y_q25 = quantile(value, probs = 0.25, na.rm = TRUE),
+            pred_y_q75 = quantile(value, probs = 0.75, na.rm = TRUE),
+            pred_y_mean = mean(value, na.rm = TRUE)) %>%
+  arrange(diversity_type, x)
+
+# Calculate median rsq
+r2_mean <- r2_df %>% group_by(diversity_type) %>% summarize(r2 = mean(value))
+
+columnscatter <- ggplot(scatter_dat_long, aes(x = sd, y = diversity_value)) +
   facet_grid(diversity_type ~ ., labeller = labeller(diversity_type = function(x) paste0(x, '-diversity')), scales = 'free_y') +
   geom_hex() +
   scale_fill_gradient(low = 'gray95', high = 'black') +
-  stat_smooth(color = 'red', se = FALSE, method = 'auto') +
+  geom_line(data = pred_val_quantiles, aes(x=x, y=pred_y), color = 'red', size = 1) +
+  geom_line(data = pred_val_quantiles, aes(x=x, y=pred_y_q025), color = 'red', linetype = 'dotted') +
+  geom_line(data = pred_val_quantiles, aes(x=x, y=pred_y_q975), color = 'red', linetype = 'dotted') +
+  geom_text(data = r2_mean, aes(x = Inf, y = -Inf, label = paste('R^2 ==', round(r2,2))), parse = TRUE, hjust = 1, vjust = -.5) +
   scale_x_continuous(name = 'Elevation variability', limits=c(0,400)) +
   scale_y_continuous(name = 'Diversity', expand = c(0,0)) +
-  theme(strip.background = element_blank(), legend.position = 'bottom', legend.text = element_text(size=9)) +
+  theme(strip.background = element_blank(), legend.position = 'bottom', legend.text = element_text(size=9), legend.key.width = unit(0.3, 'inches')) +
   panel_border(colour='black')
 
 ggsave(file.path(fpfig, 'scatter_column.png'), columnscatter, height = fig_h-2, width=fig_w/2, dpi=400)

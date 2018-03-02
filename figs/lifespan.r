@@ -1,0 +1,6 @@
+fiatr <- read.csv('C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/traits_imputed_allfia.csv')
+ggplot(fiatr, aes(x=Plant.lifespan)) + geom_histogram() + scale_x_log10(name = 'Log10 longevity (y)') + ggtitle('Tree longevity') 
+ggsave('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/lifespan/tree_longevity.png')
+birdtr <- read.csv('C:/Users/Q/Dropbox/projects/aquaxterra/birdtraitmerged.csv')
+ggplot(filter(birdtr, maximum_longevity_y > 0), aes(x = maximum_longevity_y)) + geom_histogram() + labs(x = 'Longevity (y)') + ggtitle('Bird longevity')
+ggsave('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/lifespan/bird_longevity.png')

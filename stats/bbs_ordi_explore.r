@@ -244,6 +244,4 @@ lasso_coef <- predict(lasso_mod, type = 'coefficients', s = cv_out$lambda.min) #
 
 
 
-####
-# Tenfold cross validation.
 
