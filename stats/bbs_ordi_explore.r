@@ -114,7 +114,7 @@ get_top <- function(x, ntop = 3) {
 
 pred_top <- pred_melt %>%
   group_by(axis) %>%
-  do(get_top(., ntop = 5))
+  do(get_top(., ntop = 3))
 
 # We can get (sort of) axis interpretations from this:
 # 1 Heterogeneity of climate in region (temperature and cloud cover)
