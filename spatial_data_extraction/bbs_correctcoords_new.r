@@ -35,4 +35,4 @@ rteCentroidsLatLong <- spTransform(rteCentroidsAlbers, CRSobj = CRS(wgs_crs))
 # Combine all route metadata and save as CSV.
 bbs_coords <- cbind(rteNo = rteCentroids$rteNo, rteCentroidsLatLong@coords, rteCentroidsAlbers@coords)
 names(bbs_coords) <- c('rteNo', 'lon','lat','lon_aea','lat_aea')
-write.csv(bbs_coords, 'X:/data/bbs/bbs_correct_route_centroids.csv', row.names = FALSE)      
+write.csv(bbs_coords, 'X:/data/bbs/bbs_correct_route_centroids.csv', row.names = FALSE)      

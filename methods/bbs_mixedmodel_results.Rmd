@@ -1,0 +1,164 @@
+---
+title: "Geodiversity relationships by region"
+author: "Quentin D. Read"
+date: "March 6, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Description
+
+At our working group meeting, we discussed different ways of looking at how biodiversity-geodiversity relationships vary across space. Some of our hypotheses involve how the slope of the relationship between a particular geodiversity driver and biodiversity vary in different environments. For example, we might think that biodiversity will be more affected by precipitation geodiversity in areas where precipitation is more limiting (the western USA).
+
+One way to test those kinds of hypotheses is to split up the USA into regions and fit a model with space-varying coefficients to each region. This is like a mixed model with a random slope fit to each region. Ultimately, the best way to do this is to use the space-varying coefficient model that Andy has experience with. I wanted to do a quicker version of this analysis to get some results we could look at before moving to that more sophisticated analysis. To do that, I just fit a linear mixed model to the BBS gamma diversity data at 100 km radius predicted by different geodiversity variables at 100 km radius. I fit random slopes and intercepts to each of the regions. This approach doesn't use space to determine the random effect. It's just a simple random effect, but we can still make maps that should hopefully be similar to what we could make with the spatial random effect.
+
+# Regions
+
+Before the actual results it might be helpful to revisit what regions we discussed using. We are looking at USGS HUCs, Bird Conservation Regions, and TNC's ecoregion classification. Other alternatives that we are not planning to use are NEON domains and the EPA's ecoregions.
+
+## USGS hydrologic units
+
+The USGS hydrologic unit code (HUC) level 4 splits the continental USA into about 200 regions defined by watershed boundaries.
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/borders_huc4.png}}
+\caption{USGS HUC4 regions}
+\end{figure}
+
+## Bird conservation regions
+
+The North American Bird Conservation Initiative (NABCI) has split the continental USA into about 35 regions defined by having relatively similar bird communities, called Bird Conservation Regions (BCR). See http://nabci-us.org/resources/bird-conservation-regions/ for more.
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/borders_bcr.png}}
+\caption{Bird conservation regions (BCR)}
+\end{figure}
+
+## The Nature Conservancy's ecoregions
+
+The Nature Conservancy (TNC) modified Bailey's ecoregions (originally produced by the Forest Service) to split the continental USA into about 70 regions that are supposed to be ecologically similar internally. See http://maps.tnc.org/gis_data.html for more.
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/borders_huc4.png}}
+\caption{TNC ecoregions}
+\end{figure}
+
+\newpage
+# Summary of analysis and results
+
+I selected a small number of predictor variables from our list. I included both mean values and standard deviation (geodiversity) values within the radius. All standard deviation refers to spatial not temporal variation. Also, all these variables are calculated off the coarsened 5 km pixel values, not the native resolution of the data.
+
+* Elevation mean in 100 km radius
+* Elevation standard deviation in 100 km radius
+* Temperature mean in 100 km radius
+* Temperature standard deviation in 100 km radius
+* Precipitation mean in 100 km radius
+* Precipitation standard deviation in 100 km radius
+* Gross primary productivity mean in 100 km radius
+* Gross primary productivity standard deviation in 100 km radius
+* Geological age diversity (Shannon entropy) in 100 km radius
+* Soil type diversity (Shannon entropy) in 100 km radius
+
+The gross primary productivity mean was closely correlated with precipitation mean (wet areas are productive) so I threw mean GPP out. Also, elevation mean and spatial SD of temperature are both highly correlatd with elevation SD (mountainous rugged areas tend to have a higher mean elevation and tend to have more spatially variable temperature, obviously). I threw those two out as well and kept elevation SD. That reduced the variance inflation factors of all predictors to a small number (highest is 3.3). We are left with 7 predictors at that point: **SD elevation, mean temperature, mean precipitation, SD precipitation, SD productivity, geological age diversity, soil type diversity.**
+
+Next I fit a mixed-effects model with random slopes and intercepts for all the predictors, with the response variable being BBS bird species richness inside the 100 km radius (gamma richness). I extracted the coefficients from the mixed models and made maps colored by coefficient. On the maps, the dark reds and blues indicate strong positive and negative relationships (respectively) between the predictor and gamma richness within the mixed model. Lighter colors indicate a coefficient close to zero.
+
+The scale of BCR and TNC ecoregions is relatively close enough that the maps for the two look similar. However the HUC4s are a lot smaller and so that set of maps does look a little bit different. To keep this document from getting too long I've included the BCR and TNC maps here, but all three sets of maps are in the Google Drive folder `NASABiodiversityWG/Figures/bbs_coefficient_maps`.
+
+You can see from the figures below that there is a decent amount of variation in the relationships across the bird conservation regions, and that it is not completely randomly distributed spatially. To me the important relationships are:
+
+### Relationships in BCRs
+
+* Mean temperature is weakly negatively related to breeding bird richness within BCRs
+* Spatial SD of elevation is weakly related to breeding bird richness in most of the BCRs but some positive relationships arise in the southern and eastern USA
+* Mean precipitation is pretty variable in terms of its relationship to richness, but it's most positively related in the arid Southwest
+* Spatial SD of precipitation is usually positively related to richness
+* Spatial SD of productivity is a very striking pattern which really separates the west from the east.
+* Geological age and soil type diversity are very variable but appear stronger in the west.
+
+### Differences between patterns for BCRs and HUC4s
+
+* At the scale of HUC4s, the elevation standard deviation map is strikingly more consistently positively related to richness across the map. 
+* Other than elevation, the HUC4 maps are roughly in agreement with the BCR maps, though there are some differences.
+
+\newpage
+# Maps
+
+## Coefficients by bird conservation region (BCR)
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/BCR_elevation_5k_100_sd_map.png}}
+\caption{Relationship between elevation SD and richness by BCR}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/BCR_bio1_5k_100_mean_map.png}}
+\caption{Relationship between temperature mean and richness by BCR}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/BCR_bio12_5k_100_mean_map.png}}
+\caption{Relationship between precipitation mean and richness by BCR}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/BCR_bio12_5k_100_sd_map.png}}
+\caption{Relationship between precipitation SD and richness by BCR}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/BCR_dhi_gpp_5k_100_sd_map.png}}
+\caption{Relationship between gross primary productivity SD and richness by BCR}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/BCR_geological_age_5k_100_diversity_map.png}}
+\caption{Relationship between geological age diversity and richness by BCR}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/BCR_soil_type_5k_100_diversity_map.png}}
+\caption{Relationship between soil type diversity and richness by BCR}
+\end{figure}
+
+\clearpage
+
+## Coefficients by hydrologic unit (HUC4)
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/huc4_elevation_5k_100_sd_map.png}}
+\caption{Relationship between elevation SD and richness by HUC4}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/huc4_bio1_5k_100_mean_map.png}}
+\caption{Relationship between temperature mean and richness by HUC4}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/huc4_bio12_5k_100_mean_map.png}}
+\caption{Relationship between precipitation mean and richness by HUC4}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/huc4_bio12_5k_100_sd_map.png}}
+\caption{Relationship between precipitation SD and richness by HUC4}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/huc4_dhi_gpp_5k_100_sd_map.png}}
+\caption{Relationship between gross primary productivity SD and richness by HUC4}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/huc4_geological_age_5k_100_diversity_map.png}}
+\caption{Relationship between geological age diversity and richness by HUC4}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.5\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/huc4_soil_type_5k_100_diversity_map.png}}
+\caption{Relationship between soil type diversity and richness by HUC4}
+\end{figure}

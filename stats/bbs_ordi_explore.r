@@ -25,7 +25,7 @@ bbsbio <- bbsbio %>%
   select(rteNo, lon, lat, lon_aea, lat_aea, contains('point'), contains('_100'))
 
 bbsgeo <- bbsgeo %>%
-  select(rteNo, lat, lon, HUC4, contains('point'), matches('5k.*100'))
+  select(rteNo, lat, lon, HUC4, BCR, TNC, contains('point'), matches('5k.*100'))
 
 # Get rid of roughness index as it correlates very closely with TRI, and richness of soil and geo since it's correlated with diversity
 # Get rid of night light since human footprint contains night light
