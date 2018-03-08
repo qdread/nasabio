@@ -11,6 +11,8 @@
 
 # QDR NASABIOXGEO 07 Mar 2018
 
+# Edited 08 Mar 2018: Separate the mapping script from the model fitting script.
+
 # Define functions --------------------------------------------------------
 
 # See this old thread for how I composed the model formula: http://r.789695.n4.nabble.com/lmer-with-random-slopes-for-2-or-more-first-level-factors-td902592.html
@@ -50,45 +52,6 @@ fit_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var, di
   return(list(model = mm, coef = mm_coef))
 }
 
-# Make map (run fortify each time this function is called, slower but simpler)
-# Return the plots as a list so that we can tile them in different ways
-model_map <- function(coefs, vars_to_plot, fill_scale, regions, state_borders) {
-  regions@data <- regions@data %>% 
-    left_join(coefs)
-  
-  region_fort <- fortify(regions, region = 'id') %>% left_join(regions@data, by = 'id')
-  
-  blktheme <- theme_bw() + 
-    theme(axis.text = element_blank(), 
-          axis.ticks = element_blank(), 
-          axis.title = element_blank(), 
-          panel.grid = element_blank(), 
-          panel.background = element_rect(color = 'black', fill = 'black'), 
-          panel.border = element_blank(), 
-          plot.background = element_rect(fill = 'black'), 
-          legend.position = c(0.13,0.1), 
-          legend.direction = 'horizontal', 
-          legend.title = element_blank())
-  
-  map_list <- list()
-  for (i in vars_to_plot) {
-    map_list[[length(map_list) + 1]] <- ggplot(region_fort) +
-      geom_polygon(aes_string(x='long', y='lat', group='group', fill=i)) +
-      geom_path(aes_string(x='long', y='lat', group='group'), color = 'white', size = 0.25) +
-      geom_path(data = state_borders, aes(x = long, y = lat, group = group), color = 'gray20') +
-      fill_scale +
-      coord_equal() +
-      blktheme
-    print(i)
-  }
-  return(map_list)
-}
-
-# Make predicted vs observed plot
-obs_pred_plot <- function() {
-  
-}
-
 # Load biodiversity and geodiversity data ---------------------------------
 
 library(dplyr)
@@ -104,6 +67,7 @@ bbsbio <- bbsbio %>% select(rteNo,
                            alpha_MPD_pa_z_100, beta_pd_pairwise_pa_z_100, gamma_MPD_pa_z_100,
                            alpha_MPDfunc_pa_z_100, beta_fd_pairwise_pa_z_100, gamma_MPDfunc_pa_z_100)
 
+bbssp <- bbsgeo[,c('rteNo','lat','lon')]
 bbsgeo <- bbsgeo %>%
   select(rteNo, HUC4, BCR, TNC, contains('point'), matches('5k.*100')) %>%
   select(-contains('roughness'), -contains('richness'), -contains('night')) %>%
@@ -124,31 +88,46 @@ fiageo <- fiageo %>%
   setNames(gsub('_geodiv','',names(.))) %>%
   mutate(HUC4 = if_else(nchar(HUC4) == 3, paste0('0',HUC4), as.character(HUC4)))
 
-# Load region data --------------------------------------------------------
+# Get rid of coasts and thin down plots -----------------------------------
 
 library(sp)
-library(rgdal)
-library(ggplot2)
-fpregion <- file.path(fp, 'ecoregions')
-huc4 <- readOGR(dsn = fpregion, layer = 'HU4_CONUS_Alb')
-bcr <- readOGR(dsn = fpregion, layer = 'BCR_Terrestrial_master')
-tnc <- readOGR(dsn = fpregion, layer = 'tnc_terr_ecoregions')
-states <- read.csv('~/states_albers.csv', stringsAsFactors = FALSE)
 
-# Convert all to Albers with "region" in the name.
 aea_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"
-bcr <- spTransform(bcr, CRSobj = CRS(aea_crs))
-tnc <- spTransform(tnc, CRSobj = CRS(aea_crs))
+bbssp <- subset(bbssp, rteNo %in% bbsbio$rteNo)
+bbs_aea <- SpatialPoints(coords=bbssp[,c('lon','lat')], proj4string = CRS('+proj=longlat +ellps=WGS84 +no_defs'))
+bbs_aea <- spTransform(bbs_aea, CRS(aea_crs))
 
-huc4@data <- huc4@data %>%
-  mutate(id = rownames(huc4@data), region = as.character(HUC4))
+# Function for iterative search.
+source('/mnt/research/nasabio/code/SRS_iterative.r')
+# Functions for flagging edge plots
+source('/mnt/research/nasabio/code/spatial_fns.r')
 
-bcr@data <- bcr@data %>%
-  mutate(id = rownames(bcr@data), region = as.character(BCRNAME))
+# Use 50km to coastline. Don't thin BBS plots
+bbscoast <- flag_coast_plots(bbs_aea, radius = 50e3, border_countries = c('Canada','Mexico'))
+nocoast_rte <- bbssp$rteNo[!bbscoast$is_coast]
+bbsbio <- subset(bbsbio, rteNo %in% nocoast_rte)
+bbsgeo <- subset(bbsgeo, rteNo %in% nocoast_rte)
 
-tnc@data <- tnc@data %>%
-  mutate(id = rownames(tnc@data), region = as.character(ECODE_NAME))
-  
+# For FIA, use 10 km thinning and get rid of 50km to coastline. This will reduce dataset to very manageable <10k plots.
+fiasp <- read.csv('~/data/allfia.csv')
+fiasp <- subset(fiasp, CN %in% fiabio$PLT_CN)
+fia_aea <- SpatialPoints(coords=fiasp[,c('ACTUAL_LON','ACTUAL_LAT')], proj4string = CRS('+proj=longlat +ellps=WGS84 +no_defs'))
+fia_aea <- spTransform(fia_aea, CRS(aea_crs))
+
+fiacoast <- flag_coast_plots(fia_aea, radius = 50e3, border_countries = c('Canada','Mexico'))
+
+fia_aea_nocoast <- fia_aea[!fiacoast$is_coast]
+fiasp_nocoast <- fiasp[!fiacoast$is_coast, ]
+# Thin FIA plots to minimum 10 km separation
+set.seed(38182)
+fiasub10k <- SRS_iterative_N1(fia_aea_nocoast, radius = 10e3, n = 2e5, point = sample(length(fia_aea_nocoast),1), show_progress = TRUE)
+fiaspsub <- fiasp_nocoast[fiasub10k, ]
+fiabio <- subset(fiabio, PLT_CN %in% fiaspsub$CN)
+fiageo <- subset(fiageo, PLT_CN %in% fiaspsub$CN)
+
+# Unfortunately, get rid of the few plots where beta is 0 or 1
+fiabio <- fiabio %>%
+  mutate_at(vars(contains('beta_td')), function(x) if_else(x > 0 & x < 1, x, as.numeric(NA)))
 
 # Fit models to BBS and FIA data ------------------------------------------
 
@@ -173,42 +152,6 @@ fit_fia_huc <- map2(names(fiabio)[-1], distribs, function(varname, distr) fit_mm
 fit_fia_bcr <- map2(names(fiabio)[-1], distribs, function(varname, distr) fit_mm(fiageo, fiabio, prednames, varname, 'PLT_CN', 'BCR', distr))
 fit_fia_tnc <- map2(names(fiabio)[-1], distribs, function(varname, distr) fit_mm(fiageo, fiabio, prednames, varname, 'PLT_CN', 'TNC', distr))
 
+# Save all fits
+save(fit_bbs_huc, fit_bbs_bcr, fit_bbs_tnc, fit_fia_huc, fit_fia_bcr, fit_fia_tnc, file = '/mnt/research/nasabio/temp/mmfits.RData')
 
-# Create all maps ------------------------------------------
-
-rbfill <- scale_fill_gradient2(low = "#4575B4", high = "#D73027", midpoint = 0)
-
-# Subset out the regions that are outside the US.
-bcr <- subset(bcr, region %in% fit_bbs_bcr[[1]][[2]]$region & COUNTRY %in% 'USA' & !PROVINCE_S %in% 'ALASKA')
-tnc <- subset(tnc, region %in% fit_bbs_tnc[[1]][[2]]$region)
-
-# Create nested list of maps for each predictor by response combo (9 predictors x 8 responses)
-maps_bbs_huc <- map(fit_bbs_huc, function(fit) model_map(fit$coef, prednames, rbfill, huc4, states))
-maps_bbs_bcr <- map(fit_bbs_bcr, function(fit) model_map(fit$coef, prednames, rbfill, bcr, states))
-maps_bbs_tnc <- map(fit_bbs_tnc, function(fit) model_map(fit$coef, prednames, rbfill, tnc, states))
-
-names(maps_bbs_huc) <- names(bbsbio)[-1]
-maps_bbs_huc <- lapply(maps_bbs_huc, setNames, nm = prednames)
-names(maps_bbs_bcr) <- names(bbsbio)[-1]
-maps_bbs_bcr <- lapply(maps_bbs_bcr, setNames, nm = prednames)
-names(maps_bbs_tnc) <- names(bbsbio)[-1]
-maps_bbs_tnc <- lapply(maps_bbs_tnc, setNames, nm = prednames)
-
-# Create grids of maps by predictor, and grids of maps by response
-library(gridExtra)
-fpfig <- '/mnt/research/nasabio/figs/bbs_coefficient_maps'
-bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
-geo_names <- c('elevation_sd','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','precip_sd','gpp_sd','footprint_mean')
-tw <- theme(plot.title = element_text(color = 'white'))
-for (i in 1:8) {
-  print(i)
-  png(file.path(fpfig, paste0('HUC4_', geo_names[i], '.png')), height = 9, width = 12, res = 400, units = 'in')
-  grid.arrange(grobs = map2(maps_bbs_huc, bio_titles, function(p, name) ggplotGrob(p[[i]] + ggtitle(name) + tw)), nrow = 3)
-  dev.off()
-  png(file.path(fpfig, paste0('BCR_', geo_names[i], '.png')), height = 9, width = 12, res = 400, units = 'in')
-  grid.arrange(grobs = map2(maps_bbs_bcr, bio_titles, function(p, name) ggplotGrob(p[[i]] + ggtitle(name) + tw)), nrow = 3)
-  dev.off()
-  png(file.path(fpfig, paste0('TNC_', geo_names[i], '.png')), height = 9, width = 12, res = 400, units = 'in')
-  grid.arrange(grobs = map2(maps_bbs_tnc, bio_titles, function(p, name) ggplotGrob(p[[i]] + ggtitle(name) + tw)), nrow = 3)
-  dev.off()
-}
