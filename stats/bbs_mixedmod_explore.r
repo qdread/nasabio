@@ -2,7 +2,7 @@
 # Right now, just use HUCs as the random effect, ignoring space
 # Use random slope and intercept
 
-# Just use a few predictors for alpha, beta, and gamma
+# Just use a few predictors for alpha, beta, and gamma (modified 07 mar to add human footprint)
 # Func, phy, and tax
 
 # Make a map of relationship.
@@ -33,15 +33,16 @@ gamma_dat <- resps %>%
   left_join(preds_scale)
 
 library(usdm)
-vif(preds_scale[,c('elevation_5k_100_mean', 'elevation_5k_100_sd', 'bio1_5k_100_mean' , 'bio1_5k_100_sd' , 'geological_age_5k_100_diversity' , 'soil_type_5k_100_diversity' , 'bio12_5k_100_mean' , 'bio12_5k_100_sd' , 'dhi_gpp_5k_100_mean' , 'dhi_gpp_5k_100_sd')])
+vif(preds_scale[,c('elevation_5k_100_mean', 'elevation_5k_100_sd', 'bio1_5k_100_mean' , 'bio1_5k_100_sd' , 'geological_age_5k_100_diversity' , 'soil_type_5k_100_diversity' , 'bio12_5k_100_mean' , 'bio12_5k_100_sd' , 'dhi_gpp_5k_100_mean' , 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean', 'human_footprint_5k_100_sd')])
 
-cor(preds_scale[,c('elevation_5k_100_mean', 'elevation_5k_100_sd', 'bio1_5k_100_mean' , 'bio1_5k_100_sd' , 'geological_age_5k_100_diversity' , 'soil_type_5k_100_diversity' , 'bio12_5k_100_mean' , 'bio12_5k_100_sd' , 'dhi_gpp_5k_100_mean' , 'dhi_gpp_5k_100_sd')], use = 'pairwise.complete.obs')
+cor(preds_scale[,c('elevation_5k_100_mean', 'elevation_5k_100_sd', 'bio1_5k_100_mean' , 'bio1_5k_100_sd' , 'geological_age_5k_100_diversity' , 'soil_type_5k_100_diversity' , 'bio12_5k_100_mean' , 'bio12_5k_100_sd' , 'dhi_gpp_5k_100_mean' , 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean', 'human_footprint_5k_100_sd')], use = 'pairwise.complete.obs')
 
 # Mean GPP is highly correlated with precipitation.
 # SD of temperature is highly correlated with SD of elevation.
 # Mean elevation is highly correlated with SD of elevation.
+# Mean human footprint is highly correlated with SD of human footprint
 # Removing them makes everything much better.
-vif(preds_scale[,c('elevation_5k_100_sd', 'bio1_5k_100_mean'  , 'geological_age_5k_100_diversity' , 'soil_type_5k_100_diversity' , 'bio12_5k_100_mean' , 'bio12_5k_100_sd'  , 'dhi_gpp_5k_100_sd')])
+vif(preds_scale[,c('elevation_5k_100_sd', 'bio1_5k_100_mean'  , 'geological_age_5k_100_diversity' , 'soil_type_5k_100_diversity' , 'bio12_5k_100_mean' , 'bio12_5k_100_sd'  , 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')])
 
 # Do just a few here.
 # Linear, additive (no nonlinearities or interactions yet)
