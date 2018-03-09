@@ -102,13 +102,13 @@ source('/mnt/research/nasabio/code/SRS_iterative.r')
 # Functions for flagging edge plots
 source('/mnt/research/nasabio/code/spatial_fns.r')
 
-# Use 50km to coastline. Don't thin BBS plots
+# Use 50km to Can/Mex. Don't thin BBS plots
 bbscoast <- flag_coast_plots(bbs_aea, radius = 50e3, border_countries = c('Canada','Mexico'))
-nocoast_rte <- bbssp$rteNo[!bbscoast$is_coast]
-bbsbio <- subset(bbsbio, rteNo %in% nocoast_rte)
-bbsgeo <- subset(bbsgeo, rteNo %in% nocoast_rte)
+noedge_rte <- bbssp$rteNo[!bbscoast$is_edge]
+bbsbio <- subset(bbsbio, rteNo %in% noedge_rte)
+bbsgeo <- subset(bbsgeo, rteNo %in% noedge_rte)
 
-# For FIA, use 10 km thinning and get rid of 50km to coastline. This will reduce dataset to very manageable <10k plots.
+# For FIA, use 10 km thinning and get rid of 50km to Can/Mex. This will reduce dataset to very manageable <10k plots.
 fiasp <- read.csv('~/data/allfia.csv')
 fiasp <- subset(fiasp, CN %in% fiabio$PLT_CN)
 fia_aea <- SpatialPoints(coords=fiasp[,c('ACTUAL_LON','ACTUAL_LAT')], proj4string = CRS('+proj=longlat +ellps=WGS84 +no_defs'))
@@ -116,12 +116,12 @@ fia_aea <- spTransform(fia_aea, CRS(aea_crs))
 
 fiacoast <- flag_coast_plots(fia_aea, radius = 50e3, border_countries = c('Canada','Mexico'))
 
-fia_aea_nocoast <- fia_aea[!fiacoast$is_coast]
-fiasp_nocoast <- fiasp[!fiacoast$is_coast, ]
+fia_aea_noedge <- fia_aea[!fiacoast$is_edge]
+fiasp_noedge <- fiasp[!fiacoast$is_edge, ]
 # Thin FIA plots to minimum 10 km separation
 set.seed(38182)
-fiasub10k <- SRS_iterative_N1(fia_aea_nocoast, radius = 10e3, n = 2e5, point = sample(length(fia_aea_nocoast),1), show_progress = TRUE)
-fiaspsub <- fiasp_nocoast[fiasub10k, ]
+fiasub10k <- SRS_iterative_N1(fia_aea_noedge, radius = 10e3, n = 2e5, point = sample(length(fia_aea_noedge),1), show_progress = TRUE)
+fiaspsub <- fiasp_noedge[fiasub10k, ]
 fiabio <- subset(fiabio, PLT_CN %in% fiaspsub$CN)
 fiageo <- subset(fiageo, PLT_CN %in% fiaspsub$CN)
 
