@@ -1,10 +1,13 @@
 # Fixed effects with confidence interval plots for mixed models
-load('C:/Users/Q/Dropbox/projects/nasabiodiv/mmfits.RData')
+# Do in parallel because it is taking a long time
+load('/mnt/research/nasabio/temp/mmfits.RData')
 
 # Generate confidence intervals for fixed effects
-library(purrr)
 library(lme4)
 library(glmmTMB)
+library(foreach)
+library(doParallel)
+registerDoParallel(cores = 9)
 
 prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
 
@@ -20,15 +23,21 @@ model_ci <- function(x,pnames=prednames) {
   ci[ci$pred %in% pnames, ]
 }
 
-ci_bbs_bcr <- map(fit_bbs_bcr, model_ci)
-ci_bbs_huc <- map(fit_bbs_huc, model_ci)
-ci_bbs_tnc <- map(fit_bbs_tnc, model_ci)
+map_ci <- function(model_list) {
+  foreach(i = model_list) %dopar% {
+    model_ci(i)
+  }
+}
 
+ci_bbs_bcr <- map_ci(fit_bbs_bcr)
+ci_bbs_huc <- map_ci(fit_bbs_huc)
+ci_bbs_tnc <- map_ci(fit_bbs_tnc)
 
-ci_fia_bcr <- map(fit_fia_bcr, model_ci)
-ci_fia_huc <- map(fit_fia_huc, model_ci)
-ci_fia_tnc <- map(fit_fia_tnc, model_ci)
+ci_fia_bcr <- map_ci(fit_fia_bcr)
+ci_fia_huc <- map_ci(fit_fia_huc)
+ci_fia_tnc <- map_ci(fit_fia_tnc)
 
+save(list = ls(pattern = 'ci_'), file = '/mnt/research/nasabio/temp/mmcis.RData')
 
 # Create plots by region.
 # X axis: predictor
