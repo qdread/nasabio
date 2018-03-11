@@ -137,3 +137,25 @@ p <- ggplot(subset(ci_bbs, region == reg), aes(x = pred, ymin = q025, ymax = q97
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ggsave(file.path(fpfig, paste0('BBS_',reg,'coefficientCIs.png')), p, height = 9, width = 10, dpi = 400)
 })
+
+
+# Confidence intervals of coeffs (FIA) ------------------------------------
+
+bio_titles_fia <- c('alpha TD', 'alpha TD abundance', 'alpha PD', 'alpha PD abundance', 'alpha FD', 'alpha FD abundance', 'beta TD', 'beta TD abundance', 'gamma TD', 'gamma TD abundance', 'gamma PD', 'gamma PD abundance', 'gamma FD', 'gamma FD abundance')
+
+load('C:/Users/Q/Dropbox/projects/nasabiodiv/mmcis_fia.RData')
+ci_fia <- rbind(do.call(rbind, ci_fia_bcr),
+                do.call(rbind, ci_fia_huc),
+                do.call(rbind, ci_fia_tnc))
+ci_fia$region <- rep(c('BCR','HUC4','TNC'), each = nrow(ci_fia)/3)
+ci_fia$resp <- rep(factor(bio_titles_fia, levels = bio_titles_fia), each = 8) # Keep order the same as the maps.
+
+pred_labels <-  c("bio12_5k_100_mean" = 'Precip mean',
+                  "bio12_5k_100_sd" = 'Precip stdev',
+                  "bio1_5k_100_mean" = 'Temp mean', 
+                  "dhi_gpp_5k_100_sd" = 'GPP stdev', 
+                  "elevation_5k_100_sd" = 'Elevation stdev', 
+                  "geological_age_5k_100_diversity" = 'Geol diversity', 
+                  "human_footprint_5k_100_mean" = 'Footprint mean',
+                  "soil_type_5k_100_diversity" = 'Soil type diversity')
+ci_fia$pred <- pred_labels[as.character(ci_fia$pred)]
