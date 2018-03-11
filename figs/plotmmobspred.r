@@ -109,6 +109,11 @@ dev.off()
 
 # Confidence intervals of coefficients ------------------------------------
 
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/mmcis_bbs.RData')
 ci_bbs <- rbind(do.call(rbind, ci_bbs_bcr),
                 do.call(rbind, ci_bbs_huc),
@@ -125,6 +130,10 @@ pred_labels <-  c("bio12_5k_100_mean" = 'Precip mean',
                   "human_footprint_5k_100_mean" = 'Footprint mean',
                   "soil_type_5k_100_diversity" = 'Soil type diversity')
 ci_bbs$pred <- pred_labels[as.character(ci_bbs$pred)]
+#ci_bbs <- separate(ci_bbs, resp, into = c('level','flavor')) %>%
+#  mutate(flavor = factor(flavor,levels=c('TD','PD','FD')))
+
+
 
 map(c('BCR','HUC4','TNC'), function(reg) {
 p <- ggplot(subset(ci_bbs, region == reg), aes(x = pred, ymin = q025, ymax = q975)) +
@@ -138,6 +147,26 @@ p <- ggplot(subset(ci_bbs, region == reg), aes(x = pred, ymin = q025, ymax = q97
 ggsave(file.path(fpfig, paste0('BBS_',reg,'coefficientCIs.png')), p, height = 9, width = 10, dpi = 400)
 })
 
+# Added 11 March:
+# Do only BCR and only taxonomic diversity
+(ci_bbs %>%
+  filter(region == 'BCR', grepl('TD', resp)) %>%
+  ggplot(aes(x = pred, ymin = q025, ymax = q975)) +
+  geom_hline(yintercept = 0, linetype = 'dotted', color = 'gray75', size = 1.5) +
+  geom_errorbar(width = 0.2, size = 1.1, color = 'white') +
+  facet_wrap(~ resp, scales = 'free_y') +
+  scale_y_continuous(name = 'Overall slope') +
+  scale_x_discrete(name = 'Predictor variable') +
+  theme(text = element_text(color = 'white'),
+        panel.grid.major = element_line(color = 'gray25'),
+        panel.grid.minor = element_line(color = 'gray25'),
+        panel.border = element_rect(color = 'gray50', fill = 'transparent'),
+        panel.background = element_rect(fill = 'black'),
+        plot.background = element_rect(fill = 'black'),
+        axis.text.x = element_text(color = 'white', angle = 60, hjust = 1), 
+        strip.background = element_blank(),
+        strip.text = element_text(color = 'white')) ) %>%
+ggsave(filename = 'C:/Users/Q/Dropbox/presentations/sesync2018/bbs_coef_row.png', height = 3, width = 9, dpi = 400)
 
 # Confidence intervals of coeffs (FIA) ------------------------------------
 
@@ -159,3 +188,36 @@ pred_labels <-  c("bio12_5k_100_mean" = 'Precip mean',
                   "human_footprint_5k_100_mean" = 'Footprint mean',
                   "soil_type_5k_100_diversity" = 'Soil type diversity')
 ci_fia$pred <- pred_labels[as.character(ci_fia$pred)]
+
+ci_fia_abund <- ci_fia %>%
+  filter(grepl('abundance', resp)) %>%
+  rbind(data.frame(pred='Elevation stdev', q025=NA, q975=NA, region=c('BCR','HUC4','TNC'), resp=rep(c('beta FD abundance','beta PD abundance'), each = 3))) %>%
+  mutate(resp = factor(resp, levels = paste(bio_titles, 'abundance')))
+ci_fia_incid <- ci_fia %>%
+  filter(!grepl('abundance', resp)) %>%
+  rbind(data.frame(pred='Elevation stdev', q025=NA, q975=NA, region=c('BCR','HUC4','TNC'), resp=rep(c('beta FD','beta PD'), each = 3))) %>%
+  mutate(resp = factor(resp, levels = bio_titles))
+
+map(c('BCR','HUC4','TNC'), function(reg) {
+  p <- ggplot(subset(ci_fia_abund, region == reg), aes(x = pred, ymin = q025, ymax = q975)) +
+    geom_hline(yintercept = 0, linetype = 'dotted', color = 'blue') +
+    geom_errorbar(width = 0.2, size = 1.1) +
+    facet_wrap(~ resp, scales = 'free_y') +
+    theme_bw() +
+    scale_y_continuous(name = 'Overall slope') +
+    scale_x_discrete(name = 'Predictor variable') +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  ggsave(file.path(fpfig, paste0('FIA_',reg,'_abundance_coefficientCIs.png')), p, height = 9, width = 10, dpi = 400)
+})
+
+map(c('BCR','HUC4','TNC'), function(reg) {
+  p <- ggplot(subset(ci_fia_incid, region == reg), aes(x = pred, ymin = q025, ymax = q975)) +
+    geom_hline(yintercept = 0, linetype = 'dotted', color = 'blue') +
+    geom_errorbar(width = 0.2, size = 1.1) +
+    facet_wrap(~ resp, scales = 'free_y') +
+    theme_bw() +
+    scale_y_continuous(name = 'Overall slope') +
+    scale_x_discrete(name = 'Predictor variable') +
+    theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  ggsave(file.path(fpfig, paste0('FIA_',reg,'_incidence_coefficientCIs.png')), p, height = 9, width = 10, dpi = 400)
+})
