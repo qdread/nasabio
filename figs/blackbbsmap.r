@@ -35,8 +35,8 @@ blktheme <- theme_bw() +
         legend.title = element_blank())
 
 p <- ggplot(region_fort) +
-    geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.25) +
-    geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'gray50') +
+    geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.75) +
+    geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'gray50', size = 0.75) +
     geom_point(data = bbscoords %>% filter(lat < 50), aes(x=lon.1, y=lat.1), color = 'indianred', size = 0.5) +
     coord_equal() +
     blktheme
