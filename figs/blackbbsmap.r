@@ -41,3 +41,37 @@ p <- ggplot(region_fort) +
     coord_equal() +
     blktheme
 ggsave('C:/Users/Q/Dropbox/presentations/sesync2018/bbsbcrmap.png', p, height = 6, width = 9, dpi = 400)
+
+
+# Add bbs data to map -----------------------------------------------------
+
+fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
+
+# BBS
+bbsbio <- read.csv(file.path(fp, 'bbs_allbio_wide.csv'), stringsAsFactors = FALSE)
+bbsgeo <- read.csv(file.path(fp, 'bbs_allgeo_wide.csv'), stringsAsFactors = FALSE)
+
+bbsbio <- bbsbio %>%
+  dplyr::select(rteNo, alpha_richness_100, beta_td_sorensen_pa_100, gamma_richness_100)
+bbsgeo <- bbsgeo %>%
+  dplyr::select(rteNo, elevation_5k_100_sd, bio1_5k_100_mean, geological_age_5k_100_diversity)
+
+bbscoords <- bbscoords %>% left_join(bbsbio) %>% left_join(bbsgeo)
+cscale <- function(b, n) scale_color_gradientn(name = n, colours = colorRampPalette(RColorBrewer::brewer.pal(9,'YlOrRd'), bias = b)(50))
+biases <- c(1, 2, 0.8, 2, 1, 1)
+legnames <- c('Alpha diversity', 'Beta diversity', 'Gamma diversity', 'Elevation variability', 'Temperature mean', 'Geological age diversity')
+
+for (i in 6:11) {
+dati <- bbscoords %>% 
+  filter(lat < 50, !is.na(bbscoords[,i]))
+p <- ggplot(region_fort) +
+  geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.75) +
+  geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'gray50', size = 0.75) +
+  geom_point(data = dati, aes_string(x='lon.1', y='lat.1', color = names(bbscoords)[i]), size = 1) +
+  coord_equal() +
+  blktheme + cscale(biases[i-5], legnames[i-5]) + 
+  theme(legend.text = element_text(color='white'),
+        legend.title = element_text(color = 'white'),
+        legend.background = element_rect(color = 'black', fill = 'black'))
+ggsave(paste0('C:/Users/Q/Dropbox/presentations/sesync2018/bbs', names(bbscoords)[i], 'map.png'), p, height = 6, width = 9, dpi = 400)
+}
