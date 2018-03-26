@@ -85,45 +85,68 @@ rm(fia_vars, fia_vars_melt)
 library(ggplot2)
 
 radii <- c(5, 10, 20, 50, 100, 200)
+geo_vars <- c('bio1', 'elevation', 'humanfootprint')
+geo_var_names <- c('mean annual temperature', 'elevation', 'human footprint index')
 
-fia_vars_cast %>%
-  filter(variable == 'elevation', radius %in% radii) %>%
+fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/iale_figs'
+
+threebreaks <- function(limits) {
+  x <- max(limits)*0.9
+  ndigx <- floor(log10(x))
+  lim <- floor(x/(10^ndigx)) * 10^ndigx
+    
+  c(0, lim/2, lim)
+}
+scale_x <- scale_x_continuous(breaks = threebreaks)
+
+for (i in 1:length(geo_vars)) {
+
+p1 <- fia_vars_cast %>%
+  filter(variable == geo_vars[i], radius %in% radii) %>%
   ggplot(aes(x = raw_sd, y = roughness_mean)) +
-    facet_wrap(~ radius) +
+    facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km radius'))) +
     geom_hex() +
     scale_fill_gradient(low = 'gray80', high = 'black') +
     theme_bw() +
     theme(strip.background = element_blank()) +
-    ggtitle('Roughness vs. standard deviation', 'Elevation') +
-    labs(x = 'Standard deviation', y = 'Roughness')
+    ggtitle('Roughness vs. standard deviation', geo_var_names[i]) +
+    labs(x = 'Standard deviation', y = 'Roughness') +
+    scale_x
  
-fia_vars_cast %>%
-  filter(variable == 'elevation', radius %in% radii) %>%
+p2 <- fia_vars_cast %>%
+  filter(variable == geo_vars[i], radius %in% radii) %>%
   ggplot(aes(x = raw_sd, y = tri_mean)) +
-    facet_wrap(~ radius) +
+    facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km radius'))) +
     geom_hex() +
     scale_fill_gradient(low = 'gray80', high = 'black') +
     theme_bw() +
     theme(strip.background = element_blank()) +
-    ggtitle('Terrain ruggedness index vs. standard deviation', 'Elevation') +
-    labs(x = 'Standard deviation', y = 'TRI')   
+    ggtitle('Terrain ruggedness index vs. standard deviation', geo_var_names[i]) +
+    labs(x = 'Standard deviation', y = 'TRI') +
+    scale_x
 
-fia_vars_cast %>%
-  filter(variable == 'elevation', radius %in% radii) %>%
+p3 <- fia_vars_cast %>%
+  filter(variable == geo_vars[i], radius %in% radii) %>%
   ggplot(aes(x = roughness_mean, y = tri_mean)) +
-    facet_wrap(~ radius) +
+    facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km radius'))) +
     geom_hex() +
     scale_fill_gradient(low = 'gray80', high = 'black') +
     theme_bw() +
     theme(strip.background = element_blank()) +
-    ggtitle('Terrain ruggedness index vs. roughness', 'Elevation') +
-    labs(x = 'Roughness', y = 'TRI')   
+    ggtitle('Terrain ruggedness index vs. roughness', geo_var_names[i]) +
+    labs(x = 'Roughness', y = 'TRI') +
+    scale_x
 
+ggsave(file.path(fpfig, paste('compare', geo_vars[i], 'roughness_stdev.png', sep = '_')), p1, height = 3, width = 8, dpi = 400)
+ggsave(file.path(fpfig, paste('compare', geo_vars[i], 'ruggedness_stdev.png', sep = '_')), p2, height = 3, width = 8, dpi = 400)
+ggsave(file.path(fpfig, paste('compare', geo_vars[i], 'ruggedness_roughness.png', sep = '_')), p3, height = 3, width = 8, dpi = 400)
+
+}
 
 # Make plot showing how a single metric changes with radius ---------------
 
 set.seed(555)
-plot_sample <- sample(unique(fia_vars_cast_wide$PLT_CN), 1000)
+plot_sample <- sample(unique(fia_vars_cast_wide$PLT_CN), 500)
 
 fia_vars_cast %>%
   filter(variable == 'elevation', radius %in% radii, PLT_CN %in% plot_sample) %>%
@@ -158,29 +181,140 @@ fia_vars_cast %>%
         panel.grid.minor.x = element_blank()) +
   ggtitle('Terrain ruggedness index change with radius', 'Elevation')    
 
-fia_vars_cast %>%
-  filter(variable == 'elevation', radius %in% radii) %>%
+for (i in 1:length(geo_vars)) {
+
+p1 <- fia_vars_cast %>%
+  filter(variable == geo_vars[i], radius %in% radii) %>%
   ggplot(aes(x = raw_sd, group = radius, fill = factor(radius))) +
     geom_density(alpha = 0.5) +
     scale_x_continuous(name = 'Standard deviation') +
-    scale_fill_brewer(palette = 'Set1') +
+    scale_fill_brewer(name = 'Radius (km)', palette = 'Set1') +
     theme_bw() +
-    ggtitle('Standard deviation change with radius', 'Elevation')
+    ggtitle('Standard deviation change with radius', geo_var_names[i])
 
-fia_vars_cast %>%
-  filter(variable == 'elevation', radius %in% radii) %>%
+p2 <- fia_vars_cast %>%
+  filter(variable == geo_vars[i], radius %in% radii) %>%
   ggplot(aes(x = roughness_mean, group = radius, fill = factor(radius))) +
     geom_density(alpha = 0.5) +
     scale_x_continuous(name = 'Roughness') +
-    scale_fill_brewer(palette = 'Set1') +
+    scale_fill_brewer(name = 'Radius (km)', palette = 'Set1') +
     theme_bw() +
-    ggtitle('Roughness change with radius', 'Elevation')
+    ggtitle('Roughness change with radius', geo_var_names[i])
 
-fia_vars_cast %>%
-  filter(variable == 'elevation', radius %in% radii) %>%
+p3 <- fia_vars_cast %>%
+  filter(variable == geo_vars[i], radius %in% radii) %>%
   ggplot(aes(x = tri_mean, group = radius, fill = factor(radius))) +
     geom_density(alpha = 0.5) +
     scale_x_continuous(name = 'TRI') +
-    scale_fill_brewer(palette = 'Set1') +
+    scale_fill_brewer(name = 'Radius (km)', palette = 'Set1') +
     theme_bw() +
-    ggtitle('Terrain ruggedness index change with radius', 'Elevation')
+    ggtitle('Terrain ruggedness index change with radius', geo_var_names[i])
+
+ggsave(file.path(fpfig, paste('density', geo_vars[i], 'stdev.png', sep = '_')), p1, height = 5, width = 5, dpi = 400)
+ggsave(file.path(fpfig, paste('density', geo_vars[i], 'roughness.png', sep = '_')), p2, height = 5, width = 5, dpi = 400)
+ggsave(file.path(fpfig, paste('density', geo_vars[i], 'ruggedness.png', sep = '_')), p3, height = 5, width = 5, dpi = 400)
+
+}
+
+
+# Get statistics for the different radii ----------------------------------
+
+
+
+# Demo of circle with plots and geodiversity ------------------------------
+
+# Load FIA data and 5km elevation layer
+
+library(rgdal)
+library(raster)
+
+fpras <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/geodata'
+ras_elev <- raster(file.path(fpras, 'conus_5k_dem.tif')) # In Albers
+ras_tri <- raster(file.path(fpras, 'conus_5k_dem_TRI.tif'))
+ras_rough <- raster(file.path(fpras, 'conus_5k_dem_roughness.tif'))
+
+fiafuz <- read.csv('~/FIA/fiafuzzedbyQ.csv')
+
+set.seed(1)
+n <- sample(nrow(fiafuz),1)
+
+lonlim <- fiafuz$lonfuzz_aea[n] + c(-30e3, 30e3)
+latlim <- fiafuz$latfuzz_aea[n] + c(-30e3, 30e3)
+
+coord_sub <- subset(fiafuz,
+                    lonfuzz_aea >= lonlim[1] & lonfuzz_aea <= lonlim[2] & 
+                      latfuzz_aea >= latlim[1] & latfuzz_aea <= latlim[2])
+
+anno_circle <- function(xc, yc, r, ...) annotate("path",
+                                            x=xc+r*cos(seq(0,2*pi,length.out=1001)),
+                                            y=yc+r*sin(seq(0,2*pi,length.out=1001)), ...)
+
+anno_star <- function(xc, yc, ...) annotate("point",
+                                            x = xc, y = yc, ...)
+ 
+pts_elev <- rasterToPoints(ras_elev) %>%
+  as.data.frame %>%
+  filter(between(x, lonlim[1], lonlim[2]), between(y, latlim[1], latlim[2]))
+pts_tri <- rasterToPoints(ras_tri) %>%
+  as.data.frame %>%
+  filter(between(x, lonlim[1], lonlim[2]), between(y, latlim[1], latlim[2]))
+pts_rough <- rasterToPoints(ras_rough) %>%
+  as.data.frame %>%
+  filter(between(x, lonlim[1], lonlim[2]), between(y, latlim[1], latlim[2]))
+
+
+ggplot(as.data.frame(pts_elev), aes(x=x, y=y)) +
+  geom_tile(aes(fill = conus_5k_dem)) +
+  geom_point(data = coord_sub, aes(x=lonfuzz_aea, y=latfuzz_aea), color = 'black') +
+  coord_equal(xlim = lonlim + c(5e3,-5e3), ylim = latlim + c(5e3,-5e3)) +
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 20e3, size = 2) +
+  anno_star(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], size = 5, pch = 18) +
+  scale_fill_gradientn(name = 'Elevation (m)', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
+  theme(legend.position = 'bottom', axis.title = element_blank())
+
+ggsave(file.path(fpfig, 'elevation_demo.png'), height = 4.5, width = 4, dpi = 400) 
+
+
+p1 <- ggplot(as.data.frame(pts_elev), aes(x=x, y=y)) +
+  geom_tile(aes(fill = conus_5k_dem)) +
+  coord_equal(xlim = lonlim + c(5e3,-5e3), ylim = latlim + c(5e3,-5e3)) +
+  scale_fill_gradientn(name = 'Elevation (m)', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
+  theme(legend.position = 'bottom', axis.title = element_blank())
+
+p2 <- ggplot(as.data.frame(pts_tri), aes(x=x, y=y)) +
+  geom_tile(aes(fill = conus_5k_dem_TRI)) +
+  coord_equal(xlim = lonlim + c(5e3,-5e3), ylim = latlim + c(5e3,-5e3)) +
+  scale_fill_gradientn(name = 'Terrain\nruggedness index', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
+  theme(legend.position = 'bottom', axis.title = element_blank())
+
+p3 <- ggplot(as.data.frame(pts_rough), aes(x=x, y=y)) +
+  geom_tile(aes(fill = conus_5k_dem_roughness)) +
+  coord_equal(xlim = lonlim + c(5e3,-5e3), ylim = latlim + c(5e3,-5e3)) +
+  scale_fill_gradientn(name = 'Roughness', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
+  theme(legend.position = 'bottom', axis.title = element_blank())
+
+ggsave(file.path(fpfig, 'schem_elev.png'), p1, height = 4.5, width = 4, dpi = 400)
+ggsave(file.path(fpfig, 'schem_tri.png'), p2, height = 4.5, width = 4, dpi = 400)
+ggsave(file.path(fpfig, 'schem_rough.png'), p3, height = 4.5, width = 4, dpi = 400)
+
+p1circ <- p1 + 
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 5e3, size = 1) +
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 10e3, size = 1) +
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 20e3, size = 1) +
+  anno_star(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], size = 5, pch = 18)
+
+p2circ <- p2 + 
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 5e3, size = 1) +
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 10e3, size = 1) +
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 20e3, size = 1) +
+  anno_star(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], size = 5, pch = 18)
+
+p3circ <- p3 + 
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 5e3, size = 1) +
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 10e3, size = 1) +
+  anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 20e3, size = 1) +
+  anno_star(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], size = 5, pch = 18)
+
+ggsave(file.path(fpfig, 'schem_elev_circ.png'), p1circ, height = 4.5, width = 4, dpi = 400)
+ggsave(file.path(fpfig, 'schem_tri_circ.png'), p2circ, height = 4.5, width = 4, dpi = 400)
+ggsave(file.path(fpfig, 'schem_rough_circ.png'), p3circ, height = 4.5, width = 4, dpi = 400)

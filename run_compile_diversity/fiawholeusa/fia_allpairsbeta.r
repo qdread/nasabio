@@ -5,6 +5,7 @@
 # Edited 11 Jan 2018: Move all files to SCRATCH and/or TMPDIR.
 # Edited 18 Jan 2018: Deal with jobs being over 100000.
 # Edited 09 Feb 2018: Update scratch path
+# Edited 21 Mar 2018: another update to scratch path
 
 # Use precalculated matrix.
 # One FIA plot per slice.
@@ -20,7 +21,7 @@ for (i in 1:length(args)) {
     eval(parse(text=args[[i]]))
 }
 
-load('/mnt/ls15/scratch/groups/nasabio/fiaworkspace_nospatial_wholeusa.r')
+load('/mnt/ffs17/groups/nasabio/fiaworkspace_nospatial_wholeusa.r')
 source('/mnt/research/nasabio/code/loadfiaall.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
