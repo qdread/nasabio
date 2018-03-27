@@ -48,6 +48,23 @@ save(fia_betadiv_list, file = '/mnt/research/nasabio/data/fia/fia_betadivtdpdfd_
 
 # All diversity types -----------------------------------------------------
 
+n_slices <- 135174
+
+fia_betadiv <- list()
+
+pb <- txtProgressBar(0, n_slices, style = 3)
+
+for (i in 1:n_slices) {
+	load(paste0('/mnt/research/nasabio/data/fia/diversity/usa/beta_', i, '.r'))
+	fia_betadiv[[i]] <- beta_div
+	setTxtProgressBar(pb, i)
+}
+
+close(pb)
+
+save(fia_betadiv, file = '/mnt/research/nasabio/data/fia/fia_usa_betadivtdpdfd_listbypoint.r')
+
+
 ####
 # Instead of the array, crate pairwise matrices in a list, probably will allocate less memory.
 load('/mnt/research/nasabio/data/fia/fia_betadivtdpdfd_listbypoint.r')
