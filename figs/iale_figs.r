@@ -145,6 +145,7 @@ ggsave(file.path(fpfig, paste('compare', geo_vars[i], 'ruggedness_roughness.png'
 
 # Make plot showing how a single metric changes with radius ---------------
 
+### Line plots
 set.seed(555)
 plot_sample <- sample(unique(fia_vars_cast_wide$PLT_CN), 500)
 
@@ -181,6 +182,7 @@ fia_vars_cast %>%
         panel.grid.minor.x = element_blank()) +
   ggtitle('Terrain ruggedness index change with radius', 'Elevation')    
 
+### Individual density plots
 for (i in 1:length(geo_vars)) {
 
 p1 <- fia_vars_cast %>%
@@ -216,6 +218,24 @@ ggsave(file.path(fpfig, paste('density', geo_vars[i], 'ruggedness.png', sep = '_
 
 }
 
+### Density plot combined in single faceted figure.
+# Put mean,sd,min,max into one column
+# This doesn't work very well so probably better to combine the plots with cowplot.
+metric_names <- c(raw_sd = 'standard deviation', roughness_mean = 'roughness', tri_mean = 'TRI')
+variable_names <- c(bio1 = 'temperature', elevation = 'elevation', humanfootprint = 'human footprint')
+
+p_dens_all <- 
+  melt(fia_vars, id.vars = 1:5, measure.vars = 6:9, variable.name = 'summary_stat') %>% 
+  mutate(metric_stat = paste(metric, summary_stat, sep = '_')) %>%
+  filter(radius %in% radii, metric_stat %in% c('raw_sd', 'tri_mean', 'roughness_mean')) %>%
+  ggplot(aes(x = value, group = radius, fill = factor(radius))) +
+  stat_density(aes(y = ..scaled..), alpha = 0.5, geom = 'polygon', position = 'dodge', color = 'black') +
+  facet_grid(metric_stat ~ variable, scales = 'free', labeller = labeller(metric_stat = metric_names, variable = variable_names)) +
+  scale_fill_brewer(name = 'Radius (km)', palette = 'Set1') +
+  scale_x_continuous(name = 'Metric value') +
+  theme_bw() + theme(strip.background = element_rect(fill = NA))
+
+ggsave(file.path(fpfig, 'density_all.png'), p_dens_all, height = 9, width = 10, dpi = 400)
 
 # Get statistics for the different radii ----------------------------------
 
@@ -318,3 +338,7 @@ p3circ <- p3 +
 ggsave(file.path(fpfig, 'schem_elev_circ.png'), p1circ, height = 4.5, width = 4, dpi = 400)
 ggsave(file.path(fpfig, 'schem_tri_circ.png'), p2circ, height = 4.5, width = 4, dpi = 400)
 ggsave(file.path(fpfig, 'schem_rough_circ.png'), p3circ, height = 4.5, width = 4, dpi = 400)
+
+
+# Diversity models --------------------------------------------------------
+

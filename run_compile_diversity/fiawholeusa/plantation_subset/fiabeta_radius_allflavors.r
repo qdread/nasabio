@@ -83,5 +83,5 @@ beta_metrics_df <- Reduce(left_join, beta_metrics)
 
 # Load plantation status and get rid of plantation plots before saving final csv.
 plantation <- read.csv('/mnt/research/nasabio/data/fia/plotcond/plantation.csv')
-beta_metrics_df <- subset(beta_metrics_df, PLT_CN %in% plantation$PLT_CN[plantation$plantation])
+beta_metrics_df <- subset(beta_metrics_df, PLT_CN %in% plantation$PLT_CN[!plantation$plantation])
 write.csv(beta_metrics_df, file = '/mnt/research/nasabio/data/fia/fiausa_natural_beta.csv', row.names = FALSE)
