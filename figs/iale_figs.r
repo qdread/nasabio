@@ -16,6 +16,7 @@
 
 # Load data on remote and save locally ------------------------------------
 
+# This section edited on 05 April to use precipitation instead of temperature.
 fpfia <- '/mnt/research/nasabio/data/fia/geodiv'
 
 library(dplyr)
@@ -30,7 +31,7 @@ fia_other <- read.csv(file.path(fpfia, 'fia_usa_other.csv'), stringsAsFactors = 
 
 fia_bio5k <- read.csv(file.path(fpfia, 'fia_usa_bio5k.csv'), stringsAsFactors = FALSE) %>%
   select(PLT_CN, variable, radius, mean, sd, min, max) %>%
-  filter(grepl('bio1_5k', variable))
+  filter(grepl('bio12_5k', variable))
 
 fia_vars <- rbind(fia_elev_long, fia_other, fia_bio5k) 
 write.csv(fia_vars, file = '/mnt/research/nasabio/temp/fia_vars_iale.csv', row.names = FALSE)
@@ -42,7 +43,7 @@ bbs_vars <- read.csv(file.path(fpbbs, 'bbs_geodiversity.csv'), stringsAsFactors 
 # Keep only elevation, human footprint, and mean annual precipitation.
 
 bbs_vars <- bbs_vars %>%
-  filter(grepl('elevation_5k|human_footprint_5k|bio1_5k', variable))
+  filter(grepl('elevation_5k|human_footprint_5k|bio12_5k', variable))
 write.csv(bbs_vars, file = '/mnt/research/nasabio/temp/bbs_vars_iale.csv', row.names = FALSE)
 
 
@@ -60,6 +61,7 @@ bbs_vars <- bbs_vars %>%
   mutate(variable = gsub('human_','human',variable)) %>%
   separate(variable, into = c('variable','resolution','metric')) %>%
   mutate(metric = if_else(is.na(metric), 'raw', metric)) %>%
+  mutate_at(c('mean','sd','min','max'), funs(ifelse(variable == 'bio12', ./10, .))) %>%
   select(-richness_geodiv, -diversity_geodiv, -mode, -lon, -lat, -lon_aea, -lat_aea)
 
 bbs_vars_melt <- melt(bbs_vars, id.vars = 1:5, variable.name = 'summary_stat', value.name = 'value')
@@ -72,7 +74,9 @@ fia_vars <- read.csv(file.path(fp, 'fia_vars_iale.csv'), stringsAsFactors = FALS
 fia_vars <- fia_vars %>%
   mutate(variable = gsub('human_','human',variable)) %>%
   separate(variable, into = c('variable','resolution','metric')) %>%
-  mutate(metric = if_else(is.na(metric), 'raw', metric)) 
+  mutate(metric = if_else(is.na(metric), 'raw', metric)) %>%
+  mutate_at(c('mean','sd','min','max'), funs(ifelse(variable == 'bio12', ./10, .)))
+
 
 fia_vars_melt <- melt(fia_vars, id.vars = 1:5, variable.name = 'summary_stat', value.name = 'value')
 fia_vars_cast <- dcast(fia_vars_melt, PLT_CN + variable + resolution + radius ~ metric + summary_stat)
@@ -85,8 +89,8 @@ rm(fia_vars, fia_vars_melt)
 library(ggplot2)
 
 radii <- c(5, 10, 20, 50, 100, 200)
-geo_vars <- c('bio1', 'elevation', 'humanfootprint')
-geo_var_names <- c('mean annual temperature', 'elevation', 'human footprint index')
+geo_vars <- c('bio12', 'elevation', 'humanfootprint')
+geo_var_names <- c('mean annual precipitation', 'elevation', 'human footprint index')
 
 fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/iale_figs'
 
@@ -99,6 +103,11 @@ threebreaks <- function(limits) {
 }
 scale_x <- scale_x_continuous(breaks = threebreaks)
 
+th_hexplot <- theme_bw() + theme(strip.background = element_rect(fill = NA),
+                                 legend.position = 'none')
+p_height <- 2.2
+p_width <- 6.5
+
 for (i in 1:length(geo_vars)) {
 
 p1 <- fia_vars_cast %>%
@@ -107,11 +116,11 @@ p1 <- fia_vars_cast %>%
     facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km radius'))) +
     geom_hex() +
     scale_fill_gradient(low = 'gray80', high = 'black') +
-    theme_bw() +
-    theme(strip.background = element_blank()) +
-    ggtitle('Roughness vs. standard deviation', geo_var_names[i]) +
+    #theme_bw() +
+    #theme(strip.background = element_blank()) +
+    #ggtitle('Roughness vs. standard deviation', geo_var_names[i]) +
     labs(x = 'Standard deviation', y = 'Roughness') +
-    scale_x
+    scale_x + th_hexplot
  
 p2 <- fia_vars_cast %>%
   filter(variable == geo_vars[i], radius %in% radii) %>%
@@ -119,11 +128,11 @@ p2 <- fia_vars_cast %>%
     facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km radius'))) +
     geom_hex() +
     scale_fill_gradient(low = 'gray80', high = 'black') +
-    theme_bw() +
-    theme(strip.background = element_blank()) +
-    ggtitle('Terrain ruggedness index vs. standard deviation', geo_var_names[i]) +
+    #theme_bw() +
+    #theme(strip.background = element_blank()) +
+    #ggtitle('Terrain ruggedness index vs. standard deviation', geo_var_names[i]) +
     labs(x = 'Standard deviation', y = 'TRI') +
-    scale_x
+    scale_x + th_hexplot
 
 p3 <- fia_vars_cast %>%
   filter(variable == geo_vars[i], radius %in% radii) %>%
@@ -131,15 +140,15 @@ p3 <- fia_vars_cast %>%
     facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km radius'))) +
     geom_hex() +
     scale_fill_gradient(low = 'gray80', high = 'black') +
-    theme_bw() +
-    theme(strip.background = element_blank()) +
-    ggtitle('Terrain ruggedness index vs. roughness', geo_var_names[i]) +
+    #theme_bw() +
+    #theme(strip.background = element_blank()) +
+    #ggtitle('Terrain ruggedness index vs. roughness', geo_var_names[i]) +
     labs(x = 'Roughness', y = 'TRI') +
-    scale_x
+    scale_x + th_hexplot
 
-ggsave(file.path(fpfig, paste('compare', geo_vars[i], 'roughness_stdev.png', sep = '_')), p1, height = 3, width = 8, dpi = 400)
-ggsave(file.path(fpfig, paste('compare', geo_vars[i], 'ruggedness_stdev.png', sep = '_')), p2, height = 3, width = 8, dpi = 400)
-ggsave(file.path(fpfig, paste('compare', geo_vars[i], 'ruggedness_roughness.png', sep = '_')), p3, height = 3, width = 8, dpi = 400)
+ggsave(file.path(fpfig, paste('newsize_compare', geo_vars[i], 'roughness_stdev.png', sep = '_')), p1, height = p_height, width = p_width, dpi = 400)
+ggsave(file.path(fpfig, paste('newsize_compare', geo_vars[i], 'ruggedness_stdev.png', sep = '_')), p2, height = p_height, width = p_width, dpi = 400)
+ggsave(file.path(fpfig, paste('newsize_compare', geo_vars[i], 'ruggedness_roughness.png', sep = '_')), p3, height = p_height, width = p_width, dpi = 400)
 
 }
 
@@ -222,14 +231,14 @@ ggsave(file.path(fpfig, paste('density', geo_vars[i], 'ruggedness.png', sep = '_
 # Put mean,sd,min,max into one column
 # This doesn't work very well so probably better to combine the plots with cowplot.
 metric_names <- c(raw_sd = 'standard deviation', roughness_mean = 'roughness', tri_mean = 'TRI')
-variable_names <- c(bio1 = 'temperature', elevation = 'elevation', humanfootprint = 'human footprint')
+variable_names <- c(bio1 = 'temperature', elevation = 'elevation', humanfootprint = 'human footprint', bio12 = 'precipitation')
 
 p_dens_all <- 
   melt(fia_vars, id.vars = 1:5, measure.vars = 6:9, variable.name = 'summary_stat') %>% 
   mutate(metric_stat = paste(metric, summary_stat, sep = '_')) %>%
   filter(radius %in% radii, metric_stat %in% c('raw_sd', 'tri_mean', 'roughness_mean')) %>%
   ggplot(aes(x = value, group = radius, fill = factor(radius))) +
-  stat_density(aes(y = ..scaled..), alpha = 0.5, geom = 'polygon', position = 'dodge', color = 'black') +
+  stat_density(aes(y = ..scaled..), alpha = 0.5, geom = 'polygon', position = 'dodge') +
   facet_grid(metric_stat ~ variable, scales = 'free', labeller = labeller(metric_stat = metric_names, variable = variable_names)) +
   scale_fill_brewer(name = 'Radius (km)', palette = 'Set1') +
   scale_x_continuous(name = 'Metric value') +
@@ -237,9 +246,72 @@ p_dens_all <-
 
 ggsave(file.path(fpfig, 'density_all.png'), p_dens_all, height = 9, width = 10, dpi = 400)
 
-# Get statistics for the different radii ----------------------------------
 
 
+# Do each column separately
+x_limits <- list(c(0, 110), c(0, 1400), c(0, 75))
+
+# Maxima for normalizing
+fia_melt2 <- melt(fia_vars, id.vars = 1:5, measure.vars = 6:9, variable.name = 'summary_stat') %>% 
+  mutate(metric_stat = paste(metric, summary_stat, sep = '_')) %>%
+  filter(radius %in% radii, metric_stat %in% c('raw_sd', 'tri_mean', 'roughness_mean'))
+
+fia_maxes <- fia_melt2 %>%
+  group_by(variable, metric_stat) %>%
+  summarize(maxval = max(value, na.rm = TRUE))
+
+fia_melt2 <- fia_melt2 %>%
+  left_join(fia_maxes) %>%
+  mutate(scale_value = value/maxval)
+
+p_columns <- list()
+for (i in 1:length(geo_vars)) {
+  p_columns[[i]] <-
+    fia_melt2 %>%
+    filter(variable == geo_vars[i])  %>%
+    ggplot(aes(x = scale_value, group = radius, fill = factor(radius))) +
+    geom_density(aes(y = ..scaled..), alpha = 0.5) +
+    facet_grid(metric_stat ~ variable, scales = 'free', labeller = labeller(metric_stat = metric_names, variable = variable_names)) +
+    scale_fill_brewer(name = 'Radius (km)', palette = 'Set1') +
+    scale_x_continuous(name = 'scaled metric value') +
+    scale_y_continuous(name = 'scaled density', expand = c(0,0), limits = c(0,1.05)) +
+    theme_bw() + theme(strip.background = element_rect(fill = NA),
+                       axis.text.y = element_blank(),
+                       axis.ticks.y = element_blank(),
+                       axis.text.x = element_blank(),
+                       axis.ticks.x = element_blank())
+  
+  # If i is 2 or 3, remove the axis ticks and labels
+  if (i > 1) {
+    p_columns[[i]] <- p_columns[[i]] + 
+      theme(axis.title.y = element_blank())
+  }
+  # If i is 1 or 2, remove the y strip and the legend
+  if (i < 3) {
+    p_columns[[i]] <- p_columns[[i]] +
+      theme(strip.text.y = element_blank(),
+            legend.position = 'none')
+  }
+}
+
+# Arrange the three column plots in one figure
+p_3col <- cowplot::plot_grid(plotlist = p_columns, rel_widths = c(1.2, 1, 1.85), ncol = 3)
+ggsave(file.path(fpfig, 'newsize_density_all_scaled.png'), p_3col, height = 6, width = 6.7, dpi = 400)
+
+# Just elevation in a column
+p_elevcol <- fia_melt2 %>%
+  filter(variable == 'elevation')  %>%
+  ggplot(aes(x = value, group = radius, fill = factor(radius))) +
+  geom_density(aes(y = ..scaled..), alpha = 0.5) +
+  facet_grid(metric_stat ~ variable, scales = 'free', labeller = labeller(metric_stat = metric_names, variable = variable_names)) +
+  scale_fill_brewer(name = 'Radius (km)', palette = 'Set1') +
+  scale_x_continuous(name = 'metric value', limits = c(0, 1400)) +
+  scale_y_continuous(name = 'scaled density', expand = c(0,0), limits = c(0,1.05)) +
+  theme_bw() + theme(strip.background = element_rect(fill = NA),
+                     axis.text.y = element_blank(),
+                     axis.ticks.y = element_blank(),
+                     strip.text.x = element_blank())
+ggsave(file.path(fpfig, 'newsize_density_elev.png'), p_elevcol, height = 6, width = 5.5, dpi = 400)
 
 # Demo of circle with plots and geodiversity ------------------------------
 
@@ -282,6 +354,10 @@ pts_rough <- rasterToPoints(ras_rough) %>%
   as.data.frame %>%
   filter(between(x, lonlim[1], lonlim[2]), between(y, latlim[1], latlim[2]))
 
+theme_schem <- theme(legend.position = 'bottom', 
+                     axis.title = element_blank(),
+                     axis.text = element_blank(),
+                     axis.ticks = element_blank())
 
 ggplot(as.data.frame(pts_elev), aes(x=x, y=y)) +
   geom_tile(aes(fill = conus_5k_dem)) +
@@ -290,32 +366,29 @@ ggplot(as.data.frame(pts_elev), aes(x=x, y=y)) +
   anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 20e3, size = 2) +
   anno_star(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], size = 5, pch = 18) +
   scale_fill_gradientn(name = 'Elevation (m)', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
-  theme(legend.position = 'bottom', axis.title = element_blank())
+  theme_schem
 
-ggsave(file.path(fpfig, 'elevation_demo.png'), height = 4.5, width = 4, dpi = 400) 
+ggsave(file.path(fpfig, 'elevation_demo.png'), height = 3.3, width = 3, dpi = 400) 
 
 
 p1 <- ggplot(as.data.frame(pts_elev), aes(x=x, y=y)) +
   geom_tile(aes(fill = conus_5k_dem)) +
   coord_equal(xlim = lonlim + c(5e3,-5e3), ylim = latlim + c(5e3,-5e3)) +
   scale_fill_gradientn(name = 'Elevation (m)', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
-  theme(legend.position = 'bottom', axis.title = element_blank())
-
+  theme_schem
 p2 <- ggplot(as.data.frame(pts_tri), aes(x=x, y=y)) +
   geom_tile(aes(fill = conus_5k_dem_TRI)) +
   coord_equal(xlim = lonlim + c(5e3,-5e3), ylim = latlim + c(5e3,-5e3)) +
   scale_fill_gradientn(name = 'Terrain\nruggedness index', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
-  theme(legend.position = 'bottom', axis.title = element_blank())
-
+  theme_schem
 p3 <- ggplot(as.data.frame(pts_rough), aes(x=x, y=y)) +
   geom_tile(aes(fill = conus_5k_dem_roughness)) +
   coord_equal(xlim = lonlim + c(5e3,-5e3), ylim = latlim + c(5e3,-5e3)) +
   scale_fill_gradientn(name = 'Roughness', colours = RColorBrewer::brewer.pal(9,'Oranges')[1:7]) +
-  theme(legend.position = 'bottom', axis.title = element_blank())
-
-ggsave(file.path(fpfig, 'schem_elev.png'), p1, height = 4.5, width = 4, dpi = 400)
-ggsave(file.path(fpfig, 'schem_tri.png'), p2, height = 4.5, width = 4, dpi = 400)
-ggsave(file.path(fpfig, 'schem_rough.png'), p3, height = 4.5, width = 4, dpi = 400)
+  theme_schem
+ggsave(file.path(fpfig, 'schem_elev.png'), p1, height = 3.3, width = 3, dpi = 400)
+ggsave(file.path(fpfig, 'schem_tri.png'), p2, height = 3.3, width = 3, dpi = 400)
+ggsave(file.path(fpfig, 'schem_rough.png'), p3, height = 3.3, width = 3, dpi = 400)
 
 p1circ <- p1 + 
   anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 5e3, size = 1) +
@@ -335,10 +408,7 @@ p3circ <- p3 +
   anno_circle(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], 20e3, size = 1) +
   anno_star(fiafuz$lonfuzz_aea[n], fiafuz$latfuzz_aea[n], size = 5, pch = 18)
 
-ggsave(file.path(fpfig, 'schem_elev_circ.png'), p1circ, height = 4.5, width = 4, dpi = 400)
-ggsave(file.path(fpfig, 'schem_tri_circ.png'), p2circ, height = 4.5, width = 4, dpi = 400)
-ggsave(file.path(fpfig, 'schem_rough_circ.png'), p3circ, height = 4.5, width = 4, dpi = 400)
-
-
-# Diversity models --------------------------------------------------------
+ggsave(file.path(fpfig, 'schem_elev_circ.png'), p1circ, height = 3.3, width = 3, dpi = 400)
+ggsave(file.path(fpfig, 'schem_tri_circ.png'), p2circ, height = 3.3, width = 3, dpi = 400)
+ggsave(file.path(fpfig, 'schem_rough_circ.png'), p3circ, height = 3.3, width = 3, dpi = 400)
 
