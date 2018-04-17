@@ -32,4 +32,5 @@ cp ${FROM}/human_impacts/viirs_nightlights/vcm* ${TO}
 cp ${FROM}/human_impacts/viirs_nightlights/SVDNB_npp_20150101-20151231_75N180W_vcm-orm-ntl_v10_c201701311200.avg_rade9.tif ${TO}
 
 # TRI (lots)
-cp ${FROM}/tri_tpi/* ${TO}
+cp ${FROM}/tri_tpi/*roughness* ${TO}
+cp ${FROM}/tri_tpi/*TRI* ${TO}

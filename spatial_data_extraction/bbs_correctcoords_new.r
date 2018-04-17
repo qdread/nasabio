@@ -5,6 +5,7 @@
 library(rgdal)
 
 # route data found at https://www.mbr-pwrc.usgs.gov/bbs/geographic_information/GIS_shapefiles_2015.html (downloaded 26 May 2017)
+# alternatively see https://earthworks.stanford.edu/catalog/stanford-vy474dv5024 (downloaded 17 Apr 2018)
 bbsrtes <- readOGR(dsn='C:/Users/Q/Dropbox/projects/nasabiodiv/bbsrtes_2012_alb', layer='bbsrte_2012_alb')
 
 # Calculate centroids of each route.
@@ -76,7 +77,7 @@ bbsrtes_mid_lldf <- data.frame(rteNo = bbsrtes_mid@data$rteno,
                                lon_aea = bbsrtes_mid@coords[,1],
                                lat_aea = bbsrtes_mid@coords[,2])
 
-bbsrtes_mid_df <- left_join(bbsrtes_mid_df, bbsrtes_mid_lldf)
+bbsrtes_mid_df <- left_join(bbsrtes_mid_df, bbsrtes_mid_lldf) %>% filter(complete.cases(.))
 write.csv(bbsrtes_mid_df, 'C:/Users/Q/Dropbox/projects/nasabiodiv/bbs_route_midpoints.csv', row.names = FALSE)
 
 
