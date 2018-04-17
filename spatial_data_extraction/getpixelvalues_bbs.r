@@ -2,7 +2,9 @@
 # Done in parallel
 # 14 Feb
 
-coords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors=FALSE)
+# Edited 17 Apr: change from centroids to midpoints.
+
+coords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_route_midpoints.csv', stringsAsFactors=FALSE)
 
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 n_slices <- 25

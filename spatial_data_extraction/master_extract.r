@@ -6,6 +6,7 @@
 # Edited 11 Jan 2018: Get all variables from table. (rename to master_extract.r)
 # Edited 09 Feb 2018: Update scratch path.
 # Edited 19 Feb 2018: Add escape characters to file path.
+# Edited 17 Apr 2018: Change BBS coordinates to the route midpoints, not centroids, and add smaller radii.
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
@@ -39,8 +40,8 @@ categorical <- geovar %in% c('gea','gea_5k','soil')
 # Load coordinates for correct taxon.	
 if (taxon == 'bbs') {
 	n_slices <- vartable$N.slices.bbs[k]
-	coords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
-	radii <- c(50, 75, 100, 150, 200, 300, 400, 500)
+	coords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_route_midpoints.csv')
+	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500)
 }	
 if (taxon == 'fia') {
 	n_slices <- vartable$N.slices.fiaall[k]
