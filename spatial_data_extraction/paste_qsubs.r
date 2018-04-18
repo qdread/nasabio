@@ -36,10 +36,9 @@ qsub_calls_bbs <- x %>%
   do(qsubs = sapply(seq(1, .$N.slices.bbs, by = 250), function(x) qsub_string(taxon = 'bbs', var = .$variable.id, mem = 2, tmpmem = 4, start = as.character(as.integer(x)), end = as.character(as.integer(min(x+249, .$N.slices.bbs))))))
 
 # Remove whatever has already been completed.
-qsub_calls_fia <- qsub_calls_fia[!x$variable.id %in% c('elevation','slope','roughness','tri'), ]
+#qsub_calls_fia <- qsub_calls_fia[!x$variable.id %in% c('elevation','slope','roughness','tri'), ]
 #qsub_calls_bbs <- qsub_calls_bbs[!x$variable.id %in% c('aspect_sin', 'aspect_cos'), ]
 
 write.table(unlist(qsub_calls_bbs$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all_bbs.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
-
 
 write.table(c(unlist(qsub_calls_fia$qsubs), unlist(qsub_calls_bbs$qsubs)), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
