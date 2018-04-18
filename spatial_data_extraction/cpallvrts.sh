@@ -12,6 +12,8 @@ cp ${FROM}/bioclim/Biocloud5k/* ${TO}
 
 # DEM
 cp ${FROM}/dem/SRTM_30m_DEM/VRTs/* ${TO}
+cp ${FROM}/dem/SRTM_30m_DEM/aspect_tiles/*sin* ${TO}
+cp ${FROM}/dem/SRTM_30m_DEM/aspect_tiles/*cos* ${TO}
 
 # DHI
 cp ${FROM}/dhi/dhi* ${TO}

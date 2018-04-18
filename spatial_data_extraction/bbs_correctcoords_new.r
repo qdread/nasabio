@@ -7,6 +7,7 @@ library(rgdal)
 # route data found at https://www.mbr-pwrc.usgs.gov/bbs/geographic_information/GIS_shapefiles_2015.html (downloaded 26 May 2017)
 # alternatively see https://earthworks.stanford.edu/catalog/stanford-vy474dv5024 (downloaded 17 Apr 2018)
 bbsrtes <- readOGR(dsn='C:/Users/Q/Dropbox/projects/nasabiodiv/bbsrtes_2012_alb', layer='bbsrte_2012_alb')
+bbsrtes2014 <- readOGR(dsn='C:/Users/Q/Dropbox/projects/nasabiodiv/bbsrtes2014', layer='bbsrtsl020')
 
 # Calculate centroids of each route.
 # Route numbers should already be concatenated with state number.

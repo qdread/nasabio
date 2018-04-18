@@ -37,43 +37,51 @@ fixedbbsmat <- fixedbbsmat[has_coords, !(dimnames(fixedbbsmat)[[2]] %in% nocturn
 
 bbsgrps <- bbsgrps[has_coords, ]
 
-#################### updated to this point.
+bbscov <- bbsgrps %>%
+	left_join(bbscoords %>% mutate(rteNo=as.character(rteNo))) %>%
+	setNames(nm = c('year','rteNo','Stop','lon','lat','lon_aea','lat_aea'))
 
-# Calculate distances and identities of all neighbors within the maximum radius
-names(bbsgrps_byroute) <- c('year','rteNo','lon','lat','lon_aea','lat_aea')
-bbscov <- bbsgrps_byroute
-
+bbscov$Stop <- as.integer(gsub('Stop','',bbscov$Stop))
+bbscov$rteNo <- as.integer(bbscov$rteNo)
 # For optimization purposes, convert covariates to a matrix.
 bbscovmat <- as.matrix(bbscov)
 
-
-bbsnhb_list <- as.data.frame(bbscovmat) %>% group_by(year) %>% do(l = getNeighbors(., radius = 5e5)) 
-# Flatten this into one list
-bbsnhb_r <- do.call('c', bbsnhb_list$l)
-
-save(bbsnhb_r, bbscov, bbscovmat, fixedbbsmat_byroute, file = '/mnt/research/nasabio/data/bbs/bbsworkspace_byroute.r')
-write.csv(fixedbbsmat_byroute, file = '/mnt/research/nasabio/data/bbs/bbs_plot_matrix.csv', row.names = FALSE)
-
 ######
 # Combine 2007-2016 into a single year.
+# Combine each stop across years.
+
+# Also do 2001-2011 in a single year, in case we want to distinguish between the two.
 
 consolidate_years <- function(x) {
-	mat_x <- fixedbbsmat_byroute[x$rowidx, , drop = FALSE]
+	mat_x <- fixedbbsmat[x$rowidx, , drop = FALSE]
 	as.numeric(apply(mat_x, 2, sum) > 0)
 }
 
 bbs_consol <- bbscov %>%
 	mutate(rowidx = 1:nrow(bbscov)) %>%
-	filter(year >= 2007) %>%
-	group_by(rteNo, lon, lat, lon_aea, lat_aea) %>%
+	filter(year >= 2007 & year <= 2016) %>%
+	group_by(rteNo, Stop, lon, lat, lon_aea, lat_aea) %>%
 	do(x = consolidate_years(.))
 	
-bbsmat_byroute_oneyear <- do.call('rbind', bbs_consol$x)
-dimnames(bbsmat_byroute_oneyear)[[2]] <- dimnames(fixedbbsmat_byroute)[[2]]
+bbsmat_oneyear <- do.call('rbind', bbs_consol$x)
+dimnames(bbsmat_oneyear)[[2]] <- dimnames(fixedbbsmat)[[2]]
 
 bbscov_oneyear <- bbs_consol %>% select(-x)
 bbscovmat_oneyear <- as.matrix(bbscov_oneyear)
 
-bbsnhb_list_oneyear <- getNeighbors(dat = as.data.frame(bbscovmat_oneyear), radius = 5e5)
+save(bbscov_oneyear, bbscovmat_oneyear, bbsmat_oneyear, file = '/mnt/research/nasabio/data/bbs/bbsworkspace_bystop_20072016.r')
 
-save(bbsnhb_list_oneyear, bbscov_oneyear, bbscovmat_oneyear, bbsmat_byroute_oneyear, file = '/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
+
+bbs_consol2001 <- bbscov %>%
+	mutate(rowidx = 1:nrow(bbscov)) %>%
+	filter(year >= 2001 & year <= 2011) %>%
+	group_by(rteNo, Stop, lon, lat, lon_aea, lat_aea) %>%
+	do(x = consolidate_years(.))
+	
+bbsmat_oneyear <- do.call('rbind', bbs_consol2001$x)
+dimnames(bbsmat_oneyear)[[2]] <- dimnames(fixedbbsmat)[[2]]
+
+bbscov_oneyear <- bbs_consol2001 %>% select(-x)
+bbscovmat_oneyear <- as.matrix(bbscov_oneyear)
+
+save(bbscov_oneyear, bbscovmat_oneyear, bbsmat_oneyear, file = '/mnt/research/nasabio/data/bbs/bbsworkspace_bystop_20012011.r')
