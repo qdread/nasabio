@@ -3,6 +3,7 @@
 # QDR, 07 Mar 2017
 # Project: NASABioXGeo
 
+# Modification 19 Apr 2018: Replace centroid coordinates with midpoints of the segments (gets rid of some routes but is more accurate)
 # Modification 22 Sep 2017: (1) phylo distance matrix based on a single consensus tree of 1000 samples, (2) make single presence-absence for entire time period 2007-2016.
 # Updated on 31 May 2017: new 2016 routes+coordinates.
 # Modification 05 May 2017: New coordinates (correct)
@@ -20,7 +21,7 @@
 # 2. Load community matrix.
 
 bbsspp <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/specieslist.csv', stringsAsFactors = FALSE)
-load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2016.r') # Load fixed bbsmat. This loads both byroute and bystop.
+load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2016.r') # Load fixed bbsmat. (only by route)
 # Quick correction to fix two birds that aren't in the phylogeny. Just get rid of the eastern yellow wagtail since it's probably only in Alaska anyway.
 fixedbbsmat_byroute[, which(sppids == 5739)] <- fixedbbsmat_byroute[, which(sppids == 5738)] + fixedbbsmat_byroute[, which(sppids == 5739)]
 fixedbbsmat_byroute[, which(sppids == 5738)] <- 0
@@ -28,7 +29,8 @@ fixedbbsmat_byroute[, which(sppids == 6960)] <- 0
 
 # 3. Project lat-long to Albers.
 
-bbsalbers <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv')
+#bbsalbers <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv') # Old centroids. Can still use if desired.
+bbsalbers <- read.csv('/mnt/research/nasabio/data/bbs/bbs_route_midpoints.csv')
 
 # 4. Create cophenetic distance matrix from bird phylogeny. Use consensus tree calculatd from 1000 trees randomly sampled from the posterior distribution of 10000 trees.
 # (Update 22 sep 2017)
@@ -146,7 +148,7 @@ consolidate_years <- function(x) {
 
 bbs_consol <- bbscov %>%
 	mutate(rowidx = 1:nrow(bbscov)) %>%
-	filter(year >= 2007) %>%
+	filter(year >= 2007 & year <= 2016) %>%
 	group_by(rteNo, lon, lat, lon_aea, lat_aea) %>%
 	do(x = consolidate_years(.))
 	
