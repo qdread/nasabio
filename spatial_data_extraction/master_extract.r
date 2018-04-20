@@ -7,6 +7,7 @@
 # Edited 09 Feb 2018: Update scratch path.
 # Edited 19 Feb 2018: Add escape characters to file path.
 # Edited 17 Apr 2018: Change BBS coordinates to the route midpoints, not centroids, and add smaller radii.
+# Edited 20 Apr 2018: Change scratch path to the FFS17 path.
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
@@ -14,7 +15,7 @@
 
 slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 tmp_path <- Sys.getenv('TMPDIR')
-scratch_path <- '/mnt/ls15/scratch/groups/nasabio/VRTs'
+scratch_path <- '/mnt/ffs17/groups/nasabio/VRTs'
 
 # Boilerplate code to get the arguments passed in
 args=(commandArgs(TRUE))

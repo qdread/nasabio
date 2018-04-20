@@ -17,5 +17,5 @@ cd $TMPDIR
 now="$(date +'%d%h%Y%H%M')"
 
 # Cobble together the R command using the environmental variables supplied.
-cmd="R CMD BATCH --no-save --no-restore '--args taxon=\""$taxon"\" geovar=\""$geovar"\"' rcode.r /mnt/ls15/scratch/groups/plz-lab/NASA/routputfiles/"$taxon"_"$geovar"_"$PBS_ARRAYID"_"$now".txt"
+cmd="R CMD BATCH --no-save --no-restore '--args taxon=\""$taxon"\" geovar=\""$geovar"\"' rcode.r /mnt/ffs17/groups/nasabio/routputfiles/"$taxon"_"$geovar"_"$PBS_ARRAYID"_"$now".txt"
 eval $cmd

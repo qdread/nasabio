@@ -4,9 +4,15 @@
 ########################################################################
 # Alpha diversity
 
-bbs_alphadiv <- read.csv('/mnt/research/nasabio/data/bbs/diversity1year/bbs_alphadiv.csv', stringsAsFactors = FALSE)
+bbs_alphadiv <- read.csv('/mnt/research/nasabio/data/bbs/bbs_alphadiv_1year.csv', stringsAsFactors = FALSE)
 
 library(dplyr)
+
+# Replace coordinates with correct ones
+bbscoords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_route_midpoints.csv')
+
+bbs_alphadiv <- bbscoords %>% left_join(bbs_alphadiv[,!names(bbs_alphadiv) %in% c('lon','lat','lon_aea','lat_aea')])
+bbs_alphadiv <- filter(bbs_alphadiv, !is.na(richness))
 
 # For each year and route number, get the median alpha diversity within each radius.
 radii <- c(50, 75, 100, 150, 200, 300, 400, 500) # in km
@@ -28,7 +34,7 @@ bbs_alpha <- bbs_alphadiv %>%
 	do(neighbordiv(., dat = bbs_alphadiv))
 	
 bbs_alpha <- cbind(bbs_alphadiv[rep(1:nrow(bbs_alphadiv), each=8),c('rteNo','lon','lat','lon_aea','lat_aea')], bbs_alpha)
-	
+bbs_alpha <- arrange(bbs_alpha, rteNo, radius)	
 write.csv(bbs_alpha, file = '/mnt/research/nasabio/data/bbs/bbs_alpha_1year.csv', row.names = FALSE)	
 
 ########################################################################
@@ -43,7 +49,9 @@ for (i in radii) {
 	bbs_gammadiv[[length(bbs_gammadiv) + 1]] <- gamma_div
 }
 
-bbs_gamma <- cbind(bbs_alphadiv[,c('rteNo','lon','lat','lon_aea','lat_aea')], do.call('rbind', bbs_gammadiv))
+load('/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
+
+bbs_gamma <- cbind(bbscov_oneyear[rep(1:nrow(bbscov_oneyear), each=8),c('rteNo','lon','lat','lon_aea','lat_aea')], do.call('rbind', bbs_gammadiv))
 
 write.csv(bbs_gamma, file = '/mnt/research/nasabio/data/bbs/bbs_gamma_1year.csv', row.names = FALSE)
 
