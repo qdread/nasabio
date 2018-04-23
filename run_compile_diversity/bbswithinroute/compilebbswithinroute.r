@@ -24,3 +24,24 @@ for (i in 1:length(radii)) {
 bbs_alpha <- bbs_alpha %>% bind_rows %>% arrange(rteNo, radius)
 
 write.csv(bbs_alpha, file = '/mnt/research/nasabio/data/bbs/bbs_withinroute_alpha.csv', row.names = FALSE)	
+
+# Compile beta diversity: BBS within route
+# ----------------------------------------
+
+# It's already averaged by radius so we just need to put the slices together.
+
+load('/mnt/research/nasabio/data/bbs/bbsworkspace_bystop_20072016.r')
+library(dplyr)
+
+bbs_beta <- lapply(1:1000, function(i) {
+	load(paste0('/mnt/research/nasabio/data/bbs/diversitywithinroute/beta_',i,'.r'))
+	beta_div
+})
+
+bbs_beta <- do.call(c, bbs_beta) %>% bind_rows 
+
+route_ids <- unique(bbscov_oneyear$rteNo)
+
+bbs_beta <- cbind(rteNo = rep(route_ids, each=3), bbs_beta)
+
+write.csv(bbs_beta, file = '/mnt/research/nasabio/data/bbs/bbs_withinroute_beta.csv', row.names = FALSE)	
