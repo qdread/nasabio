@@ -1,7 +1,8 @@
 # Exploratory analysis: test conditional autoregressive models in BRMS
 # Using brms 2.2.0 (older version did not have CAR implemented)
 
-library(brms)
+library(brms) # The likes of P. Bürkner does things!
+library(rstan)
 options(mc.cores = 3)
 rstan_options(auto_write = TRUE)
 
@@ -65,7 +66,48 @@ fakecar <- brm(y ~ x1 + x2 + (1|region) + (x1 - 1|region) + (x2 - 1|region),
     chains = 2, iter = 2000, warmup = 1000)
 
 summary(fakecar)
-fakepars <- fakecar$fit@sim$samples[[1]]
+fakepars <- fakecar$fit@sim$samples[[1]] # Chain 1 of 2.
+
+# Plot.
+# Parameter names
+par_names <- fakecar$fit@model_pars
+stanplot(fakecar, pars = 'b', type = 'trace')
+
+# Code to extract parameter estimates and CIs from fit object in a tidy format.
+fit_sum <- summary(fakecar)
+fit_sum$fixed
+fit_sum$random
+fit_sum$spec_pars
+fit_sum$cor_pars
+fre <- ranef(fakecar)
+ffe <- fixef(fakecar)
+
+# Random effects come out as a list containing a 3D array; fixed effects come out as a 2D array
+
+# Flatten random effects into 2D array and combine with fixed effects.
+ffe_df <- cbind(effect = 'fixed', as.data.frame.table(ffe, responseName = 'value'))
+fre_df <- cbind(effect = 'random', as.data.frame.table(fre$region, responseName = 'value'))
+
+rbind(ffe_df, fre_df)
+
+library(reshape2)
+
+ffe <- melt(ffe, varnames = c('parameter', 'stat'))
+fre <- melt(fre$region, varnames = c('region', 'parameter', 'stat'))
+rbind(cbind(effect = 'fixed', region = NA, ffe),
+      cbind(effect = 'random', fre))
+
+### try to fit model here.
+load('C:/Users/Q/Dropbox/projects/nasabiodiv/fia_spatial_mm_dat.RData')
+prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
+
+matchbcr <- match(fiageo$BCR, dimnames(bcr_bin)[[1]])
+fiageo$BCR <- matchbcr
+dimnames(bcr_bin) <- list(1:nrow(bcr_bin), 1:nrow(bcr_bin))
+
+fiageo <- filter(fiageo, !is.na(BCR))
+
+test_mm1 <- fit_spatial_mm(fiageo, fiabio, prednames, resp_var = 'alpha_richness', id_var = 'PLT_CN', region_var = 'BCR', adj_matrix = bcr_bin, distribution = 'gaussian', n_chains = 2, n_iter = 2000, n_warmup = 1000) # This at least starts sampling, though it is taking a very long time even for the small number of iterations.
 
 # Some failed attempts below this line ------------------------------------
 
