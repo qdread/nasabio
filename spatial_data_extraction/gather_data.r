@@ -50,7 +50,7 @@ write.csv(bbsdat, file = file.path(fpdata, 'bbs/bbs_allgeo_wide.csv'), row.names
 
 # All biodiversity in a single wide format data frame for BBS.
 bbsalphapt <- read.csv(file.path(fpdata, 'bbs/bbs_alphadiv_1year.csv'), stringsAsFactors = FALSE) %>% 
-	select(rteNo, lon, lat, lon_aea, lat_aea, richness, MPD_pa_z, MNTD_pa_z, MPDfunc_pa_z, MNTDfunc_pa_z) %>%
+	select(rteNo, richness, MPD_pa_z, MNTD_pa_z, MPDfunc_pa_z, MNTDfunc_pa_z) %>%
 	setNames(c(names(.)[1:5], paste('alpha', names(.)[-(1:5)], 'point', sep = '_')))
 
 library(data.table)
@@ -80,6 +80,37 @@ bbsbiodat <- bbsalphapt %>%
 	
 write.csv(bbsbiodat, file = file.path(fpdata, 'bbs/bbs_allbio_wide.csv'), row.names = FALSE)
 
+#############################################################
+# This section added 24 Apr. 2018
+# Compile within-route biodiversity for BBS
+# Only includes radii 5, 10, and 20 km.
+
+library(dplyr)
+library(reshape2)
+library(data.table)
+fpdata <- '/mnt/research/nasabio/data'
+
+bbsalphawithin <- read.csv(file.path(fpdata, 'bbs/bbs_withinroute_alpha.csv'), stringsAsFactors = FALSE) %>%
+	setDT %>%
+	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
+	setNames(c(names(.)[1], paste('alpha', names(.)[-1], sep = '_')))
+
+bbsbetawithin <- read.csv(file.path(fpdata, 'bbs/bbs_withinroute_beta.csv'), stringsAsFactors = FALSE) %>%
+	setDT %>%
+	dcast(rteNo ~ radius, value.var = c("beta_td_pairwise_pa", "beta_td_sorensen_pa",  "beta_pd_pairwise_pa", "beta_pd_pairwise_pa_z", "beta_pd_nt_pa", "beta_pd_nt_pa_z", "beta_fd_pairwise_pa", 
+	"beta_fd_pairwise_pa_z", "beta_fd_nt_pa", "beta_fd_nt_pa_z"))
+	
+bbsgammawithin <- read.csv(file.path(fpdata, 'bbs/bbs_withinroute_gamma.csv'), stringsAsFactors = FALSE) %>%
+	setDT %>%
+	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
+	setNames(c(names(.)[1], paste('gamma', names(.)[-1], sep = '_')))
+
+bbsbiowithin <- bbsalphawithin %>%
+	left_join(bbsbetawithin) %>%
+	left_join(bbsgammawithin)	
+
+write.csv(bbsbiowithin, file = file.path(fpdata, 'bbs/bbs_allbio_withinroute_wide.csv'), row.names = FALSE)
+	
 #############################################################
 # 22 Feb. 2018
 

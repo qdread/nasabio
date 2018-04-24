@@ -51,7 +51,7 @@ for (i in radii) {
 
 load('/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
 
-bbs_gamma <- cbind(bbscov_oneyear[rep(1:nrow(bbscov_oneyear), each=8),c('rteNo','lon','lat','lon_aea','lat_aea')], do.call('rbind', bbs_gammadiv))
+bbs_gamma <- cbind(bbscov_oneyear[rep(1:nrow(bbscov_oneyear), times=length(bbs_gammadiv)),c('rteNo','lon','lat','lon_aea','lat_aea')], do.call('rbind', bbs_gammadiv))
 
 write.csv(bbs_gamma, file = '/mnt/research/nasabio/data/bbs/bbs_gamma_1year.csv', row.names = FALSE)
 
