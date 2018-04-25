@@ -2,20 +2,22 @@
 # 21 Feb 2018
 # All geodiversity variables in a single wide format data frame for BBS and FIA.
 
+# Edit 25 Apr 2018: Use midpoints, not centroids
+
 library(dplyr)
 library(reshape2)
 fpdata <- '/mnt/research/nasabio/data'
 
 bbsgeopt <- read.csv(file.path(fpdata, 'bbs/bbs_geo_by_point.csv'), stringsAsFactors = FALSE)
-bbshuc <- read.csv(file.path(fpdata, 'bbs/bbs_huc4.csv'), stringsAsFactors = FALSE)
-bbsll <- read.csv(file.path(fpdata, 'bbs/bbs_correct_route_centroids.csv'), stringsAsFactors = FALSE)
+bbseco <- read.csv(file.path(fpdata, 'bbs/bbs_ecoregions.csv'), stringsAsFactors = FALSE)
+#bbsll <- read.csv(file.path(fpdata, 'bbs/bbs_correct_route_centroids.csv'), stringsAsFactors = FALSE)
+bbsll <- read.csv(file.path(fpdata, 'bbs/bbs_route_midpoints.csv'), stringsAsFactors = FALSE)
 
 bbsdat <- bbsgeopt %>%
 	left_join(bbsll) %>%
-	left_join(bbshuc) %>%
-	select(-lon.1, -lat.1) %>%
-	select(rteNo, lat, lon, HUC4, everything()) %>%
-	setNames(c(names(.)[1:4], paste(names(.)[-(1:4)], 'point', sep = '_')))
+	left_join(bbseco) %>%
+	select(rteNo, lat, lon, lat_aea, lon_aea, HUC4, BCR, TNC, everything()) %>%
+	setNames(c(names(.)[1:8], paste(names(.)[-(1:8)], 'point', sep = '_')))
 
 # Radius values
 

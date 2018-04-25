@@ -3,6 +3,7 @@
 # Project: NASA Bioxgeo
 # Date: 14 Feb 2018
 
+# Edited 25 April 2018: use BBS midpoints, not centroids.
 # Edited 05 March 2018: add Bird Conservation Regions (BCR) and TNC Ecoregions (TNC)
 
 # Load true FIA plot coordinates.
@@ -60,7 +61,8 @@ write.csv(bbs_huc4, '/mnt/research/nasabio/data/bbs/bbs_huc4.csv', row.names = F
 
 # Load lat long coordinates for centroid of each route and find the BCR and TNC it's in
 
-bbscoords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors = FALSE)
+#bbscoords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors = FALSE)
+bbscoords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_route_midpoints.csv', stringsAsFactors = FALSE)
 bbscoords_sp <- SpatialPoints(coords = bbscoords[,c('lon', 'lat')],
 							  proj4string = CRS('+proj=longlat +ellps=WGS84 +no_defs'))
 bbscoords_sp <- spTransform(bbscoords_sp,
@@ -77,9 +79,10 @@ bbs_ecoregions <- read.csv('/mnt/research/nasabio/data/bbs/bbs_huc4.csv', string
 write.csv(bbs_ecoregions, '/mnt/research/nasabio/data/bbs/bbs_ecoregions.csv', row.names = FALSE)
 
 # Load bbs all geodiversity data frame and join the ecoregions to it (in right order)
-bbsgeo <- read.csv('/mnt/research/nasabio/data/bbs/bbs_allgeo_wide.csv', stringsAsFactors = FALSE)
-bbsgeo <- bbsgeo %>%
-	left_join(bbs_ecoregions) %>%
-	select(rteNo, HUC4, BCR, TNC, everything())
+### this section is no longer needed 25 apr 2018
+# bbsgeo <- read.csv('/mnt/research/nasabio/data/bbs/bbs_allgeo_wide.csv', stringsAsFactors = FALSE)
+# bbsgeo <- bbsgeo %>%
+	# left_join(bbs_ecoregions) %>%
+	# select(rteNo, HUC4, BCR, TNC, everything())
 	
-write.csv(bbsgeo, '/mnt/research/nasabio/data/bbs/bbs_allgeo_wide.csv', row.names = FALSE)
+# write.csv(bbsgeo, '/mnt/research/nasabio/data/bbs/bbs_allgeo_wide.csv', row.names = FALSE)

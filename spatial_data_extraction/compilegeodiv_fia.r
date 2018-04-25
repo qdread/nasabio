@@ -78,6 +78,9 @@ for (i in 1:nrow(vartable)) {
 
 bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors = FALSE)
 
+# Edit 24 Apr 2018: use the midpoints, not centroids
+bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_route_midpoints.csv', stringsAsFactors = FALSE)
+
 bbs_all_stats <- list()
 
 for (i in 1:length(bbs_stats[[1]])) {
@@ -88,7 +91,7 @@ for (i in 1:length(bbs_stats[[1]])) {
 
 bbs_all_stats <- bind_rows(bbs_all_stats)
 bbs_all_stats <- bbs_all_stats %>%
-	rename(richness_geodiv = richness, diversity_geodiv = diversity, lon_aea = lon.1, lat_aea = lat.1) %>%
+	rename(richness_geodiv = richness, diversity_geodiv = diversity) %>%
 	select(-layer) %>%
 	select(rteNo, lon, lat, lon_aea, lat_aea, variable, radius, everything())
 
@@ -153,6 +156,7 @@ for (i in 1:nrow(vartable)) {
 }
 
 bbsll <- read.csv('/mnt/research/nasabio/data/bbs/bbs_correct_route_centroids.csv', stringsAsFactors = FALSE)
+
 
 bbs_all_stats <- list()
 
