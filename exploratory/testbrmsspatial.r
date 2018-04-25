@@ -99,15 +99,27 @@ rbind(cbind(effect = 'fixed', region = NA, ffe),
 
 ### try to fit model here.
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/fia_spatial_mm_dat.RData')
+# Do this on cluster instead.
+load('/mnt/research/nasabio/temp/fia_spatial_mm_dat.RData')
+
 prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
 
+# This matching may not be necessary.
 matchbcr <- match(fiageo$BCR, dimnames(bcr_bin)[[1]])
 fiageo$BCR <- matchbcr
 dimnames(bcr_bin) <- list(1:nrow(bcr_bin), 1:nrow(bcr_bin))
 
-fiageo <- filter(fiageo, !is.na(BCR))
+# Which ones have a BCR, HUC4, and TNC?
+# Most of them. We can just get rid of the few that do not.
 
-test_mm1 <- fit_spatial_mm(fiageo, fiabio, prednames, resp_var = 'alpha_richness', id_var = 'PLT_CN', region_var = 'BCR', adj_matrix = bcr_bin, distribution = 'gaussian', n_chains = 2, n_iter = 2000, n_warmup = 1000) # This at least starts sampling, though it is taking a very long time even for the small number of iterations.
+fiageo <- filter(fiageo, BCR %in% dimnames(bcr_bin)[[1]] & TNC %in% dimnames(tnc_bin)[[1]] & HUC4 %in% dimnames(huc_bin)[[1]])
+
+test_mm1 <- fit_spatial_mm(fiageo, fiabio, prednames, resp_var = 'alpha_richness', id_var = 'PLT_CN', region_var = 'BCR', adj_matrix = bcr_bin, distribution = 'gaussian', n_chains = 2, n_iter = 500, n_warmup = 400) # This at least starts sampling, though it is taking a very long time even for the small number of iterations.
+
+test_mm2 <- fit_spatial_mm(fiageo, fiabio, prednames, resp_var = 'beta_td_sorensen_pa', id_var = 'PLT_CN', region_var = 'BCR', adj_matrix = bcr_bin, distribution = 'beta', n_chains = 2, n_iter = 500, n_warmup = 400) 
+
+# Do this on cluster instead.
+load('/mnt/research/nasabio/temp/fia_spatial_mm_dat.RData')
 
 # Some failed attempts below this line ------------------------------------
 

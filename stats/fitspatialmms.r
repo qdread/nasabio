@@ -10,6 +10,7 @@
 # QDR NASABIOXGEO 24 Apr 2018
 
 # New version of this script created 24 Apr: use brms to fit the spatial model.
+# Edited 25 Apr: make an R object with just the data so the models can be fit elsewhere in parallel.
 
 # Define functions --------------------------------------------------------
 
@@ -127,6 +128,22 @@ fiageo <- subset(fiageo, PLT_CN %in% fiaspsub$CN)
 fiabio <- fiabio %>%
   mutate_at(vars(contains('beta_td')), function(x) if_else(x > 0 & x < 1, x, as.numeric(NA)))
 
+# Save data so that models can be fit in parallel -------------------------
+
+# Filter out the ones that are not in any ecoregion
+in_eco <- function(dat) dat$BCR %in% dimnames(bcr_bin)[[1]] & dat$TNC %in% dimnames(tnc_bin)[[1]] & dat$HUC4 %in% dimnames(huc_bin)[[1]]
+fia_in_eco <- in_eco(fiageo)
+bbs_in_eco <- in_eco(bbsgeo)
+
+fiageo <- fiageo[fia_in_eco,]
+fiabio <- fiabio[fia_in_eco,]
+bbsgeo <- bbsgeo[bbs_in_eco,]
+bbsbio <- bbsbio[bbs_in_eco,]
+
+save(fiageo, fiabio, bcr_bin, huc_bin, tnc_bin, file = '/mnt/research/nasabio/temp/fia_spatial_mm_dat.RData')
+save(bbsgeo, bbsbio, bcr_bin, huc_bin, tnc_bin, file = '/mnt/research/nasabio/temp/bbs_spatial_mm_dat.RData')
+
+
 # Fit models to BBS and FIA data ------------------------------------------
 
 prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
@@ -134,13 +151,13 @@ prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100
 # Fit all BBS response variables to same predictors by HUC, BCR, TNC
 
 library(purrr)
-options(mc.cores = 2)
+options(mc.cores = 3)
 
 distribs <- ifelse(grepl('beta_td', names(bbsbio)[-1]), 'beta', 'normal') # Beta_td follows beta distribution, rest are normally distributed
 
-fit_bbs_huc <- map2(names(bbsbio)[-1], distribs, function(varname, distr) fit_mm(bbsgeo, bbsbio, prednames, varname, 'rteNo', 'HUC4', distr))
-fit_bbs_bcr <- map2(names(bbsbio)[-1], distribs, function(varname, distr) fit_mm(bbsgeo, bbsbio, prednames, varname, 'rteNo', 'BCR', distr))
-fit_bbs_tnc <- map2(names(bbsbio)[-1], distribs, function(varname, distr) fit_mm(bbsgeo, bbsbio, prednames, varname, 'rteNo', 'TNC', distr))
+fit_bbs_huc <- map2(names(bbsbio)[-1], distribs, function(varname, distr) fit_spatial_mm(bbsgeo, bbsbio, prednames, varname, 'rteNo', 'HUC4', distr))
+fit_bbs_bcr <- map2(names(bbsbio)[-1], distribs, function(varname, distr) fit_spatial_mm(bbsgeo, bbsbio, prednames, varname, 'rteNo', 'BCR', distr))
+fit_bbs_tnc <- map2(names(bbsbio)[-1], distribs, function(varname, distr) fit_spatial_mm(bbsgeo, bbsbio, prednames, varname, 'rteNo', 'TNC', distr))
 
 
 # Fit all FIA response variables to same predictors by the 3 regions also
