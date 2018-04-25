@@ -60,10 +60,15 @@ bbsbio <- read.csv(file.path(fp, 'bbs/bbs_allbio_wide.csv'), stringsAsFactors = 
 bbsgeo <- read.csv(file.path(fp, 'bbs/bbs_allgeo_wide.csv'), stringsAsFactors = FALSE)
 
 # Use only 100 km radius.
-bbsbio <- bbsbio %>% select(rteNo,
-                           alpha_richness_100, beta_td_sorensen_pa_100, gamma_richness_100, 
-                           alpha_MPD_pa_z_100, beta_pd_pairwise_pa_z_100, gamma_MPD_pa_z_100,
-                           alpha_MPDfunc_pa_z_100, beta_fd_pairwise_pa_z_100, gamma_MPDfunc_pa_z_100)
+bbsbio <- bbsbio %>% 
+  select(rteNo,
+         alpha_richness_100, alpha_MPD_pa_z_100, alpha_MPDfunc_pa_z_100,
+         beta_td_sorensen_pa_100, beta_pd_pairwise_pa_z_100, beta_fd_pairwise_pa_z_100,
+         gamma_richness_100, gamma_MPD_pa_z_100, gamma_MPDfunc_pa_z_100) %>%
+  rename(alpha_richness = alpha_richness_100, alpha_phy_pa = alpha_MPD_pa_z_100, alpha_func_pa = alpha_MPDfunc_pa_z_100,
+         beta_td_sorensen_pa = beta_td_sorensen_pa_100, beta_phy_pa = beta_pd_pairwise_pa_z_100, beta_func_pa = beta_fd_pairwise_pa_z_100,
+         gamma_richness = gamma_richness_100, gamma_phy_pa = gamma_MPD_pa_z_100, gamma_func_pa = gamma_MPDfunc_pa_z_100)
+  
 
 bbssp <- bbsgeo[,c('rteNo','lat','lon')]
 bbsgeo <- bbsgeo %>%

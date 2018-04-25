@@ -3,12 +3,14 @@
 # Use 100 km but later maybe use 50 km if this is too much.
 # QDR 06 Mar 2018
 
+# Edited 25 Apr 2018: Add phylogenetic and functional beta.
+
 # Load biodiversity data
 
 library(dplyr)
 fp <- '/mnt/research/nasabio/data/fia'
 ad <- read.csv(file.path(fp, 'fiausa_natural_alpha.csv'), stringsAsFactors = FALSE)
-bd <- read.csv(file.path(fp, 'fiausa_natural_betatd.csv'), stringsAsFactors = FALSE)
+bd <- read.csv(file.path(fp, 'fiausa_natural_beta.csv'), stringsAsFactors = FALSE)
 gd <- read.csv(file.path(fp, 'fiausa_natural_gamma.csv'), stringsAsFactors = FALSE)
 
 # Func, phy, and tax for alpha and gamma, but func and phy aren't ready yet for beta.
@@ -20,7 +22,8 @@ fiabio <- Reduce(left_join,
 					rename(alpha_richness = richness, alpha_shannon = shannon, alpha_phy_pa = MPD_pa_z, alpha_phy = MPD_z, alpha_func_pa = MPDfunc_pa_z, alpha_func = MPDfunc_z),
 				 bd %>%
 					filter(radius == 100) %>%
-					select(PLT_CN, beta_td_sorensen_pa, beta_td_sorensen),
+					select(PLT_CN, beta_td_sorensen_pa, beta_td_sorensen, beta_pd_pairwise_pa_z, beta_pd_pairwise_z, beta_fd_pairwise_pa_z, beta_fd_pairwise_z) %>%
+					rename(beta_phy_pa = beta_pd_pairwise_pa_z, beta_phy = beta_pd_pairwise_z, beta_func_pa = beta_fd_pairwise_pa_z, beta_func = beta_fd_pairwise_z),
 				 gd %>% 
 					filter(radius == 100) %>% 
 					select(PLT_CN, richness, shannon, MPD_pa_z, MPD_z, MPDfunc_pa_z, MPDfunc_z) %>%
