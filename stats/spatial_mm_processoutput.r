@@ -1,6 +1,16 @@
 # Summarize all spatial mixed models and combine all their coefficients into one data frame for plotting.
 # QDR/NASABIOXGEO/26 Apr 2018
 
+respnames_fia <- c("alpha_richness", "alpha_effspn", "alpha_phy_pa",
+                   "alpha_phy", "alpha_func_pa", "alpha_func", "beta_td_sorensen_pa",
+                   "beta_td_sorensen", "beta_phy_pa", "beta_phy", "beta_func_pa",
+                   "beta_func", "gamma_richness", "gamma_effspn", "gamma_phy_pa",
+                   "gamma_phy", "gamma_func_pa", "gamma_func")
+respnames_bbs <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
+                   "beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa", "gamma_richness",
+                   "gamma_phy_pa", "gamma_func_pa")
+
+
 task_table <- data.frame(taxon = rep(c('fia','bbs'), c(length(respnames_fia), length(respnames_bbs))),
                          rv = c(respnames_fia, respnames_bbs),
                          ecoregion = rep(c('HUC4','BCR','TNC'), each = length(respnames_fia) + length(respnames_bbs)),
@@ -11,15 +21,16 @@ library(brms)
 library(purrr)
 library(reshape2)
 
-# Run summary on each fit.
-model_summ <- map(1:81, function(i) {
-	load(file.path(fp, paste0('fit', i, '.RData'))
-	summ <- summary(fit$model)
-	list(summ = summ, coef = fit$coef)
-}
+model_coef <- list()
+model_summ <- list()
 
-model_coef <- map(model_summ, 'coef')
-model_summ <- map(model_summ, 'summ')
+# Run summary on each fit.
+for (i in 1:81) {
+	print(i)
+	load(file.path(fp, paste0('fit', i, '.RData')))
+	model_summ[[i]] <- summary(fit$model)
+	model_coef[[i]] <- fit$coef
+}
 
 # Reshape coefficient data frame to slightly wider form, and then add identifying columns.
 model_coef <- map2(model_coef, 1:81, function(x, y) {
@@ -34,8 +45,8 @@ model_coef <- do.call(rbind, model_coef)
 model_coef_fia <- subset(model_coef, taxon == 'fia')
 model_coef_bbs <- subset(model_coef, taxon == 'bbs')
 
-model_summ_fia <- model_summ[which(task_table$taxon == 'fia']
-model_summ_bbs <- model_summ[which(task_table$taxon == 'bbs']
+model_summ_fia <- model_summ[which(task_table$taxon == 'fia')]
+model_summ_bbs <- model_summ[which(task_table$taxon == 'bbs')]
 
 write.csv(model_coef_fia, '/mnt/research/nasabio/data/fia/spatial_coef_fia.csv', row.names = FALSE)
 write.csv(model_coef_bbs, '/mnt/research/nasabio/data/bbs/spatial_coef_bbs.csv', row.names = FALSE)
