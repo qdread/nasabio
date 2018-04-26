@@ -48,10 +48,9 @@ fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region
             chains = n_chains, iter = n_iter, warmup = n_warmup)
   fixed_effects <- fixef(mm)
   random_effects <- ranef(mm)
-  fixed_effects <- melt(fixed_effects, varnames = c('parameter', 'stat'))
-  random_effects <- melt(random_effects$region, varnames = c('region', 'parameter', 'stat'))
-  mm_coef <- rbind(cbind(effect = 'fixed', region = NA, fixed_effects),
-                   cbind(effect = 'random', random_effects))
+  fixed_effects <- cbind(effect = 'fixed', region = NA, melt(fixed_effects, varnames = c('parameter', 'stat')))
+  random_effects <- cbind(effect = 'random', melt(random_effects$region, varnames = c('region', 'stat', 'parameter')))
+  mm_coef <- full_join(fixed_effects, random_effects)
   return(list(model = mm, coef = mm_coef))
 }
 
