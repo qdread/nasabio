@@ -194,7 +194,7 @@ if (task == 5) {
     do(maps = model_map(., rbfill, bcr, states))  
   maps_fia_bcr_incid %>%
     group_by(parameter) %>%
-    do(foo = arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
+    do(foo = arrangeMaps(., fpfig = fpfia, region_name = 'BCR', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
 }
 
 if (task == 6) {
@@ -206,7 +206,7 @@ if (task == 6) {
     do(maps = model_map(., rbfill, tnc, states))
   maps_fia_tnc_incid %>%
     group_by(parameter) %>%
-    do(foo = arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
+    do(foo = arrangeMaps(., fpfig = fpfia, region_name = 'TNC', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
 }
 
 if (task == 7) {
@@ -230,7 +230,7 @@ if (task == 8) {
     do(maps = model_map(., rbfill, bcr, states))  
   maps_fia_bcr_abund %>%
     group_by(parameter) %>%
-    do(foo = arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
+    do(foo = arrangeMaps(., fpfig = fpfia, region_name = 'BCR', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
 }
 
 if (task == 9) {
@@ -242,6 +242,6 @@ if (task == 9) {
     do(maps = model_map(., rbfill, tnc, states))
   maps_fia_tnc_abund %>%
     group_by(parameter) %>%
-    do(foo = arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
+    do(foo = arrangeMaps(., fpfig = fpfia, region_name = 'TNC', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
 }
 
