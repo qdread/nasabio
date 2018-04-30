@@ -24,12 +24,20 @@ library(reshape2)
 model_coef <- list()
 model_summ <- list()
 
-n_fits <- length(dir(fp, pattern = 'fit'))
+n_fits <- length(dir(fp, pattern = 'fit')) # 81
+
+# Added April 30: For the ones that didn't converge the first time, load the model fit from a different directory
+fp2 <- '/mnt/research/nasabio/temp/spammfit_moreiter'
 
 # Run summary on each fit.
 for (i in 1:n_fits) {
 	print(i)
-	load(file.path(fp, paste0('fit', i, '.RData')))
+  if (!(file.exists(file.path(fp2, paste0('fit', i, '.RData'))))) {
+	  load(file.path(fp, paste0('fit', i, '.RData')))
+  } else {
+    load(file.path(fp2, paste0('fit', i, '.RData')))
+  }
+	
 	model_summ[[i]] <- summary(fit$model, waic = FALSE, loo = FALSE, R2 = TRUE) 
 	# Will need to go to parallel if we want to calculate ICs, as it takes way too long.
 	model_coef[[i]] <- fit$coef

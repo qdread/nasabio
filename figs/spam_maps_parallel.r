@@ -2,6 +2,8 @@
 # This uses the new spatial mixed model coefficients.
 # QDR NASABIOXGEO 27 Apr 2018
 
+# Version created 30 Apr: Do in parallel on cluster
+task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # Define functions --------------------------------------------------------
 
@@ -49,12 +51,6 @@ arrangeMaps <- function(x, fpfig, region_name, titles, raw_names, div_type = 'in
 # Load region data --------------------------------------------------------
 
 # Load coefficients
-fpbbs <- 'C:/Users/Q/Dropbox/projects/nasabiodiv' # Local
-fpfia <- 'C:/Users/Q/Dropbox/projects/nasabiodiv'
-fpregion <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/regions'
-fphuc <- 'C:/Users/Q/Dropbox/projects/aquaxterra/hucshapefiles'
-fpstate <- '~/R'
-
 fpbbs <- '/mnt/research/nasabio/data/bbs' # Cluster
 fpfia <- '/mnt/research/nasabio/data/fia'
 fpregion <- '/mnt/research/nasabio/data/ecoregions'
@@ -108,49 +104,16 @@ tnc <- subset(tnc, region %in% tnc_unique)
 
 rbfill <- scale_fill_gradient2(low = "#4575B4", high = "#D73027", midpoint = 0)
 
-# Create list of maps for each predictor by response combo (9 predictors x 8 responses)
-maps_bbs_huc <- coef_bbs %>%
-  filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept') %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(HUC4 = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, huc4, states))
-maps_bbs_bcr <- coef_bbs %>%
-  filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept') %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(BCRNAME = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, bcr, states))  
-maps_bbs_tnc <- coef_bbs %>%
-  filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept') %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(ECODE_NAME = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, tnc, states))
-
-
-# Create grids of maps by predictor, and grids of maps by response
 library(gridExtra)
 fpbbs <- '/mnt/research/nasabio/figs/bbs_coefficient_maps'
 prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
 bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
 bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
-                "alpha_phy_pa", "beta_phy_pa", "gamma_phy_pa", 
+               "alpha_phy_pa", "beta_phy_pa", "gamma_phy_pa", 
                "alpha_func_pa", "beta_func_pa", "gamma_func_pa")
 geo_names <- c('elevation_sd','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','precip_sd','gpp_sd','footprint_mean')
 tw <- theme(plot.title = element_text(color = 'white'))
 
-maps_bbs_huc %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpbbs, region_name = 'HUC4', titles = bio_titles, raw_names = bio_names))
-maps_bbs_bcr %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles, raw_names = bio_names))
-maps_bbs_tnc %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles, raw_names = bio_names))
-
-### FIA
 # Separate incidence and abundance
 fpfia <- '/mnt/research/nasabio/figs/fia_coefficient_maps'
 
@@ -166,66 +129,119 @@ fia_bio_names_abund <- c("alpha_effspn", "beta_td_sorensen", "gamma_effspn",
 bio_titles_incidence <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
 bio_titles_abundance <- paste(bio_titles_incidence, 'abundance')
 
+
 # Create list of maps for each predictor by response combo (9 predictors x 8 responses)
-# Incidence
-maps_fia_huc_incid <- coef_fia %>%
-  filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(HUC4 = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, huc4, states))
-maps_fia_bcr_incid <- coef_fia %>%
-  filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(BCRNAME = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, bcr, states))  
-maps_fia_tnc_incid <- coef_fia %>%
-  filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(ECODE_NAME = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, tnc, states))
+if (task == 1) {
+  maps_bbs_huc <- coef_bbs %>%
+    filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept') %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(HUC4 = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, huc4, states))
+  maps_bbs_huc %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpbbs, region_name = 'HUC4', titles = bio_titles, raw_names = bio_names))
+  
+}
 
-# Abundance
-maps_fia_huc_abund <- coef_fia %>%
-  filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(HUC4 = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, huc4, states))
-maps_fia_bcr_abund <- coef_fia %>%
-  filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(BCRNAME = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, bcr, states))  
-maps_fia_tnc_abund <- coef_fia %>%
-  filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
-  dplyr::select(rv, parameter, region, Estimate) %>%
-  rename(ECODE_NAME = region) %>%
-  group_by(rv, parameter) %>%
-  do(maps = model_map(., rbfill, tnc, states))
+if (task == 2) {
+  maps_bbs_bcr <- coef_bbs %>%
+    filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept') %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(BCRNAME = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, bcr, states))  
+  maps_bbs_bcr %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles, raw_names = bio_names))
+  
+  
+}
 
+if (task == 3) {
+  maps_bbs_tnc <- coef_bbs %>%
+    filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept') %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(ECODE_NAME = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, tnc, states))
+  maps_bbs_tnc %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles, raw_names = bio_names))
+  
+  
+}
 
-maps_fia_huc_incid %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpfia, region_name = 'HUC4', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
-maps_fia_bcr_incid %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
-maps_fia_tnc_incid %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
+if (task == 4) {
+  maps_fia_huc_incid <- coef_fia %>%
+    filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(HUC4 = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, huc4, states))
+  maps_fia_huc_incid %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpfia, region_name = 'HUC4', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
+  
+}
 
-maps_fia_huc_abund %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpfia, region_name = 'HUC4', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
-maps_fia_bcr_abund %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
-maps_fia_tnc_abund %>%
-  group_by(parameter) %>%
-  do(arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
+if (task == 5) {
+  maps_fia_bcr_incid <- coef_fia %>%
+    filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(BCRNAME = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, bcr, states))  
+  maps_fia_bcr_incid %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
+}
 
+if (task == 6) {
+  maps_fia_tnc_incid <- coef_fia %>%
+    filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(ECODE_NAME = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, tnc, states))
+  maps_fia_tnc_incid %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles_incidence, raw_names = fia_bio_names_incid))
+}
+
+if (task == 7) {
+  maps_fia_huc_abund <- coef_fia %>%
+    filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(HUC4 = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, huc4, states))
+  maps_fia_huc_abund %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpfia, region_name = 'HUC4', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
+}
+
+if (task == 8) {
+  maps_fia_bcr_abund <- coef_fia %>%
+    filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(BCRNAME = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, bcr, states))  
+  maps_fia_bcr_abund %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpbbs, region_name = 'BCR', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
+}
+
+if (task == 9) {
+  maps_fia_tnc_abund <- coef_fia %>%
+    filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+    dplyr::select(rv, parameter, region, Estimate) %>%
+    rename(ECODE_NAME = region) %>%
+    group_by(rv, parameter) %>%
+    do(maps = model_map(., rbfill, tnc, states))
+  maps_fia_tnc_abund %>%
+    group_by(parameter) %>%
+    do(arrangeMaps(., fpfig = fpbbs, region_name = 'TNC', titles = bio_titles_abundance, raw_names = fia_bio_names_abund, div_type = 'abundance'))
+}
 

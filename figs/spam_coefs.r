@@ -5,6 +5,7 @@ fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv' # Local
 
 coef_bbs <- read.csv(file.path(fp, 'spatial_coef_bbs.csv'), stringsAsFactors = FALSE)
 coef_fia <- read.csv(file.path(fp, 'spatial_coef_fia.csv'), stringsAsFactors = FALSE)
+spatial_r2s <- read.csv(file.path(fp, 'spatial_r2s.csv'), stringsAsFactors = FALSE)
 
 library(dplyr)
 library(ggplot2)
@@ -30,22 +31,25 @@ bio_titles_abundance <- paste(bio_titles_incidence, 'abundance')
 coef_bbs_fixed <- coef_bbs %>% 
   filter(effect == 'fixed', !parameter %in% 'Intercept') %>%
   mutate(predictor = geo_names[match(parameter, prednames)],
-         response = factor(bio_titles[match(rv, bio_names)], levels = bio_titles))
+         response = factor(bio_titles[match(rv, bio_names)], levels = bio_titles)) 
 coef_fia_fixed_incid <- coef_fia %>%
   filter(effect == 'fixed', !parameter %in% 'Intercept', rv %in% fia_bio_names_incid) %>%
   mutate(predictor = geo_names[match(parameter, prednames)],
-         response = factor(bio_titles_incidence[match(rv, fia_bio_names_incid)], levels = bio_titles_incidence))
+         response = factor(bio_titles_incidence[match(rv, fia_bio_names_incid)], levels = bio_titles_incidence)) 
 coef_fia_fixed_abund <- coef_fia %>%
   filter(effect == 'fixed', !parameter %in% 'Intercept', rv %in% fia_bio_names_abund) %>%
   mutate(predictor = geo_names[match(parameter, prednames)],
          response = factor(bio_titles_abundance[match(rv, fia_bio_names_abund)], levels = bio_titles_abundance))
+spatial_r2s <- spatial_r2s %>%
+  mutate(response = factor(c(bio_titles_incidence, bio_titles_abundance)[match(rv, c(fia_bio_names_incid, fia_bio_names_abund))], levels = c(bio_titles_incidence, bio_titles_abundance)))
 
 coefplot_bbs <- coef_bbs_fixed %>%
   group_by(ecoregion) %>%
-  do(plot = ggplot(., aes(x = predictor, y = Estimate, ymin = q025, ymax = q975)) +
+  do(plot = ggplot(., aes(x = predictor, y = Estimate)) +
     facet_wrap(~ response, scales = 'free_y') +
     geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-    geom_errorbar(width = 0) +
+    geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
+    geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.5, vjust = -.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'bbs', ecoregion %in% .$ecoregion)) +
     geom_point() +
     theme_bw() +
     theme(strip.background = element_rect(fill=NA),
@@ -55,10 +59,11 @@ coefplot_bbs <- coef_bbs_fixed %>%
 
 coefplot_fia_incid <- coef_fia_fixed_incid %>%
   group_by(ecoregion) %>%
-  do(plot = ggplot(., aes(x = predictor, y = Estimate, ymin = q025, ymax = q975)) +
+  do(plot = ggplot(., aes(x = predictor, y = Estimate)) +
        facet_wrap(~ response, scales = 'free_y') +
        geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-       geom_errorbar(width = 0) +
+       geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
+       geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.5, vjust = -.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, !grepl('abundance', response))) +
        geom_point() +
        theme_bw() +
        theme(strip.background = element_rect(fill=NA),
@@ -68,10 +73,11 @@ coefplot_fia_incid <- coef_fia_fixed_incid %>%
 
 coefplot_fia_abund <- coef_fia_fixed_abund %>%
   group_by(ecoregion) %>%
-  do(plot = ggplot(., aes(x = predictor, y = Estimate, ymin = q025, ymax = q975)) +
+  do(plot = ggplot(., aes(x = predictor, y = Estimate)) +
        facet_wrap(~ response, scales = 'free_y') +
        geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-       geom_errorbar(width = 0) +
+       geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
+       geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.5, vjust = -.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, grepl('abundance', response))) +
        geom_point() +
        theme_bw() +
        theme(strip.background = element_rect(fill=NA),

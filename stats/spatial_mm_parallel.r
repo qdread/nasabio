@@ -63,6 +63,10 @@ if (taxon == 'bbs') {
   geodat <- bbsgeo
   biodat <- bbsbio
   siteid <- 'rteNo'
+  
+  # Added April 30: Correction for outliers on beta functional
+  biodat$beta_func_pa[biodat$beta_func_pa < -10] <- NA
+  
 } else {
   load('/mnt/research/nasabio/temp/fia_spatial_mm_dat.RData')
   geodat <- fiageo
