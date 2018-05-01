@@ -1,0 +1,63 @@
+---
+title: "Geodiversity predictors of biodiversity flavors"
+author: "Quentin D. Read"
+date: "May 1, 2018"
+output: pdf_document
+---
+
+# Summary
+
+These are some results for the NASA Bio X Geo manuscript where the goal is to look at the different patterns of biodiversity-geodiversity relationships across the different biodiversity flavors (alpha, beta, gamma * taxonomic, phylogenetic, functional). There are a lot of results here and it is a little bit complicated, so I would appreciate any feedback on what to focus on in terms of a story for the paper. I've tried to identify what I think is interesting and cool, but I would appreciate people's opinion on that.
+
+# Methods
+
+All these results are based on biodiversity and geodiversity variables aggregated at **100 km** radius. Also, all the geodiversity standard deviations are based on **5 km** pixel resolutions.
+
+## Predictor variables (geodiversity)
+
+I used variable selection to find eight predictors that encompass most of the environmental variation across BBS and FIA locations:
+
+* Means
+  + Mean annual temperature
+  + Mean annual precipitation
+  + Mean human footprint index
+* Standard deviation or variability
+  + Standard deviation of elevation
+  + Standard deviation of gross primary productivity
+  + Standard deviation of precipitation
+  + Shannon diversity of geological age category
+  + Shannon diversity of soil type
+
+## Response variables (biodiversity)
+
+I fit a separate linear model for each biodiversity response variable, with the 8 variables above as predictors. There are 9 biodiversity response variables for BBS and for FIA, because we have 3 diversity levels (alpha, beta, gamma) and 3 diversity flavors (taxonomic, phylogenetic, and functional). All of this is *incidence-based*, where species abundance is ignored and only presence-absence is taken into account. For FIA, I did run everything with abundance as well, but the results were qualitatively similar--I think it's better to just look at incidence for both birds and trees.
+
+* Alpha diversity: local
+  + *Taxonomic* (average richness of local communities in the radius)
+  + *Phylogenetic* (average pairwise phylogenetic distance score of communities in the radius, *z*-score compared to null distribution so that it is independent of richness)
+  + *Functional* (average pairwise functional distance score of the communities in the radius, *z*-score compared to null distribution so that it is independent of richness)
+* Beta diversity: turnover
+  + *Taxonomic* (average pairwise distance among communities in the radius)
+  + *Phylogenetic* (average pairwise phylogenetic distance among communities in the radius; *z*-score compared to null distribution to get phylogenetic diversity independent of richness)
+  + *Functional* (average pairwise functional distance among communities in the radius; *z*-score compared to null distribution to control for richness)
+* Gamma diversity: regional
++ *Taxonomic* (total richness of pooled communities in the radius)
+  + *Phylogenetic* (pairwise phylogenetic distance score of pooled communities in the radius, *z*-score compared to null distribution so that it is independent of richness)
+  + *Functional* (pairwise functional distance score of pooled communities in the radius, *z*-score compared to null distribution so that it is independent of richness)
+  
+## Model fitting
+
+I fit a mixed model in which there are fixed effects for all the predictors, and there is a random intercept and slope for each predictor in each region. The continental USA is broken up into regions so that we can look at how the coefficients of the relationships between geodiversity and biodiversity vary across space. The regions are helpful because it is much easier to fit a model with a small number of regions rather than continuous variation in the coefficients across space.
+
+I fit the models with three different regions to see if the size and number of the regions made a difference in the relationships:
+
+* *HUC4*: The HUC4 regions are based on watershed boundaries and divide the continental USA into about 200 regions.
+* *TNC*: The Nature Conservancy ecoregions split the continental USA into about 70 regions.
+* *BCR*: The Bird Conservation Regions split the continental USA into about 35 regions.
+
+The spatial autocorrelation among regions is modeled with a conditional autoregressive (CAR) structure. To specify that, I made an adjacency matrix where two regions are identified as being neighbors if they share a border. The random effect in the model now accounts for the spatial autocorrelation in the biodiversity values of neighboring regions.
+
+I fit the model using the R package `brms` which let me fit it using Bayesian methods without having to fully specify everything about the model. I modeled all the error in the response variables as normally distributed except for taxonomic beta-diversity. Because no null model is run for taxonomic beta-diversity, it is still a raw dissimilarity metric varying between 0 and 1, so the error is beta-distributed.
+
+# Results
+

@@ -3,6 +3,7 @@
 # QDR NASABIOXGEO 27 Apr 2018
 
 # Version created 30 Apr: Do in parallel on cluster
+# Modified 1 May: Clip map to USA borders
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # Define functions --------------------------------------------------------
@@ -74,11 +75,13 @@ library(rgdal)
 library(ggplot2)
 library(dplyr)
 library(purrr)
+library(rgeos)
 
 huc4 <- readOGR(dsn = fphuc, layer = 'HU4_CONUS_Alb')
 bcr <- readOGR(dsn = fpregion, layer = 'BCR_Terrestrial_master')
 tnc <- readOGR(dsn = fpregion, layer = 'tnc_terr_ecoregions')
 states <- read.csv(file.path(fpstate, 'states_albers.csv'), stringsAsFactors = FALSE)
+load(file.path(fpstate, 'states_albers.RData'))
 
 # Convert all to Albers with "region" in the name.
 aea_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"
@@ -99,6 +102,12 @@ bcr_unique <- unique(coef_fia$region[coef_fia$ecoregion == 'BCR'])
 tnc_unique <- unique(coef_fia$region[coef_fia$ecoregion == 'TNC'])
 bcr <- subset(bcr, region %in% bcr_unique & COUNTRY %in% 'USA' & !PROVINCE_S %in% 'ALASKA')
 tnc <- subset(tnc, region %in% tnc_unique)
+
+# Clip TNC to US boundaries
+goodusabounds <- gUnaryUnion(states_albers)
+tncdat <- tnc@data
+tnc <- gIntersection(tnc, goodusabounds, byid = TRUE, id = row.names(tnc@data))
+tnc <- SpatialPolygonsDataFrame(tnc, tncdat)
 
 # Create all maps ------------------------------------------
 
