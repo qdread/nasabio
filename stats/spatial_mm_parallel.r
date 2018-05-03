@@ -2,6 +2,7 @@
 # Fit for a single combination of response variable x taxon (bbs/fia) x region (huc/bcr/tnc)
 # QDR/Nasabioxgeo/25 Apr 2018
 
+# Edited 3 May 2018: move creation of CV fold to the k-fold script
 # Edited 2 May 2018: change the number of iterations to a variable
 # Edited 1 May 2018: add option for priors.
 # edited on hpcc 27 apr to add iterations to get models to converge
@@ -53,15 +54,8 @@ fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region
   formula_string <- paste(names(resp_df)[2], '~', fixed_effects, '+', random_effects)
   dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
   
-  # Added 2 May: identify folds ahead of time
-  assign_fold <- function(n, k) {
-    sample(rep_len(sample(1:k), n))
-  }
-  
   # Added 2 May: get rid of any region that has less than 5 sites.
-  dat <- dat %>% group_by(region) %>% filter(n() >= 5) %>% mutate(fold = assign_fold(n(), 5))
-  #keep_idx <- dimnames(adj_matrix)[[1]] %in% dat$region  # This might not be needed.
-  #adj_matrix <- adj_matrix[keep_idx, keep_idx] 
+  dat <- dat %>% group_by(region) %>% filter(n() >= 5) 
   
   # Fit model, extract coefficients, and format them
   mm <- brm(formula_string, data = dat, family = distribution, autocor = cor_car(adj_matrix, formula = ~ 1|region, type = 'esicar'),
@@ -119,10 +113,11 @@ fit <- fit_spatial_mm(pred_df = geodat,
                       region_var = ecoregion, 
                       distribution = distrib, 
                       adj_matrix = eco_mat,
+					  priors = added_priors,
                       n_chains = NC,
                       n_iter = NI,
-                      n_warmup = NW,
-					  priors = added_priors)
+                      n_warmup = NW
+					  )
 
 # Save all fits
 save(fit, file = paste0('/mnt/research/nasabio/temp/spammfit/fit',task,'.RData'))

@@ -47,7 +47,7 @@ I fit a separate linear model for each biodiversity response variable, with the 
 
 ## Other processing of data
 
-I had to get rid of a few outliers in beta diversity, but other than that all the data are included for BBS ending up with around 3000 sites. For FIA, I thinned out the data so that all plots were a minimum of 10 km from any other plot, to try to deal somewhat with autocorrelation and to make the models fit more quickly, which ends up with around 9000 sites.
+I had to get rid of a few outliers in beta diversity, but other than that all the data are included for BBS ending up with around 3000 sites. For FIA, I thinned out the data so that all plots were a minimum of 10 km from any other plot, to try to deal somewhat with autocorrelation and to make the models fit more quickly, which ends up with around 9000 sites. In addition, I threw out entire regions if there were less than 5 sites in the region because it isn't meaningful to estimate a random effect with so few points in the block. Luckily, that only got rid of a few dozen sites at most.
   
 ## Model fitting
 
@@ -63,11 +63,15 @@ The spatial autocorrelation among regions is modeled with a conditional autoregr
 
 I fit the model using the R package `brms` which let me fit it using Bayesian methods without having to fully specify everything about the model. I modeled all the error in the response variables as normally distributed except for taxonomic beta-diversity. Because no null model is run for taxonomic beta-diversity, it is still a raw dissimilarity metric varying between 0 and 1, so the error is beta-distributed.
 
+## Cross-validation
+
+I wanted to see how well the models do at predicting data outside the sample. I did 5-fold cross validation with the subsets stratified across regions: I refit each of the models on only 80% of the data five times, with the 20% holdout sampled evenly across the regions. This gives a "k-fold information criterion." I also used the model fits to predict the values for the other 20%. Then, I averaged the root mean squared error of those predictions to get a "k-fold RMSE" for each model, which tells us how well the model does at predicting data points that were not used to fit the model. The reason I used 5-fold and not the customary 10-fold is that since I used 5 as the cutoff for regions, 5-fold cross validation ensures that each 80% subset is stratified evenly across the regions.
+
 # Results
 
 ## Fixed effects
 
-These are the coefficient estimates of the fixed effects. The predictors are scaled so that you can compare within a model. The $R^2$ of the model is shown as well.
+These are the coefficient estimates of the fixed effects. The predictors are scaled so that you can compare within a model. The fit statistics I showed are the $R^2$ of the model, the in-sample *rRMSE* and the k-fold *rRMSE* (r stands for relative meaning that the RMSE was divided by the range of the data so that model performance could be compared across different response variables). A low *rRMSE* is better predictive power, it can vary between 0 and 1 where 0 is no error.
 
 ### BBS results
 
