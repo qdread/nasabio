@@ -44,6 +44,10 @@ I fit a separate linear model for each biodiversity response variable, with the 
 + *Taxonomic* (total richness of pooled communities in the radius)
   + *Phylogenetic* (pairwise phylogenetic distance score of pooled communities in the radius, *z*-score compared to null distribution so that it is independent of richness)
   + *Functional* (pairwise functional distance score of pooled communities in the radius, *z*-score compared to null distribution so that it is independent of richness)
+
+## Other processing of data
+
+I had to get rid of a few outliers in beta diversity, but other than that all the data are included for BBS ending up with around 3000 sites. For FIA, I thinned out the data so that all plots were a minimum of 10 km from any other plot, to try to deal somewhat with autocorrelation and to make the models fit more quickly, which ends up with around 9000 sites.
   
 ## Model fitting
 
@@ -61,3 +65,28 @@ I fit the model using the R package `brms` which let me fit it using Bayesian me
 
 # Results
 
+## Fixed effects
+
+These are the coefficient estimates of the fixed effects. The predictors are scaled so that you can compare within a model. The $R^2$ of the model is shown as well.
+
+### BBS results
+
+* If you compare the results for the different ways of breaking the USA into regions (HUC4, TNC, and BCR regions), it really looks like there isn't much difference. For the MS, I think we can focus on just one. TNC ecoregions seem to be a good choice because there are not too many of them and their boundaries have some ecological meaning.
+* Climate effects (temperature and precipitation) have large impacts on bird diversity.
+* Looking at the more geodiversity-related predictors, we see that variability of gross primary productivity is pretty strongly associated with increased taxonomic diversity across alpha, beta, and gamma, but it is associated with decreased taxonomic and phylogenetic diversity.
+* For the geology and soil diversity relationships, we see that they have consistently positive impacts on gamma diversity, but more "geodiverse" areas are associated with lower alpha diversity, leading to reduced beta diversity even though gamma is higher. That is sort of interesting.
+* Human footprint index mean actually has positive impacts on bird diversity across the board, at least for functional and phylogenetic diversity. 
+* Elevation standard deviation is associated with higher beta and gamma diversity for taxonomic, but is associated with lower diversity of all kinds for phylogenetic and functional diversity.
+
+### FIA results
+
+* Overall, the uncertainty around the parameter estimates is higher than for BBS even though more data was used to fit the model.
+* Elevation standard deviation, which we identified as a big component of geodiversity, consistently is asociated with higher beta diversity, as well as higher taxonomic gamma diversity.
+* The climate predictors are pretty weak although precipitation has some effects on beta diversity.
+* Human footprint index has little effect on tree diversity.
+* Geological age diversity is associated with increased taxonomic diversity, and soil diversity seems like it has inconsistent effects.
+* Productivity standard deviation is consistently associated with increased diversity of trees.
+
+## Random effects
+
+I made some maps to see if we could visualize any interesting patterns in the random effects, in other words, do the relationships vary across space? The patterns seem somewhat random for a lot of the predictors, although some patterns seem to appear for others. It is not really easy to say what is going on. I would think it's a better idea to just base the story around the fixed effects, but if people can help me think of a good story for the random effects, that would be great.

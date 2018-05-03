@@ -2,11 +2,20 @@
 # Fit for a single combination of response variable x taxon (bbs/fia) x region (huc/bcr/tnc)
 # QDR/Nasabioxgeo/25 Apr 2018
 
+# Edited 2 May 2018: change the number of iterations to a variable
+# Edited 1 May 2018: add option for priors.
+# edited on hpcc 27 apr to add iterations to get models to converge
+
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
+args <- commandArgs(TRUE)
+
+for (i in 1:length(args)) {
+  eval(parse(text=args[[i]]))
+}
+
 NC <- 3
-NI <- 4000
-NW <- 3000
+# NI and NW should be specified.
 
 prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
 respnames_fia <- c("alpha_richness", "alpha_effspn", "alpha_phy_pa",
@@ -27,7 +36,7 @@ taxon <- task_table$taxon[task]
 rv <- task_table$rv[task]
 ecoregion <- task_table$ecoregion[task]
 
-fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var, adj_matrix, distribution = c('gaussian','beta'), n_chains = 2, n_iter = 2000, n_warmup = 1000) {
+fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var, adj_matrix, distribution = c('gaussian','beta'), priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000) {
   require(dplyr)
   require(brms)
   require(reshape2)
@@ -43,9 +52,20 @@ fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region
   random_effects <- paste(c(paste('(1|', region_name, ')', sep = ''), paste('(', pred_var_names, ' - 1|', region_name, ')', sep = '')), collapse = '+')
   formula_string <- paste(names(resp_df)[2], '~', fixed_effects, '+', random_effects)
   dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
+  
+  # Added 2 May: identify folds ahead of time
+  assign_fold <- function(n, k) {
+    sample(rep_len(sample(1:k), n))
+  }
+  
+  # Added 2 May: get rid of any region that has less than 5 sites.
+  dat <- dat %>% group_by(region) %>% filter(n() >= 5) %>% mutate(fold = assign_fold(n(), 5))
+  #keep_idx <- dimnames(adj_matrix)[[1]] %in% dat$region  # This might not be needed.
+  #adj_matrix <- adj_matrix[keep_idx, keep_idx] 
+  
   # Fit model, extract coefficients, and format them
   mm <- brm(formula_string, data = dat, family = distribution, autocor = cor_car(adj_matrix, formula = ~ 1|region, type = 'esicar'),
-            chains = n_chains, iter = n_iter, warmup = n_warmup)
+            chains = n_chains, iter = n_iter, warmup = n_warmup, prior = priors)
   fixed_effects <- fixef(mm)
   random_effects <- ranef(mm)
   fixed_effects <- cbind(effect = 'fixed', region = as.character(NA), melt(fixed_effects, varnames = c('parameter', 'stat')))
@@ -63,10 +83,10 @@ if (taxon == 'bbs') {
   geodat <- bbsgeo
   biodat <- bbsbio
   siteid <- 'rteNo'
-  
+
   # Added April 30: Correction for outliers on beta functional
   biodat$beta_func_pa[biodat$beta_func_pa < -10] <- NA
-  
+
 } else {
   load('/mnt/research/nasabio/temp/fia_spatial_mm_dat.RData')
   geodat <- fiageo
@@ -76,6 +96,17 @@ if (taxon == 'bbs') {
 
 distrib <- ifelse(grepl('beta_td', rv), 'beta', 'gaussian') # Beta_td follows beta distribution, rest are normally distributed
                   
+# Priors (added May 1)
+# --------------------
+
+library(brms)
+added_priors <-  c(prior('normal(0,10)', class = 'b'),
+				   prior('lognormal(1,1)', class = 'sd', group = 'region'),
+				   prior('student_t(3,0,3)', class = 'sdcar')
+				 )
+				 
+# --------------------				  
+				  
 if (ecoregion == 'HUC4') eco_mat <- huc_bin
 if (ecoregion == 'BCR') eco_mat <- bcr_bin
 if (ecoregion == 'TNC') eco_mat <- tnc_bin
@@ -90,7 +121,8 @@ fit <- fit_spatial_mm(pred_df = geodat,
                       adj_matrix = eco_mat,
                       n_chains = NC,
                       n_iter = NI,
-                      n_warmup = NW)
+                      n_warmup = NW,
+					  priors = added_priors)
 
 # Save all fits
 save(fit, file = paste0('/mnt/research/nasabio/temp/spammfit/fit',task,'.RData'))

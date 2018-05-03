@@ -1,6 +1,8 @@
 # Summarize all spatial mixed models and combine all their coefficients into one data frame for plotting.
 # QDR/NASABIOXGEO/26 Apr 2018
 
+# Edited 01 May: Add "predict" step so we can get RMSE.
+
 respnames_fia <- c("alpha_richness", "alpha_effspn", "alpha_phy_pa",
                    "alpha_phy", "alpha_func_pa", "alpha_func", "beta_td_sorensen_pa",
                    "beta_td_sorensen", "beta_phy_pa", "beta_phy", "beta_func_pa",
@@ -23,6 +25,7 @@ library(reshape2)
 
 model_coef <- list()
 model_summ <- list()
+model_pred <- list()
 
 n_fits <- length(dir(fp, pattern = 'fit')) # 81
 
@@ -41,6 +44,8 @@ for (i in 1:n_fits) {
 	model_summ[[i]] <- summary(fit$model, waic = FALSE, loo = FALSE, R2 = TRUE) 
 	# Will need to go to parallel if we want to calculate ICs, as it takes way too long.
 	model_coef[[i]] <- fit$coef
+	model_pred[[i]] <- cbind(observed = fit$model$data[,1], predict(fit$model))
+	
 }
 
 # Reshape coefficient data frame to slightly wider form, and then add identifying columns.
@@ -53,17 +58,26 @@ model_coef <- map2(model_coef, 1:n_fits, function(x, y) {
 
 model_coef <- do.call(rbind, model_coef)
 
+model_r2s <- map_dbl(model_summ, 'R2')
+write.csv(cbind(task_table, R2 = model_r2s), '/mnt/research/nasabio/data/fia/spatial_r2s.csv', row.names = FALSE)
+
 # Added 27 Apr: Reduce size of summary to just show the coefficients' convergence stats.
 get_pars <- function(x, y) {
   par_df <- as.data.frame(rbind(x$fixed, x$spec_pars, x$cor_pars, x$random$region))
   cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], parameter = row.names(par_df), par_df)
 }
 
-model_r2s <- map_dbl(model_summ, 'R2')
-write.csv(cbind(task_table, R2 = model_r2s), '/mnt/research/nasabio/data/fia/spatial_r2s.csv', row.names = FALSE)
 
 model_summ <- map2(model_summ, 1:n_fits, get_pars)
+
+# Diagnostic step: Check R-hats of the parameters
+did_not_converge <- map(model_summ, function(x) x$parameter[x$Rhat > 1.1])
+which(map_int(did_not_converge, length) > 0)
+
 model_summ <- do.call(rbind, model_summ)
+
+model_pred <- map2_dfr(model_pred, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x)))
+
 
 model_coef_fia <- subset(model_coef, taxon == 'fia')
 model_coef_bbs <- subset(model_coef, taxon == 'bbs')
@@ -71,8 +85,14 @@ model_coef_bbs <- subset(model_coef, taxon == 'bbs')
 model_summ_fia <-  subset(model_summ, taxon == 'fia')
 model_summ_bbs <-  subset(model_summ, taxon == 'bbs')
 
+model_pred_fia <-  subset(model_pred, taxon == 'fia')
+model_pred_bbs <-  subset(model_pred, taxon == 'bbs')
+
 write.csv(model_coef_fia, '/mnt/research/nasabio/data/fia/spatial_coef_fia.csv', row.names = FALSE)
 write.csv(model_coef_bbs, '/mnt/research/nasabio/data/bbs/spatial_coef_bbs.csv', row.names = FALSE)
 
 write.csv(model_summ_fia, '/mnt/research/nasabio/data/fia/spatial_summ_fia.csv', row.names = FALSE)
 write.csv(model_summ_bbs, '/mnt/research/nasabio/data/bbs/spatial_summ_bbs.csv', row.names = FALSE)
+
+write.csv(model_pred_fia, '/mnt/research/nasabio/data/fia/spatial_pred_fia.csv', row.names = FALSE)
+write.csv(model_pred_bbs, '/mnt/research/nasabio/data/bbs/spatial_pred_bbs.csv', row.names = FALSE)

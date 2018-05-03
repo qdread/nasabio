@@ -1,14 +1,32 @@
 # Fixed effect coefficient plots from spatial mixed models
 # QDR/NASABioxgeo/27 Apr 2018
 
+# Edit 02 May: add RMSE and observed vs predicted plots
+
 fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv' # Local
 
 coef_bbs <- read.csv(file.path(fp, 'spatial_coef_bbs.csv'), stringsAsFactors = FALSE)
 coef_fia <- read.csv(file.path(fp, 'spatial_coef_fia.csv'), stringsAsFactors = FALSE)
 spatial_r2s <- read.csv(file.path(fp, 'spatial_r2s.csv'), stringsAsFactors = FALSE)
+pred_bbs <- read.csv(file.path(fp, 'spatial_pred_bbs.csv'), stringsAsFactors = FALSE)
+pred_fia <- read.csv(file.path(fp, 'spatial_pred_fia.csv'), stringsAsFactors = FALSE)
 
 library(dplyr)
 library(ggplot2)
+
+# Calculation of RMSE
+rmse_bbs <- pred_bbs %>%
+  group_by(rv, ecoregion) %>%
+  summarize(RMSE = sqrt(mean((observed-Estimate)^2)),
+            range_obs = diff(range(observed)),
+            rRMSE = RMSE/range_obs)
+rmse_fia <- pred_fia %>%
+  group_by(rv, ecoregion) %>%
+  summarize(RMSE = sqrt(mean((observed-Estimate)^2)),
+            range_obs = diff(range(observed)),
+            rRMSE = RMSE/range_obs)
+
+rmse_all <- rbind(data.frame(taxon = 'fia', rmse_fia), data.frame(taxon = 'bbs', rmse_bbs))
 
 prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
 geo_names <- c('elevation_sd','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','precip_sd','gpp_sd','footprint_mean')
@@ -41,7 +59,8 @@ coef_fia_fixed_abund <- coef_fia %>%
   mutate(predictor = geo_names[match(parameter, prednames)],
          response = factor(bio_titles_abundance[match(rv, fia_bio_names_abund)], levels = bio_titles_abundance))
 spatial_r2s <- spatial_r2s %>%
-  mutate(response = factor(c(bio_titles_incidence, bio_titles_abundance)[match(rv, c(fia_bio_names_incid, fia_bio_names_abund))], levels = c(bio_titles_incidence, bio_titles_abundance)))
+  mutate(response = factor(c(bio_titles_incidence, bio_titles_abundance)[match(rv, c(fia_bio_names_incid, fia_bio_names_abund))], levels = c(bio_titles_incidence, bio_titles_abundance))) %>%
+  left_join(rmse_all)
 
 coefplot_bbs <- coef_bbs_fixed %>%
   group_by(ecoregion) %>%
@@ -49,7 +68,8 @@ coefplot_bbs <- coef_bbs_fixed %>%
     facet_wrap(~ response, scales = 'free_y') +
     geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
     geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
-    geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.5, vjust = -.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'bbs', ecoregion %in% .$ecoregion)) +
+    geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.1, vjust = -1.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'bbs', ecoregion %in% .$ecoregion)) +
+    geom_text(aes(label = paste('rRMSE =', round(rRMSE, 2))), x = -Inf, y = -Inf, hjust = -.1, vjust = -.7, parse = FALSE, data = filter(spatial_r2s, taxon == 'bbs', ecoregion %in% .$ecoregion)) +  
     geom_point() +
     theme_bw() +
     theme(strip.background = element_rect(fill=NA),
@@ -63,7 +83,8 @@ coefplot_fia_incid <- coef_fia_fixed_incid %>%
        facet_wrap(~ response, scales = 'free_y') +
        geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
        geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
-       geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.5, vjust = -.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, !grepl('abundance', response))) +
+       geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.1, vjust = -1.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, !grepl('abundance', response))) +
+       geom_text(aes(label = paste('rRMSE =', round(rRMSE, 2))), x = -Inf, y = -Inf, hjust = -.1, vjust = -.7, parse = FALSE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, !grepl('abundance', response))) +  
        geom_point() +
        theme_bw() +
        theme(strip.background = element_rect(fill=NA),
@@ -77,8 +98,8 @@ coefplot_fia_abund <- coef_fia_fixed_abund %>%
        facet_wrap(~ response, scales = 'free_y') +
        geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
        geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
-       geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.5, vjust = -.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, grepl('abundance', response))) +
-       geom_point() +
+       geom_text(aes(label = paste('R^2 ==', round(R2, 2))), x = -Inf, y = -Inf, hjust = -.1, vjust = -1.7, parse = TRUE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, grepl('abundance', response))) +
+       geom_text(aes(label = paste('rRMSE =', round(rRMSE, 2))), x = -Inf, y = -Inf, hjust = -.1, vjust = -.7, parse = FALSE, data = filter(spatial_r2s, taxon == 'fia', ecoregion %in% .$ecoregion, grepl('abundance', response))) +         geom_point() +
        theme_bw() +
        theme(strip.background = element_rect(fill=NA),
              axis.text.x = element_text(angle = 45, hjust = 1)) +
