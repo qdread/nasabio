@@ -47,7 +47,7 @@ I fit a separate linear model for each biodiversity response variable, with the 
 
 ## Other processing of data
 
-I had to get rid of a few outliers in beta diversity, but other than that all the data are included for BBS ending up with around 3000 sites. For FIA, I thinned out the data so that all plots were a minimum of 10 km from any other plot, to try to deal somewhat with autocorrelation and to make the models fit more quickly, which ends up with around 9000 sites. In addition, I threw out entire regions if there were less than 5 sites in the region because it isn't meaningful to estimate a random effect with so few points in the block. Luckily, that only got rid of a few dozen sites at most.
+First, I got rid of any site within 50 km of the Canada or Mexico borders. Next, I had to get rid of a few outliers in beta diversity, but other than that all the data are included for BBS ending up with around 3000 sites. For FIA, I thinned out the data so that all plots were a minimum of 10 km from any other plot, to try to deal somewhat with autocorrelation and to make the models fit more quickly, which ends up with around 9000 sites. In addition, I threw out entire regions if there were less than 5 sites in the region because it isn't meaningful to estimate a random effect with so few points in the block. Luckily, that only got rid of a few dozen sites at most.
   
 ## Model fitting
 

@@ -49,6 +49,8 @@ fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region
 
 # Load biodiversity and geodiversity data ---------------------------------
 
+# Edit 04 May: also make 50km version
+
 library(dplyr)
 fp <- '/mnt/research/nasabio/data'
 
@@ -90,6 +92,42 @@ fiageo <- read.csv(file.path(fp, 'fia/fia_geo_formixedmodels.csv'), stringsAsFac
 fiageo <- fiageo %>%
   setNames(gsub('_geodiv','',names(.))) %>%
   mutate(HUC4 = if_else(nchar(HUC4) == 3, paste0('0',HUC4), as.character(HUC4)))
+
+
+# 50 km version -----------------------------------------------------------
+
+# Use only 50 km radius.
+bbsbio <- bbsbio %>% 
+  select(rteNo,
+         alpha_richness_50, alpha_MPD_pa_z_50, alpha_MPDfunc_pa_z_50,
+         beta_td_sorensen_pa_50, beta_pd_pairwise_pa_z_50, beta_fd_pairwise_pa_z_50,
+         gamma_richness_50, gamma_MPD_pa_z_50, gamma_MPDfunc_pa_z_50) %>%
+  rename(alpha_richness = alpha_richness_50, alpha_phy_pa = alpha_MPD_pa_z_50, alpha_func_pa = alpha_MPDfunc_pa_z_50,
+         beta_td_sorensen_pa = beta_td_sorensen_pa_50, beta_phy_pa = beta_pd_pairwise_pa_z_50, beta_func_pa = beta_fd_pairwise_pa_z_50,
+         gamma_richness = gamma_richness_50, gamma_phy_pa = gamma_MPD_pa_z_50, gamma_func_pa = gamma_MPDfunc_pa_z_50)
+
+
+bbssp <- bbsgeo[,c('rteNo','lat','lon')]
+bbsgeo <- bbsgeo %>%
+  select(rteNo, HUC4, BCR, TNC, contains('point'), matches('5k.*_50_')) %>%
+  select(-contains('roughness'), -contains('richness'), -contains('night')) %>%
+  select(rteNo, HUC4, BCR, TNC,
+         contains('bio1_'), contains('bio12_'), contains('biocloud1_'),
+         contains('elevation'), contains('soil'), contains('geological'),
+         contains('footprint'), contains('gpp')) %>%
+  select(-contains('point')) %>%
+  mutate(HUC4 = if_else(nchar(HUC4) == 3, paste0('0',HUC4), as.character(HUC4)))
+
+# FIA (only needed variables are in these dfs, rest are on server)
+# Use effective species number for Shannon
+fiabio <- read.csv(file.path(fp, 'fia/fia_bio_formixedmodels_50k.csv'), stringsAsFactors = FALSE) %>%
+  mutate(alpha_shannon = exp(alpha_shannon), gamma_shannon = exp(gamma_shannon)) %>%
+  rename(alpha_effspn = alpha_shannon, gamma_effspn = gamma_shannon)
+fiageo <- read.csv(file.path(fp, 'fia/fia_geo_formixedmodels_50k.csv'), stringsAsFactors = FALSE)
+fiageo <- fiageo %>%
+  setNames(gsub('_geodiv','',names(.))) %>%
+  mutate(HUC4 = if_else(nchar(HUC4) == 3, paste0('0',HUC4), as.character(HUC4)))
+
 
 # Get rid of coasts and thin down plots -----------------------------------
 
@@ -148,6 +186,9 @@ bbsbio <- bbsbio[bbs_in_eco,]
 save(fiageo, fiabio, bcr_bin, huc_bin, tnc_bin, file = '/mnt/research/nasabio/temp/fia_spatial_mm_dat.RData')
 save(bbsgeo, bbsbio, bcr_bin, huc_bin, tnc_bin, file = '/mnt/research/nasabio/temp/bbs_spatial_mm_dat.RData')
 
+# 50 k version
+save(fiageo, fiabio, bcr_bin, huc_bin, tnc_bin, file = '/mnt/research/nasabio/temp/fia_spatial_mm_dat_50k.RData')
+save(bbsgeo, bbsbio, bcr_bin, huc_bin, tnc_bin, file = '/mnt/research/nasabio/temp/bbs_spatial_mm_dat_50k.RData')
 
 # Fit models to BBS and FIA data ------------------------------------------
 
