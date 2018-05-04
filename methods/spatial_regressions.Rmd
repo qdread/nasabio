@@ -67,6 +67,8 @@ I fit the model using the R package `brms` which let me fit it using Bayesian me
 
 I wanted to see how well the models do at predicting data outside the sample. I did 5-fold cross validation with the subsets stratified across regions: I refit each of the models on only 80% of the data five times, with the 20% holdout sampled evenly across the regions. This gives a "k-fold information criterion." I also used the model fits to predict the values for the other 20%. Then, I averaged the root mean squared error of those predictions to get a "k-fold RMSE" for each model, which tells us how well the model does at predicting data points that were not used to fit the model. The reason I used 5-fold and not the customary 10-fold is that since I used 5 as the cutoff for regions, 5-fold cross validation ensures that each 80% subset is stratified evenly across the regions.
 
+\newpage
+
 # Results
 
 ## Fixed effects
@@ -82,6 +84,13 @@ These are the coefficient estimates of the fixed effects. The predictors are sca
 * Human footprint index mean actually has positive impacts on bird diversity across the board, at least for functional and phylogenetic diversity. 
 * Elevation standard deviation is associated with higher beta and gamma diversity for taxonomic, but is associated with lower diversity of all kinds for phylogenetic and functional diversity.
 
+\begin{figure}[h!]
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/BBS_TNC_coefficients.png}}
+\caption{Fixed effects for BBS diversity models, using TNC regions as the random effect}
+\end{figure}
+
+\newpage
+
 ### FIA results
 
 * Overall, the uncertainty around the parameter estimates is higher than for BBS even though more data was used to fit the model.
@@ -91,6 +100,29 @@ These are the coefficient estimates of the fixed effects. The predictors are sca
 * Geological age diversity is associated with increased taxonomic diversity, and soil diversity seems like it has inconsistent effects.
 * Productivity standard deviation is consistently associated with increased diversity of trees.
 
+\begin{figure}[h!]
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/FIAincidence_TNC_coefficients.png}}
+\caption{Fixed effects for FIA diversity models, using TNC regions as the random effect}
+\end{figure}
+
+\newpage
+
 ## Random effects
 
 I made some maps to see if we could visualize any interesting patterns in the random effects, in other words, do the relationships vary across space? The patterns seem somewhat random for a lot of the predictors, although some patterns seem to appear for others. It is not really easy to say what is going on. I would think it's a better idea to just base the story around the fixed effects, but if people can help me think of a good story for the random effects, that would be great.
+
+### BBS random effect maps
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/TNC_incidence_soil_diversity.png}}
+\caption{Region-specific random effect of soil diversity on BBS diversity (TNC ecoregions)}
+\end{figure}
+
+\newpage
+
+### FIA random effect maps
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/fia_coefficient_maps/TNC_incidence_soil_diversity.png}}
+\caption{Region-specific random effect of soil diversity on FIA diversity (TNC ecoregions)}
+\end{figure}

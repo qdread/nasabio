@@ -1,6 +1,7 @@
 # Do K-fold cross validation on the spatial mixed models and return CV predictions and information criteria.
 # QDR/NASABIOXGEO/02 May 2018
 
+# Edited 4 May 2018: add adapt-delta argument.
 # Edited 3 May 2018: Make number of iterations and warmups variable. Also make the fold variable here.
 
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
@@ -12,7 +13,7 @@ for (i in 1:length(args)) {
   eval(parse(text=args[[i]]))
 }
 
-kfold_rmse <- function(fit, k, n_chains, n_iter, n_warmup, seed = 101) {
+kfold_rmse <- function(fit, k, n_chains, n_iter, n_warmup, delta = 0.8, seed = 101) {
   require(brms)
   require(purrr)
   require(dplyr)
@@ -26,7 +27,7 @@ kfold_rmse <- function(fit, k, n_chains, n_iter, n_warmup, seed = 101) {
   folds <- fit$data %>% group_by(region) %>% transmute(fold = assign_fold(n(), k))
   fit$data$fold <- factor(folds$fold)
   
-  kf <- kfold(fit, chains = n_chains, cores = n_chains, iter = n_iter, warmup = n_warmup, save_fits = TRUE, group = 'fold')
+  kf <- kfold(fit, chains = n_chains, cores = n_chains, iter = n_iter, warmup = n_warmup, adapt_delta = delta, save_fits = TRUE, group = 'fold')
   
   # Predicted values for the subset not in each fold.
   oos_pred <- map2(kf$fits[,'fit'], kf$fits[,'omitted'], function(fit_fold, idx) {
@@ -53,6 +54,6 @@ fp <- '/mnt/research/nasabio/temp/spammfit'
 
 load(file.path(fp, paste0('fit', task, '.RData')))
 
-kf <- kfold_rmse(fit$model, k = 5, n_chains = 2, n_iter = NI, n_warmup = NW, seed = task + 101)	
+kf <- kfold_rmse(fit$model, k = 5, n_chains = 2, n_iter = NI, n_warmup = NW, delta = delta, seed = task + 101)	
 	
 save(kf, file = paste0('/mnt/research/nasabio/temp/spammkfold/kfold_', task, '.RData'))

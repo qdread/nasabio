@@ -2,7 +2,7 @@
 # Fit for a single combination of response variable x taxon (bbs/fia) x region (huc/bcr/tnc)
 # QDR/Nasabioxgeo/25 Apr 2018
 
-# Edited 3 May 2018: move creation of CV fold to the k-fold script
+# Edited 3 May 2018: move creation of CV fold to the k-fold script; add option to change adapt_delta
 # Edited 2 May 2018: change the number of iterations to a variable
 # Edited 1 May 2018: add option for priors.
 # edited on hpcc 27 apr to add iterations to get models to converge
@@ -16,7 +16,10 @@ for (i in 1:length(args)) {
 }
 
 NC <- 3
-# NI and NW should be specified.
+# If arguments are not specified, give default values
+if (!exists('NI')) NI <- 5000
+if (!exists('NW')) NW <- 3000
+if (!exists('delta')) delta <- 0.8
 
 prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
 respnames_fia <- c("alpha_richness", "alpha_effspn", "alpha_phy_pa",
@@ -37,7 +40,7 @@ taxon <- task_table$taxon[task]
 rv <- task_table$rv[task]
 ecoregion <- task_table$ecoregion[task]
 
-fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var, adj_matrix, distribution = c('gaussian','beta'), priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000) {
+fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var, adj_matrix, distribution = c('gaussian','beta'), priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.8) {
   require(dplyr)
   require(brms)
   require(reshape2)
@@ -59,7 +62,7 @@ fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region
   
   # Fit model, extract coefficients, and format them
   mm <- brm(formula_string, data = dat, family = distribution, autocor = cor_car(adj_matrix, formula = ~ 1|region, type = 'esicar'),
-            chains = n_chains, iter = n_iter, warmup = n_warmup, prior = priors)
+            chains = n_chains, iter = n_iter, warmup = n_warmup, prior = priors, control = list(adapt_delta = delta))
   fixed_effects <- fixef(mm)
   random_effects <- ranef(mm)
   fixed_effects <- cbind(effect = 'fixed', region = as.character(NA), melt(fixed_effects, varnames = c('parameter', 'stat')))
@@ -116,7 +119,8 @@ fit <- fit_spatial_mm(pred_df = geodat,
 					  priors = added_priors,
                       n_chains = NC,
                       n_iter = NI,
-                      n_warmup = NW
+                      n_warmup = NW,
+					  delta = delta
 					  )
 
 # Save all fits

@@ -1,6 +1,7 @@
 # Summarize all spatial mixed models and combine all their coefficients into one data frame for plotting.
 # QDR/NASABIOXGEO/26 Apr 2018
 
+# Edited 03 May: Also extract the fit statistics from the k-fold cross validation output
 # Edited 01 May: Add "predict" step so we can get RMSE.
 
 respnames_fia <- c("alpha_richness", "alpha_effspn", "alpha_phy_pa",
@@ -19,6 +20,7 @@ task_table <- data.frame(taxon = rep(c('fia','bbs'), c(length(respnames_fia), le
                          stringsAsFactors = FALSE)
 
 fp <- '/mnt/research/nasabio/temp/spammfit'
+fpkf <- '/mnt/research/nasabio/temp/spammkfold'
 library(brms)
 library(purrr)
 library(reshape2)
@@ -27,25 +29,20 @@ model_coef <- list()
 model_summ <- list()
 model_pred <- list()
 
-n_fits <- length(dir(fp, pattern = 'fit')) # 81
-
-# Added April 30: For the ones that didn't converge the first time, load the model fit from a different directory
-fp2 <- '/mnt/research/nasabio/temp/spammfit_moreiter'
+n_fits <- nrow(task_table) # 81
 
 # Run summary on each fit.
 for (i in 1:n_fits) {
 	print(i)
-  if (!(file.exists(file.path(fp2, paste0('fit', i, '.RData'))))) {
-	  load(file.path(fp, paste0('fit', i, '.RData')))
+  if (!(file.exists(file.path(fp, paste0('fit', i, '.RData'))))) {
+	  model_coef[[i]] <- model_summ[[i]] <- model_pred[[i]] <- 'No data'
   } else {
-    load(file.path(fp2, paste0('fit', i, '.RData')))
-  }
-	
+    load(file.path(fp, paste0('fit', i, '.RData')))
+  	
 	model_summ[[i]] <- summary(fit$model, waic = FALSE, loo = FALSE, R2 = TRUE) 
-	# Will need to go to parallel if we want to calculate ICs, as it takes way too long.
 	model_coef[[i]] <- fit$coef
 	model_pred[[i]] <- cbind(observed = fit$model$data[,1], predict(fit$model))
-	
+  }
 }
 
 # Reshape coefficient data frame to slightly wider form, and then add identifying columns.
@@ -96,3 +93,41 @@ write.csv(model_summ_bbs, '/mnt/research/nasabio/data/bbs/spatial_summ_bbs.csv',
 
 write.csv(model_pred_fia, '/mnt/research/nasabio/data/fia/spatial_pred_fia.csv', row.names = FALSE)
 write.csv(model_pred_bbs, '/mnt/research/nasabio/data/bbs/spatial_pred_bbs.csv', row.names = FALSE)
+
+# Added 03 May: Extract k-fold results.
+model_kfold <- list()
+
+# Get k-fold output for each fit
+for (i in 1:n_fits) {
+	print(i)
+	if (!(file.exists(file.path(fpkf, paste0('kfold_', i, '.RData'))))) {
+	  model_kfold[[i]] <- 'No data'
+    } else {
+    load(file.path(fpkf, paste0('kfold_', i, '.RData')))
+  	
+	model_kfold[[i]] <- kf
+  }
+}
+
+model_kfold_pred <- map2_dfr(model_kfold, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], x$oos_pred))
+model_kfold_stats <- map_dfr(model_kfold,function(x) {
+	res <- data.frame(rmse_total=NA, rmse1=NA, rmse2=NA, rmse3=NA, rmse4=NA, rmse5=NA, kfoldic=NA, kfoldic_se=NA)
+	if (length(x) > 1) res <- data.frame(rmse_total = x$rmse_total, 
+									   rmse1 = x$rmse_fold[1], 
+									   rmse2 = x$rmse_fold[2],
+									   rmse3 = x$rmse_fold[3],
+									   rmse4 = x$rmse_fold[4],
+									   rmse5 = x$rmse_fold[5],
+									   kfoldic = x$kfold_estimates['kfoldic','Estimate'],
+									   kfoldic_se = x$kfold_estimates['kfoldic','SE'])
+	return(res)								   
+									   })
+
+write.csv(cbind(task_table, model_kfold_stats), '/mnt/research/nasabio/data/fia/spatial_kfold_stats.csv', row.names = FALSE)
+															   
+model_kfold_pred_fia <-  subset(model_kfold_pred, taxon == 'fia')
+model_kfold_pred_bbs <-  subset(model_kfold_pred, taxon == 'bbs')
+
+write.csv(model_kfold_pred_fia, '/mnt/research/nasabio/data/fia/spatial_kfoldpred_fia.csv', row.names = FALSE)
+write.csv(model_kfold_pred_bbs, '/mnt/research/nasabio/data/bbs/spatial_kfoldpred_bbs.csv', row.names = FALSE)
+																			   
