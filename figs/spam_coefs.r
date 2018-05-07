@@ -122,3 +122,50 @@ for (i in 1:3) {
   ggsave(file.path(fpfig, paste0('FIAincidence_', region_names[i], '_coefficients.png')), coefplot_fia_incid$plot[[i]], height = 9, width = 8, dpi = 300)
   ggsave(file.path(fpfig, paste0('FIAabundance_', region_names[i], '_coefficients.png')), coefplot_fia_abund$plot[[i]], height = 9, width = 8, dpi = 300)
 }
+
+
+
+# All regions on one plot -------------------------------------------------
+
+pd <- position_dodge(width = 0.2)
+
+coefplot_bbs_all <- ggplot(coef_bbs_fixed, aes(x = predictor, y = Estimate, color = ecoregion)) +
+       facet_wrap(~ response, scales = 'free_y') +
+       geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
+       geom_errorbar(aes(ymin = q025, ymax = q975), width = 0, position = pd) +
+       geom_point(position = pd) +
+       theme_bw() +
+       theme(strip.background = element_rect(fill=NA),
+             axis.text.x = element_text(angle = 45, hjust = 1),
+             legend.position = 'bottom') +
+       ggtitle('BBS Geodiversity predictors of Biodiversity at 100 km scale')
+
+coefplot_fia_incid_all <- ggplot(coef_fia_fixed_incid, aes(x = predictor, y = Estimate, color = ecoregion)) +
+  facet_wrap(~ response, scales = 'free_y') +
+  geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
+  geom_errorbar(aes(ymin = q025, ymax = q975), width = 0, position = pd) +
+  geom_point(position = pd) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill=NA),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'bottom') +
+  ggtitle('FIA Geodiversity predictors of Biodiversity at 100 km scale', 'incidence-based')
+
+coefplot_fia_abund_all <- ggplot(coef_fia_fixed_abund, aes(x = predictor, y = Estimate, color = ecoregion)) +
+  facet_wrap(~ response, scales = 'free_y') +
+  geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
+  geom_errorbar(aes(ymin = q025, ymax = q975), width = 0, position = pd) +
+  geom_point(position = pd) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill=NA),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'bottom') +
+  ggtitle('FIA Geodiversity predictors of Biodiversity at 100 km scale', 'abundance-based')
+
+# Save the plots
+
+fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots'
+
+ggsave(file.path(fpfig, 'BBS_all_coefficients.png'), coefplot_bbs_all, height = 9, width = 8, dpi = 300)
+ggsave(file.path(fpfig, 'FIAincidence_all_coefficients.png'), coefplot_fia_incid_all, height = 9, width = 8, dpi = 300)
+ggsave(file.path(fpfig, 'FIAabundance_all_coefficients.png'), coefplot_fia_abund_all, height = 9, width = 8, dpi = 300)

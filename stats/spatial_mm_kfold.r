@@ -27,7 +27,7 @@ kfold_rmse <- function(fit, k, n_chains, n_iter, n_warmup, delta = 0.8, seed = 1
   folds <- fit$data %>% group_by(region) %>% transmute(fold = assign_fold(n(), k))
   fit$data$fold <- factor(folds$fold)
   
-  kf <- kfold(fit, chains = n_chains, cores = n_chains, iter = n_iter, warmup = n_warmup, adapt_delta = delta, save_fits = TRUE, group = 'fold')
+  kf <- kfold(fit, chains = n_chains, cores = n_chains, iter = n_iter, warmup = n_warmup, control = list(adapt_delta = delta), save_fits = TRUE, group = 'fold')
   
   # Predicted values for the subset not in each fold.
   oos_pred <- map2(kf$fits[,'fit'], kf$fits[,'omitted'], function(fit_fold, idx) {

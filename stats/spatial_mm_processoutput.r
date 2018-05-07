@@ -1,8 +1,11 @@
 # Summarize all spatial mixed models and combine all their coefficients into one data frame for plotting.
 # QDR/NASABIOXGEO/26 Apr 2018
 
+# Edited 07 May: Do separately for the 50 km and 100 km fits
 # Edited 03 May: Also extract the fit statistics from the k-fold cross validation output
 # Edited 01 May: Add "predict" step so we can get RMSE.
+
+radius <- 50 # Or 100
 
 respnames_fia <- c("alpha_richness", "alpha_effspn", "alpha_phy_pa",
                    "alpha_phy", "alpha_func_pa", "alpha_func", "beta_td_sorensen_pa",
@@ -19,8 +22,8 @@ task_table <- data.frame(taxon = rep(c('fia','bbs'), c(length(respnames_fia), le
                          ecoregion = rep(c('HUC4','BCR','TNC'), each = length(respnames_fia) + length(respnames_bbs)),
                          stringsAsFactors = FALSE)
 
-fp <- '/mnt/research/nasabio/temp/spammfit'
-fpkf <- '/mnt/research/nasabio/temp/spammkfold'
+fp <- ifelse(radius == 100, '/mnt/research/nasabio/temp/spammfit', '/mnt/research/nasabio/temp/spammfit50k')
+fpkf <- ifelse(radius == 100, '/mnt/research/nasabio/temp/spammkfold', '/mnt/research/nasabio/temp/spammkfold50k')
 library(brms)
 library(purrr)
 library(reshape2)
@@ -56,7 +59,7 @@ model_coef <- map2(model_coef, 1:n_fits, function(x, y) {
 model_coef <- do.call(rbind, model_coef)
 
 model_r2s <- map_dbl(model_summ, 'R2')
-write.csv(cbind(task_table, R2 = model_r2s), '/mnt/research/nasabio/data/fia/spatial_r2s.csv', row.names = FALSE)
+write.csv(cbind(task_table, R2 = model_r2s), paste0('/mnt/research/nasabio/data/modelfits/spatial_r2s',radius,'k.csv'), row.names = FALSE)
 
 # Added 27 Apr: Reduce size of summary to just show the coefficients' convergence stats.
 get_pars <- function(x, y) {
@@ -75,24 +78,9 @@ model_summ <- do.call(rbind, model_summ)
 
 model_pred <- map2_dfr(model_pred, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x)))
 
-
-model_coef_fia <- subset(model_coef, taxon == 'fia')
-model_coef_bbs <- subset(model_coef, taxon == 'bbs')
-
-model_summ_fia <-  subset(model_summ, taxon == 'fia')
-model_summ_bbs <-  subset(model_summ, taxon == 'bbs')
-
-model_pred_fia <-  subset(model_pred, taxon == 'fia')
-model_pred_bbs <-  subset(model_pred, taxon == 'bbs')
-
-write.csv(model_coef_fia, '/mnt/research/nasabio/data/fia/spatial_coef_fia.csv', row.names = FALSE)
-write.csv(model_coef_bbs, '/mnt/research/nasabio/data/bbs/spatial_coef_bbs.csv', row.names = FALSE)
-
-write.csv(model_summ_fia, '/mnt/research/nasabio/data/fia/spatial_summ_fia.csv', row.names = FALSE)
-write.csv(model_summ_bbs, '/mnt/research/nasabio/data/bbs/spatial_summ_bbs.csv', row.names = FALSE)
-
-write.csv(model_pred_fia, '/mnt/research/nasabio/data/fia/spatial_pred_fia.csv', row.names = FALSE)
-write.csv(model_pred_bbs, '/mnt/research/nasabio/data/bbs/spatial_pred_bbs.csv', row.names = FALSE)
+write.csv(model_coef, paste0('/mnt/research/nasabio/data/modelfits/spatial_coef',radius,'k.csv'), row.names = FALSE)
+write.csv(model_summ, paste0('/mnt/research/nasabio/data/modelfits/spatial_summ',radius,'k.csv'), row.names = FALSE)
+write.csv(model_pred, paste0('/mnt/research/nasabio/data/modelfits/spatial_pred',radius,'k.csv'), row.names = FALSE)
 
 # Added 03 May: Extract k-fold results.
 model_kfold <- list()
@@ -123,11 +111,6 @@ model_kfold_stats <- map_dfr(model_kfold,function(x) {
 	return(res)								   
 									   })
 
-write.csv(cbind(task_table, model_kfold_stats), '/mnt/research/nasabio/data/fia/spatial_kfold_stats.csv', row.names = FALSE)
-															   
-model_kfold_pred_fia <-  subset(model_kfold_pred, taxon == 'fia')
-model_kfold_pred_bbs <-  subset(model_kfold_pred, taxon == 'bbs')
-
-write.csv(model_kfold_pred_fia, '/mnt/research/nasabio/data/fia/spatial_kfoldpred_fia.csv', row.names = FALSE)
-write.csv(model_kfold_pred_bbs, '/mnt/research/nasabio/data/bbs/spatial_kfoldpred_bbs.csv', row.names = FALSE)
+write.csv(cbind(task_table, model_kfold_stats), paste0('/mnt/research/nasabio/data/modelfits/spatial_kfold_stats',radius,'k.csv'), row.names = FALSE)
+write.csv(model_kfold_pred, paste0('/mnt/research/nasabio/data/modelfits/spatial_kfold_pred',radius,'k.csv'), row.names = FALSE)
 																			   

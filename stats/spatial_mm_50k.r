@@ -59,7 +59,13 @@ fit_spatial_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region
   dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
   
   # Added 2 May: get rid of any region that has less than 5 sites.
-  dat <- dat %>% group_by(region) %>% filter(n() >= 5) 
+  dat <- dat %>% group_by(region) %>% filter(n() >= 5)
+  
+  # Added 4 May: if any region no longer has a neighbor at this point, get rid of it too.
+  reduced_adj_matrix <- adj_matrix[rownames(adj_matrix) %in% dat$region, rownames(adj_matrix) %in% dat$region]
+  nneighb <- rowSums(reduced_adj_matrix)
+  keep_regions <- names(nneighb)[nneighb > 0]
+  dat <- filter(dat, region %in% keep_regions)
   
   # Fit model, extract coefficients, and format them
   mm <- brm(formula_string, data = dat, family = distribution, autocor = cor_car(adj_matrix, formula = ~ 1|region, type = 'esicar'),
