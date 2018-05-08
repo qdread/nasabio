@@ -11,17 +11,17 @@ These are some results for the NASA Bio X Geo manuscript where the goal is to lo
 
 # Methods
 
-All these results are based on biodiversity and geodiversity variables aggregated at **100 km** radius. Also, all the geodiversity standard deviations are based on **5 km** pixel resolutions.
+All these results are based on biodiversity and geodiversity variables aggregated at **50 km** radius. (I also did all of this at 100 km radius, but the results are very similar so I think it's fine to just stick with the 50 km radius for this story.) Also, all the geodiversity standard deviations are based on **5 km** pixel resolutions.
 
 ## Predictor variables (geodiversity)
 
-I used variable selection to find eight predictors that encompass most of the environmental variation across BBS and FIA locations:
+I used variable selection as well as subjectively deciding which variables are important, to find eight predictors that encompass most of the environmental variation across BBS and FIA locations. You can see that there are a few variables that indicate the climate norms and the level of human impact inside the radius, as well as a number of variables indicating geodiversity or environmental heterogeneity.
 
 * Means
   + Mean annual temperature
   + Mean annual precipitation
   + Mean human footprint index
-* Standard deviation or variability
+* Standard deviations or variability measures
   + Standard deviation of elevation
   + Standard deviation of gross primary productivity
   + Standard deviation of precipitation
@@ -53,11 +53,12 @@ First, I got rid of any site within 50 km of the Canada or Mexico borders. Next,
 
 I fit a mixed model in which there are fixed effects for all the predictors, and there is a random intercept and slope for each predictor in each region. The continental USA is broken up into regions so that we can look at how the coefficients of the relationships between geodiversity and biodiversity vary across space. The regions are helpful because it is much easier to fit a model with a small number of regions rather than continuous variation in the coefficients across space.
 
-I fit the models with three different regions to see if the size and number of the regions made a difference in the relationships:
+I fit the models with three different regions (and without regions) to see if the size and number of the regions made a difference in the relationships:
 
 * *HUC4*: The HUC4 regions are based on watershed boundaries and divide the continental USA into about 200 regions.
 * *TNC*: The Nature Conservancy ecoregions split the continental USA into about 70 regions.
 * *BCR*: The Bird Conservation Regions split the continental USA into about 35 regions.
+* *none*: To ensure that adding the regions isn't overfitting too much, I also fit the model with no random effect, just directly using the predictors as fixed effects.
 
 The spatial autocorrelation among regions is modeled with a conditional autoregressive (CAR) structure. To specify that, I made an adjacency matrix where two regions are identified as being neighbors if they share a border. The random effect in the model now accounts for the spatial autocorrelation in the biodiversity values of neighboring regions.
 
@@ -65,7 +66,7 @@ I fit the model using the R package `brms` which let me fit it using Bayesian me
 
 ## Cross-validation
 
-I wanted to see how well the models do at predicting data outside the sample. I did 5-fold cross validation with the subsets stratified across regions: I refit each of the models on only 80% of the data five times, with the 20% holdout sampled evenly across the regions. This gives a "k-fold information criterion." I also used the model fits to predict the values for the other 20%. Then, I averaged the root mean squared error of those predictions to get a "k-fold RMSE" for each model, which tells us how well the model does at predicting data points that were not used to fit the model. The reason I used 5-fold and not the customary 10-fold is that since I used 5 as the cutoff for regions, 5-fold cross validation ensures that each 80% subset is stratified evenly across the regions.
+I wanted to see how well the models do at predicting data outside the sample. I did 5-fold cross validation with the subsets stratified across regions: I refit each of the models on only 80% of the data five times, with the 20% holdout sampled evenly across the regions. This gives a "k-fold information criterion." I also used the model fits to predict the values for the other 20%. Then, I averaged the root mean squared error of those predictions to get a "k-fold RMSE" for each model, which tells us how well the model does at predicting data points that were not used to fit the model. The reason I used 5-fold and not the customary 10-fold is that since I used 5 as the cutoff for regions, 5-fold cross validation ensures that each 80% subset is stratified evenly across the regions. I also did the cross-validation for the model fit without random effects, as a proof of concept. In every case, the RMSE was divided by the range of the data to get a relative value that we can compare across response variables.
 
 \newpage
 
@@ -73,11 +74,12 @@ I wanted to see how well the models do at predicting data outside the sample. I 
 
 ## Fixed effects
 
-These are the coefficient estimates of the fixed effects. The predictors are scaled so that you can compare within a model. The fit statistics I showed are the $R^2$ of the model, the in-sample *rRMSE* and the k-fold *rRMSE* (r stands for relative meaning that the RMSE was divided by the range of the data so that model performance could be compared across different response variables). A low *rRMSE* is better predictive power, it can vary between 0 and 1 where 0 is no error.
+These are the coefficient estimates of the fixed effects. The predictors are scaled so that you can compare within a model. In the model performance plots the in-sample *rRMSE* is the black points and the k-fold *rRMSE* is the red points (r stands for relative meaning that the RMSE was divided by the range of the data so that model performance could be compared across different response variables). A low *rRMSE* is better predictive power, it can vary between 0 and 1 where 0 is no error. As you can see, the k-fold *rRMSE* is pretty similar to the in-sample *rRMSE* which is good and means that overfitting is not a big issue.
 
 ### BBS results
 
 * If you compare the results for the different ways of breaking the USA into regions (HUC4, TNC, and BCR regions), it really looks like there isn't much difference. For the MS, I think we can focus on just one. TNC ecoregions seem to be a good choice because there are not too many of them and their boundaries have some ecological meaning.
+* The RMSE plot validates our choice of including a random effect, since the model without it performs poorly whether in or out of sample. It also shows that geodiversity predicts the different forms of biodiversity more or less equally well.
 * Climate effects (temperature and precipitation) have large impacts on bird diversity.
 * Looking at the more geodiversity-related predictors, we see that variability of gross primary productivity is pretty strongly associated with increased taxonomic diversity across alpha, beta, and gamma, but it is associated with decreased taxonomic and phylogenetic diversity.
 * For the geology and soil diversity relationships, we see that they have consistently positive impacts on gamma diversity, but more "geodiverse" areas are associated with lower alpha diversity, leading to reduced beta diversity even though gamma is higher. That is sort of interesting.
@@ -85,8 +87,13 @@ These are the coefficient estimates of the fixed effects. The predictors are sca
 * Elevation standard deviation is associated with higher beta and gamma diversity for taxonomic, but is associated with lower diversity of all kinds for phylogenetic and functional diversity.
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/BBS_TNC_coefficients.png}}
-\caption{Fixed effects for BBS diversity models, using TNC regions as the random effect}
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/BBS_all_coefficients_50km.png}}
+\caption{Fixed effects for BBS diversity models}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/BBS_performance_50km.png}}
+\caption{Predictive performance of BBS diversity models}
 \end{figure}
 
 \newpage
@@ -94,6 +101,7 @@ These are the coefficient estimates of the fixed effects. The predictors are sca
 ### FIA results
 
 * Overall, the uncertainty around the parameter estimates is higher than for BBS even though more data was used to fit the model.
+* As with the BBS results, the RMSE plot shows that it is good to include a random effect. The difference is that beta diversity is poorly predicted compared to the other types of diversity.
 * Elevation standard deviation, which we identified as a big component of geodiversity, consistently is asociated with higher beta diversity, as well as higher taxonomic gamma diversity.
 * The climate predictors are pretty weak although precipitation has some effects on beta diversity.
 * Human footprint index has little effect on tree diversity.
@@ -101,8 +109,13 @@ These are the coefficient estimates of the fixed effects. The predictors are sca
 * Productivity standard deviation is consistently associated with increased diversity of trees.
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/FIAincidence_TNC_coefficients.png}}
-\caption{Fixed effects for FIA diversity models, using TNC regions as the random effect}
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/FIAincidence_all_coefficients_50km.png}}
+\caption{Fixed effects for FIA diversity models}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots/FIAincidence_performance_50km.png}}
+\caption{Predictive performance of FIA diversity models}
 \end{figure}
 
 \newpage

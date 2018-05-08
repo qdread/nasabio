@@ -2,9 +2,12 @@
 # This uses the new spatial mixed model coefficients.
 # QDR NASABIOXGEO 27 Apr 2018
 
+
 # Version created 30 Apr: Do in parallel on cluster
 # Modified 1 May: Clip map to USA borders
+# Modified 8 May: Do 50 km and 100 km separately, both with new data.
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+radius <- 50 # Or 100
 
 # Define functions --------------------------------------------------------
 
@@ -39,11 +42,11 @@ model_map <- function(coefs, fill_scale, regions, state_borders) {
       blktheme
 }
 
-arrangeMaps <- function(x, fpfig, region_name, titles, raw_names, div_type = 'incidence') {
+arrangeMaps <- function(x, fpfig, region_name, titles, raw_names, div_type = 'incidence', rad = radius) {
   geo_name <- geo_names[which(prednames %in% x$parameter)] # For file name by geo variable
   x$bio_title <- titles[match(x$rv, raw_names)] # Short title by bio variable
   x <- x[match(titles, x$bio_title),] # Put bio variables in correct order
-  png(file.path(fpfig, paste0(region_name, '_', div_type, '_', geo_name, '.png')), height = 9, width = 12, res = 400, units = 'in')
+  png(file.path(fpfig, paste0(region_name, '_', rad, 'k_', div_type, '_', geo_name, '.png')), height = 9, width = 12, res = 400, units = 'in')
   grid.arrange(grobs = map2(x$maps, x$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
   dev.off()
   return('i just made a map :-)')
@@ -52,23 +55,18 @@ arrangeMaps <- function(x, fpfig, region_name, titles, raw_names, div_type = 'in
 # Load region data --------------------------------------------------------
 
 # Load coefficients
-fpbbs <- '/mnt/research/nasabio/data/bbs' # Cluster
-fpfia <- '/mnt/research/nasabio/data/fia'
+fpcoef <- '/mnt/research/nasabio/data/modelfits' # Cluster
 fpregion <- '/mnt/research/nasabio/data/ecoregions'
 fphuc <- fpregion
 fpstate <- '~'
 
 
-coef_bbs <- read.csv(file.path(fpbbs, 'spatial_coef_bbs.csv'), stringsAsFactors = FALSE)
-coef_fia <- read.csv(file.path(fpfia, 'spatial_coef_fia.csv'), stringsAsFactors = FALSE)
+coef_all <- read.csv(file.path(fpcoef, paste0('spatial_coef_', radius, 'k.csv')), stringsAsFactors = FALSE)
 
 # Edit HUC names
-hucidx_bbs <- which(coef_bbs$ecoregion == 'HUC4' & nchar(coef_bbs$region) == 3)
-hucidx_fia <- which(coef_fia$ecoregion == 'HUC4' & nchar(coef_fia$region) == 3)
+hucidx <- which(coef_all$ecoregion == 'HUC4' & nchar(coef_all$region) == 3)
 
-coef_bbs$region[hucidx_bbs] <- paste0('0', coef_bbs$region[hucidx_bbs])
-coef_fia$region[hucidx_fia] <- paste0('0', coef_fia$region[hucidx_fia])
-
+coef_all$region[hucidx] <- paste0('0', coef_all$region[hucidx])
 
 library(sp)
 library(rgdal)
@@ -98,8 +96,8 @@ tnc@data <- tnc@data %>%
   mutate(id = rownames(tnc@data), region = as.character(ECODE_NAME))
 
 # Subset out the regions that are outside the US.
-bcr_unique <- unique(coef_fia$region[coef_fia$ecoregion == 'BCR'])
-tnc_unique <- unique(coef_fia$region[coef_fia$ecoregion == 'TNC'])
+bcr_unique <- unique(coef_all$region[coef_all$ecoregion == 'BCR'])
+tnc_unique <- unique(coef_all$region[coef_all$ecoregion == 'TNC'])
 bcr <- subset(bcr, region %in% bcr_unique & COUNTRY %in% 'USA' & !PROVINCE_S %in% 'ALASKA')
 tnc <- subset(tnc, region %in% tnc_unique)
 
@@ -115,7 +113,9 @@ rbfill <- scale_fill_gradient2(low = "#4575B4", high = "#D73027", midpoint = 0)
 
 library(gridExtra)
 fpbbs <- '/mnt/research/nasabio/figs/bbs_coefficient_maps'
-prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
+if (radius == 100) prednames <- c('elevation_5k_100_sd', 'bio1_5k_100_mean', 'geological_age_5k_100_diversity', 'soil_type_5k_100_diversity', 'bio12_5k_100_mean', 'bio12_5k_100_sd', 'dhi_gpp_5k_100_sd', 'human_footprint_5k_100_mean')
+if (radius == 50) prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd', 'human_footprint_5k_50_mean')
+
 bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
 bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
                "alpha_phy_pa", "beta_phy_pa", "gamma_phy_pa", 
@@ -141,8 +141,8 @@ bio_titles_abundance <- paste(bio_titles_incidence, 'abundance')
 
 # Create list of maps for each predictor by response combo (9 predictors x 8 responses)
 if (task == 1) {
-  maps_bbs_huc <- coef_bbs %>%
-    filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept') %>%
+  maps_bbs_huc <- coef_all %>%
+    filter(taxon == 'bbs', effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept') %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(HUC4 = region) %>%
     group_by(rv, parameter) %>%
@@ -154,8 +154,8 @@ if (task == 1) {
 }
 
 if (task == 2) {
-  maps_bbs_bcr <- coef_bbs %>%
-    filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept') %>%
+  maps_bbs_bcr <- coef_all %>%
+    filter(taxon == 'bbs', effect == 'random', ecoregion == 'BCR', parameter != 'Intercept') %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(BCRNAME = region) %>%
     group_by(rv, parameter) %>%
@@ -168,8 +168,8 @@ if (task == 2) {
 }
 
 if (task == 3) {
-  maps_bbs_tnc <- coef_bbs %>%
-    filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept') %>%
+  maps_bbs_tnc <- coef_all %>%
+    filter(taxon == 'bbs', effect == 'random', ecoregion == 'TNC', parameter != 'Intercept') %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(rv, parameter) %>%
@@ -182,8 +182,8 @@ if (task == 3) {
 }
 
 if (task == 4) {
-  maps_fia_huc_incid <- coef_fia %>%
-    filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+  maps_fia_huc_incid <- coef_all %>%
+    filter(taxon == 'fia', effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(HUC4 = region) %>%
     group_by(rv, parameter) %>%
@@ -195,8 +195,8 @@ if (task == 4) {
 }
 
 if (task == 5) {
-  maps_fia_bcr_incid <- coef_fia %>%
-    filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+  maps_fia_bcr_incid <- coef_all %>%
+    filter(taxon == 'fia', effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(BCRNAME = region) %>%
     group_by(rv, parameter) %>%
@@ -207,8 +207,8 @@ if (task == 5) {
 }
 
 if (task == 6) {
-  maps_fia_tnc_incid <- coef_fia %>%
-    filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+  maps_fia_tnc_incid <- coef_all %>%
+    filter(taxon == 'fia', effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(rv, parameter) %>%
@@ -219,8 +219,8 @@ if (task == 6) {
 }
 
 if (task == 7) {
-  maps_fia_huc_abund <- coef_fia %>%
-    filter(effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+  maps_fia_huc_abund <- coef_all %>%
+    filter(taxon == 'fia', effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(HUC4 = region) %>%
     group_by(rv, parameter) %>%
@@ -231,8 +231,8 @@ if (task == 7) {
 }
 
 if (task == 8) {
-  maps_fia_bcr_abund <- coef_fia %>%
-    filter(effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+  maps_fia_bcr_abund <- coef_all %>%
+    filter(taxon == 'fia', effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(BCRNAME = region) %>%
     group_by(rv, parameter) %>%
@@ -243,8 +243,8 @@ if (task == 8) {
 }
 
 if (task == 9) {
-  maps_fia_tnc_abund <- coef_fia %>%
-    filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+  maps_fia_tnc_abund <- coef_all %>%
+    filter(taxon == 'fia', effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(rv, parameter) %>%
