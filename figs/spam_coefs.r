@@ -259,6 +259,42 @@ ggsave(file.path(fpfig, 'FIAincidence_all_coefficients_100km.png'), coefplot_fia
 ggsave(file.path(fpfig, 'FIAabundance_all_coefficients_100km.png'), coefplot_fia_abund_100, height = 9, width = 8, dpi = 300)
 
 
+# Just TNC coefficients ---------------------------------------------------
+
+# Add some color to indicate which ones' credible intervals are not zero
+
+coefplot_bbs_tnc50 <- coef_all %>%
+  filter(taxon == 'bbs', radius == 50, effect == 'fixed', !parameter %in% 'Intercept', ecoregion == 'TNC') %>%
+  mutate(nonzero = q025 > 0 | q975 < 0) %>%
+  ggplot(aes(x = predictor, y = Estimate, color = nonzero)) +
+  facet_wrap(~ response, scales = 'free_y') +
+  geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
+  geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
+  geom_point() +
+  scale_color_manual(values = c('black', 'red')) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill=NA),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none')
+
+coefplot_fia_incid_tnc50 <- coef_all %>%
+  filter(taxon == 'fia', radius == 50, effect == 'fixed', !parameter %in% 'Intercept', !grepl('abundance',response), ecoregion == 'TNC') %>%
+  mutate(nonzero = q025 > 0 | q975 < 0) %>%
+  ggplot(aes(x = predictor, y = Estimate, color = nonzero)) +
+  facet_wrap(~ response, scales = 'free_y') +
+  geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
+  geom_errorbar(aes(ymin = q025, ymax = q975), width = 0) +
+  geom_point() +
+  scale_color_manual(values = c('black', 'red')) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill=NA),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none') 
+
+ggsave(file.path(fpfig, 'BBS_TNC_coefficients_50km.png'), coefplot_bbs_tnc50, height = 8, width = 8, dpi = 300)
+ggsave(file.path(fpfig, 'FIAincidence_TNC_coefficients_50km.png'), coefplot_fia_incid_tnc50, height = 8, width = 8, dpi = 300)
+
+
 # Plot showing RMSEs --------------------------------------------------------
 
 rmseplot_bbs_50 <- r2_all %>% 
@@ -333,6 +369,39 @@ rmseplot_fia_abund_100 <- r2_all %>%
         legend.position = 'bottom') +
   ggtitle('FIA model performance, 100 km scale', 'abundance-based')
 
+# rmse for only TNC ecoregions for BBS
+rmseplot_bbs_tnc_50 <- r2_all %>% 
+  filter(taxon == 'bbs', radius == 50, ecoregion == 'TNC') %>%
+  ggplot(aes(x = response)) +
+  geom_point(aes(y = rRMSE)) +
+  geom_point(aes(y = kfold_rRMSE), color = 'red') +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 0.17), expand = c(0,0)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle('BBS model performance, 50 km scale')
+
+rmseplot_fia_tnc_50 <- r2_all %>% 
+  filter(taxon == 'fia', radius == 50, ecoregion == 'TNC', !grepl('abundance', response)) %>%
+  ggplot(aes(x = response)) +
+  geom_point(aes(y = rRMSE)) +
+  geom_point(aes(y = kfold_rRMSE), color = 'red') +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 0.17), expand = c(0,0)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle('FIA model performance, 50 km scale')
+
+# rmseplot for both
+rmseplot_both_tnc_50 <- r2_all %>% 
+  filter(radius == 50, ecoregion == 'TNC', !grepl('abundance', response)) %>%
+  ggplot(aes(x = response)) +
+  facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
+  geom_point(aes(y = rRMSE)) +
+  geom_point(aes(y = kfold_rRMSE), color = 'red') +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 0.17), expand = c(0,0)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.background = element_rect(fill = NA)) 
+
 # Save the plots
 
 fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots'
@@ -343,3 +412,6 @@ ggsave(file.path(fpfig, 'FIAabundance_performance_50km.png'), rmseplot_fia_abund
 ggsave(file.path(fpfig, 'BBS_performance_100km.png'), rmseplot_bbs_100, height = 9, width = 8, dpi = 300)
 ggsave(file.path(fpfig, 'FIAincidence_performance_100km.png'), rmseplot_fia_incid_100, height = 9, width = 8, dpi = 300)
 ggsave(file.path(fpfig, 'FIAabundance_performance_100km.png'), rmseplot_fia_abund_100, height = 9, width = 8, dpi = 300)
+ggsave(file.path(fpfig, 'BBS_performance_TNC.png'), rmseplot_bbs_tnc_50, height = 5, width = 5, dpi = 300)
+ggsave(file.path(fpfig, 'FIA_performance_TNC.png'), rmseplot_fia_tnc_50, height = 5, width = 5, dpi = 300)
+ggsave(file.path(fpfig, 'both_performance_TNC.png'), rmseplot_both_tnc_50, height = 4, width = 7, dpi = 300)

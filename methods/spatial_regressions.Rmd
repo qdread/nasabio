@@ -122,7 +122,7 @@ These are the coefficient estimates of the fixed effects. The predictors are sca
 
 ## Random effects
 
-I made some maps to see if we could visualize any interesting patterns in the random effects, in other words, do the relationships vary across space? The patterns seem somewhat random for a lot of the predictors, although some patterns seem to appear for others. It is not really easy to say what is going on. I would think it's a better idea to just base the story around the fixed effects, but if people can help me think of a good story for the random effects, that would be great.
+I made some maps to see if we could visualize any interesting patterns in the random effects, in other words, do the relationships vary across space? The patterns seem somewhat random for a lot of the predictors, although some patterns seem to appear for others. It is not really easy to say what is going on. I would think it's a better idea to just base the story around the fixed effects, but if people can help me think of a good story for the random effects, that would be great. The way I'm envisioning it now is to present the main results, then note on the side that we have to account for spatial variation in the relationships to see the overall pattern clearly.
 
 ### BBS random effect maps
 
