@@ -47,7 +47,8 @@ map_int(model_pars_100k, function(x) sum(x$Rhat > 1.1)) # All converge
 
 model_r2s_50k <- map_dbl(summary_50k, function(x) x$model_summ$R2)
 model_r2s_100k <- map_dbl(summary_100k, function(x) x$model_summ$R2)
-write.csv(cbind(task_table, radius = rep(c(50,100),each=nrow(task_table)), R2 = c(model_r2s_50k, model_r2s_100k)), '/mnt/research/nasabio/data/modelfits/nonspatial_r2s.csv', row.names = FALSE)
+write.csv(cbind(task_table, radius = 50, R2 = model_r2s_50k), '/mnt/research/nasabio/data/modelfits/nonspatial_r2s_50k.csv', row.names = FALSE)
+write.csv(cbind(task_table, radius = 100, R2 = model_r2s_100k), '/mnt/research/nasabio/data/modelfits/nonspatial_r2s_100k.csv', row.names = FALSE)
 
 model_pred_50k <- map2_dfr(summary_50k, 1:nrow(task_table), function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], radius=50, as.data.frame(x$model_pred)))
 model_pred_100k <- map2_dfr(summary_100k, 1:nrow(task_table), function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], radius=100, as.data.frame(x$model_pred)))
@@ -76,3 +77,35 @@ write.csv(model_pars_100k, '/mnt/research/nasabio/data/modelfits/nonspatial_summ
 
 write.csv(model_pred_50k, '/mnt/research/nasabio/data/modelfits/nonspatial_pred_50k.csv', row.names = FALSE)
 write.csv(model_pred_100k, '/mnt/research/nasabio/data/modelfits/nonspatial_pred_100k.csv', row.names = FALSE)
+
+# Load k-fold results.
+
+get_kf_stats <- function(x) {
+	res <- data.frame(rmse_total=NA, rmse1=NA, rmse2=NA, rmse3=NA, rmse4=NA, rmse5=NA, kfoldic=NA, kfoldic_se=NA)
+	if (length(x) > 1) res <- data.frame(rmse_total = x$rmse_total, 
+									   rmse1 = x$rmse_fold[1], 
+									   rmse2 = x$rmse_fold[2],
+									   rmse3 = x$rmse_fold[3],
+									   rmse4 = x$rmse_fold[4],
+									   rmse5 = x$rmse_fold[5],
+									   kfoldic = x$kfold_estimates['kfoldic','Estimate'],
+									   kfoldic_se = x$kfold_estimates['kfoldic','SE'])
+	return(res)								   
+}
+
+load('/mnt/research/nasabio/temp/kfolds_nospatial_50k.RData')
+
+model_kfold_pred_50k <- map2_dfr(kfolds, 1:nrow(task_table), function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], radius = 50, x$oos_pred))
+model_kfold_stats_50k <- map_dfr(kfolds, get_kf_stats)
+
+write.csv(cbind(task_table, radius = 50, model_kfold_stats_50k), '/mnt/research/nasabio/data/modelfits/nonspatial_kfold_stats_50k.csv', row.names = FALSE)
+write.csv(model_kfold_pred_50k, '/mnt/research/nasabio/data/modelfits/nonspatial_kfold_pred_50k.csv', row.names = FALSE)
+																			   
+load('/mnt/research/nasabio/temp/kfolds_nospatial_100k.RData')
+
+model_kfold_pred_100k <- map2_dfr(kfolds, 1:nrow(task_table), function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], radius = 100, x$oos_pred))
+model_kfold_stats_100k <- map_dfr(kfolds, get_kf_stats)
+
+write.csv(cbind(task_table, radius = 100, model_kfold_stats_100k), '/mnt/research/nasabio/data/modelfits/nonspatial_kfold_stats_100k.csv', row.names = FALSE)
+write.csv(model_kfold_pred_100k, '/mnt/research/nasabio/data/modelfits/nonspatial_kfold_pred_100k.csv', row.names = FALSE)
+																			   

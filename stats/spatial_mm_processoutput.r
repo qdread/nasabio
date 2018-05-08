@@ -59,7 +59,7 @@ model_coef <- map2(model_coef, 1:n_fits, function(x, y) {
 model_coef <- do.call(rbind, model_coef)
 
 model_r2s <- map_dbl(model_summ, 'R2')
-write.csv(cbind(task_table, R2 = model_r2s), paste0('/mnt/research/nasabio/data/modelfits/spatial_r2s',radius,'k.csv'), row.names = FALSE)
+write.csv(cbind(task_table, R2 = model_r2s), paste0('/mnt/research/nasabio/data/modelfits/spatial_r2s_',radius,'k.csv'), row.names = FALSE)
 
 # Added 27 Apr: Reduce size of summary to just show the coefficients' convergence stats.
 get_pars <- function(x, y) {
@@ -78,9 +78,9 @@ model_summ <- do.call(rbind, model_summ)
 
 model_pred <- map2_dfr(model_pred, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x)))
 
-write.csv(model_coef, paste0('/mnt/research/nasabio/data/modelfits/spatial_coef',radius,'k.csv'), row.names = FALSE)
-write.csv(model_summ, paste0('/mnt/research/nasabio/data/modelfits/spatial_summ',radius,'k.csv'), row.names = FALSE)
-write.csv(model_pred, paste0('/mnt/research/nasabio/data/modelfits/spatial_pred',radius,'k.csv'), row.names = FALSE)
+write.csv(model_coef, paste0('/mnt/research/nasabio/data/modelfits/spatial_coef_',radius,'k.csv'), row.names = FALSE)
+write.csv(model_summ, paste0('/mnt/research/nasabio/data/modelfits/spatial_summ_',radius,'k.csv'), row.names = FALSE)
+write.csv(model_pred, paste0('/mnt/research/nasabio/data/modelfits/spatial_pred_',radius,'k.csv'), row.names = FALSE)
 
 # Added 03 May: Extract k-fold results.
 model_kfold <- list()
@@ -111,6 +111,6 @@ model_kfold_stats <- map_dfr(model_kfold,function(x) {
 	return(res)								   
 									   })
 
-write.csv(cbind(task_table, model_kfold_stats), paste0('/mnt/research/nasabio/data/modelfits/spatial_kfold_stats',radius,'k.csv'), row.names = FALSE)
-write.csv(model_kfold_pred, paste0('/mnt/research/nasabio/data/modelfits/spatial_kfold_pred',radius,'k.csv'), row.names = FALSE)
+write.csv(cbind(task_table, model_kfold_stats), paste0('/mnt/research/nasabio/data/modelfits/spatial_kfold_stats_',radius,'k.csv'), row.names = FALSE)
+write.csv(model_kfold_pred, paste0('/mnt/research/nasabio/data/modelfits/spatial_kfold_pred_',radius,'k.csv'), row.names = FALSE)
 																			   
