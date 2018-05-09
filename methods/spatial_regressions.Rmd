@@ -122,13 +122,13 @@ These are the coefficient estimates of the fixed effects. The predictors are sca
 
 ## Random effects
 
-I made some maps to see if we could visualize any interesting patterns in the random effects, in other words, do the relationships vary across space? The patterns seem somewhat random for a lot of the predictors, although some patterns seem to appear for others. It is not really easy to say what is going on. I would think it's a better idea to just base the story around the fixed effects, but if people can help me think of a good story for the random effects, that would be great. The way I'm envisioning it now is to present the main results, then note on the side that we have to account for spatial variation in the relationships to see the overall pattern clearly.
+I made some maps to see if we could visualize any interesting patterns in the random effects, in other words, do the relationships vary across space? The patterns seem somewhat random for a lot of the predictors, although some patterns seem to appear for others. It is not really easy to say what is going on. I would think it's a better idea to just base the story around the fixed effects, but if people can help me think of a good story for the random effects, that would be great. The way I'm envisioning it now is to present the main results, then note on the side that we have to account for spatial variation in the relationships to see the overall pattern clearly. I only showed a few maps here. Please look on google drive at `NASABiodiversityWG/Figures/bbs_coefficient_maps` and `NASABiodiversityWG/Figures/fia_coefficient_maps` to see the rest of the maps which are sorted out by predictor and response variable.
 
 ### BBS random effect maps
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/TNC_incidence_soil_diversity.png}}
-\caption{Region-specific random effect of soil diversity on BBS diversity (TNC ecoregions)}
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_coefficient_maps/TNC_50k_incidence_elevation_sd.png}}
+\caption{Region-specific random effect of elevation standard deviation on BBS diversity (TNC ecoregions)}
 \end{figure}
 
 \newpage
@@ -136,6 +136,6 @@ I made some maps to see if we could visualize any interesting patterns in the ra
 ### FIA random effect maps
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/fia_coefficient_maps/TNC_incidence_soil_diversity.png}}
+\centerline{\includegraphics[width=1\textwidth]{/Users/Q/google_drive/NASABiodiversityWG/Figures/fia_coefficient_maps/TNC_50k_incidence_soil_diversity.png}}
 \caption{Region-specific random effect of soil diversity on FIA diversity (TNC ecoregions)}
 \end{figure}

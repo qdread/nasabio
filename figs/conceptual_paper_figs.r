@@ -260,6 +260,13 @@ coef_plot <- ggplot(coef_quant, aes(x = radius_plot, group = interaction(radius,
 
 ggsave(file.path(fpfig, 'fig2_verybottomrow_coefs.png'), coef_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
 
+# Added 09 May: Edited version of coefficient plot for the proposal.
+modified_plot <- coef_plot + 
+	labs(x = 'Grain of analysis (radius in km)', y = 'Magnitude of relationship\n(slope coefficient)') +
+	theme(legend.position = 'bottom', legend.text = element_text(size=9), legend.title = element_text(size=9))
+	
+ggsave('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/proposal/modified_coef_plot.png', modified_plot, width = 3, height = 3, dpi = 400)	
+
 # Separate coefficient plots for each variable
 coef_plot_1x3 <- ggplot(coef_quant, aes(x = radius)) +
   facet_wrap( ~ diversity_type, scales = 'free', labeller = labeller(diversity_type = c(alpha_diversity = 'alpha', beta_diversity = 'beta', gamma_diversity = 'gamma'))) +
