@@ -6,6 +6,7 @@
 # Version created 30 Apr: Do in parallel on cluster
 # Modified 1 May: Clip map to USA borders
 # Modified 8 May: Do 50 km and 100 km separately, both with new data.
+# Modified 10 May: plot the pop level coefficients, not the random effects
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 radius <- 50 # Or 100
 
@@ -142,7 +143,7 @@ bio_titles_abundance <- paste(bio_titles_incidence, 'abundance')
 # Create list of maps for each predictor by response combo (9 predictors x 8 responses)
 if (task == 1) {
   maps_bbs_huc <- coef_all %>%
-    filter(taxon == 'bbs', effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept') %>%
+    filter(taxon == 'bbs', effect == 'coefficient', ecoregion == 'HUC4') %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(HUC4 = region) %>%
     group_by(rv, parameter) %>%
@@ -155,7 +156,7 @@ if (task == 1) {
 
 if (task == 2) {
   maps_bbs_bcr <- coef_all %>%
-    filter(taxon == 'bbs', effect == 'random', ecoregion == 'BCR', parameter != 'Intercept') %>%
+    filter(taxon == 'bbs', effect == 'coefficient', ecoregion == 'BCR') %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(BCRNAME = region) %>%
     group_by(rv, parameter) %>%
@@ -169,7 +170,7 @@ if (task == 2) {
 
 if (task == 3) {
   maps_bbs_tnc <- coef_all %>%
-    filter(taxon == 'bbs', effect == 'random', ecoregion == 'TNC', parameter != 'Intercept') %>%
+    filter(taxon == 'bbs', effect == 'coefficient', ecoregion == 'TNC') %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(rv, parameter) %>%
@@ -183,7 +184,7 @@ if (task == 3) {
 
 if (task == 4) {
   maps_fia_huc_incid <- coef_all %>%
-    filter(taxon == 'fia', effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+    filter(taxon == 'fia', effect == 'coefficient', ecoregion == 'HUC4', rv %in% fia_bio_names_incid) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(HUC4 = region) %>%
     group_by(rv, parameter) %>%
@@ -196,7 +197,7 @@ if (task == 4) {
 
 if (task == 5) {
   maps_fia_bcr_incid <- coef_all %>%
-    filter(taxon == 'fia', effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+    filter(taxon == 'fia', effect == 'coefficient', ecoregion == 'BCR', rv %in% fia_bio_names_incid) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(BCRNAME = region) %>%
     group_by(rv, parameter) %>%
@@ -208,7 +209,7 @@ if (task == 5) {
 
 if (task == 6) {
   maps_fia_tnc_incid <- coef_all %>%
-    filter(taxon == 'fia', effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_incid) %>%
+    filter(taxon == 'fia', effect == 'coefficient', ecoregion == 'TNC', rv %in% fia_bio_names_incid) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(rv, parameter) %>%
@@ -220,7 +221,7 @@ if (task == 6) {
 
 if (task == 7) {
   maps_fia_huc_abund <- coef_all %>%
-    filter(taxon == 'fia', effect == 'random', ecoregion == 'HUC4', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+    filter(taxon == 'fia', effect == 'coefficient', ecoregion == 'HUC4', rv %in% fia_bio_names_abund) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(HUC4 = region) %>%
     group_by(rv, parameter) %>%
@@ -232,7 +233,7 @@ if (task == 7) {
 
 if (task == 8) {
   maps_fia_bcr_abund <- coef_all %>%
-    filter(taxon == 'fia', effect == 'random', ecoregion == 'BCR', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+    filter(taxon == 'fia', effect == 'coefficient', ecoregion == 'BCR', rv %in% fia_bio_names_abund) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(BCRNAME = region) %>%
     group_by(rv, parameter) %>%
@@ -244,7 +245,7 @@ if (task == 8) {
 
 if (task == 9) {
   maps_fia_tnc_abund <- coef_all %>%
-    filter(taxon == 'fia', effect == 'random', ecoregion == 'TNC', parameter != 'Intercept', rv %in% fia_bio_names_abund) %>%
+    filter(taxon == 'fia', effect == 'coefficient', ecoregion == 'TNC', rv %in% fia_bio_names_abund) %>%
     dplyr::select(rv, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(rv, parameter) %>%

@@ -1,6 +1,7 @@
 # Summarize all spatial mixed models and combine all their coefficients into one data frame for plotting.
 # QDR/NASABIOXGEO/26 Apr 2018
 
+# Edited 10 May: Include the fixed+random effect for each slope (must be calculated manually)
 # Edited 07 May: Do separately for the 50 km and 100 km fits
 # Edited 03 May: Also extract the fit statistics from the k-fold cross validation output
 # Edited 01 May: Add "predict" step so we can get RMSE.
@@ -31,6 +32,7 @@ library(reshape2)
 model_coef <- list()
 model_summ <- list()
 model_pred <- list()
+model_slopes <- list()
 
 n_fits <- nrow(task_table) # 81
 
@@ -42,18 +44,20 @@ for (i in 1:n_fits) {
   } else {
     load(file.path(fp, paste0('fit', i, '.RData')))
   	
-	model_summ[[i]] <- summary(fit$model, waic = FALSE, loo = FALSE, R2 = TRUE) 
+	#model_summ[[i]] <- summary(fit$model, waic = FALSE, loo = FALSE, R2 = TRUE) 
 	model_coef[[i]] <- fit$coef
 	model_pred[[i]] <- cbind(observed = fit$model$data[,1], predict(fit$model))
+	model_slopes[[i]] <- melt(coef(fit$model)$region, varnames = c('region', 'stat', 'parameter'))
   }
 }
 
 # Reshape coefficient data frame to slightly wider form, and then add identifying columns.
 model_coef <- map2(model_coef, 1:n_fits, function(x, y) {
 	coef_cast <- dcast(x, effect + region + parameter ~ stat)
-	names(coef_cast) <- gsub('2.5%ile', 'q025', names(coef_cast))
-	names(coef_cast) <- gsub('97.5%ile', 'q975', names(coef_cast))
-	cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], coef_cast)
+	slope_cast <- data.frame(effect = 'coefficient', dcast(model_slopes[[y]], region + parameter ~ stat))
+	names(coef_cast)[6:7] <- c('q025', 'q975')
+	names(slope_cast)[6:7] <- c('q025', 'q975')
+	cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], rbind(coef_cast, slope_cast))
 })
 
 model_coef <- do.call(rbind, model_coef)

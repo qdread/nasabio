@@ -1,14 +1,14 @@
 # BBS TNC map formatted for proposal, omitting phylogenetic diversity.
 # Requires everything to be loaded from spam_maps.r
 
-maps_bbs_tnc <- coef_bbs %>%
-  filter(effect == 'random', ecoregion == 'TNC', parameter != 'Intercept') %>%
+maps_bbs_tnc <- coef_all %>%
+  filter(taxon == 'bbs', effect == 'coefficient', ecoregion == 'TNC', parameter != 'Intercept') %>%
   dplyr::select(rv, parameter, region, Estimate) %>%
   rename(ECODE_NAME = region) %>%
   group_by(rv, parameter) %>%
   do(maps = model_map(., rbfill, tnc, states))
 elev_maps <- maps_bbs_tnc %>%
-  filter(!grepl('phy', rv), parameter == 'elevation_5k_100_sd') %>%
+  filter(!grepl('phy', rv), parameter == 'elevation_5k_50_sd') %>%
   mutate(bio_title = bio_titles[match(rv, bio_names)])
  
 elev_maps <- elev_maps[na.omit(match(bio_titles, elev_maps$bio_title)), ]
@@ -30,6 +30,7 @@ whitetheme <-  theme_bw() +
         plot.title = element_text(color = 'black'))
 
 png('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/bbs_tnc_elevation_slope_map.png', height = 4, width = 8, res = 400, units = 'in')
+png('/mnt/research/nasabio/figs/bbs_tnc_elevation_slope_map.png', height = 4, width = 8, res = 400, units = 'in')
   grid.arrange(grobs = map2(elev_maps$maps, elev_maps$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + whitetheme)), nrow = 2)
 dev.off()
 

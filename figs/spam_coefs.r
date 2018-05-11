@@ -415,3 +415,17 @@ ggsave(file.path(fpfig, 'FIAabundance_performance_100km.png'), rmseplot_fia_abun
 ggsave(file.path(fpfig, 'BBS_performance_TNC.png'), rmseplot_bbs_tnc_50, height = 5, width = 5, dpi = 300)
 ggsave(file.path(fpfig, 'FIA_performance_TNC.png'), rmseplot_fia_tnc_50, height = 5, width = 5, dpi = 300)
 ggsave(file.path(fpfig, 'both_performance_TNC.png'), rmseplot_both_tnc_50, height = 4, width = 7, dpi = 300)
+
+# Added 10 May : Plot of R2s.
+r2plot_both_tnc_50 <- r2_all %>% 
+  filter(radius == 50, ecoregion == 'TNC', !grepl('abundance', response)) %>%
+  ggplot(aes(x = response)) +
+  facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
+  geom_point(aes(y = R2)) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 1), expand = c(0,0), name = expression('Bayesian R'^2)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.background = element_rect(fill = NA)) 
+
+fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots'
+ggsave(file.path(fpfig, 'both_r2_TNC.png'), r2plot_both_tnc_50, height = 4, width = 7, dpi = 300)
