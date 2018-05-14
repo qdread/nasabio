@@ -17,7 +17,7 @@ NC <- 3
 # If arguments are not specified, give default values
 if (!exists('NI')) NI <- 5000
 if (!exists('NW')) NW <- 3000
-if (!exists('delta')) delta <- 0.8
+if (!exists('delta')) delta <- 0.9
 
 prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd')
 alpha_resp <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa")
@@ -37,7 +37,7 @@ ecoregion <- task_table$ecoregion[task]
 
 
 
-fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = c('gaussian','beta'), priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.8) {
+fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9) {
   require(dplyr)
   require(brms)
   require(reshape2)
@@ -65,7 +65,7 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
   dat <- filter(dat, region %in% keep_regions)
   
   # Fit model, extract coefficients, and format them
-  mm <- brm(formula_string, data = dat, family = distribution, autocor = cor_car(adj_matrix, formula = ~ 1|region, type = 'esicar'),
+  mm <- brm(formula = formula_string, data = dat, family = distribution, autocor = cor_car(adj_matrix, formula = ~ 1|region),
             chains = n_chains, iter = n_iter, warmup = n_warmup, prior = priors, control = list(adapt_delta = delta))
   fixed_effects <- fixef(mm)
   random_effects <- ranef(mm)
@@ -97,16 +97,20 @@ if (taxon == 'bbs') {
   siteid <- 'PLT_CN'
 }
 
-distrib <- ifelse(grepl('beta_td', rv), 'beta', 'gaussian') # Beta follows beta distribution, rest are normally distributed
+if (task_table$rv[task] == 'beta') {
+	distrib <- list('beta', 'gaussian', 'gaussian')
+} else {
+	distrib <- list('gaussian', 'gaussian', 'gaussian')
+}
                   
 # Priors (added May 1)
 # --------------------
 
-library(brms)
-added_priors <-  c(prior('normal(0,10)', class = 'b'),
-				   prior('lognormal(1,1)', class = 'sd', group = 'region'),
-				   prior('student_t(3,0,3)', class = 'sdcar')
-				 )
+# library(brms)
+# added_priors <-  c(prior('normal(0,10)', class = 'b'),
+				   # prior('lognormal(1,1)', class = 'sd', group = 'region'),
+				   # prior('student_t(3,0,3)', class = 'sdcar')
+				 # )
 				 
 # --------------------				  
 				  
@@ -122,7 +126,7 @@ fit <- fit_mv_mm(pred_df = geodat,
                       region_var = ecoregion, 
                       distribution = distrib, 
                       adj_matrix = eco_mat,
-					  priors = added_priors,
+					  #priors = added_priors,
                       n_chains = NC,
                       n_iter = NI,
                       n_warmup = NW,
