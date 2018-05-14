@@ -2,6 +2,8 @@
 # New script forked from spatial_mm_parallel.r
 # QDR/Nasabioxgeo/11 May 2018
 
+# Modified 14 May: take logit transformation of beta TD so that all can be modeled with multivariate normal.
+
 # This time, only fit 50 km radius, get rid of human footprint since it does not fit with anything about geodiversity, and only use TNC.
 # Also only use incidence-based for FIA.
 
@@ -73,7 +75,7 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
   fixed_effects <- cbind(effect = 'fixed', region = as.character(NA), melt(fixed_effects, varnames = c('parameter', 'stat')))
   random_effects <- cbind(effect = 'random', melt(random_effects$region, varnames = c('region', 'stat', 'parameter'))) %>% mutate(region = as.character(region))
   region_effects <- cbind(effect = 'coefficient', melt(region_effects$region, varnames = c('region', 'stat', 'parameter'))) %>% mutate(region = as.character(region))
-  mm_coef <- full_join(fixed_effects, random_effects, region_effects)
+  mm_coef <- fixed_effects %>% full_join(random_effects) %>% full_join(region_effects)
   return(list(model = mm, coef = mm_coef))
 }
 
@@ -89,19 +91,27 @@ if (taxon == 'bbs') {
 
   # Added April 30: Correction for outliers on beta functional
   biodat$beta_func_pa[biodat$beta_func_pa < -10] <- NA
+  # Added 14 May: logit transform beta td.
+  biodat$beta_td_sorensen_pa <- qlogis(biodat$beta_td_sorensen_pa)
 
 } else {
   load('/mnt/research/nasabio/temp/fia_spatial_mm_dat_50k.RData')
   geodat <- fiageo
   biodat <- fiabio
   siteid <- 'PLT_CN'
+  # Added 14 May: logit transform beta td.
+  biodat$beta_td_sorensen_pa <- qlogis(biodat$beta_td_sorensen_pa)
+  biodat$beta_td_sorensen <- qlogis(biodat$beta_td_sorensen)
 }
 
-if (task_table$rv[task] == 'beta') {
-	distrib <- list('beta', 'gaussian', 'gaussian')
-} else {
-	distrib <- list('gaussian', 'gaussian', 'gaussian')
-}
+
+# Modified 14 May: model all with Gaussian
+distrib <- 'gaussian'
+# if (task_table$rv[task] == 'beta') {
+	# distrib <- list('beta', 'gaussian', 'gaussian')
+# } else {
+	# distrib <- list('gaussian', 'gaussian', 'gaussian')
+# }
                   
 # Priors (added May 1)
 # --------------------
