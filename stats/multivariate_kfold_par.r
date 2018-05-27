@@ -42,7 +42,7 @@ onefold <- function(fit, k, ksub, n_chains, n_iter, n_warmup, delta = 0.8, seed 
   oos_pred <- map2(kf$fits[,'fit'], kf$fits[,'omitted'], function(fit_fold, idx) {
     pred <- predict(fit_fold, newdata = fit$data[idx,])
 	# Convert each slice of pred into a list element (one for each response variable)
-	lapply(1:(dim(pred)[3]), function(i) as.data.frame(cbind(idx = idx, y = fit$data[idx, resp_names[i]], pred[, , i])))
+	lapply(1:(dim(pred)[3]), function(i) as.data.frame(cbind(idx = idx, y = fit$data[idx, resp_idx[i]], pred[, , i])))
   })
   
   # RMSE for each response variable

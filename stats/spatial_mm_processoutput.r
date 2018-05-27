@@ -44,7 +44,7 @@ for (i in 1:n_fits) {
   } else {
     load(file.path(fp, paste0('fit', i, '.RData')))
   	
-	#model_summ[[i]] <- summary(fit$model, waic = FALSE, loo = FALSE, R2 = TRUE) 
+	model_summ[[i]] <- summary(fit$model, waic = FALSE, loo = FALSE, R2 = TRUE) 
 	model_coef[[i]] <- fit$coef
 	model_pred[[i]] <- cbind(observed = fit$model$data[,1], predict(fit$model))
 	model_slopes[[i]] <- melt(coef(fit$model)$region, varnames = c('region', 'stat', 'parameter'))
