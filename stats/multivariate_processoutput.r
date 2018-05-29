@@ -34,6 +34,7 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
   
   model_coef <- fit$coef # Includes fixed, random, and coefficient.
   model_pred <- predict(fit$model) # Returns raw array: n data x 4 stats x n response variables.
+  # The predict() call takes a long time (~20 min or so in some cases)
   
   dimnames(model_pred)[[3]] <- resp_names
   model_pred <- melt(model_pred, varnames=c('idx','stat','response'))

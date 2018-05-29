@@ -30,8 +30,12 @@ onefold <- function(fit, k, ksub, n_chains, n_iter, n_warmup, delta = 0.8, seed 
   folds <- fit$data %>% group_by(region) %>% transmute(fold = assign_fold(n(), k))
   fit$data$fold <- factor(folds$fold)
   
+  # Create MCMC seed based on time
+  now <- as.numeric(Sys.time())
+  (mcmc_seed <- trunc((now-floor(now))*10000))
+  
   # Fit only the specified fold.
-  kf <- kfold(fit, Ksub = as.array(ksub), chains = n_chains, cores = n_chains, iter = n_iter, warmup = n_warmup, control = list(adapt_delta = delta), save_fits = TRUE, group = 'fold')
+  kf <- kfold(fit, Ksub = as.array(ksub), chains = n_chains, cores = n_chains, iter = n_iter, warmup = n_warmup, control = list(adapt_delta = delta), save_fits = TRUE, group = 'fold', seed = mcmc_seed)
   
   # Get names of response variables. Note that underscore characters are removed by brms, causing issues.
   resp_idx <- match(fit$formula$responses, gsub('_', '', names(fit$data)))
