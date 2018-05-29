@@ -2,6 +2,7 @@
 # New script forked from spatial_mm_parallel.r
 # QDR/Nasabioxgeo/11 May 2018
 
+# Modified 29 May: add priors so that FIA alpha model can converge.
 # Modified 14 May: take logit transformation of beta TD so that all can be modeled with multivariate normal.
 
 # This time, only fit 50 km radius, get rid of human footprint since it does not fit with anything about geodiversity, and only use TNC.
@@ -113,14 +114,19 @@ distrib <- 'gaussian'
 	# distrib <- list('gaussian', 'gaussian', 'gaussian')
 # }
                   
-# Priors (added May 1)
+# Priors (added May 29)
 # --------------------
 
-# library(brms)
-# added_priors <-  c(prior('normal(0,10)', class = 'b'),
-				   # prior('lognormal(1,1)', class = 'sd', group = 'region'),
-				   # prior('student_t(3,0,3)', class = 'sdcar')
-				 # )
+library(brms)
+# Tighten prior on the intercept for FIA alpha.
+# 1st arg is df, 2nd is mu, 3rd is sigma for student t distribution
+if (task == 1) {
+  added_priors <- c(set_prior('student_t(5, 4, 3)', class = 'Intercept', resp = 'alpharichness'),
+					set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphaphypa'),
+					set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphafuncpa') )
+} else {
+  added_priors <- NULL
+}
 				 
 # --------------------				  
 				  
@@ -136,7 +142,7 @@ fit <- fit_mv_mm(pred_df = geodat,
                       region_var = ecoregion, 
                       distribution = distrib, 
                       adj_matrix = eco_mat,
-					  #priors = added_priors,
+					  priors = added_priors,
                       n_chains = NC,
                       n_iter = NI,
                       n_warmup = NW,
