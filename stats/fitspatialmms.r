@@ -161,9 +161,10 @@ fiacoast <- flag_coast_plots(fia_aea, radius = 50e3, border_countries = c('Canad
 fia_aea_noedge <- fia_aea[!fiacoast$is_edge]
 fiasp_noedge <- fiasp[!fiacoast$is_edge, ]
 # Thin FIA plots to minimum 10 km separation
+# Edited 30 May: 20 km instead, to try to equalize with BBS's sample size (ends up being ~ 3000 also)
 set.seed(38182)
-fiasub10k <- SRS_iterative_N1(fia_aea_noedge, radius = 10e3, n = 2e5, point = sample(length(fia_aea_noedge),1), show_progress = TRUE)
-fiaspsub <- fiasp_noedge[fiasub10k, ]
+fiasub_radius <- SRS_iterative_N1(fia_aea_noedge, radius = 20e3, n = 3000, point = sample(length(fia_aea_noedge),1), show_progress = TRUE)
+fiaspsub <- fiasp_noedge[fiasub_radius, ]
 fiabio <- subset(fiabio, PLT_CN %in% fiaspsub$CN)
 fiageo <- subset(fiageo, PLT_CN %in% fiaspsub$CN)
 
@@ -174,7 +175,10 @@ fiabio <- fiabio %>%
 # Save data so that models can be fit in parallel -------------------------
 
 # Filter out the ones that are not in any ecoregion
+# Edit 30 May: only do this for TNC
 in_eco <- function(dat) dat$BCR %in% dimnames(bcr_bin)[[1]] & dat$TNC %in% dimnames(tnc_bin)[[1]] & dat$HUC4 %in% dimnames(huc_bin)[[1]]
+in_eco <- function(dat) dat$TNC %in% dimnames(tnc_bin)[[1]]
+
 fia_in_eco <- in_eco(fiageo)
 bbs_in_eco <- in_eco(bbsgeo)
 

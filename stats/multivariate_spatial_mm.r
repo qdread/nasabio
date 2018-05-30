@@ -2,6 +2,7 @@
 # New script forked from spatial_mm_parallel.r
 # QDR/Nasabioxgeo/11 May 2018
 
+# Modified 30 May: scale response variables in addition to predictors.
 # Modified 29 May: add priors so that FIA alpha model can converge.
 # Modified 14 May: take logit transformation of beta TD so that all can be modeled with multivariate normal.
 
@@ -49,6 +50,7 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
   resp_df <- resp_df[, c(id_var, resp_vars)]
   pred_df <- pred_df[, c(id_var, pred_vars)]
   pred_df[,-1] <- scale(pred_df[,-1])
+  resp_df[,-1] <- scale(resp_df[,-1])
   pred_var_names <- names(pred_df)[-1]
   names(id_df)[2] <- 'region' # Make sure the name of the region is called region so that the random effects will specify correctly.
   region_name <- 'region'
@@ -117,13 +119,15 @@ distrib <- 'gaussian'
 # Priors (added May 29)
 # --------------------
 
+# Edit May 30: get rid of prior for now
 library(brms)
 # Tighten prior on the intercept for FIA alpha.
 # 1st arg is df, 2nd is mu, 3rd is sigma for student t distribution
 if (task == 1) {
-  added_priors <- c(set_prior('student_t(5, 4, 3)', class = 'Intercept', resp = 'alpharichness'),
-					set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphaphypa'),
-					set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphafuncpa') )
+  added_priors <- NULL
+  # added_priors <- c(set_prior('student_t(5, 4, 3)', class = 'Intercept', resp = 'alpharichness'),
+					# set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphaphypa'),
+					# set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphafuncpa') )
 } else {
   added_priors <- NULL
 }
