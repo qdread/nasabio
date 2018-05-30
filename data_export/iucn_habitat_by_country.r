@@ -44,7 +44,7 @@ co_ec_spp <- subset(all_spp, taxonid %in% co_ec_IDs)
 
 # Get habitat for each species --------------------------------------------
 
-# Include error-checking code in the function so that it will return NA for everything.
+# Include error-checking code in the function so that it will return NA for everything if there's no data.
 
 get_habitat <- function(ID) {
   habitat_by_sp <- GET(url = paste0(api_url, '/habitats/species/id/', ID,'?token=', token))
@@ -52,7 +52,7 @@ get_habitat <- function(ID) {
   if (class(habitat_by_sp) == 'data.frame') {
     data.frame(taxonid=ID, habitat_by_sp)
   } else {
-    data.frame(taxonid=ID, code=NA, habitat=NA, suitability=NA, season=NA, majorimportance=NA)
+    data.frame(taxonid=ID)
   }
 }
 
