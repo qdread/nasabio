@@ -10,6 +10,7 @@ fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/modelfits' # Local
 model_coef <- read.csv(file.path(fp, 'multivariate_spatial_coef.csv'), stringsAsFactors = FALSE)
 model_pred <- read.csv(file.path(fp, 'multivariate_spatial_pred.csv'), stringsAsFactors = FALSE)
 model_rmse <- read.csv(file.path(fp, 'multivariate_spatial_rmse.csv'), stringsAsFactors = FALSE)
+model_r2 <- read.csv(file.path(fp, 'multivariate_spatial_r2.csv'), stringsAsFactors = FALSE)
 kfold_pred <- read.csv(file.path(fp, 'multivariate_kfold_pred.csv'), stringsAsFactors = FALSE)
 kfold_rmse <- read.csv(file.path(fp, 'multivariate_kfold_rmse.csv'), stringsAsFactors = FALSE)
 
@@ -40,6 +41,7 @@ all_rmse <- kfold_rmse %>%
   summarize(kfold_RMSE = sqrt(mean(kfold_RMSE^2))) %>%
   rename(response = variable) %>%
   right_join(model_rmse) %>%
+  left_join(model_r2 %>% rename(r2 = Estimate, r2_error = Est.Error, r2_q025 = Q2.5, r2_q975 = Q97.5)) %>%
   mutate(kfold_rRMSE = kfold_RMSE/range_obs,
          response = factor(bio_titles[match(response, bio_names)], levels = bio_titles))
 
@@ -53,35 +55,40 @@ all_coef <- model_coef %>%
 
 # Coefficient plots -------------------------------------------------
 
-fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/observed_predicted_plots'
+fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs'
 
 # Add some color to indicate which ones' credible intervals are not zero
+# Also shade the climate mean region with a gray rectangle
 
-coefplot_bbs <- all_coef %>%
+coefdat_bbs <- all_coef %>%
   filter(taxon == 'bbs') %>%
-  mutate(nonzero = Q2.5 > 0 | Q97.5 < 0) %>%
-  ggplot(aes(x = predictor, y = Estimate, color = nonzero)) +
-  facet_wrap(~ response, scales = 'free_y') +
+  mutate(nonzero = Q2.5 > 0 | Q97.5 < 0)
+coefplot_bbs <- ggplot(coefdat_bbs) +
+  geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-  geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0) +
-  geom_point() +
+  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
+  geom_point(aes(x = predictor, y = Estimate, color = nonzero)) +
+  facet_wrap(~ response, scales = 'free_y') +
   scale_color_manual(values = c('black', 'red')) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
+        panel.grid = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = 'none')
 
-coefplot_fia <- all_coef %>%
+coefdat_fia <- all_coef %>%
   filter(taxon == 'fia') %>%
-  mutate(nonzero = Q2.5 > 0 | Q97.5 < 0) %>%
-  ggplot(aes(x = predictor, y = Estimate, color = nonzero)) +
-  facet_wrap(~ response, scales = 'free_y') +
+  mutate(nonzero = Q2.5 > 0 | Q97.5 < 0)
+coefplot_fia <- ggplot(coefdat_fia) +
+  geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-  geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0) +
-  geom_point() +
+  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
+  geom_point(aes(x = predictor, y = Estimate, color = nonzero)) +
+  facet_wrap(~ response, scales = 'free_y') +
   scale_color_manual(values = c('black', 'red')) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
+        panel.grid = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = 'none')
 
@@ -119,6 +126,7 @@ rmseplot_both <- all_rmse %>%
   facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
   geom_point(aes(y = rRMSE)) +
   geom_point(aes(y = kfold_rRMSE), color = 'red') +
+  geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
   theme_bw() +
   scale_y_continuous(limits = c(0, 0.17), expand = c(0,0)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),

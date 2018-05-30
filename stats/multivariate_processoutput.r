@@ -51,18 +51,22 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
               range_obs = diff(range(observed)),
               rRMSE = RMSE/range_obs)
   
-  list(coef = model_coef, pred = model_pred, rmse = model_rmse)
+  # Bayesian R-squared
+  model_r2 <- cbind(task_table[i, ], response = resp_names, bayes_R2(fit$model))
+  
+  list(coef = model_coef, pred = model_pred, rmse = model_rmse, r2 = model_r2)
 
 }
 
 model_coef <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x$coef)))
 model_pred <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x$pred)))
 model_rmse <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x$rmse)))
+model_r2 <- map_dfr(model_stats, 'r2')
 
 write.csv(model_coef, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_coef.csv', row.names = FALSE)
 write.csv(model_pred, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_pred.csv', row.names = FALSE)
 write.csv(model_rmse, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_rmse.csv', row.names = FALSE)
-
+write.csv(model_r2, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_r2.csv', row.names = FALSE)
 
 # K-fold output -----------------------------------------------------------
 

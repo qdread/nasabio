@@ -52,7 +52,7 @@ get_habitat <- function(ID) {
   if (class(habitat_by_sp) == 'data.frame') {
     data.frame(taxonid=ID, habitat_by_sp)
   } else {
-    data.frame(taxonID=ID, code=NA, habitat=NA, suitability=NA, season=NA, majorimportance=NA)
+    data.frame(taxonid=ID, code=NA, habitat=NA, suitability=NA, season=NA, majorimportance=NA)
   }
 }
 
