@@ -119,17 +119,25 @@ distrib <- 'gaussian'
 # Priors (added May 29)
 # --------------------
 
-# Edit May 30: get rid of prior for now
+# Edit May 31: Add priors for FIA intercepts and for BBS alpha sdcar
 library(brms)
 # Tighten prior on the intercept for FIA alpha.
 # 1st arg is df, 2nd is mu, 3rd is sigma for student t distribution
+added_priors <- NULL
 if (task == 1) {
-  added_priors <- NULL
-  # added_priors <- c(set_prior('student_t(5, 4, 3)', class = 'Intercept', resp = 'alpharichness'),
-					# set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphaphypa'),
-					# set_prior('student_t(5, 0, 3)', class = 'Intercept', resp = 'alphafuncpa') )
-} else {
-  added_priors <- NULL
+  added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alpharichness'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphaphypa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
+} 
+if (task == 3) {
+  added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammarichness'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammaphypa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammafuncpa') )
+} 
+if (task == 4) {
+  added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alpharichness'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphaphypa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphafuncpa') )
 }
 				 
 # --------------------				  

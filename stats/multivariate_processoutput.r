@@ -20,6 +20,18 @@ library(doParallel)
 
 registerDoParallel(cores = n_fits)
 
+# Inspect summaries.
+model_summ <- foreach (i = 1:n_fits) %dopar% {
+  load(file.path(fp, paste0('fit', i, '.RData')))
+  summary(fit$model)
+}
+
+# Check R-hat from summary.
+model_rhat <- map(model_summ, function(x) {
+  pars <- with(x, rbind(fixed, spec_pars, cor_pars, random[[1]]))
+  pars[order(pars[,'Rhat'], decreasing = TRUE), ]
+})
+
 model_stats <- foreach (i = 1:n_fits) %dopar% {
   load(file.path(fp, paste0('fit', i, '.RData')))
   
