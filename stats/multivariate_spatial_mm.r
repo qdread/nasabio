@@ -93,7 +93,8 @@ if (taxon == 'bbs') {
   siteid <- 'rteNo'
 
   # Added April 30: Correction for outliers on beta functional
-  biodat$beta_func_pa[biodat$beta_func_pa < -10] <- NA
+  # Edited June 4: don't get rid of those outliers.
+  # biodat$beta_func_pa[biodat$beta_func_pa < -10] <- NA
   # Added 14 May: logit transform beta td.
   biodat$beta_td_sorensen_pa <- qlogis(biodat$beta_td_sorensen_pa)
 
@@ -130,9 +131,9 @@ if (task == 1) {
 					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
 } 
 if (task == 3) {
-  added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammarichness'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammaphypa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammafuncpa') )
+  added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammarichness'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammaphypa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammafuncpa') )
 } 
 if (task == 4) {
   added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alpharichness'),

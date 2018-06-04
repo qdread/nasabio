@@ -1,6 +1,8 @@
 # Summarize spatial multivariate mixed model output
 # QDR/NASABIOXGEO/25 May 2018
 
+# Modified 4 June: get RMSE for each iteration so we can put a credible interval on it.
+
 task_table <- data.frame(taxon = rep(c('fia','bbs'), each = 3),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
@@ -57,11 +59,29 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
     left_join(model_obs)
   
   # Here, do the RMSE for the model.
+  # Prediction raw values. 
+  pred_raw <- predict(fit$model, summary = FALSE)
+  dimnames(pred_raw)[[3]] <- resp_names
+  
+  # Observed raw values
+  obs_raw <- fit$model$data[, resp_names]
+  
+  # Get RMSE for each iteration and their quantiles
+  rmse_quantiles <- sweep(pred_raw, 2:3, as.matrix(obs_raw), FUN = '-') %>% # Subtract predicted - observed
+    melt(varnames = c('iter', 'idx', 'response')) %>%
+    group_by(response, iter) %>%
+    summarize(RMSE = sqrt(mean(value^2))) %>%
+    ungroup %>% group_by(response) %>%
+    summarize(RMSE_mean = mean(RMSE), 
+              RMSE_q025 = quantile(RMSE, probs = 0.025), 
+              RMSE_q975 = quantile(RMSE, probs = 0.975))
+  
+  # Generate ranges of observed data and divide this by the RMSE values to get the relative RMSE values
   model_rmse <- model_pred %>%
     group_by(response) %>%
-    summarize(RMSE = sqrt(mean((observed-Estimate)^2)),
-              range_obs = diff(range(observed)),
-              rRMSE = RMSE/range_obs)
+    summarize(range_obs = diff(range(observed))) %>%
+    left_join(rmse_quantiles) %>%
+    mutate_at(vars(starts_with('RMSE')), funs(relative = ./range_obs))
   
   # Bayesian R-squared
   model_r2 <- cbind(task_table[i, ], response = resp_names, bayes_R2(fit$model))

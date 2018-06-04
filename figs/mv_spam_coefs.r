@@ -18,6 +18,7 @@ kfold_rmse <- read.csv(file.path(fp, 'multivariate_kfold_rmse.csv'), stringsAsFa
 library(dplyr)
 library(ggplot2)
 library(reshape2)
+library(purrr)
 
 prednames50 <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd')
 geo_names <- c('elevation sd','temperature mean','geol. age diversity','soil diversity','precip. mean','precip. sd','GPP sd')
@@ -50,7 +51,9 @@ all_coef <- model_coef %>%
   filter(effect == 'fixed', !parameter %in% 'Intercept') %>%
   dcast(taxon + rv + response + parameter ~ stat) %>%
   mutate(predictor = factor(geo_names[match(parameter, prednames50)], levels = geo_names_order),
-         response = factor(bio_titles[match(response, bio_names)], levels = bio_titles)) 
+         response = factor(bio_titles[match(response, bio_names)], levels = bio_titles),
+         flavor = map_chr(strsplit(as.character(response), ' '), 2) %>%
+           factor(levels = c('TD','PD','FD'), labels = c('taxonomic', 'phylogenetic', 'functional')))
   
 
 # Coefficient plots -------------------------------------------------
@@ -68,7 +71,8 @@ coefplot_bbs <- ggplot(coefdat_bbs) +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
   geom_point(aes(x = predictor, y = Estimate, color = nonzero)) +
-  facet_wrap(~ response, scales = 'free_y') +
+  facet_grid(rv ~ flavor) +
+  scale_y_continuous(name = 'coefficient estimate', limits = c(-0.71, 0.71), expand = c(0,0)) +
   scale_color_manual(values = c('black', 'red')) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
@@ -84,8 +88,9 @@ coefplot_fia <- ggplot(coefdat_fia) +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
   geom_point(aes(x = predictor, y = Estimate, color = nonzero)) +
-  facet_wrap(~ response, scales = 'free_y') +
+  facet_grid(rv ~ flavor) +
   scale_color_manual(values = c('black', 'red')) +
+  scale_y_continuous(name = 'coefficient estimate', limits = c(-0.71, 0.71), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
         panel.grid = element_blank(),

@@ -1,6 +1,8 @@
 # Maps to show raw data for NASABIOXGEO MS
 # QDR/29 May 2018
 
+# Edit 4 Jun 2018: change midpoint to gray, change labels
+
 # Make map (run fortify each time this function is called, slower but simpler)
 # Return the plots as a list so that we can tile them in different ways
 point_map <- function(dat, color_scale, regions, state_borders, bg_color = 'black', text_color = 'white', state_color = 'gray20', fill_color = 'white', show_legend = TRUE) {
@@ -25,7 +27,7 @@ point_map <- function(dat, color_scale, regions, state_borders, bg_color = 'blac
   
   ggplot(region_fort) +
     geom_polygon(aes(x=long, y=lat, group=group), fill = fill_color) +
-    geom_point(data = dat, aes(x = lon_aea, y = lat_aea, color = value), size = 0.7) +
+    geom_point(data = dat, aes(x = lon_aea, y = lat_aea, color = value), size = 1.25) +
     geom_path(aes(x=long, y=lat, group=group), color = text_color, size = 0.25) +
     geom_path(data = state_borders, aes(x = long, y = lat, group = group), color = state_color) +
     color_scale +
@@ -45,14 +47,14 @@ fpregion <- '/mnt/research/nasabio/data/ecoregions'
 fpstate <- '~'
 fpfig <- '/mnt/research/nasabio/figs/descriptivemaps'
 
-rbcol <- scale_color_gradient(low = "blue", high = "red")
+rbcol <- scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')))
 
 prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd')
 
-bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
-bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
-               "alpha_phy_pa", "beta_phy_pa", "gamma_phy_pa", 
-               "alpha_func_pa", "beta_func_pa", "gamma_func_pa")
+bio_titles <- c('alpha taxonomic', 'alpha phylogenetic', 'alpha functional', 'beta taxonomic', 'beta phylogenetic', 'beta functional', 'gamma taxonomic', 'gamma phylogenetic', 'gamma functional')
+bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
+               "beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa",
+               "gamma_richness", "gamma_phy_pa", "gamma_func_pa")
 geo_names <- c('elevation_sd','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','precip_sd','gpp_sd', 'intercept')
 
 # Load data and coordinates

@@ -2,6 +2,8 @@
 # This uses the new spatial mixed model coefficients. ***MULTIVARIATE!***
 # QDR NASABIOXGEO 28 May 2018
 
+# Edit 04 June: Also make maps of spatial effects only
+
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 # Define functions --------------------------------------------------------
@@ -83,6 +85,20 @@ coef_wide <- coef_all %>%
     TRUE ~ 'zero'
   ))
 
+# Alternative version: spatial effects only (random, not including fixed effect)
+
+spatialeff_wide <- coef_all %>%
+  filter(effect == 'random') %>%
+  select(-ecoregion, -effect, -rv) %>%
+  dcast(taxon + region + response + parameter ~ stat) %>%
+  mutate(significance = case_when(
+    Q2.5 > 0 ~ 'positive',
+    Q97.5 < 0 ~ 'negative',
+    TRUE ~ 'zero'
+  ))
+
+
+
 tnc <- readOGR(dsn = fpregion, layer = 'tnc_terr_ecoregions')
 states <- read.csv(file.path(fpstate, 'states_albers.csv'), stringsAsFactors = FALSE)
 load(file.path(fpstate, 'states_albers.RData'))
@@ -112,10 +128,10 @@ signif_fill <- scale_fill_manual(values = c(negative = "#4575B4", positive = "#D
 library(gridExtra)
 fpfig <- '/mnt/research/nasabio/figs/mv_coefficient_maps'
 
-bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
-bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
-               "alpha_phy_pa", "beta_phy_pa", "gamma_phy_pa", 
-               "alpha_func_pa", "beta_func_pa", "gamma_func_pa")
+bio_titles <- c('alpha taxonomic', 'alpha phylogenetic', 'alpha functional', 'beta taxonomic', 'beta phylogenetic', 'beta functional', 'gamma taxonomic', 'gamma phylogenetic', 'gamma functional')
+bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
+               "beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa",
+               "gamma_richness", "gamma_phy_pa", "gamma_func_pa")
 geo_names <- c('elevation_sd','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','precip_sd','gpp_sd', 'intercept')
 
 prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd', 'Intercept')
@@ -170,4 +186,28 @@ if (task == 4) {
   maps_fia_sig %>%
     group_by(parameter) %>%
     do(foo = arrangeMaps(., fpfig = fpfig, prefix = 'fia_signif', titles = bio_titles, raw_names = bio_names, text_color = cols['text']))
+}
+
+if (task == 5) {
+  maps_bbs_spat <- spatialeff_wide %>%
+    filter(taxon == 'bbs') %>%
+    dplyr::select(response, parameter, region, Estimate) %>%
+    rename(ECODE_NAME = region) %>%
+    group_by(response, parameter) %>%
+    do(maps = model_map(., rbfill, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
+  maps_bbs_spat %>%
+    group_by(parameter) %>%
+    do(foo = arrangeMaps(., fpfig = fpfig, prefix = 'bbs_spatial', titles = bio_titles, raw_names = bio_names, text_color = cols['text']))
+}
+
+if (task == 6) {
+  maps_fia_spat <- spatialeff_wide %>%
+    filter(taxon == 'fia') %>%
+    dplyr::select(response, parameter, region, Estimate) %>%
+    rename(ECODE_NAME = region) %>%
+    group_by(response, parameter) %>%
+    do(maps = model_map(., rbfill, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
+  maps_fia_spat %>%
+    group_by(parameter) %>%
+    do(foo = arrangeMaps(., fpfig = fpfig, prefix = 'fia_spatial', titles = bio_titles, raw_names = bio_names, text_color = cols['text']))
 }
