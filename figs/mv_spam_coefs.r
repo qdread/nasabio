@@ -34,11 +34,6 @@ raw_bio_names <- cbind(expand.grid(rv=c('alpha','beta','gamma'),variable=c('rmse
 
 # Combine full-model and k-fold RMSEs.
 # Include RMSE from each fold so we can see variability due to folds.
-kfold_rmse <- kfold_rmse %>%
-  select(-kfoldic, -kfoldic_se) %>%
-  melt(id.vars = c('taxon','rv','ecoregion','fold'), value.name = 'kfold_RMSE') %>%
-  mutate(variable = raw_bio_names$name[match(paste(rv, variable), paste(raw_bio_names$rv, raw_bio_names$variable))]) 
-
 
 all_rmse <- kfold_rmse %>%
   mutate(response = bio_names[match(response, gsub('_','',bio_names))]) %>%
@@ -75,7 +70,7 @@ coefplot_bbs <- ggplot(coefdat_bbs) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
   geom_point(aes(x = predictor, y = Estimate, color = nonzero)) +
   facet_grid(rv ~ flavor) +
-  scale_y_continuous(name = 'coefficient estimate', limits = c(-0.71, 0.71), expand = c(0,0)) +
+  scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   scale_color_manual(values = c('black', 'red')) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
@@ -93,7 +88,7 @@ coefplot_fia <- ggplot(coefdat_fia) +
   geom_point(aes(x = predictor, y = Estimate, color = nonzero)) +
   facet_grid(rv ~ flavor) +
   scale_color_manual(values = c('black', 'red')) +
-  scale_y_continuous(name = 'coefficient estimate', limits = c(-0.71, 0.71), expand = c(0,0)) +
+  scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
         panel.grid = element_blank(),
@@ -103,6 +98,17 @@ coefplot_fia <- ggplot(coefdat_fia) +
 
 ggsave(file.path(fpfig, 'BBS_multivariate_coef.png'), coefplot_bbs, height = 8, width = 8, dpi = 300)
 ggsave(file.path(fpfig, 'FIA_multivariate_coef.png'), coefplot_fia, height = 8, width = 8, dpi = 300)
+
+# Edit 6 June: sideways coefficient plot.
+coef_bbs_sideways <- coefplot_bbs + 
+  coord_flip() +
+  theme(axis.text.x = element_text(angle=0, hjust=0.5)) 
+coef_fia_sideways <- coefplot_fia + 
+  coord_flip() +
+  theme(axis.text.x = element_text(angle=0, hjust=0.5)) 
+
+ggsave(file.path(fpfig, 'BBS_multivariate_coef_sideways.png'), coef_bbs_sideways, height = 8, width = 8, dpi = 300)
+ggsave(file.path(fpfig, 'FIA_multivariate_coef_sideways.png'), coef_fia_sideways, height = 8, width = 8, dpi = 300)
 
 
 # Plot showing RMSEs --------------------------------------------------------
