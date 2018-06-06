@@ -1,6 +1,6 @@
 # nasabio
 
-Readme documentation last updated by QDR on 29 November 2017
+Readme documentation last updated by QDR on 06 June 2018
 
 ## Description of repo
 
@@ -25,6 +25,7 @@ The repo now contains a lot of subdirectories roughly sorted by task:
 - **methods**: RMarkdown and Markdown documents, and a few R scripts, with demonstrations of the different methods we are deciding between, as well as documents describing our methods in beautiful prose.
 - **occupancy**: Scripts related to the BBS occupancy models.
 - **prep_diversity_files**: This folder contains scripts that are used in the diversity workflow. Given the size of the data, there is a lot of preprocessing that needs to be done before actually calculating diversity.
+- **readmes**: This contains some markdown files with technical documentation about the code.
 - **run_compile_diversity**: This is also part of the diversity workflow, which includes scripts that calculate diversity metrics on the MSU cluster then compile the outputs into CSV files and export them.
 - **spatial_data_extraction**: This folder contains scripts related to extracting data out of the rasters with geodiversity variables and calculating different summary metrics on them.
 - **specieslists**: CSV files with species lists needed for analysis.

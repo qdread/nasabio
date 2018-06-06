@@ -44,3 +44,4 @@ Aspect cos,conus_30m_aspect_cos.vrt,aspect_cos,1,30,300,500,10000
 Geological age,GEA.vrt,gea,1,1000,500,100,500
 Soil type,stg.vrt,soil,1,5000,500,100,500
 Geological age 5k,GEA_5k.vrt,gea_5k,1,5000,500,100,500
+Idaho fire,mtbs_ID_2012.vrt,idaho_fire,1,30,100,250,250

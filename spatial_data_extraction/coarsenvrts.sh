@@ -84,3 +84,8 @@ gdalbuildvrt /mnt/research/nasabio/data/geology/geo_ages/GEA_5k.vrt /mnt/researc
 gdalwarp -r mode -t_srs '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0' -tr 5000 5000 -te -125 20 -65 56 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/research/nasabio/data/geology/soils/stg.vrt /mnt/research/nasabio/data/geology/soils/stg_5k.tif
 
 gdalbuildvrt /mnt/research/nasabio/data/geology/soils/stg_5k.vrt /mnt/research/nasabio/data/geology/soils/stg_5k.tif
+
+#########################################################
+# Added 06 June: convert Idaho fire to VRT
+# No need to reproject b/c already in Albers
+gdalbuildvrt /mnt/research/nasabio/data/mtbs_ID_2012.vrt /mnt/research/nasabio/data/mtbs_ID_2012.tif
