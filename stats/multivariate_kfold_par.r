@@ -3,6 +3,8 @@
 # Parallel version created 25 May
 # QDR/NASABIOXGEO/25 May 2018
 
+# Modified 4 June: save raw predictions with each iteration so that we can put a credible interval on the k-fold RMSE too.
+
 # Total number of tasks is number of models * number of folds per model = 6 * 5 = 30
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 taskdf <- expand.grid(fold = 1:5, model = 1:6)
@@ -20,6 +22,7 @@ onefold <- function(fit, k, ksub, n_chains, n_iter, n_warmup, delta = 0.8, seed 
   require(brms)
   require(purrr)
   require(dplyr)
+  require(reshape2)
   
   # The group 'fold' is specified ahead of time.
   assign_fold <- function(n, k) {
@@ -44,20 +47,19 @@ onefold <- function(fit, k, ksub, n_chains, n_iter, n_warmup, delta = 0.8, seed 
   # Predicted values for the subset not in the specified fold.
   # Since this is multivariate, we need to rewrite this code to get multiple y obs and y pred columns
   oos_pred <- map2(kf$fits[,'fit'], kf$fits[,'omitted'], function(fit_fold, idx) {
-    pred <- predict(fit_fold, newdata = fit$data[idx,])
-	# Convert each slice of pred into a list element (one for each response variable)
-	lapply(1:(dim(pred)[3]), function(i) as.data.frame(cbind(idx = idx, y = fit$data[idx, resp_idx[i]], pred[, , i])))
+    pred_raw <- predict(fit_fold, newdata = fit$data[idx,], summary = FALSE)
+	dimnames(pred_raw)[[3]] <- resp_names
+	obs_raw <- fit$data[idx, resp_names]
+	sweep(pred_raw, 2:3, as.matrix(obs_raw), FUN = '-') %>% # Subtract predicted - observed
+      melt(varnames = c('iter', 'idx', 'response'))
   })
   
-  # RMSE for each response variable
-  oos_rmse <- map_dbl(oos_pred$fit, function(x) {
-    sqrt(mean((x$y - x$Estimate)^2))
-  })
-    
+  # Do not calculate the RMSE in here anymore. Do it once all the output has been combined so that we can get the credible interval.  
+
   # Add fold ID
-  oos_pred <- data.frame(fold = ksub, yvar = rep(resp_names, map_int(oos_pred$fit, nrow)), do.call(rbind, oos_pred$fit))
+  oos_pred <- data.frame(fold = ksub, bind_rows(oos_pred$fit))
   
-  return(list(kfold_estimates = kf$estimates, rmse_fold = setNames(oos_rmse, resp_names), oos_pred = oos_pred))
+  return(list(kfold_estimates = kf$estimates, oos_pred = oos_pred))
   
 }
 

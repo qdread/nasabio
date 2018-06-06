@@ -11,7 +11,7 @@ model_coef <- read.csv(file.path(fp, 'multivariate_spatial_coef.csv'), stringsAs
 model_pred <- read.csv(file.path(fp, 'multivariate_spatial_pred.csv'), stringsAsFactors = FALSE)
 model_rmse <- read.csv(file.path(fp, 'multivariate_spatial_rmse.csv'), stringsAsFactors = FALSE)
 model_r2 <- read.csv(file.path(fp, 'multivariate_spatial_r2.csv'), stringsAsFactors = FALSE)
-kfold_pred <- read.csv(file.path(fp, 'multivariate_kfold_pred.csv'), stringsAsFactors = FALSE)
+#kfold_pred <- read.csv(file.path(fp, 'multivariate_kfold_pred.csv'), stringsAsFactors = FALSE)
 kfold_rmse <- read.csv(file.path(fp, 'multivariate_kfold_rmse.csv'), stringsAsFactors = FALSE)
 
 
@@ -32,19 +32,22 @@ bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
 raw_bio_names <- cbind(expand.grid(rv=c('alpha','beta','gamma'),variable=c('rmse_y1','rmse_y2','rmse_y3')),
                        name = bio_names)
 
-# K-fold RMSE is still separated by fold, so compute the total RMSE for each variable.
 # Combine full-model and k-fold RMSEs.
-all_rmse <- kfold_rmse %>%
+# Include RMSE from each fold so we can see variability due to folds.
+kfold_rmse <- kfold_rmse %>%
   select(-kfoldic, -kfoldic_se) %>%
   melt(id.vars = c('taxon','rv','ecoregion','fold'), value.name = 'kfold_RMSE') %>%
-  mutate(variable = raw_bio_names$name[match(paste(rv, variable), paste(raw_bio_names$rv, raw_bio_names$variable))]) %>%
-  group_by(taxon, rv, ecoregion, variable) %>%
-  summarize(kfold_RMSE = sqrt(mean(kfold_RMSE^2))) %>%
-  rename(response = variable) %>%
+  mutate(variable = raw_bio_names$name[match(paste(rv, variable), paste(raw_bio_names$rv, raw_bio_names$variable))]) 
+
+
+all_rmse <- kfold_rmse %>%
+  mutate(response = bio_names[match(response, gsub('_','',bio_names))]) %>%
+  filter(is.na(fold)) %>%
+  select(-kfoldic, -kfoldic_se, -fold) %>%
   right_join(model_rmse) %>%
   left_join(model_r2 %>% rename(r2 = Estimate, r2_error = Est.Error, r2_q025 = Q2.5, r2_q975 = Q97.5)) %>%
-  mutate(kfold_rRMSE = kfold_RMSE/range_obs,
-         response = factor(bio_titles[match(response, bio_names)], levels = bio_titles))
+  mutate_at(vars(starts_with('kfold_RMSE')), funs(relative = ./range_obs)) %>%
+  mutate(response = factor(bio_titles[match(response, bio_names)], levels = bio_titles))
 
 # Reshape coefficient plot and relabel it
 all_coef <- model_coef %>%
@@ -104,43 +107,24 @@ ggsave(file.path(fpfig, 'FIA_multivariate_coef.png'), coefplot_fia, height = 8, 
 
 # Plot showing RMSEs --------------------------------------------------------
 
-# rmse for only TNC ecoregions for BBS
-rmseplot_bbs <- all_rmse %>% 
-  filter(taxon == 'bbs') %>%
-  ggplot(aes(x = response)) +
-  geom_point(aes(y = rRMSE)) +
-  geom_point(aes(y = kfold_rRMSE), color = 'red') +
-  theme_bw() +
-  scale_y_continuous(limits = c(0, 0.17), expand = c(0,0)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ggtitle('BBS model performance')
-
-rmseplot_fia <- all_rmse %>% 
-  filter(taxon == 'fia') %>%
-  ggplot(aes(x = response)) +
-  geom_point(aes(y = rRMSE)) +
-  geom_point(aes(y = kfold_rRMSE), color = 'red') +
-  theme_bw() +
-  scale_y_continuous(limits = c(0, 0.17), expand = c(0,0)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ggtitle('FIA model performance')
-
+pn1 <- position_nudge(x = -0.06, y = 0)
+pn2 <- position_nudge(x = 0.06, y = 0)
 # rmseplot for both
 rmseplot_both <- all_rmse %>% 
   ggplot(aes(x = response)) +
   facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_point(aes(y = rRMSE)) +
-  geom_point(aes(y = kfold_rRMSE), color = 'red') +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, y = RMSE_mean), width = 0, position = pn1) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975, y = RMSE_mean), width = 0, color = 'red', position = pn2) +
+  geom_point(aes(y = RMSE_mean), position = pn1) +
+  geom_point(aes(y = kfold_RMSE_mean), color = 'red', position = pn2) +
   geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 0.17), expand = c(0,0)) +
+  scale_y_continuous(limits = c(0, 1.3), expand = c(0,0), name = 'root mean squared error') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         strip.background = element_rect(fill = NA)) 
 
 # Save the plots
 
-ggsave(file.path(fpfig, 'BBS_performance_multivariate.png'), rmseplot_bbs, height = 5, width = 5, dpi = 300)
-ggsave(file.path(fpfig, 'FIA_performance_multivariate.png'), rmseplot_fia, height = 5, width = 5, dpi = 300)
 ggsave(file.path(fpfig, 'both_performance_multivariate.png'), rmseplot_both, height = 4, width = 7, dpi = 300)
 
 

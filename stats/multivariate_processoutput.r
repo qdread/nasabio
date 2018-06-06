@@ -72,7 +72,7 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
     group_by(response, iter) %>%
     summarize(RMSE = sqrt(mean(value^2))) %>%
     ungroup %>% group_by(response) %>%
-    summarize(RMSE_mean = mean(RMSE), 
+    summarize(RMSE_mean = sqrt(mean(RMSE^2)), 
               RMSE_q025 = quantile(RMSE, probs = 0.025), 
               RMSE_q975 = quantile(RMSE, probs = 0.975))
   
@@ -115,19 +115,36 @@ for (i in 1:n_fits) {
   # Combine all the predicted values into a single data frame.
   model_kfold_pred[[i]] <- map_dfr(folds_i, 'oos_pred')
   
-  # Combine all the k-fold ICs and RMSEs into a single object.
-  model_kfold_stats[[i]] <- map_dfr(folds_i, function(x) data.frame(                                                                        rmse_y1 = x$rmse_fold[1], 
-                                                                                                                                            rmse_y2 = x$rmse_fold[2], 
-                                                                                                                                            rmse_y3 = x$rmse_fold[3], 
-                                                                                                                                            kfoldic = x$kfold_estimates['kfoldic','Estimate'], 
-                                                                                                                                            kfoldic_se = x$kfold_estimates['kfoldic','SE']))
+  # Calculate RMSE for each fold and each iteration
+  RMSE_all <- model_kfold_pred[[i]] %>%
+    group_by(fold, iter, response) %>%
+    summarize(RMSE = sqrt(mean(value^2)))
+  RMSE_quantiles <- RMSE_all %>%
+    ungroup %>%
+    group_by(response) %>%
+    summarize(kfold_RMSE_mean = sqrt(mean(RMSE^2)), 
+              kfold_RMSE_q025 = quantile(RMSE, probs = 0.025), 
+              kfold_RMSE_q975 = quantile(RMSE, probs = 0.975))
+  RMSE_quantiles_byfold <- RMSE_all %>%
+    ungroup %>%
+    group_by(fold, response) %>%
+    summarize(kfold_RMSE_mean = sqrt(mean(RMSE^2)), 
+              kfold_RMSE_q025 = quantile(RMSE, probs = 0.025), 
+              kfold_RMSE_q975 = quantile(RMSE, probs = 0.975))
   
+  
+  # Combine all the k-fold ICs and RMSEs into a single object.
+  model_kfold_stats[[i]] <- bind_rows(data.frame(fold = NA, RMSE_quantiles),
+                                  data.frame(RMSE_quantiles_byfold, 
+                                  map_dfr(folds_i, function(x) data.frame(kfoldic = rep(x$kfold_estimates['kfoldic','Estimate'],3),
+                                                                          kfoldic_se = rep(x$kfold_estimates['kfoldic','SE'],3)))))
+    
 }
 
-model_kfold_stats <- map2_dfr(model_kfold_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], fold = 1:5, as.data.frame(x)))
+model_kfold_stats <- map2_dfr(model_kfold_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x)))
 
-model_kfold_pred <- map2_dfr(model_kfold_pred, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x))) %>%
-  arrange(taxon, rv, yvar, idx)
+# model_kfold_pred <- map2_dfr(model_kfold_pred, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], as.data.frame(x))) %>%
+#   arrange(taxon, rv, yvar, idx)
 
 write.csv(model_kfold_stats, '/mnt/research/nasabio/data/modelfits/multivariate_kfold_rmse.csv', row.names = FALSE)
-write.csv(model_kfold_pred, '/mnt/research/nasabio/data/modelfits/multivariate_kfold_pred.csv', row.names = FALSE)
+# write.csv(model_kfold_pred, '/mnt/research/nasabio/data/modelfits/multivariate_kfold_pred.csv', row.names = FALSE)
