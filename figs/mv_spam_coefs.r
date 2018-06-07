@@ -11,6 +11,7 @@ model_coef <- read.csv(file.path(fp, 'multivariate_spatial_coef.csv'), stringsAs
 model_pred <- read.csv(file.path(fp, 'multivariate_spatial_pred.csv'), stringsAsFactors = FALSE)
 model_rmse <- read.csv(file.path(fp, 'multivariate_spatial_rmse.csv'), stringsAsFactors = FALSE)
 model_r2 <- read.csv(file.path(fp, 'multivariate_spatial_r2.csv'), stringsAsFactors = FALSE)
+model_coef_var <- read.csv(file.path(fp, 'multivariate_spatial_coef_variation.csv'), stringsAsFactors = FALSE)
 #kfold_pred <- read.csv(file.path(fp, 'multivariate_kfold_pred.csv'), stringsAsFactors = FALSE)
 kfold_rmse <- read.csv(file.path(fp, 'multivariate_kfold_rmse.csv'), stringsAsFactors = FALSE)
 
@@ -52,7 +53,13 @@ all_coef <- model_coef %>%
          response = factor(bio_titles[match(response, bio_names)], levels = bio_titles),
          flavor = map_chr(strsplit(as.character(response), ' '), 2) %>%
            factor(levels = c('TD','PD','FD'), labels = c('taxonomic', 'phylogenetic', 'functional')))
-  
+
+# Relabel data frame of spatial variability metrics  
+model_coef_var <- model_coef_var %>%
+  mutate(predictor = factor(geo_names[match(parameter, prednames50)], levels = geo_names_order),
+         response = factor(bio_titles[match(response, bio_names)], levels = bio_titles),
+         flavor = map_chr(strsplit(as.character(response), ' '), 2) %>%
+           factor(levels = c('TD','PD','FD'), labels = c('taxonomic', 'phylogenetic', 'functional')))
 
 # Coefficient plots -------------------------------------------------
 
@@ -110,6 +117,29 @@ coef_fia_sideways <- coefplot_fia +
 ggsave(file.path(fpfig, 'BBS_multivariate_coef_sideways.png'), coef_bbs_sideways, height = 8, width = 8, dpi = 300)
 ggsave(file.path(fpfig, 'FIA_multivariate_coef_sideways.png'), coef_fia_sideways, height = 8, width = 8, dpi = 300)
 
+
+# Plot of spatial variability ---------------------------------------------
+
+pd = position_dodge(width = 0.5)
+coefvar_plot <- ggplot(model_coef_var %>% 
+                         filter(!is.na(predictor)) %>%
+                         mutate(taxon = factor(taxon,labels=c('birds','trees')))) +
+  geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
+  geom_col(aes(x = predictor, y = cv, fill = taxon, group = taxon), position = pd, width = 0.5) +
+  facet_grid(rv ~ flavor) +
+  scale_fill_manual(values = c('blue', 'skyblue')) +
+  scale_y_continuous(name = 'spatial coefficient of variation', limits = c(0, 15), expand = c(0,0), breaks=c(0,5,10)) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = NA),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = c(0.91, 0.9))
+
+coefvar_sideways <- coefvar_plot + 
+  coord_flip() +
+  theme(axis.text.x = element_text(angle=0, hjust=0.5),
+        legend.background = element_rect(color = 'black')) 
+ggsave(file.path(fpfig, 'both_multivariate_coefvar_sideways.png'), coefvar_sideways, height = 8, width = 8, dpi = 300)
 
 # Plot showing RMSEs --------------------------------------------------------
 

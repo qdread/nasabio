@@ -28,6 +28,7 @@ model_map <- function(coefs, fill_scale, regions, state_borders, bg_color = 'bla
           panel.border = element_blank(), 
           plot.background = element_rect(fill = bg_color), 
           legend.position = c(0.15,0.1), 
+          legend.key.width = unit(0.2, 'inches'),
           legend.direction = 'horizontal', 
           legend.title = element_blank(),
           legend.background = element_rect(fill = bg_color),

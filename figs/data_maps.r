@@ -18,10 +18,11 @@ point_map <- function(dat, color_scale, regions, state_borders, bg_color = 'blac
           panel.border = element_blank(), 
           plot.background = element_rect(fill = bg_color), 
           legend.position = c(0.15,0.1), 
+          legend.key.width = unit(0.2, 'inches'),
           legend.direction = 'horizontal', 
           legend.title = element_blank(),
           legend.background = element_rect(fill = bg_color),
-          legend.text = element_text(color = text_color))
+          legend.text = element_text(color = text_color, size = 6))
   
   if (!show_legend) blktheme <- blktheme + theme(legend.position = 'none')
   
