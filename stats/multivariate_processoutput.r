@@ -1,11 +1,13 @@
 # Summarize spatial multivariate mixed model output
 # QDR/NASABIOXGEO/25 May 2018
 
+# Modified 14 June: include newer "null" and subset models
 # Modified 4 June: get RMSE for each iteration so we can put a credible interval on it.
 
 task_table <- data.frame(taxon = rep(c('fia','bbs'), each = 3),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
+                         model = rep(c('full','climate','space'),each=6),
                          stringsAsFactors = FALSE)
 
 n_fits <- nrow(task_table)
@@ -33,6 +35,8 @@ model_rhat <- map(model_summ, function(x) {
   pars <- with(x, rbind(fixed, spec_pars, cor_pars, random[[1]]))
   pars[order(pars[,'Rhat'], decreasing = TRUE), ]
 })
+
+map(model_rhat, function(x) x[x[,'Rhat'] >= 1.1, ])
 
 model_stats <- foreach (i = 1:n_fits) %dopar% {
   load(file.path(fp, paste0('fit', i, '.RData')))

@@ -2,6 +2,8 @@
 # New script forked from spatial_mm_parallel.r
 # QDR/Nasabioxgeo/11 May 2018
 
+# Modified 14 June: Add priors to some of the beta-diversity models that didn't converge.
+# Modified 13 June: Get rid of precipitation SD, include null models with space only and with space+climate only
 # Modified 30 May: scale response variables in addition to predictors.
 # Modified 29 May: add priors so that FIA alpha model can converge.
 # Modified 14 May: take logit transformation of beta TD so that all can be modeled with multivariate normal.
@@ -23,7 +25,8 @@ if (!exists('NI')) NI <- 5000
 if (!exists('NW')) NW <- 3000
 if (!exists('delta')) delta <- 0.9
 
-prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd')
+prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_50_sd')
+climate_prednames <- c('bio1_5k_50_mean', 'bio12_5k_50_mean')
 alpha_resp <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa")
 beta_resp <- c("beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa")
 gamma_resp <- c("gamma_richness", "gamma_phy_pa", "gamma_func_pa")
@@ -31,12 +34,16 @@ gamma_resp <- c("gamma_richness", "gamma_phy_pa", "gamma_func_pa")
 task_table <- data.frame(taxon = rep(c('fia','bbs'), each = 3),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
+						 model = rep(c('full','climate','space'),each=6),
                          stringsAsFactors = FALSE)
 
 taxon <- task_table$taxon[task]
 if(task_table$rv[task] == 'alpha') rv <- alpha_resp
 if(task_table$rv[task] == 'beta') rv <- beta_resp
 if(task_table$rv[task] == 'gamma') rv <- gamma_resp
+if(task_table$model[task] == 'climate') prednames <- climate_prednames
+if(task_table$model[task] == 'space') prednames <- character(0)
+
 ecoregion <- task_table$ecoregion[task]
 
 
@@ -48,18 +55,25 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
   # Build formula and data
   id_df <- pred_df[, c(id_var, region_var)]
   resp_df <- resp_df[, c(id_var, resp_vars)]
-  pred_df <- pred_df[, c(id_var, pred_vars)]
-  pred_df[,-1] <- scale(pred_df[,-1])
   resp_df[,-1] <- scale(resp_df[,-1])
-  pred_var_names <- names(pred_df)[-1]
   names(id_df)[2] <- 'region' # Make sure the name of the region is called region so that the random effects will specify correctly.
   region_name <- 'region'
   resp_var_names <- paste0('cbind(', paste(resp_vars, collapse = ','), ')')
-  fixed_effects <- paste(pred_var_names, collapse = '+')
-  random_effects <- paste(c(paste('(1|', region_name, ')', sep = ''), paste('(', pred_var_names, ' - 1|', region_name, ')', sep = '')), collapse = '+')
-  formula_string <- paste(resp_var_names, '~', fixed_effects, '+', random_effects)
-  dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
-  
+  # below, create full formula string for the model with predictors
+  # create much simpler one if there aren't predictors (edited 13 June)
+  if (length(pred_vars) > 0) {
+	pred_df <- pred_df[, c(id_var, pred_vars)]
+	pred_df[,-1] <- scale(pred_df[,-1])
+	pred_var_names <- names(pred_df)[-1]
+	fixed_effects <- paste(pred_var_names, collapse = '+')
+	random_effects <- paste(c(paste('(1|', region_name, ')', sep = ''), paste('(', pred_var_names, ' - 1|', region_name, ')', sep = '')), collapse = '+')
+	formula_string <- paste(resp_var_names, '~', fixed_effects, '+', random_effects)
+	dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
+  } else {
+	formula_string <- paste(resp_var_names, '~', paste('(1|', region_name, ')', sep = ''))
+	dat <- Reduce(left_join, list(id_df, resp_df)) %>% filter(complete.cases(.))
+  }
+    
   # Added 2 May: get rid of any region that has less than 5 sites.
   dat <- dat %>% group_by(region) %>% filter(n() >= 5)
   
@@ -121,26 +135,40 @@ distrib <- 'gaussian'
 # --------------------
 
 # Edit May 31: Add priors for FIA intercepts and for BBS alpha sdcar
+# Edit June 14: Add sdcar priors and intercept priors on FIA beta, sd car priors on BBS beta
 library(brms)
 # Tighten prior on the intercept for FIA alpha.
 # 1st arg is df, 2nd is mu, 3rd is sigma for student t distribution
 added_priors <- NULL
-if (task == 1) {
+if (task_table$rv[task] == 'alpha' & taxon == 'fia') {
   added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alpharichness'),
 					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphaphypa'),
 					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
 } 
-if (task == 3) {
+if (task_table$rv[task] == 'beta' & taxon == 'fia') {
+  added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betatdsorensenpa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betaphypa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betafuncpa') )					
+}
+if (task_table$rv[task] == 'gamma' & taxon == 'fia') {
   added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammarichness'),
 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammaphypa'),
 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammafuncpa') )
 } 
-if (task == 4) {
+if (task_table$rv[task] == 'alpha' & taxon == 'bbs') {
   added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alpharichness'),
 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphaphypa'),
 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphafuncpa') )
 }
-				 
+if (task_table$rv[task] == 'beta' & taxon == 'bbs') {
+  added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa') )
+}
+			 
 # --------------------				  
 				  
 if (ecoregion == 'HUC4') eco_mat <- huc_bin

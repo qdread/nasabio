@@ -3,11 +3,12 @@
 # Parallel version created 25 May
 # QDR/NASABIOXGEO/25 May 2018
 
+# Modified 14 June: add more tasks.
 # Modified 4 June: save raw predictions with each iteration so that we can put a credible interval on the k-fold RMSE too.
 
-# Total number of tasks is number of models * number of folds per model = 6 * 5 = 30
+# Total number of tasks is number of models * number of folds per model = 18 * 5 = 90
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-taskdf <- expand.grid(fold = 1:5, model = 1:6)
+taskdf <- expand.grid(fold = 1:5, model = 1:18)
 fit_n <- taskdf$model[task]
 fold_n <- taskdf$fold[task]
 
