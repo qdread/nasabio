@@ -3,6 +3,7 @@
 # Use 100 km but later maybe use 50 km if this is too much.
 # QDR 06 Mar 2018
 
+# Edited 14 Jun 2018: Add TRI variables in addition to SD. (Also, update file paths)
 # Edited 04 May 2018: Also make 50 km version.
 # Edited 25 Apr 2018: Add phylogenetic and functional beta.
 
@@ -36,12 +37,13 @@ write.csv(fiabio, file.path(fp, 'fia_bio_formixedmodels_50k.csv'), row.names = F
 
 # Load the geodiversity data frames that are needed: elevation, bio5k, geo and soil, dhi, footprint.
 
-bio5kmean <- read.csv(file.path(fp, 'geodiv/fia_bio5k_mean_wide.csv'), stringsAsFactors = FALSE)
-bio5ksd <- read.csv(file.path(fp, 'geodiv/fia_bio5k_sd_wide.csv'), stringsAsFactors = FALSE)
-elevmean <- read.csv(file.path(fp, 'geodiv/fia_elev_mean_wide.csv'), stringsAsFactors = FALSE)
-elevsd <- read.csv(file.path(fp, 'geodiv/fia_elev_sd_wide.csv'), stringsAsFactors = FALSE)
-othermean <- read.csv(file.path(fp, 'geodiv/fia_other_mean_wide.csv'), stringsAsFactors = FALSE)
-othersd <- read.csv(file.path(fp, 'geodiv/fia_other_sd_wide.csv'), stringsAsFactors = FALSE)
+fpgeo <- file.path(fp, 'geodiversity_CSVs')
+bio5kmean <- read.csv(file.path(fpgeo, 'fia_bio5k_mean_wide.csv'), stringsAsFactors = FALSE)
+bio5ksd <- read.csv(file.path(fpgeo, 'fia_bio5k_sd_wide.csv'), stringsAsFactors = FALSE)
+elevmean <- read.csv(file.path(fpgeo, 'fia_elev_mean_wide.csv'), stringsAsFactors = FALSE)
+elevsd <- read.csv(file.path(fpgeo, 'fia_elev_sd_wide.csv'), stringsAsFactors = FALSE)
+othermean <- read.csv(file.path(fpgeo, 'fia_other_mean_wide.csv'), stringsAsFactors = FALSE)
+othersd <- read.csv(file.path(fpgeo, 'fia_other_sd_wide.csv'), stringsAsFactors = FALSE)
 
 if (rad == 100) fiageo <- Reduce(left_join,
 				 list(
@@ -61,18 +63,18 @@ if (rad == 100) fiageo <- Reduce(left_join,
 if (rad == 50) fiageo <- Reduce(left_join,
 				 list(
 				 bio5kmean %>% 
-					select(PLT_CN, bio1_5k_50_mean, bio12_5k_50_mean),
+					select(PLT_CN, bio1_5k_50_mean, bio12_5k_50_mean, bio1_5k_tri_50_mean, bio12_5k_tri_50_mean),
 				 bio5ksd %>% 
 					select(PLT_CN, bio1_5k_50_sd, bio12_5k_50_sd),
 				 elevmean %>%
-					select(PLT_CN, elevation_5k_50_mean),
+					select(PLT_CN, elevation_5k_50_mean, elevation_5k_tri_50_mean),
 				 elevsd %>%
 					select(PLT_CN, elevation_5k_50_sd),
 				 othermean %>%
-					select(PLT_CN, dhi_gpp_5k_50_mean, human_footprint_5k_50_mean),
+					select(PLT_CN, dhi_gpp_5k_50_mean, human_footprint_5k_50_mean, dhi_gpp_5k_tri_50_mean, human_footprint_5k_tri_50_mean),
 				 othersd %>% 
 					select(PLT_CN, dhi_gpp_5k_50_sd, human_footprint_5k_50_sd, geological_age_5k_50_diversity_geodiv, soil_type_5k_50_diversity_geodiv) ))
 					
 fiaeco <- read.csv(file.path(fp, 'fia_ecoregions.csv'))
 fiageo <- right_join(fiaeco, fiageo)
-write.csv(fiageo, file.path(fp, 'fia_geo_formixedmodels_50k.csv'), row.names = FALSE)	
+write.csv(fiageo, file.path(fp, 'geodiversity_CSVs/fia_geo_formixedmodels_50k.csv'), row.names = FALSE)	
