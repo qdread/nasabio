@@ -28,7 +28,7 @@ task_table <- expand.grid(taxon = c('fia','bbs'),
 						 scale = c(5, 20, 100),
 						 predictor_group = c('full', 'climate', 'geo', 'human'),
                          stringsAsFactors = FALSE)
-task_table <- merge(task_table, data.frame(taxon = c('fia','bbs'), rv = c('alpha','alpha','beta','beta'), random_effect = rep(c('spatial','nonspatial'),each=4), predictor_group = 'null'), all = TRUE)
+task_table <- merge(task_table, data.frame(taxon = c('fia','bbs'), rv = c('alpha_richness','alpha_richness','beta_td_sorensen_pa','beta_td_sorensen_pa'), random_effect = rep(c('spatial','nonspatial'),each=4), predictor_group = 'null'), all = TRUE)
 
 taxon <- task_table$taxon[task]
 scale_km <- task_table$scale[task]
@@ -63,7 +63,7 @@ if (taxon == 'bbs') {
 }
 
 # Get correct subset of predictors
-prednames <- names(geodat)[-(1:5)]
+prednames <- names(geodat)[!(names(geodat) %in% c('rteNo','HUC4','TNC','BCR'))]
 prednames <- grep(scale_km, prednames, value = TRUE)
 
 if (predictors == 'climate') prednames <- grep(paste(climate_prednames, collapse='|'), prednames, value = TRUE)

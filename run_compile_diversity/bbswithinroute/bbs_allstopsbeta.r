@@ -1,5 +1,7 @@
 # BBS beta-diversity within routes
 
+# Edited 15 June 2018: Correct indexing error.
+
 load('/mnt/research/nasabio/data/bbs/bbsworkspace_bystop_20072016.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance matrices.
@@ -52,16 +54,19 @@ for (rte in rowidxmin:rowidxmax) {
 	if (rowidxmin < rowidxmax) setTxtProgressBar(pb, rte)
 	# Distances between target plot and all other plots.
 	beta_div_rte <- array(NA, dim=c(50,50,21))
-		
+	
+	# Get indexes of rows that are in the focal route.
+	rte_rows <- which(bbscov_oneyear$rteNo == route_ids[rte])
+	
 	for (p1 in 1:49) {
 		for (p2 in (p1+1):50) {
-			# Loop through all other FIA plots, check if plot is in radius
-			# If plot is within radius, calculate diversity between that plot and target plot. 
-			beta_div_rte[p1, p2, ] <- singlepair_beta(p1 = bbsmat_oneyear[p1,], p2 = bbsmat_oneyear[p2,], 
-													td=T, pd=T, fd=T, abundance=F,
-													pddist=ericdist, fddist=birdtraitdist,
-													nnull = nnull,
-													phylo_spp = NULL, func_problem_spp = NULL)
+			# Added 15 June: Catch errors and return NA
+			beta_p1_p2 <- try(  singlepair_beta(p1 = bbsmat_oneyear[rte_rows[p1],], p2 = bbsmat_oneyear[rte_rows[p2],], 
+												td=T, pd=T, fd=T, abundance=F,
+												pddist=ericdist, fddist=birdtraitdist,
+												nnull = nnull,
+												phylo_spp = NULL, func_problem_spp = NULL), TRUE)
+			beta_div_rte[p1, p2, ] <- if (!inherits(beta_p1_p2, 'try-error')) beta_p1_p2 else as.numeric(rep(NA, length(div_names)))
 			
 		}
 	}

@@ -59,8 +59,7 @@ if (taxon == 'bbs') {
   siteid <- 'rteNo'
 
   # Added April 30: Correction for outliers on beta functional
-  # Edited June 4: don't get rid of those outliers.
-  # biodat$beta_func_pa[biodat$beta_func_pa < -10] <- NA
+  biodat$beta_func_pa[biodat$beta_func_pa < -10] <- NA
   # Added 14 May: logit transform beta td.
   biodat$beta_td_sorensen_pa <- qlogis(biodat$beta_td_sorensen_pa)
 
