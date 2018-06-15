@@ -72,6 +72,7 @@ if (predictors == 'human') prednames <- grep(paste(human_prednames, collapse='|'
 if (predictors == 'null') prednames <- character(0)
 
 distrib <- 'gaussian' # Fit all with Gaussian
+ecoregion <- 'TNC' # Use TNC as the ecoregion
 
 added_priors <- NULL # No priors yet
 
