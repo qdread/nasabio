@@ -92,17 +92,17 @@ library(reshape2)
 library(data.table)
 fpdata <- '/mnt/research/nasabio/data'
 
-bbsalphawithin <- read.csv(file.path(fpdata, 'bbs/bbs_withinroute_alpha.csv'), stringsAsFactors = FALSE) %>%
+bbsalphawithin <- read.csv(file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_withinroute_alpha.csv'), stringsAsFactors = FALSE) %>%
 	setDT %>%
 	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
 	setNames(c(names(.)[1], paste('alpha', names(.)[-1], sep = '_')))
 
-bbsbetawithin <- read.csv(file.path(fpdata, 'bbs/bbs_withinroute_beta.csv'), stringsAsFactors = FALSE) %>%
+bbsbetawithin <- read.csv(file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_withinroute_beta.csv'), stringsAsFactors = FALSE) %>%
 	setDT %>%
 	dcast(rteNo ~ radius, value.var = c("beta_td_pairwise_pa", "beta_td_sorensen_pa",  "beta_pd_pairwise_pa", "beta_pd_pairwise_pa_z", "beta_pd_nt_pa", "beta_pd_nt_pa_z", "beta_fd_pairwise_pa", 
 	"beta_fd_pairwise_pa_z", "beta_fd_nt_pa", "beta_fd_nt_pa_z"))
 	
-bbsgammawithin <- read.csv(file.path(fpdata, 'bbs/bbs_withinroute_gamma.csv'), stringsAsFactors = FALSE) %>%
+bbsgammawithin <- read.csv(file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_withinroute_gamma.csv'), stringsAsFactors = FALSE) %>%
 	setDT %>%
 	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
 	setNames(c(names(.)[1], paste('gamma', names(.)[-1], sep = '_')))
@@ -111,7 +111,7 @@ bbsbiowithin <- bbsalphawithin %>%
 	left_join(bbsbetawithin) %>%
 	left_join(bbsgammawithin)	
 
-write.csv(bbsbiowithin, file = file.path(fpdata, 'bbs/bbs_allbio_withinroute_wide.csv'), row.names = FALSE)
+write.csv(bbsbiowithin, file = file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_allbio_withinroute_wide.csv'), row.names = FALSE)
 	
 #############################################################
 # 22 Feb. 2018

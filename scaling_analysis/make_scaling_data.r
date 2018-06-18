@@ -69,6 +69,11 @@ noedge_rte <- bbssp$rteNo[!bbscoast$is_edge]
 bbsbio <- subset(bbsbio, rteNo %in% noedge_rte)
 bbsgeo <- subset(bbsgeo, rteNo %in% noedge_rte)
 
+# Unfortunately, get rid of the few plots where beta is 0 or 1 (only 1 plot where it is 1, actually)
+bbsbio <- bbsbio %>%
+  mutate_at(vars(contains('beta_td')), function(x) if_else(x > 0 & x < 1, x, as.numeric(NA)))
+
+
 # For FIA, use 10 km thinning and get rid of 50km to Can/Mex. This will reduce dataset to very manageable <10k plots.
 fiasp <- read.csv('~/data/allfia.csv')
 aea_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"
