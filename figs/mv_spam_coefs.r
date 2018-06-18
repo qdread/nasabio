@@ -118,6 +118,34 @@ ggsave(file.path(fpfig, 'BBS_multivariate_coef_sideways.png'), coef_bbs_sideways
 ggsave(file.path(fpfig, 'FIA_multivariate_coef_sideways.png'), coef_fia_sideways, height = 8, width = 8, dpi = 300)
 
 
+# Edit 18 June: plot of coefficients with both, to compare.
+coefdat_both <- all_coef %>%
+  filter(model == 'full') %>%
+  mutate(nonzero = Q2.5 > 0 | Q97.5 < 0)
+pd <- position_dodge(width = 0.06)
+coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c('birds','trees')))) +
+  geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
+  geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
+  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = taxon, group = taxon), width = 0, position=pd) +
+  geom_point(aes(x = predictor, y = Estimate, size = nonzero, fill = nonzero, group = taxon), pch = 21, position=pd) +
+  facet_grid(rv ~ flavor) +
+  scale_color_manual(values = c('blue', 'skyblue')) +
+  scale_fill_manual(values = c('black', 'red'), guide = FALSE) +
+  scale_size_manual(values = c(1, 1.5), guide = FALSE) +
+  scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill=NA),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none')
+
+coef_both_sideways <- coefplot_both + 
+  coord_flip() +
+  theme(axis.text.x = element_text(angle=0, hjust=0.5), 
+        legend.background = element_rect(color = 'black'),
+        legend.position = c(0.91,0.9))
+  
+
 # Plot of spatial variability ---------------------------------------------
 
 pd = position_dodge(width = 0.5)

@@ -80,16 +80,22 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
   
   # Bayesian R-squared
   model_r2 <- bayes_R2(fit$model)
-  names(model_r2) <- c('r2', 'r2_error', 'r2_q025', 'r2_q975')
+  dimnames(model_r2)[[2]] <- c('r2', 'r2_error', 'r2_q025', 'r2_q975')
   model_r2 <- cbind(task_table[i,], model_r2)
   
-  # LOO information criterion
-  # model_loo <- LOO(fit$model) # Takes ~5 minutes to run even if model isn't refit.
-  # model_loo_est <- as.numeric(model_loo$estimates)
-  # names(model_loo_est) <- c('elpd_LOO', 'p_LOO', 'LOOIC', 'elpd_LOO_se', 'p_LOO_se', 'LOOIC_se')
-  # model_loo_est <- cbind(task_table[i,], t(model_loo_est))
-  
   list(coef = cbind(task_table[i,], fit$coef), pred = model_pred, rmse = model_rmse, r2 = model_r2)
+  
+}
+
+# Do LOO separately
+model_loos <- foreach (i = 1:n_fits) %dopar% {
+  load(file.path(fp, paste0('fit', i, '.RData'))) # Load model
+  
+  # LOO information criterion
+  model_loo <- LOO(fit$model) # Takes ~5 minutes to run even if model isn't refit.
+  model_loo_est <- as.numeric(model_loo$estimates)
+  names(model_loo_est) <- c('elpd_LOO', 'p_LOO', 'LOOIC', 'elpd_LOO_se', 'p_LOO_se', 'LOOIC_se')
+  cbind(task_table[i,], t(model_loo_est))
   
 }
 
@@ -98,11 +104,11 @@ model_coef <- map_dfr(model_stats, 'coef')
 model_pred <- map_dfr(model_stats, 'pred')
 model_rmse <- map_dfr(model_stats, 'rmse')
 model_r2 <- map_dfr(model_stats, 'r2')
-model_looic <- map_dfr(model_stats, 'loo')
+model_looic <- bind_rows(model_loos)
 model_fitstats <- Reduce(left_join, list(model_rmse, model_r2, model_looic))
 
 # Write the data frames to csv.
 fp_output <- '/mnt/research/nasabio/data/modelfits'
 write.csv(model_coef, file.path(fp_output, 'scaling_coef.csv'), row.names = FALSE)
-write.csv(model_pred, file.path(fp_output, 'scaling_coef.csv'), row.names = FALSE)
+write.csv(model_pred, file.path(fp_output, 'scaling_pred.csv'), row.names = FALSE)
 write.csv(model_fitstats, file.path(fp_output, 'scaling_fitstats.csv'), row.names = FALSE)
