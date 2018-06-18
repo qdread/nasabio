@@ -1,12 +1,14 @@
 # Tables and figures of correlations within predictors and within response variables
 # QDR/NASABioxgeo/30 May 2018
 
+# Edit 18 Jun: Use new predictor sets
+
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/modelfits/bbs_spatial_mm_dat_50k.RData')
 load('C:/Users/Q/Dropbox/projects/nasabiodiv/modelfits/fia_spatial_mm_dat_50k.RData')
 
-prednames50 <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd')
-geo_names <- c('elevation sd','temperature mean','geol. age diversity','soil diversity','precip. mean','precip. sd','GPP sd')
-geo_names_order <- c('temperature mean', 'precip. mean', 'elevation sd', 'precip. sd', 'GPP sd', 'geol. age diversity', 'soil diversity')
+prednames50 <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
+geo_names <- c('elevation diversity','temperature mean','geol. age diversity','soil diversity','precip. mean','GPP diversity')
+geo_names_order <- c('temperature mean', 'precip. mean', 'elevation diversity', 'GPP diversity', 'geol. age diversity', 'soil diversity')
 
 bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
 bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",

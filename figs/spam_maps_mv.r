@@ -2,6 +2,7 @@
 # This uses the new spatial mixed model coefficients. ***MULTIVARIATE!***
 # QDR NASABIOXGEO 28 May 2018
 
+# Edit 18 June: new predictor sets
 # Edit 04 June: Also make maps of spatial effects only
 
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
@@ -77,8 +78,8 @@ library(reshape2)
 # Make a column for the parameter estimate and one that shows whether the CI is not zero.
 
 coef_wide <- coef_all %>%
-  filter(effect == 'coefficient') %>%
-  select(-ecoregion, -effect, -rv) %>%
+  filter(effect == 'coefficient', model == 'full') %>%
+  select(-ecoregion, -effect, -rv, -model) %>%
   dcast(taxon + region + response + parameter ~ stat) %>%
   mutate(significance = case_when(
     Q2.5 > 0 ~ 'positive',
@@ -89,8 +90,8 @@ coef_wide <- coef_all %>%
 # Alternative version: spatial effects only (random, not including fixed effect)
 
 spatialeff_wide <- coef_all %>%
-  filter(effect == 'random') %>%
-  select(-ecoregion, -effect, -rv) %>%
+  filter(effect == 'random', model == 'full') %>%
+  select(-ecoregion, -effect, -rv, -model) %>%
   dcast(taxon + region + response + parameter ~ stat) %>%
   mutate(significance = case_when(
     Q2.5 > 0 ~ 'positive',
@@ -133,9 +134,8 @@ bio_titles <- c('alpha taxonomic', 'alpha phylogenetic', 'alpha functional', 'be
 bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
                "beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa",
                "gamma_richness", "gamma_phy_pa", "gamma_func_pa")
-geo_names <- c('elevation_sd','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','precip_sd','gpp_sd', 'intercept')
-
-prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd', 'Intercept')
+geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','gpp_sd', 'intercept')
+prednames <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
 
 cols <- c(bg = 'gray80', text = 'black', state = 'gray20')
 

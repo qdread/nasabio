@@ -3,6 +3,7 @@
 # QDR NASABioXGeo
 # Originally written in April but this source code file created 14 June 2018
 
+# Modified 18 June 2018: add drop = FALSE to scale so that it does not give weird output if only 1 response variable
 # Modified 15 June 2018: correct scale() function to just return a numeric vector without attributes (also debug this a bit)
 
 fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9, random_effect_type = 'spatial') {
@@ -12,8 +13,8 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
   # Build formula and data
   id_df <- pred_df[, c(id_var, region_var)]
   resp_df <- resp_df[, c(id_var, resp_vars)]
-  resp_df[,-1] <- scale(resp_df[,-1])
-  resp_df[,-1] <- lapply(resp_df[,-1], as.numeric)
+  resp_df[,-1] <- scale(resp_df[,-1, drop = FALSE])
+  resp_df[,-1] <- lapply(resp_df[,-1, drop = FALSE], as.numeric)
   names(id_df)[2] <- 'region' # Make sure the name of the region is called region so that the random effects will specify correctly.
   region_name <- 'region'
   resp_var_names <- paste0('cbind(', paste(resp_vars, collapse = ','), ')')
@@ -21,8 +22,8 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
   # create much simpler one if there aren't predictors (edited 13 June)
   if (length(pred_vars) > 0) {
 	pred_df <- pred_df[, c(id_var, pred_vars)]
-	pred_df[,-1] <- scale(pred_df[,-1])
-	pred_df[,-1] <- lapply(pred_df[,-1], as.numeric)
+	pred_df[,-1] <- scale(pred_df[,-1, drop = FALSE])
+	pred_df[,-1] <- lapply(pred_df[,-1, drop = FALSE], as.numeric)
 	pred_var_names <- names(pred_df)[-1]
 	fixed_effects <- paste(pred_var_names, collapse = '+')
 	random_effects <- paste(c(paste('(1|', region_name, ')', sep = ''), paste('(', pred_var_names, ' - 1|', region_name, ')', sep = '')), collapse = '+')

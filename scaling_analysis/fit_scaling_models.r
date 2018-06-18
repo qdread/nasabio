@@ -1,6 +1,8 @@
 # Fit models for scaling analysis
 # QDR NASABioXGeo 14 June 2018
 
+# Modified 18 June: add priors for the models that did not converge
+
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 
 args <- commandArgs(TRUE)
@@ -60,6 +62,9 @@ if (taxon == 'bbs') {
   # Logit transform beta td.
   biodat$beta_td_sorensen_pa <- qlogis(biodat$beta_td_sorensen_pa)
   biodat$beta_td_sorensen <- qlogis(biodat$beta_td_sorensen)
+  
+  # Edit 18 June: Remove one unexplained outlier (~5E14) of elevation TRI
+  geodat$elevation_30m_tri_100_mean[geodat$elevation_30m_tri_100_mean > 1e6] <- NA
 }
 
 # Get correct subset of predictors
@@ -74,7 +79,15 @@ if (predictors == 'null') prednames <- character(0)
 distrib <- 'gaussian' # Fit all with Gaussian
 ecoregion <- 'TNC' # Use TNC as the ecoregion
 
-added_priors <- NULL # No priors yet
+added_priors <- NULL # For most tasks, model will converge using only default priors
+# Edit 18 June: Add priors for the models that did not converge
+if (rv == 'alpha_richness' & taxon == 'fia') {
+  added_priors <- c(brms::set_prior('student_t(5, 0, 2)', class = 'Intercept'))
+} 
+if (rv == 'beta_td_sorensen_pa' & taxon == 'bbs') {
+  added_priors <- c(brms::set_prior('lognormal(1, 1)', class = 'sdcar'))
+}
+
 
 fit <- fit_mv_mm(pred_df = geodat, 
 				  resp_df = biodat, 

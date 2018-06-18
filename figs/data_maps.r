@@ -1,6 +1,7 @@
 # Maps to show raw data for NASABIOXGEO MS
 # QDR/29 May 2018
 
+# Edit 18 Jun 2018: new predictor variables.
 # Edit 4 Jun 2018: change midpoint to gray, change labels
 
 # Make map (run fortify each time this function is called, slower but simpler)
@@ -50,13 +51,13 @@ fpfig <- '/mnt/research/nasabio/figs/descriptivemaps'
 
 rbcol <- scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')))
 
-prednames <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd')
+prednames <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
 
 bio_titles <- c('alpha taxonomic', 'alpha phylogenetic', 'alpha functional', 'beta taxonomic', 'beta phylogenetic', 'beta functional', 'gamma taxonomic', 'gamma phylogenetic', 'gamma functional')
 bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
                "beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa",
                "gamma_richness", "gamma_phy_pa", "gamma_func_pa")
-geo_names <- c('elevation_sd','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','precip_sd','gpp_sd', 'intercept')
+geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','gpp_sd', 'intercept')
 
 # Load data and coordinates
 load('/mnt/research/nasabio/temp/bbs_spatial_mm_dat_50k.RData')
@@ -129,15 +130,12 @@ maps_geo <- allgeo_long %>%
   do(maps = point_map(., rbcol, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state'], fill_color = cols['fill'], show_legend = TRUE))
 
 # Correct order of plots
-geo_names <- c('temperature mean','precipitation st.dev.','precipitation mean','elevation st.dev.','soil diversity','geol. age diversity','GPP st.dev.')
-geo_names_order <- c('temperature mean', 'precipitation mean', 'elevation st.dev.', 'precipitation st.dev.', 'GPP st.dev.', 'geol. age diversity', 'soil diversity')
-
+geo_names_order <- c('temperature mean', 'precipitation mean', 'elevation diversity', 'soil diversity', 'geological age diversity', 'GPP diversity')
 
 tw <- theme(plot.title = element_text(color = 'black'))
-maps_geo$title <- geo_names
-maps_geo <- maps_geo[match(geo_names_order, geo_names),]
+maps_geo$title <- geo_names_order
 
-png(file.path(fpfig, 'geo_points.png'), height = 9, width = 12, res = 400, units = 'in')
+png(file.path(fpfig, 'geo_points.png'), height = 9, width = 9, res = 400, units = 'in')
   grid.arrange(grobs = map2(maps_geo$maps, maps_geo$title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()
 

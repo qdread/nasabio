@@ -1,6 +1,7 @@
 # Fixed effect coefficient plots from spatial mixed models (multivariate version)
 # QDR/NASABioxgeo/28 May 2018
 
+# Modified 18 June: Add the new null models.
 
 # Load and combine data ---------------------------------------------------
 
@@ -21,34 +22,33 @@ library(ggplot2)
 library(reshape2)
 library(purrr)
 
-prednames50 <- c('elevation_5k_50_sd', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'bio12_5k_50_sd', 'dhi_gpp_5k_50_sd')
-geo_names <- c('elevation sd','temperature mean','geol. age diversity','soil diversity','precip. mean','precip. sd','GPP sd')
-geo_names_order <- c('temperature mean', 'precip. mean', 'elevation sd', 'precip. sd', 'GPP sd', 'geol. age diversity', 'soil diversity')
+prednames50 <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
+geo_names <- c('elevation diversity','temperature mean','geol. age diversity','soil diversity','precip. mean','GPP diversity')
+geo_names_order <- c('temperature mean', 'precip. mean', 'elevation diversity', 'GPP diversity', 'geol. age diversity', 'soil diversity')
 
 bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma PD', 'alpha FD', 'beta FD', 'gamma FD')
 bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
                "alpha_phy_pa", "beta_phy_pa", "gamma_phy_pa", 
                "alpha_func_pa", "beta_func_pa", "gamma_func_pa")
 
-raw_bio_names <- cbind(expand.grid(rv=c('alpha','beta','gamma'),variable=c('rmse_y1','rmse_y2','rmse_y3')),
-                       name = bio_names)
-
 # Combine full-model and k-fold RMSEs.
 # Include RMSE from each fold so we can see variability due to folds.
 
 all_rmse <- kfold_rmse %>%
-  mutate(response = bio_names[match(response, gsub('_','',bio_names))]) %>%
+  mutate(response = bio_names[match(response,bio_names)]) %>%
   filter(is.na(fold)) %>%
   select(-kfoldic, -kfoldic_se, -fold) %>%
   right_join(model_rmse) %>%
   left_join(model_r2 %>% rename(r2 = Estimate, r2_error = Est.Error, r2_q025 = Q2.5, r2_q975 = Q97.5)) %>%
   mutate_at(vars(starts_with('kfold_RMSE')), funs(relative = ./range_obs)) %>%
-  mutate(response = factor(bio_titles[match(response, bio_names)], levels = bio_titles))
+  mutate(response = factor(bio_titles[match(response, bio_names)], levels = bio_titles),
+         flavor = map_chr(strsplit(as.character(response), ' '), 2) %>%
+           factor(levels = c('TD','PD','FD'), labels = c('taxonomic', 'phylogenetic', 'functional')))
 
 # Reshape coefficient plot and relabel it
 all_coef <- model_coef %>%
   filter(effect == 'fixed', !parameter %in% 'Intercept') %>%
-  dcast(taxon + rv + response + parameter ~ stat) %>%
+  dcast(taxon + rv + model + response + parameter ~ stat) %>%
   mutate(predictor = factor(geo_names[match(parameter, prednames50)], levels = geo_names_order),
          response = factor(bio_titles[match(response, bio_names)], levels = bio_titles),
          flavor = map_chr(strsplit(as.character(response), ' '), 2) %>%
@@ -71,7 +71,7 @@ fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/multivariate_maps_f
 coefdat_bbs <- all_coef %>%
   filter(taxon == 'bbs') %>%
   mutate(nonzero = Q2.5 > 0 | Q97.5 < 0)
-coefplot_bbs <- ggplot(coefdat_bbs) +
+coefplot_bbs <- ggplot(coefdat_bbs %>% filter(model=='full')) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
@@ -88,7 +88,7 @@ coefplot_bbs <- ggplot(coefdat_bbs) +
 coefdat_fia <- all_coef %>%
   filter(taxon == 'fia') %>%
   mutate(nonzero = Q2.5 > 0 | Q97.5 < 0)
-coefplot_fia <- ggplot(coefdat_fia) +
+coefplot_fia <- ggplot(coefdat_fia %>% filter(model=='full')) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
@@ -122,7 +122,7 @@ ggsave(file.path(fpfig, 'FIA_multivariate_coef_sideways.png'), coef_fia_sideways
 
 pd = position_dodge(width = 0.5)
 coefvar_plot <- ggplot(model_coef_var %>% 
-                         filter(!is.na(predictor)) %>%
+                         filter(!is.na(predictor), model == 'full') %>%
                          mutate(taxon = factor(taxon,labels=c('birds','trees')))) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_col(aes(x = predictor, y = cv, fill = taxon, group = taxon), position = pd, width = 0.5) +
@@ -146,11 +146,13 @@ ggsave(file.path(fpfig, 'both_multivariate_coefvar_sideways.png'), coefvar_sidew
 pn1 <- position_nudge(x = -0.06, y = 0)
 pn2 <- position_nudge(x = 0.06, y = 0)
 # rmseplot for both
+# Comparison of RMSE and R-squared among models.
 rmseplot_both <- all_rmse %>% 
+  filter(model == 'full') %>%
   ggplot(aes(x = response)) +
   facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, y = RMSE_mean), width = 0, position = pn1) +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975, y = RMSE_mean), width = 0, color = 'red', position = pn2) +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pn1) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, color = 'red', position = pn2) +
   geom_point(aes(y = RMSE_mean), position = pn1) +
   geom_point(aes(y = kfold_RMSE_mean), color = 'red', position = pn2) +
   geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
@@ -163,4 +165,44 @@ rmseplot_both <- all_rmse %>%
 
 ggsave(file.path(fpfig, 'both_performance_multivariate.png'), rmseplot_both, height = 4, width = 7, dpi = 300)
 
+# Edit 18 June: plot comparing RMSEs and R-squared for the 3 model types
+pd <- position_dodge(width = 0.05)
+rmseplot_bymodel <- all_rmse %>% 
+  ggplot(aes(x = response, color = model, group = model)) +
+  facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean), position = pd) +
+ # geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.background = element_rect(fill = NA)) 
 
+kfold_rmseplot_bymodel <- all_rmse %>% 
+  ggplot(aes(x = response, color = model, group = model)) +
+  facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
+  # geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.background = element_rect(fill = NA)) 
+
+# Just compare the predictive power of the full model, putting birds and trees on the same one.
+rmseplot_taxacolor <- all_rmse %>% 
+  filter(model == 'full') %>%
+  mutate(taxon = factor(taxon,labels=c('birds','trees'))) %>%
+  ggplot(aes(x = rv)) +
+  facet_grid(. ~ flavor, switch = 'x') +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, color = taxon, group = taxon), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean, color = taxon, group = taxon), position = pd) +
+  theme_bw() +
+  scale_color_manual(values = c('blue', 'skyblue')) +
+  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
+  scale_x_discrete(name = 'response') +
+  theme(strip.background = element_blank(),
+        strip.placement = 'outside',
+        panel.spacing = unit(0, 'lines'),
+        legend.position = c(0.91, 0.9),
+        legend.background = element_rect(color = 'black'))

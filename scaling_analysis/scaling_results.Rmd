@@ -1,0 +1,66 @@
+---
+title: "First scaling results"
+author: "Quentin D. Read"
+date: "June 18, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Code workflow
+
+The biodiversity and geodiversity metrics for BBS and FIA are combined into data frames and written to CSVs in this script: `GitHub/nasabio/spatial_data_extraction/gather_data.r`
+
+The rest of the code is all on GitHub at `GitHub/nasabio/scaling_analysis`.
+
+* First reduce the number of columns in FIA input data using the script `reduce_fia_columns.r`.
+* Next create input data in a format that can be used for the model fits using the script `make_scaling_data.r`. That script selects the right columns, gets rid of a few bad data points, and thins out the FIA data to ~3000 plots at least 20 km from any neighboring plot.
+* Next fit the models with `fit_scaling_models.r`. This script is run remotely in parallel for each model. The actual function to fit the multivariate mixed model is at `GitHub/nasabio/stats/fit_mv_mm.r`. Most of the models converged the first time without adding any priors, but I added a few priors to the intercepts and the sd of the autoregressive model, and all the models converged after adding those priors. The model fits are saved in .RData format to `/mnt/research/nasabio/temp/scalingfits`.
+* Finally, get the coefficients, predicted values, and model fit statistics (Bayesian R-squared, RMSE, and leave-one-out IC), with the script `scaling_coef_and_IC.r`. CSVs with the results are saved in `/mnt/research/nasabio/data/modelfits`.
+
+# Description of model
+
+## Model specification
+
+The models are mixed models with a single response variable, some fixed predictors, and TNC ecoregion as random effect. Both response and predictors are centered and scaled so all coefficients are interpretable as *change in number of std dev of response per change in std dev of predictor.* In all cases, response variable is biodiversity within a 5-km radius. The random effect is either nonspatial (TNC ecoregion is just a blocked random effect) or spatial (spatial autocorrelation among ecoregions is modeled with a conditional autoregressive model that takes into account whether regions are adjacent).
+
+There are a total of 104 models fit: 
+
+* 2 different taxa: birds (BBS) and trees (FIA)
+* 2 different response variables: alpha-diversity and beta-diversity (both at 5 km radius)
+* 2 different types of random effect (spatial and nonspatial)
+* 13 different predictor sets
+  + Full model, climate predictors only, geo predictors only, human predictors only, and null model with no fixed effects
+  + 3 different spatial grains of predictor variable (5 km, 20 km, and 100 km) for all models but the null model
+  + (4 groups of predictors * 3 scales) + 1 null model = 13 predictor sets
+  
+$2 \times 2 \times 2 \times 13 = 104$.
+
+## Predictors
+
+For each environmental variable, two different summary statistics (averaged within the circle of appropriate radius) are used as predictors: the mean and the topographic ruggedness index (TRI). The TRI is the average difference between each pixel and its neighbors, in the native resolution of each variable. Two exceptions to that are the categorical variables: soil type and geological age. For those, we are using diversity as measured with Shannon entropy as a measure of geodiversity.
+
+* Climate variables
+  + Mean annual temperature (1 km resolution)
+  + Mean annual precipitation (1 km resolution)
+* Geological variables
+  + Elevation (30 m resolution)
+  + Dynamic habitat index: gross primary productivity (1 km resolution)
+  + Soil type (5 km resolution, categorical)
+  + Geological age (1 km resolution, categorical)
+* Human influence variable
+  + Human footprint index (1 km resolution)
+  
+# Results
+
+## Model fit statistics
+
+```{r}
+fp <- 'C:/Users/Q/google_drive/NASABiodiversityWG/birdXtree_ScalingPaper/model_output'
+
+coefs <- read.csv(file.path(fp, 'scaling_coef.csv'), stringsAsFactors = FALSE)
+fitstats <- read.csv(file.path(fp, 'scaling_fitstats.csv'), stringsAsFactors = FALSE)
+```
+
