@@ -34,7 +34,7 @@ There are a total of 104 models fit:
 * 13 different predictor sets
   + Full model, climate predictors only, geo predictors only, human predictors only, and null model with no fixed effects
   + 3 different spatial grains of predictor variable (5 km, 20 km, and 100 km) for all models but the null model
-  + (4 groups of predictors * 3 scales) + 1 null model = 13 predictor sets
+  + (4 groups of predictors $\times$ 3 scales) + 1 null model = 13 predictor sets
   
 $2 \times 2 \times 2 \times 13 = 104$.
 
@@ -55,12 +55,97 @@ For each environmental variable, two different summary statistics (averaged with
   
 # Results
 
+So far, I do not see a very strong pattern of scale at least looking at the model fit statistics. However there are some very low information criteria for the 5 km scale. 
+
 ## Model fit statistics
 
-```{r}
+```{r load, message = FALSE}
 fp <- 'C:/Users/Q/google_drive/NASABiodiversityWG/birdXtree_ScalingPaper/model_output'
 
 coefs <- read.csv(file.path(fp, 'scaling_coef.csv'), stringsAsFactors = FALSE)
 fitstats <- read.csv(file.path(fp, 'scaling_fitstats.csv'), stringsAsFactors = FALSE)
+
+fitstats$scale[is.na(fitstats$scale)] <- 'null'
+fitstats$scale <- factor(fitstats$scale, 
+                         levels=c('5','20','100','null'), 
+                         labels=c('5 km','20 km','100 km','null'))
+
+library(ggplot2)
+library(dplyr)
+lbls <- labeller(taxon = c(bbs='birds',fia='trees'), 
+                 rv = c(alpha_richness='alpha',beta_td_sorensen_pa='beta'))
+
+th <- theme_bw() +
+  theme(strip.background = element_rect(fill = NA))
+                 
 ```
 
+### Information criteria compared across model fits
+
+First just show the ones with the spatial random effect. 
+
+```{r}
+p_looic <- fitstats %>%
+  filter(random_effect == 'spatial') %>%
+  ggplot(aes(y = LOOIC, ymin = LOOIC - LOOIC_se, ymax = LOOIC + LOOIC_se))
+
+p_looic + 
+  facet_grid(taxon ~ rv, labeller = lbls) +
+  geom_pointrange(aes(x = scale, color = predictor_group)) +
+  th
+```
+
+### Root mean squared error compared across model fits
+
+It might be possible to infer from this figure, and from the R-squared figure below, that geodiversity and climate predictors become less important as scale goes up, but human influence becomes more important.
+
+
+```{r}
+p_rmse <- fitstats %>%
+  filter(random_effect == 'spatial') %>%
+  ggplot(aes(y = RMSE_mean, ymin = RMSE_q025, ymax = RMSE_q975))
+
+p_rmse + 
+  facet_grid(taxon ~ rv, labeller = lbls) +
+  geom_pointrange(aes(x = scale, color = predictor_group)) +
+  th
+```
+
+### Bayesian R-squared compared across model fits
+
+```{r}
+p_r2 <- fitstats %>%
+  filter(random_effect == 'spatial') %>%
+  ggplot(aes(y = r2, ymin = r2_q025, ymax = r2_q975))
+
+p_r2 + 
+  facet_grid(taxon ~ rv, labeller = lbls) +
+  geom_pointrange(aes(x = scale, color = predictor_group)) +
+  th
+```
+
+### Comparison of random effects
+
+Is the spatial random effect better than the naive random effect? They appear to have very similar prediction accuracy.
+
+```{r}
+ggplot(fitstats, 
+       aes(x = random_effect, y = RMSE_mean, ymin = RMSE_q025, ymax = RMSE_q975)) +
+  facet_grid(taxon ~ rv + scale, labeller = lbls) +
+  geom_pointrange(aes(color = predictor_group)) + 
+  th +
+  theme(axis.text.x = element_text(angle=90))
+  
+```
+
+They also have a very similar R-squared.
+
+```{r}
+ggplot(fitstats, 
+       aes(x = random_effect, y = r2, ymin = r2_q025, ymax = r2_q975)) +
+  facet_grid(taxon ~ rv + scale, labeller = lbls) +
+  geom_pointrange(aes(color = predictor_group)) + 
+  th +
+  theme(axis.text.x = element_text(angle=90))
+  
+```

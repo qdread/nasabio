@@ -179,8 +179,8 @@ rmseplot_both <- all_rmse %>%
   filter(model == 'full') %>%
   ggplot(aes(x = response)) +
   facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pn1) +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, color = 'red', position = pn2) +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, y = RMSE_mean), width = 0, position = pn1) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975, y = kfold_RMSE_mean), width = 0, color = 'red', position = pn2) +
   geom_point(aes(y = RMSE_mean), position = pn1) +
   geom_point(aes(y = kfold_RMSE_mean), color = 'red', position = pn2) +
   geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
@@ -195,27 +195,66 @@ ggsave(file.path(fpfig, 'both_performance_multivariate.png'), rmseplot_both, hei
 
 # Edit 18 June: plot comparing RMSEs and R-squared for the 3 model types
 pd <- position_dodge(width = 0.05)
-rmseplot_bymodel <- all_rmse %>% 
-  ggplot(aes(x = response, color = model, group = model)) +
-  facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
+rmseplot_bymodel_bird <- all_rmse %>% 
+  filter(taxon == 'bbs') %>%
+  ggplot(aes(x = rv, color = model, group = model)) +
+  facet_grid(. ~ flavor, switch = 'x') +
   geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
   geom_point(aes(y = RMSE_mean), position = pd) +
- # geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
   theme_bw() +
   scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        strip.background = element_rect(fill = NA)) 
+  scale_x_discrete(name = 'response') +
+  ggtitle('birds') +
+  theme(strip.background = element_blank(),
+        strip.placement = 'outside',
+        panel.spacing = unit(0, 'lines'),
+        legend.position = 'none')
+rmseplot_bymodel_tree <- all_rmse %>% 
+  filter(taxon == 'fia') %>%
+  ggplot(aes(x = rv, color = model, group = model)) +
+  facet_grid(. ~ flavor, switch = 'x') +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean), position = pd) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
+  scale_x_discrete(name = 'response') +
+  ggtitle('trees') +
+  theme(strip.background = element_blank(),
+        strip.placement = 'outside',
+        panel.spacing = unit(0, 'lines'),
+        legend.position = c(0.91, 0.9),
+        legend.background = element_rect(color = 'black'))
 
-kfold_rmseplot_bymodel <- all_rmse %>% 
-  ggplot(aes(x = response, color = model, group = model)) +
-  facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
-  # geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
+
+kfold_rmseplot_bymodel_bird <- all_rmse %>% 
+  filter(taxon == 'bbs') %>%
+  ggplot(aes(x = rv, color = model, group = model)) +
+  facet_grid(. ~ flavor, switch = 'x') +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean), position = pd) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        strip.background = element_rect(fill = NA)) 
+  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = '5-fold CV root mean squared error') +
+  scale_x_discrete(name = 'response') +
+  ggtitle('birds') +
+  theme(strip.background = element_blank(),
+        strip.placement = 'outside',
+        panel.spacing = unit(0, 'lines'),
+        legend.position = 'none')
+kfold_rmseplot_bymodel_tree <- all_rmse %>% 
+  filter(taxon == 'fia') %>%
+  ggplot(aes(x = rv, color = model, group = model)) +
+  facet_grid(. ~ flavor, switch = 'x') +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean), position = pd) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = '5-fold CV root mean squared error') +
+  scale_x_discrete(name = 'response') +
+  ggtitle('trees') +
+  theme(strip.background = element_blank(),
+        strip.placement = 'outside',
+        panel.spacing = unit(0, 'lines'),
+        legend.position = c(0.91, 0.9),
+        legend.background = element_rect(color = 'black'))
 
 # Just compare the predictive power of the full model, putting birds and trees on the same one.
 rmseplot_taxacolor <- all_rmse %>% 
