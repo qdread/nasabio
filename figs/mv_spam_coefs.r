@@ -127,11 +127,11 @@ coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = taxon, group = taxon), width = 0, position=pd) +
-  geom_point(aes(x = predictor, y = Estimate, size = nonzero, fill = nonzero, group = taxon), pch = 21, position=pd) +
+  geom_point(aes(x = predictor, y = Estimate, size = nonzero, color = taxon, fill = nonzero, group = taxon), pch = 21, position=pd, show.legend = FALSE) +
   facet_grid(rv ~ flavor) +
   scale_color_manual(values = c('blue', 'skyblue')) +
   scale_fill_manual(values = c('black', 'red'), guide = FALSE) +
-  scale_size_manual(values = c(1, 1.5), guide = FALSE) +
+  scale_size_manual(values = c(1.2, 1.5), guide = FALSE) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
@@ -143,20 +143,24 @@ coef_both_sideways <- coefplot_both +
   coord_flip() +
   theme(axis.text.x = element_text(angle=0, hjust=0.5), 
         legend.background = element_rect(color = 'black'),
-        legend.position = c(0.91,0.9))
-  
+        legend.position = c(0.92,0.93))
+
+ggsave(file.path(fpfig, 'both_multivariate_coef_sideways.png'), coef_both_sideways, height = 8, width = 8, dpi = 300)
+
 
 # Plot of spatial variability ---------------------------------------------
 
 pd = position_dodge(width = 0.5)
 coefvar_plot <- ggplot(model_coef_var %>% 
-                         filter(!is.na(predictor), model == 'full') %>%
-                         mutate(taxon = factor(taxon,labels=c('birds','trees')))) +
+                         filter(!is.na(predictor)) %>%
+                         mutate(taxon = factor(taxon,levels=c('fia','bbs'),labels=c('trees','birds')),
+                                response = map_chr(strsplit(as.character(response), ' '), 1))) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
-  geom_col(aes(x = predictor, y = cv, fill = taxon, group = taxon), position = pd, width = 0.5) +
-  facet_grid(rv ~ flavor) +
+  geom_col(aes(x = predictor, y = coef_var, fill = taxon, group = taxon), position = pd, width = 0.5) +
+  facet_grid(response ~ flavor) +
   scale_fill_manual(values = c('blue', 'skyblue')) +
-  scale_y_continuous(name = 'spatial coefficient of variation', limits = c(0, 15), expand = c(0,0), breaks=c(0,5,10)) +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  scale_y_continuous(name = 'spatial variability of relationship', limits = c(0, 0.7), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill = NA),
         panel.grid = element_blank(),
@@ -167,6 +171,7 @@ coefvar_sideways <- coefvar_plot +
   coord_flip() +
   theme(axis.text.x = element_text(angle=0, hjust=0.5),
         legend.background = element_rect(color = 'black')) 
+
 ggsave(file.path(fpfig, 'both_multivariate_coefvar_sideways.png'), coefvar_sideways, height = 8, width = 8, dpi = 300)
 
 # Plot showing RMSEs --------------------------------------------------------
@@ -194,6 +199,10 @@ rmseplot_both <- all_rmse %>%
 ggsave(file.path(fpfig, 'both_performance_multivariate.png'), rmseplot_both, height = 4, width = 7, dpi = 300)
 
 # Edit 18 June: plot comparing RMSEs and R-squared for the 3 model types
+
+all_rmse <- all_rmse %>%
+  mutate(model = factor(model, levels=c('space','climate','full'), labels=c('space only', 'space+climate','space+climate+geodiversity')))
+
 pd <- position_dodge(width = 0.05)
 rmseplot_bymodel_bird <- all_rmse %>% 
   filter(taxon == 'bbs') %>%
@@ -222,8 +231,9 @@ rmseplot_bymodel_tree <- all_rmse %>%
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
         panel.spacing = unit(0, 'lines'),
-        legend.position = c(0.91, 0.9),
-        legend.background = element_rect(color = 'black'))
+        legend.position = c(0.85, 0.2),
+        legend.background = element_rect(color = 'black'),
+        legend.text = element_text(size = 8))
 
 
 kfold_rmseplot_bymodel_bird <- all_rmse %>% 
@@ -253,12 +263,13 @@ kfold_rmseplot_bymodel_tree <- all_rmse %>%
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
         panel.spacing = unit(0, 'lines'),
-        legend.position = c(0.91, 0.9),
-        legend.background = element_rect(color = 'black'))
+        legend.position = c(0.85, 0.2),
+        legend.background = element_rect(color = 'black'),
+        legend.text = element_text(size = 8))
 
 # Just compare the predictive power of the full model, putting birds and trees on the same one.
 rmseplot_taxacolor <- all_rmse %>% 
-  filter(model == 'full') %>%
+  filter(model == 'space+climate+geodiversity') %>%
   mutate(taxon = factor(taxon,labels=c('birds','trees'))) %>%
   ggplot(aes(x = rv)) +
   facet_grid(. ~ flavor, switch = 'x') +
@@ -271,5 +282,32 @@ rmseplot_taxacolor <- all_rmse %>%
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
         panel.spacing = unit(0, 'lines'),
-        legend.position = c(0.91, 0.9),
+        legend.position = c(0.91, 0.8),
         legend.background = element_rect(color = 'black'))
+
+# Save plots
+library(gridExtra)
+png(file.path(fpfig, 'both_fittedrmse_allmodels.png'), height = 8, width = 7, res = 400, units = 'in')
+grid.arrange(rmseplot_bymodel_bird, rmseplot_bymodel_tree, nrow = 2)
+dev.off()
+png(file.path(fpfig, 'both_5foldrmse_allmodels.png'), height = 8, width = 7, res = 400, units = 'in')
+grid.arrange(kfold_rmseplot_bymodel_bird, kfold_rmseplot_bymodel_tree, nrow = 2)
+dev.off()
+
+ggsave(file.path(fpfig, 'both_fittedrmse_fullonly.png'), rmseplot_taxacolor, height = 4, width = 7, dpi = 400)
+
+
+# Table of fit stats ------------------------------------------------------
+
+# By taxon, diversity level, flavor, model.
+# Include RMSE, kfold RMSE, and R2 (with CIs)
+
+fit_table <- all_rmse %>%
+  mutate(taxon = factor(taxon, labels = c('birds','trees')),
+         RMSE = paste0(round(RMSE_mean,2), ' [', round(RMSE_q025,2), ',', round(RMSE_q975,2), ']'),
+         kfold_RMSE = paste0(round(kfold_RMSE_mean,2), ' [', round(kfold_RMSE_q025,2), ',', round(kfold_RMSE_q975,2), ']'),
+         Rsquared = paste0(round(r2,2), ' [', round(r2_q025,2), ',', round(r2_q975,2), ']')) %>%
+  select(taxon, rv, flavor, model, RMSE, kfold_RMSE, Rsquared) %>%
+  arrange(taxon, rv, flavor, model)
+
+write.csv(fit_table, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv', row.names = FALSE)

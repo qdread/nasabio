@@ -1,6 +1,7 @@
 # Summarize spatial multivariate mixed model output
 # QDR/NASABIOXGEO/25 May 2018
 
+# Modified 19 June: Get rid of the CV calculation (gives bad results)
 # Modified 14 June: include newer "null" and subset models
 # Modified 4 June: get RMSE for each iteration so we can put a credible interval on it.
 
@@ -90,24 +91,7 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
   # Bayesian R-squared
   model_r2 <- cbind(task_table[i, ], response = resp_names, bayes_R2(fit$model))
   
-  # Addition 07 June: calculate coefficient estimates for all iterations, then get the SD of them (with credible interval)
-  # This will be used to say which relationships vary more spatially.
-  co_raw <- coef(fit$model, summary = FALSE)
-  co_sds <- apply(co_raw[[1]], c(1,3), sd)
-  co_mean <- apply(co_raw[[1]], c(1,3), mean)
-  co_cv <- co_sds/abs(co_mean)
-  
-  co_cv_quant <- as.data.frame(t(apply(co_cv, 2, quantile, probs = c(0.5, 0.025, 0.975))))
-  names(co_cv_quant) <- c('cv', 'cv_q025', 'cv_q975')
-  
-  co_cv_quant <- cbind(name = row.names(co_cv_quant), co_cv_quant)
-  
-  co_cv_quant <- co_cv_quant %>%
-    separate(name, into = c('response', 'parameter'), extra = 'merge') %>%
-    mutate(response = resp_names[match(response, raw_resp_names)])
-  
-  
-  list(coef = model_coef, pred = model_pred, rmse = model_rmse, r2 = model_r2, coef_variation = co_cv_quant)
+    list(coef = model_coef, pred = model_pred, rmse = model_rmse, r2 = model_r2)
 
 }
 
@@ -115,14 +99,11 @@ model_coef <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_
 model_pred <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$pred)))
 model_rmse <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$rmse)))
 model_r2 <- map_dfr(model_stats, 'r2')
-model_coef_variation <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], x$coef_variation))
-
 
 write.csv(model_coef, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_coef.csv', row.names = FALSE)
 write.csv(model_pred, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_pred.csv', row.names = FALSE)
 write.csv(model_rmse, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_rmse.csv', row.names = FALSE)
 write.csv(model_r2, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_r2.csv', row.names = FALSE)
-write.csv(model_coef_variation, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_coef_variation.csv', row.names = FALSE)
 
 # K-fold output -----------------------------------------------------------
 
