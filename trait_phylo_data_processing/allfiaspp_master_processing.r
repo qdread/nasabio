@@ -1,8 +1,16 @@
-# Script to explore FIA data for the whole entire USA.
-# Run on cluster because it's a big file (900megs)
+# Master FIA taxonomy/trait/phylogeny data processing script for all USA species
+# QDR / NASAbioXgeo
 
-fiaall <- read.csv('finley_trees_continental_US_most_recent_evaluations_nov8_2017.csv', stringsAsFactors = FALSE)
-fiaplotids <- read.csv('finley_unique_plt_cn_from_tree_dataset_nov8_2017.csv', stringsAsFactors = FALSE)
+# Modified and renamed on 26 June: make sure file paths are consistent
+
+# Set file paths
+google_drive_path <- 'C:/Users/Q/google_drive/NASABiodiversityWG'
+cluster_path <- '/mnt/research/nasabio/data/fia'
+github_path <- '~/GitHub/nasabio'
+
+# Run the first part on cluster because it's a big file (900megs)
+fiaall <- read.csv(file.path(cluster_path, 'treedata10nov/finley_trees_continental_US_most_recent_evaluations_nov8_2017.csv'), stringsAsFactors = FALSE)
+fiaplotids <- read.csv(file.path(cluster_path, 'treedata10nov/finley_unique_plt_cn_from_tree_dataset_nov8_2017.csv'), stringsAsFactors = FALSE)
 # Note: just loading fiaall into ram takes up ~4gb ram. Probably a good idea to split it up at some point. ~4 million rows, 29 columns.
 
 fia_spp <- table(fiaall$SPCD)
@@ -11,9 +19,10 @@ length(fia_spp) # 383 species.
 length(unique(fiaall$PLT_CN)) # 135174 plots.
 
 # Load the coordinates
+#### NOTE: These are the true coordinates. Anyone who runs this needs their own local copy.
 fiaallcoords <- read.csv('~/data/allfia.csv')
 dim(fiaallcoords)
-length(unique(fiaallcoords$CN)) # Both of these agree, 135174 plots. PNW is 1/6 of these, so I need to calc things for 5x as many plots as I've done before.
+length(unique(fiaallcoords$CN)) # Both of these agree, 135174 plots. P
 
 # Check the species codes against the lookup table.
 # Save the list of species codes to do this locally.
@@ -23,8 +32,8 @@ write.csv(data.frame(SPCD = allfia_spcodes), file = 'spcds.csv', row.names = FAL
 ###################
 # starting here, run locally from github working directory:
 
-allfia_spcodes <- read.csv('specieslists/spcds.csv')
-fiataxa <- read.csv('specieslists/fia_taxon_lookuptable.csv', stringsAsFactors = FALSE)
+allfia_spcodes <- read.csv(file.path(github_path, 'specieslists/spcds.csv'))
+fiataxa <- read.csv(file.path(github_path, 'specieslists/fia_taxon_lookuptable.csv'), stringsAsFactors = FALSE)
 all(allfia_spcodes$SPCD %in% fiataxa$FIA.Code) #yes
 
 # Browse the species list.
@@ -35,7 +44,7 @@ with(fiataxa, paste(Genus, Species)[match(allfia_spcodes$SPCD, FIA.Code)])
 
 library(ape)
 library(dplyr)
-fullphylo <- read.tree('C:/Users/Q/Dropbox/projects/nasabiodiv/allfiaphylogeny/tree_all_final_031716.txt')
+fullphylo <- read.tree(file.path(google_drive_path, 'Trait_Data/fia_phylogeny_KevinPotter/tree_all_final_031716.txt'))
 
 fiataxa <- fiataxa %>%
   mutate(Genus = gsub('\\ ', '', Genus),
@@ -151,7 +160,7 @@ spp_not_in_phylo <- fiataxa_inplots[!fiataxa_inplots %in% phylotaxa]
 
 # Load TRY
 
-trait_try <- read.csv('C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/fia_try_17aug/try_trait_byspecies.csv', stringsAsFactors = FALSE)
+trait_try <- read.csv(file.path(google_drive_path, 'Trait_Data/fia_try_17aug/try_trait_byspecies.csv'), stringsAsFactors = FALSE)
 
 # Process SLA related traits
 slanames <- grep('SLA', names(trait_try), value=T)
@@ -173,7 +182,7 @@ try_name_correction <- c('Quercus_margaretta' = 'Quercus_margarettae',
 trait_try_use$Scientific_Name[match(names(try_name_correction), trait_try_use$Scientific_Name)] <- try_name_correction
 
 library(XLConnect)
-trait_stevens <- readWorksheetFromFile('C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/Traits_Stevens_FIA.xlsx', sheet = 'Master')
+trait_stevens <- readWorksheetFromFile(file.path(google_drive_path, 'Trait_Data/Traits_Stevens_FIA.xlsx'), sheet = 'Master')
 
 # Convert to numerics where needed.
 numeric_cols <- c(2,5:ncol(trait_stevens))
@@ -275,9 +284,9 @@ nofuncspp <- fiataxa_inplots[!fiataxa_inplots %in% dimnames(traits_imputed)[[1]]
 dput(nofuncspp)
 
 traits_imputed <- cbind(Scientific_Name = dimnames(traits_imputed)[[1]], traits_imputed)
-write.csv(traits_imputed, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/traits_imputed_allfia.csv', row.names = FALSE)
-save(fullphylo, imputation_tree, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/phylogenies_allfia.r')
+write.csv(traits_imputed, file = file.path(google_drive_path, 'Trait_Data/traits_imputed_allfia.csv'), row.names = FALSE)
+save(fullphylo, imputation_tree, file = file.path(google_drive_path, 'Trait_Data/phylogenies_allfia.r'))
 
 # Also save lookup table
 fiataxa_inplots_lookup <- fiataxa[match(allfia_spcodes$SPCD, fiataxa$FIA.Code), ]
-write.csv(fiataxa_inplots_lookup, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/Trait_Data/lookup_table_allfia.csv', row.names = FALSE)
+write.csv(fiataxa_inplots_lookup, file = file.path(google_drive_path, 'Trait_Data/lookup_table_allfia.csv'), row.names = FALSE)
