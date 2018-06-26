@@ -252,7 +252,7 @@ traits_goodspp <- trait_all_use[!trait_all_use$Scientific_Name %in% trait_spp_no
 traits_goodspp <- traits_goodspp[match(unique(traits_goodspp$Scientific_Name), traits_goodspp$Scientific_Name), ]
 dimnames(traits_goodspp)[[1]] <- traits_goodspp$Scientific_Name
 
-set.seed(313 + nchar('fuck free world!'))
+set.seed(313 + nchar('boo free world!!'))
 phyimp <- phylopars(trait_data = traits_goodspp %>%
                       rename(species = Scientific_Name) %>% 
                       mutate(Plant.lifespan = log(Plant.lifespan),
