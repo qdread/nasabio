@@ -1,7 +1,7 @@
-### COPY ALL TIF AND VRT TO SCRATCH DIRECTORY
-### (they get deleted every 45 days)
+### COPY ALL TIF AND VRT TO FLASH FILE SYSTEM DIRECTORY
+### (Only 500GB can be stored there at any given time)
 
-TO="/mnt/ls15/scratch/groups/nasabio/VRTs"
+TO="/mnt/ffs17/groups/nasabio/VRTs"
 FROM="/mnt/research/nasabio/data"
 
 # Bioclim and Biocloud

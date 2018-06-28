@@ -42,3 +42,19 @@ qsub_calls_bbs <- x %>%
 write.table(unlist(qsub_calls_bbs$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all_bbs.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 write.table(c(unlist(qsub_calls_fia$qsubs), unlist(qsub_calls_bbs$qsubs)), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+
+#############################################
+# 28 Jun: Do one job per geo variable, to get 1 km radius stats only (not done in previous, unfortunately)
+
+qsub_string_1job <- function(taxon, var, mem, tmpmem, walltime='4:00:00') paste0('qsub geoextract1km.sh -N ', var, '_', taxon, ' -v taxon=', taxon, ',geovar=', var, ' -l walltime=', walltime, ',mem=', mem, 'gb,file=', tmpmem, 'gb')
+
+qsub_calls_fia <- x %>%
+  rowwise %>%
+  transmute(qsubs = qsub_string_1job(taxon = 'fia', var = variable.id, mem = 2, tmpmem = 4))
+
+qsub_calls_bbs <- x %>%
+  rowwise %>%
+  transmute(qsubs = qsub_string_1job(taxon = 'bbs', var = variable.id, mem = 2, tmpmem = 4))
+  
+write.table(c(qsub_calls_fia$qsubs, qsub_calls_bbs$qsubs), file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/geo_qsub_all_1km.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
