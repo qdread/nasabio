@@ -1,13 +1,13 @@
 # GEODIVERSITY EXTRACTION BATCH SCRIPT v2: 1 kilometer edition
 # QDR / NASAbioxgeo / 28 Jun 2018
 # New version created for 1 kilometer radius only!
-# Try not to run in parallel
+# Still has to be done in parallel unfortunately
 
 # Workflow:
 # 1. Use extractBox() to make square of maximum radius (300 km) around focal point
 # 2. Use extractFromCircle() to make a bunch of circles of different radii, getting summary statistics each time.
 
-slice <- 1
+slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
 tmp_path <- Sys.getenv('TMPDIR')
 scratch_path <- '/mnt/ffs17/groups/nasabio/VRTs'
 
@@ -39,7 +39,7 @@ if (taxon == 'bbs') {
 	radii <- c(1)
 }	
 if (taxon == 'fia') {
-	n_slices <- 1
+	n_slices <- 50
 	source('/mnt/research/nasabio/code/loadfiaall.r')
 	coords <- fiacoords
 	radii <- c(1)
@@ -82,4 +82,4 @@ for (i in rowidxmin:rowidxmax) {
 	}
 }
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/allgeodiv_1km/', geovar, '.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/allgeodiv_1km/', geovar, '_', slice, '.r'))

@@ -3,6 +3,7 @@
 # All geodiversity variables in a single wide format data frame for BBS and FIA.
 
 # Edit 25 Apr 2018: Use midpoints, not centroids
+# Edit 01 Jul 2018: add the 1 kilometer ones too
 
 library(dplyr)
 library(reshape2)
@@ -10,7 +11,6 @@ fpdata <- '/mnt/research/nasabio/data'
 
 bbsgeopt <- read.csv(file.path(fpdata, 'bbs/bbs_geo_by_point.csv'), stringsAsFactors = FALSE)
 bbseco <- read.csv(file.path(fpdata, 'bbs/bbs_ecoregions.csv'), stringsAsFactors = FALSE)
-#bbsll <- read.csv(file.path(fpdata, 'bbs/bbs_correct_route_centroids.csv'), stringsAsFactors = FALSE)
 bbsll <- read.csv(file.path(fpdata, 'bbs/bbs_route_midpoints.csv'), stringsAsFactors = FALSE)
 
 bbsdat <- bbsgeopt %>%
@@ -21,7 +21,7 @@ bbsdat <- bbsgeopt %>%
 
 # Radius values
 
-bbsgeorad <- read.csv(file.path(fpdata, 'bbs/bbs_geodiversity.csv'), stringsAsFactors = FALSE)
+bbsgeorad <- read.csv(file.path(fpdata, 'bbs/bbs_geodiversity.csv'), stringsAsFactors = FALSE) # for all but 1 km
 
 bbsgeorad <- bbsgeorad %>%
 	select(rteNo, radius, mean, sd, variable, richness_geodiv, diversity_geodiv, mode) 
@@ -43,12 +43,40 @@ bbsdat <- bbsdat %>%
 	left_join(bbsgeorad_wide_mean) %>%
 	left_join(bbsgeorad_wide_div) %>%
 	left_join(bbsgeorad_wide_rich) %>%
-	left_join(bbsgeorad_wide_mode)
+	left_join(bbsgeorad_wide_mode) %>%
 
 # correct typo
 bbsdat <- setNames(bbsdat, gsub('nighlight', 'nightlight', names(bbsdat)))
 	
-write.csv(bbsdat, file = file.path(fpdata, 'bbs/bbs_allgeo_wide.csv'), row.names = FALSE)
+write.csv(bbsdat, file = file.path(fpdata, 'bbs/bbs_allgeo_wide.csv'), row.names = FALSE) # all but 1 km
+
+# BBS geodiversity 1 km edition
+bbsgeorad <- read.csv(file.path(fpdata, 'bbs/geodiversity_CSVs/bbs_geodiversity_1kmradius.csv'), stringsAsFactors = FALSE) # for 1 km
+
+bbsgeorad <- bbsgeorad %>%
+	select(rteNo, radius, mean, sd, variable, richness_geodiv, diversity_geodiv, mode) 
+
+discrete_vars <- grep('soil|geol', unique(bbsgeorad$variable), value = TRUE)
+tri_vars <- grep('_tri|_roughness', unique(bbsgeorad$variable), value = TRUE)
+	
+# Create wide format.
+bbsgeorad_wide_sd <- bbsgeorad %>% filter(!variable %in% c(discrete_vars, tri_vars)) %>% dcast(rteNo ~ variable + radius, value.var = 'sd') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'sd', sep = '_')))
+bbsgeorad_wide_mean <- bbsgeorad %>% filter(!variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'mean') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'mean', sep = '_')))
+bbsgeorad_wide_div <- bbsgeorad %>% filter(variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'diversity_geodiv') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'diversity', sep = '_')))
+bbsgeorad_wide_rich <- bbsgeorad %>% filter(variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'richness_geodiv') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'richness', sep = '_')))
+bbsgeorad_wide_mode <- bbsgeorad %>% filter(variable %in% discrete_vars) %>% dcast(rteNo ~ variable + radius, value.var = 'mode') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'mode', sep = '_')))
+
+# Join all
+
+bbsdat <- bbsgeorad_wide_sd %>%
+	left_join(bbsgeorad_wide_mean) %>%
+	left_join(bbsgeorad_wide_div) %>%
+	left_join(bbsgeorad_wide_rich) %>%
+	left_join(bbsgeorad_wide_mode) %>%
+  setNames(gsub('_rtri_', '_tri_', names(.))) # correct typo
+
+write.csv(bbsdat, file = file.path(fpdata, 'bbs/geodiversity_CSVs/bbs_allgeo_wide_1kmradius.csv'), row.names = FALSE)
+
 
 # All biodiversity in a single wide format data frame for BBS.
 bbsalphapt <- read.csv(file.path(fpdata, 'bbs/bbs_alphadiv_1year.csv'), stringsAsFactors = FALSE) %>% 
@@ -175,6 +203,36 @@ for (i in 1:length(var_categ)) {
 	write.csv(fiageorad_wide_mean[[i]], file.path(fpdata, 'fia/geodiv' , paste0('fia_', var_categ[i], '_mean_wide.csv')), row.names = FALSE)
 }
 
+# FIA geodiversity 1 km edition
+
+fiageo1km <- read.csv(file.path(fpdata, 'fia/geodiversity_CSVs/fia_geodiversity_1kmradius.csv'), stringsAsFactors = FALSE)
+
+fiageo1km <- fiageo1km %>%
+	select(PLT_CN, radius, mean, sd, variable, richness_geodiv, diversity_geodiv, mode) 
+
+discrete_vars <- grep('soil|geol', unique(fiageo1km$variable), value = TRUE)
+tri_vars <- grep('_tri|_roughness', unique(fiageo1km$variable), value = TRUE)
+	
+# Create wide format.
+fiageo1km_wide_sd <- fiageo1km %>% filter(!variable %in% c(discrete_vars, tri_vars)) %>% dcast(PLT_CN ~ variable + radius, value.var = 'sd') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'sd', sep = '_')))
+fiageo1km_wide_mean <- fiageo1km %>% filter(!variable %in% discrete_vars) %>% dcast(PLT_CN ~ variable + radius, value.var = 'mean') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'mean', sep = '_')))
+fiageo1km_wide_div <- fiageo1km %>% filter(variable %in% discrete_vars) %>% dcast(PLT_CN ~ variable + radius, value.var = 'diversity_geodiv') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'diversity', sep = '_')))
+fiageo1km_wide_rich <- fiageo1km %>% filter(variable %in% discrete_vars) %>% dcast(PLT_CN ~ variable + radius, value.var = 'richness_geodiv') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'richness', sep = '_')))
+fiageo1km_wide_mode <- fiageo1km %>% filter(variable %in% discrete_vars) %>% dcast(PLT_CN ~ variable + radius, value.var = 'mode') %>% setNames(c(names(.)[1], paste(names(.)[-1], 'mode', sep = '_')))
+
+# Join all
+
+fiadat <- fiageo1km_wide_sd %>%
+	left_join(fiageo1km_wide_mean) %>%
+	left_join(fiageo1km_wide_div) %>%
+	left_join(fiageo1km_wide_rich) %>%
+	left_join(fiageo1km_wide_mode) %>%
+  setNames(gsub('_rtri_', '_tri_', names(.))) # correct typo
+
+	
+write.csv(fiadat, file = file.path(fpdata, 'fia/geodiversity_CSVs/fia_allgeo_wide_1kmradius.csv'), row.names = FALSE)
+
+###########################################
 
 # FIA biodiversity
 

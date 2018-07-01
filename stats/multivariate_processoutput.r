@@ -8,7 +8,7 @@
 task_table <- data.frame(taxon = rep(c('fia','bbs'), each = 3),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
-                         model = rep(c('full','climate','space'),each=6),
+                         model = rep(c('full','climate','space','geo'),each=6),
                          stringsAsFactors = FALSE)
 
 n_fits <- nrow(task_table)
