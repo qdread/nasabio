@@ -68,9 +68,9 @@ if (taxon == 'bbs') {
 # Get correct subset of predictors by type and scale
 prednames <- names(geodat)[!(names(geodat) %in% c('rteNo','HUC4','TNC','BCR'))]
 
-climate_prednames <- grep(paste(paste0(climate_prednames, climate_scale), collapse='|'), prednames, value = TRUE)
-geo_prednames <- grep(paste(paste0(geo_prednames, geo_scale), collapse='|'), prednames, value = TRUE)
-human_prednames <- grep(paste(paste0(human_prednames, human_scale), collapse='|'), prednames, value = TRUE)
+climate_prednames <- grep(paste(paste0(climate_prednames, climate_scale, '_'), collapse='|'), prednames, value = TRUE)
+geo_prednames <- grep(paste(paste0(geo_prednames, geo_scale, '_'), collapse='|'), prednames, value = TRUE)
+human_prednames <- grep(paste(paste0(human_prednames, human_scale, '_'), collapse='|'), prednames, value = TRUE)
 
 prednames <- c(climate_prednames, geo_prednames, human_prednames)
 
