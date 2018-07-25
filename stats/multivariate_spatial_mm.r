@@ -2,6 +2,7 @@
 # New script forked from spatial_mm_parallel.r
 # QDR/Nasabioxgeo/11 May 2018
 
+# Modified 25 July: tighten prior on intercepts for beta
 # Modified 1 July: Geodiversity only as well as climate only
 # Modified 14 June: Replace SD on the predictors with TRI
 # Modified 14 June: Add priors to some of the beta-diversity models that didn't converge.
@@ -103,9 +104,9 @@ if (task_table$rv[task] == 'beta' & taxon == 'fia') {
   added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betatdsorensenpa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betaphypa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betafuncpa') )					
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa') )					
 }
 if (task_table$rv[task] == 'gamma' & taxon == 'fia') {
   added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammarichness'),
