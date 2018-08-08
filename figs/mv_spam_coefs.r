@@ -6,7 +6,7 @@
 # Load and combine data ---------------------------------------------------
 
 
-fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/modelfits' # Local
+fp <- '~/Dropbox/projects/nasabiodiv/modelfits' # Local
 
 model_coef <- read.csv(file.path(fp, 'multivariate_spatial_coef.csv'), stringsAsFactors = FALSE)
 model_pred <- read.csv(file.path(fp, 'multivariate_spatial_pred.csv'), stringsAsFactors = FALSE)
@@ -63,7 +63,7 @@ model_coef_var <- model_coef_var %>%
 
 # Coefficient plots -------------------------------------------------
 
-fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs'
+fpfig <- '~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs'
 
 # Add some color to indicate which ones' credible intervals are not zero
 # Also shade the climate mean region with a gray rectangle
@@ -199,9 +199,10 @@ rmseplot_both <- all_rmse %>%
 ggsave(file.path(fpfig, 'both_performance_multivariate.png'), rmseplot_both, height = 4, width = 7, dpi = 300)
 
 # Edit 18 June: plot comparing RMSEs and R-squared for the 3 model types
+# Edit 08 Aug: add geodiversity-only to this
 
 all_rmse <- all_rmse %>%
-  mutate(model = factor(model, levels=c('space','climate','full'), labels=c('space only', 'space+climate','space+climate+geodiversity')))
+  mutate(model = factor(model, levels=c('space','climate','geo','full'), labels=c('space only', 'space+climate','space+geodiversity','space+climate+geodiversity')))
 
 pd <- position_dodge(width = 0.05)
 rmseplot_bymodel_bird <- all_rmse %>% 
@@ -310,4 +311,4 @@ fit_table <- all_rmse %>%
   select(taxon, rv, flavor, model, RMSE, kfold_RMSE, Rsquared) %>%
   arrange(taxon, rv, flavor, model)
 
-write.csv(fit_table, file = 'C:/Users/Q/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv', row.names = FALSE)
+write.csv(fit_table, file = '~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv', row.names = FALSE)
