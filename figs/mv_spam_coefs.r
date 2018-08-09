@@ -212,7 +212,7 @@ rmseplot_bymodel_bird <- all_rmse %>%
   geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
   geom_point(aes(y = RMSE_mean), position = pd) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
+  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('birds') +
   theme(strip.background = element_blank(),
@@ -226,25 +226,25 @@ rmseplot_bymodel_tree <- all_rmse %>%
   geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
   geom_point(aes(y = RMSE_mean), position = pd) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
+  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('trees') +
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
         panel.spacing = unit(0, 'lines'),
-        legend.position = c(0.85, 0.2),
+        legend.position = c(0.5, 0.2),
         legend.background = element_rect(color = 'black'),
-        legend.text = element_text(size = 8))
+        legend.text = element_text(size = 6.5))
 
 
 kfold_rmseplot_bymodel_bird <- all_rmse %>% 
   filter(taxon == 'bbs') %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(. ~ flavor, switch = 'x') +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = '5-fold CV root mean squared error') +
+  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = '5-fold CV root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('birds') +
   theme(strip.background = element_blank(),
@@ -255,16 +255,48 @@ kfold_rmseplot_bymodel_tree <- all_rmse %>%
   filter(taxon == 'fia') %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(. ~ flavor, switch = 'x') +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = '5-fold CV root mean squared error') +
+  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = '5-fold CV root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('trees') +
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
         panel.spacing = unit(0, 'lines'),
-        legend.position = c(0.85, 0.2),
+        legend.position = c(0.5, 0.2),
+        legend.background = element_rect(color = 'black'),
+        legend.text = element_text(size = 6.5))
+
+# RMSE plot as 2-way facet
+
+rmseplot_bymodel_2wayfacet <- all_rmse %>% 
+  ggplot(aes(x = rv, color = model, group = model)) +
+  facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
+  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean), position = pd) +
+  theme_bw() +
+  scale_y_reverse(limits = c(1.34, 0.25), name = 'root mean squared error') +
+  scale_x_discrete(name = 'response') +
+  theme(strip.background = element_blank(),
+        strip.placement = 'outside',
+        panel.spacing = unit(0, 'lines'),
+        legend.position = 'bottom',
+        legend.background = element_rect(color = 'black'),
+        legend.text = element_text(size = 8))
+
+kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>% 
+  ggplot(aes(x = rv, color = model, group = model)) +
+  facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
+  theme_bw() +
+  scale_y_reverse(limits = c(1.34, 0.25), name = '5-fold CV root mean squared error') +
+  scale_x_discrete(name = 'response') +
+  theme(strip.background = element_blank(),
+        strip.placement = 'outside',
+        panel.spacing = unit(0, 'lines'),
+        legend.position = 'bottom',
         legend.background = element_rect(color = 'black'),
         legend.text = element_text(size = 8))
 
@@ -278,7 +310,7 @@ rmseplot_taxacolor <- all_rmse %>%
   geom_point(aes(y = RMSE_mean, color = taxon, group = taxon), position = pd) +
   theme_bw() +
   scale_color_manual(values = c('blue', 'skyblue')) +
-  scale_y_continuous(limits = c(0, 1.34), expand = c(0,0), name = 'root mean squared error') +
+  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
   scale_x_discrete(name = 'response') +
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
@@ -289,13 +321,16 @@ rmseplot_taxacolor <- all_rmse %>%
 # Save plots
 library(gridExtra)
 png(file.path(fpfig, 'both_fittedrmse_allmodels.png'), height = 8, width = 7, res = 400, units = 'in')
-grid.arrange(rmseplot_bymodel_bird, rmseplot_bymodel_tree, nrow = 2)
+  grid.arrange(rmseplot_bymodel_bird, rmseplot_bymodel_tree, nrow = 2)
 dev.off()
+
 png(file.path(fpfig, 'both_5foldrmse_allmodels.png'), height = 8, width = 7, res = 400, units = 'in')
-grid.arrange(kfold_rmseplot_bymodel_bird, kfold_rmseplot_bymodel_tree, nrow = 2)
+  grid.arrange(kfold_rmseplot_bymodel_bird, kfold_rmseplot_bymodel_tree, nrow = 2)
 dev.off()
 
 ggsave(file.path(fpfig, 'both_fittedrmse_fullonly.png'), rmseplot_taxacolor, height = 4, width = 7, dpi = 400)
+ggsave(file.path(fpfig, 'both_fittedrmse_allmodels_2wayfacet.png'), rmseplot_bymodel_2wayfacet, height = 6, width = 7, dpi = 400)
+ggsave(file.path(fpfig, 'both_5foldrmse_allmodels_2wayfacet.png'), kfold_rmseplot_bymodel_2wayfacet, height = 6, width = 7, dpi = 400)
 
 
 # Table of fit stats ------------------------------------------------------
