@@ -1,6 +1,8 @@
 # Fit models for scaling analysis: version 2
 # QDR NASABioXGeo 1 July 2018
 
+# Modified 15 August 2018: try to force the intercept through zero to aid convergence.
+
 # 1 km response variable, alpha diversity only, using mixed scale sets of predictors
 
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
@@ -78,10 +80,12 @@ distrib <- 'gaussian' # Fit all with Gaussian
 ecoregion <- 'TNC' # Use TNC as the ecoregion
 
 added_priors <- NULL # For most tasks, model will converge using only default priors
+
 # Edit 18 June: Add priors for the models that did not converge
-if (rv == 'alpha_richness' & taxon == 'fia') {
-  added_priors <- c(brms::set_prior('student_t(5, 0, 2)', class = 'Intercept'))
-} 
+# Edit 15 Aug: remove this because there is no intercept anymore.
+#if (rv == 'alpha_richness' & taxon == 'fia') {
+#  added_priors <- c(brms::set_prior('student_t(5, 0, 2)', class = 'Intercept'))
+#} 
 
 fit <- fit_mv_mm(pred_df = geodat, 
 				  resp_df = biodat, 
@@ -96,7 +100,8 @@ fit <- fit_mv_mm(pred_df = geodat,
 				  n_iter = NI,
 				  n_warmup = NW,
 				  delta = delta,
-				  random_effect_type = random_effect
+				  random_effect_type = random_effect,
+				  force_zero_intercept = TRUE
 				  )
 
 # Save all fits

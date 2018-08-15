@@ -3,10 +3,11 @@
 # QDR NASABioXGeo
 # Originally written in April but this source code file created 14 June 2018
 
+# Modified 15 August 2018: add option to force intercept through zero
 # Modified 18 June 2018: add drop = FALSE to scale so that it does not give weird output if only 1 response variable
 # Modified 15 June 2018: correct scale() function to just return a numeric vector without attributes (also debug this a bit)
 
-fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9, random_effect_type = 'spatial') {
+fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9, random_effect_type = 'spatial', force_zero_intercept = FALSE) {
   require(dplyr)
   require(brms)
   require(reshape2)
@@ -26,7 +27,8 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
 	pred_df[,-1] <- lapply(pred_df[,-1, drop = FALSE], as.numeric)
 	pred_var_names <- names(pred_df)[-1]
 	fixed_effects <- paste(pred_var_names, collapse = '+')
-	random_effects <- paste(c(paste('(1|', region_name, ')', sep = ''), paste('(', pred_var_names, ' - 1|', region_name, ')', sep = '')), collapse = '+')
+	intercepts <- if (force_zero_intercept) '0' else paste('(1|', region_name, ')', sep = '')
+	random_effects <- paste(c(intercepts, paste('(', pred_var_names, ' - 1|', region_name, ')', sep = '')), collapse = '+')
 	formula_string <- paste(resp_var_names, '~', fixed_effects, '+', random_effects)
 	dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
   } else {
