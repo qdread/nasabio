@@ -32,7 +32,8 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
 	formula_string <- paste(resp_var_names, '~', fixed_effects, '+', random_effects)
 	dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
   } else {
-	formula_string <- paste(resp_var_names, '~', paste('(1|', region_name, ')', sep = ''))
+	intercepts <- if (force_zero_intercept) '0 +' else ''
+	formula_string <- paste(resp_var_names, '~', intercepts, paste('(1|', region_name, ')', sep = ''))
 	dat <- Reduce(left_join, list(id_df, resp_df)) %>% filter(complete.cases(.))
   }
     

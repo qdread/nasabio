@@ -83,9 +83,8 @@ added_priors <- NULL # For most tasks, model will converge using only default pr
 
 # Edit 18 June: Add priors for the models that did not converge
 # Edit 15 Aug: remove this because there is no intercept anymore.
-#if (rv == 'alpha_richness' & taxon == 'fia') {
-#  added_priors <- c(brms::set_prior('student_t(5, 0, 2)', class = 'Intercept'))
-#} 
+# Edit 16 Aug: tighten prior on SDCAR.
+added_priors <- c(brms::set_prior('lognormal(1, 1)', class = 'sdcar'))
 
 fit <- fit_mv_mm(pred_df = geodat, 
 				  resp_df = biodat, 
