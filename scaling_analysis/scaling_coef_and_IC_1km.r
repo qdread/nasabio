@@ -32,7 +32,10 @@ registerDoParallel(cores = 20)
 # Inspect summaries.
 model_summ <- foreach (i = 1:n_fits) %dopar% {
   load(file.path(fp, paste0('1kmresponse_fit', i, '.RData')))
-  summary(fit$model)
+  message(paste('Fit', i, 'loaded'))
+  summ <- summary(fit$model)
+  message(paste('Fit', i, 'summarized'))
+  summ
 }
 
 # Check R-hat from summary.
@@ -51,12 +54,15 @@ cbind(task_table, failed)
 
 model_stats <- foreach (i = 1:n_fits) %dopar% {
   load(file.path(fp, paste0('fit', i, '.RData'))) # Load model
+  message(paste('Fit', i, 'loaded'))
   
   model_pred <- as.data.frame(predict(fit$model)) # Returns matrix of predicted values: n rows x 4 columns (summary stats)
   names(model_pred) <- c('predicted', 'predicted_error', 'predicted_q025', 'predicted_q975')
   # Join predicted with observed values
   model_obs <- data.frame(idx = 1:nrow(fit$model$data), observed = as.numeric(fit$model$data[, 1]))
   model_pred <- cbind(task_table[i,], model_obs, model_pred)
+  
+  message(paste('Fit', i, 'predicted values found'))
   
   # Here, do the RMSE for the model.
   # Prediction raw values. 
@@ -79,10 +85,14 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
     mutate_at(vars(starts_with('RMSE')), funs(relative = ./range_obs))
   model_rmse <- cbind(task_table[i,], rmse_quantiles)
   
+  message(paste('Fit', i, 'RMSE found'))
+  
   # Bayesian R-squared
   model_r2 <- bayes_R2(fit$model)
   dimnames(model_r2)[[2]] <- c('r2', 'r2_error', 'r2_q025', 'r2_q975')
   model_r2 <- cbind(task_table[i,], model_r2)
+  
+  message(paste('Fit', i, 'R-squared found'))
   
   list(coef = cbind(task_table[i,], fit$coef), pred = model_pred, rmse = model_rmse, r2 = model_r2)
   
@@ -91,13 +101,14 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
 # Do LOO separately
 model_loos <- foreach (i = 1:n_fits) %dopar% {
   load(file.path(fp, paste0('fit', i, '.RData'))) # Load model
+  message(paste('Fit', i, 'loaded'))
   
   # LOO information criterion
   model_loo <- LOO(fit$model) # Takes ~5 minutes to run even if model isn't refit.
   model_loo_est <- as.numeric(model_loo$estimates)
   names(model_loo_est) <- c('elpd_LOO', 'p_LOO', 'LOOIC', 'elpd_LOO_se', 'p_LOO_se', 'LOOIC_se')
   cbind(task_table[i,], t(model_loo_est))
-  
+  message(paste('Fit', i, 'LOOIC found'))
 }
 
 # After the fit stats have run for each model separately, combine all the output into data frames.
