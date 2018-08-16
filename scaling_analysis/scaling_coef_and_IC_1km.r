@@ -53,7 +53,7 @@ cbind(task_table, failed)
 # Get model fit stats and predictions -------------------------------------
 
 model_stats <- foreach (i = 1:n_fits) %dopar% {
-  load(file.path(fp, paste0('fit', i, '.RData'))) # Load model
+  load(file.path(fp, paste0('1kmresponse_fit', i, '.RData'))) # Load model
   message(paste('Fit', i, 'loaded'))
   
   model_pred <- as.data.frame(predict(fit$model)) # Returns matrix of predicted values: n rows x 4 columns (summary stats)
@@ -100,7 +100,7 @@ model_stats <- foreach (i = 1:n_fits) %dopar% {
 
 # Do LOO separately
 model_loos <- foreach (i = 1:n_fits) %dopar% {
-  load(file.path(fp, paste0('fit', i, '.RData'))) # Load model
+  load(file.path(fp, paste0('1kmresponse_fit', i, '.RData'))) # Load model
   message(paste('Fit', i, 'loaded'))
   
   # LOO information criterion

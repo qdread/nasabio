@@ -54,12 +54,17 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
 	  mm <- brm(formula = formula_string, data = dat, family = distribution,
 				chains = n_chains, iter = n_iter, warmup = n_warmup, prior = priors, control = list(adapt_delta = delta))
   }
-  fixed_effects <- fixef(mm)
+  # Edit 16 Aug: do not extract fixed effects (and combined fixed+random effects) if it is a null model without fixed effects.
   random_effects <- ranef(mm)
-  region_effects <- coef(mm)
-  fixed_effects <- cbind(effect = 'fixed', region = as.character(NA), melt(fixed_effects, varnames = c('parameter', 'stat')))
   random_effects <- cbind(effect = 'random', melt(random_effects$region, varnames = c('region', 'stat', 'parameter'))) %>% mutate(region = as.character(region))
-  region_effects <- cbind(effect = 'coefficient', melt(region_effects$region, varnames = c('region', 'stat', 'parameter'))) %>% mutate(region = as.character(region))
-  mm_coef <- fixed_effects %>% full_join(random_effects) %>% full_join(region_effects)
+  if (!force_zero_intercept | length(pred_vars) > 0) {
+	fixed_effects <- fixef(mm)
+    region_effects <- coef(mm)
+	fixed_effects <- cbind(effect = 'fixed', region = as.character(NA), melt(fixed_effects, varnames = c('parameter', 'stat')))
+	region_effects <- cbind(effect = 'coefficient', melt(region_effects$region, varnames = c('region', 'stat', 'parameter'))) %>% mutate(region = as.character(region))
+    mm_coef <- fixed_effects %>% full_join(random_effects) %>% full_join(region_effects)
+  } else {
+	mm_coef <- random_effects
+  }
   return(list(model = mm, coef = mm_coef))
 }
