@@ -107,8 +107,9 @@ model_loos <- foreach (i = 1:n_fits) %dopar% {
   model_loo <- LOO(fit$model) # Takes ~5 minutes to run even if model isn't refit.
   model_loo_est <- as.numeric(model_loo$estimates)
   names(model_loo_est) <- c('elpd_LOO', 'p_LOO', 'LOOIC', 'elpd_LOO_se', 'p_LOO_se', 'LOOIC_se')
-  cbind(task_table[i,], t(model_loo_est))
+  model_loo_est <- cbind(task_table[i,], t(model_loo_est))
   message(paste('Fit', i, 'LOOIC found'))
+  model_loo_est
 }
 
 # After the fit stats have run for each model separately, combine all the output into data frames.

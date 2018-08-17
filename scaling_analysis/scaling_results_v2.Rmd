@@ -1,0 +1,250 @@
+---
+title: "Scaling results: Version 2.0"
+author: "Quentin D. Read"
+date: "August 17, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Changes from previous version
+
+This is the second version of the scaling analysis for birds and trees. There are a few key changes from the previous version (June 2018) which I summarize here.
+
+* In contrast to the previous version, where I used alpha and beta diversity as the response variable, aggregated over some area around the focal plot, the new response variable is *only alpha richness of the plot.* This keeps things simple. We are not using functional and phylogenetic currently.
+* I added a smaller radius (1 km) than the previous version. The radii used are now 1, 5, 20, and 100 km.
+* I got rid of the models with nonspatial random effect. The only random effect used is the spatial one. If we believe that the random effect that explicitly accounts for spatial autocorrelation is the correct one, I think it is best to just use that.
+* The fixed effects are now done in a full factorial design where all possible combinations of the 4 different radii (or null) are used for each group of predictors: climate, geodiversity, and human. There are 5 possibilities for each group (the 4 radii or not using those predictors at all) times 3 groups, so 125 models were fit for FIA and 125 for BBS.
+* The intercepts are now forced through zero for all the fixed effects because the response variable is standardized so that the intercept should be zero. This helped convergence greatly.
+
+All of the methods, results, and location of scripts have been updated for version 2.0 throughout this document. The new scripts have the suffix `_1km` in them because the 1 km radius was added.
+
+# Code workflow
+
+The biodiversity and geodiversity metrics for BBS and FIA are combined into data frames and written to CSVs in this script: `GitHub/nasabio/spatial_data_extraction/gather_data.r`
+
+The rest of the code is all on GitHub at `GitHub/nasabio/scaling_analysis`.
+
+* First reduce the number of columns in FIA input data using the script `reduce_fia_columns.r`.
+* Next create input data in a format that can be used for the model fits using the script `make_scaling_data_1km.r`. That script selects the right columns, gets rid of a few bad data points, and thins out the FIA data to ~3000 plots at least 20 km from any neighboring plot.
+* Next fit the models with `fit_scaling_models_1km.r`. This script is run remotely in parallel for each model. The actual function to fit the multivariate mixed model is at `GitHub/nasabio/stats/fit_mv_mm.r`. Most of the models converged the first time without adding any priors, but I added a tighter prior to the standard deviation of the autoregressive model, and all the models converged after adding those priors. The model fits are saved in .RData format to `/mnt/research/nasabio/temp/scalingfits`.
+* Finally, get the coefficients, predicted values, and model fit statistics (Bayesian R-squared, RMSE, and leave-one-out IC), with the script `scaling_coef_and_IC_1km.r`. CSVs with the results are saved in `/mnt/research/nasabio/data/modelfits`. I copied the CSVs to Google Drive at `NASABiodiversityWG/birdXtree_ScalingPaper/model_output`. For this version, all the output files begin with `scalingV2_`.
+
+\newpage
+
+# Description of model
+
+## Model specification
+
+The models are mixed models with a single response variable, some fixed predictors, and TNC ecoregion as random effect. Both response and predictors are centered and scaled so all coefficients are interpretable as *change in number of std dev of response per change in std dev of predictor.* In all cases, response variable is biodiversity measured as richness of a single FIA plot or BBS route/route segment. The BBS routes were segmented by using subsets of stops extending away from the center point of the route (stops 25 and 26 are on either side of the center of the route). The random effect is spatial (spatial autocorrelation among TNC ecoregions is modeled with a conditional autoregressive model that takes into account whether regions are adjacent).
+
+There are a total of 250 models fit: 
+
+* 2 different taxa: birds (BBS) and trees (FIA)
+* 125 different predictor sets
+  + Climate predictors either absent or at 4 different radii: 5 possibilities
+  + Geodiversity predictors either absent or at 4 different radii: 5 possibilities
+  + Human predictors either absent or at 4 different radii: 5 possibilities
+  
+$2 \times 5 \times 5 \times 5 = 250$.
+
+## Predictors
+
+For each environmental variable, two different summary statistics (averaged within the circle of appropriate radius) are used as predictors: the mean and the topographic ruggedness index (TRI). The TRI is the average difference between each pixel and its neighbors, in the native resolution of each variable. Two exceptions to that are the categorical variables: soil type and geological age. For those, we are using diversity as measured with Shannon entropy as a measure of geodiversity.
+
+* Climate variables
+  + Mean annual temperature (1 km resolution)
+  + Mean annual precipitation (1 km resolution)
+* Geological variables
+  + Elevation (30 m resolution)
+  + Dynamic habitat index: gross primary productivity (1 km resolution)
+  + Soil type (5 km resolution, categorical)
+  + Geological age (1 km resolution, categorical)
+* Human influence variable
+  + Human footprint index (1 km resolution)
+
+\newpage
+
+# Results
+
+These new results are actually fairly interesting. I would argue that you could tell the following story from the results:
+
+* Climate variables don't care what scale they are aggregated at and put into the model. This is probably because climate varies on a pretty big scale so the mean climate in the 1 km radius around a point is pretty similar to the mean climate in the 20 km radius around a point.
+* Geodiversity and human scale variables are most predictive of richness for both birds and trees at roughly the same small to moderate scale: 5 km and 1 km respectively. That is where we get the best model as identified by information criterion. Those scales are probably the scales where things tend to vary (topography and human impact can vary greatly over a kilometer or two, unlike climate) and therefore have a big effect on diversity.
+* I was really surprised how consistent these results are across taxa. If you look at the best models sorted by information criterion, they are uniformly 5 km geodiversity variables, 1 km human variables, and a mix of scales for climate variables (though 1 km is on top) for both birds and trees.
+
+I am still thinking about the best way to display the results. The issue is that there are three types of predictors in a factorial design, and it's hard to plot 3 axes. It would be good to try out some other ways.
+
+Also note that since this was all done in a Bayesian framework, all the coefficient estimates, information criteria, RMSE, and R-squared values have credible intervals. I didn't bother plotting them for now, but they can be used in interpreting the results.
+
+## (Very naive) model selection
+
+This is just sorting the models out by information criterion. Leave-one-out information criterion (LOOIC) is recommended by the Stan people. The code below shows the first ten models for BBS and for FIA.
+
+```{r sortstats, message = FALSE}
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(viridis)
+library(grid)
+
+fp <- '~/google_drive/NASABiodiversityWG/birdXtree_ScalingPaper/model_output'
+
+fitstats <- read.csv(file.path(fp, 'scalingV2_fitstats.csv'), stringsAsFactors = FALSE)
+
+theme_set(theme_bw() +
+            theme(strip.background = element_rect(fill = NA)))
+
+# Refactor the scale columns to say null for zero.
+fitstats <- fitstats %>%
+  mutate_at(vars(contains('scale')), 
+            funs(factor(., levels = c(0,1,5,20,100), 
+                        labels = c('null','1 km','5 km', '20 km', '100 km')))) %>%
+  mutate(taxon = if_else(taxon == 'bbs', 'birds', 'trees'))
+
+bbs_sort <- fitstats %>%
+  filter(taxon == 'birds') %>%
+  select(climate_scale, geo_scale, human_scale, RMSE_mean, r2, LOOIC) %>%
+  arrange(LOOIC)
+
+bbs_sort[1:10,]
+
+fia_sort <- fitstats %>%
+  filter(taxon == 'trees') %>%
+  select(climate_scale, geo_scale, human_scale, RMSE_mean, r2, LOOIC) %>%
+  arrange(LOOIC)
+
+fia_sort[1:10,]
+```
+
+\newpage
+
+## Display model selection results as a figure
+
+This is my attempt at showing the model selection results as some kind of heat map with associated numbers. You can see how the top models for geodiversity and human influence consistently identify the same small to moderate scale as the best.
+
+```{r model_sel_table, echo = FALSE}
+# Customized labels
+l1 <- textGrob(label = expression(Delta*LOOIC), hjust = 0)
+l2 <- textGrob(label = expression(R^2), hjust = 0, vjust = 0.35)
+l3 <- textGrob(label = 'RMSE', hjust = 0)
+
+# Create BBS plot data
+bbs_plotdat <- bbs_sort %>%
+  mutate(column = 125:1) %>%
+  melt(id.vars = c('column','RMSE_mean','r2','LOOIC'), value.name = 'scale', variable.name = 'predictor') %>%
+  mutate(predictor = gsub('_scale','',predictor),
+         deltaLOOIC = LOOIC - min(LOOIC),
+         scale = factor(scale, levels = c('null','1 km','5 km','20 km','100 km')))
+
+# Draw BBS plot
+bbs_plotdat %>%
+  filter(column > 115) %>%
+ggplot(aes(x = predictor, y = column, fill = scale)) +
+  geom_tile(color = 'black') +
+  geom_text(aes(label = round(deltaLOOIC, 1), x = 3.6), hjust = 0) +
+  geom_text(aes(label = round(r2, 3), x = 4.1), hjust = 0) +
+  geom_text(aes(label = round(RMSE_mean, 3), x = 4.6), hjust = 0) +
+  geom_text(aes(label = '', x = 5)) + # Dummy column.
+  annotation_custom(grob = l1, ymin = 126, ymax = 126, xmin = 3.6, xmax = 3.6) +
+  annotation_custom(grob = l2, ymin = 126, ymax = 126, xmin = 4.1, xmax = 4.1) +
+  annotation_custom(grob = l3, ymin = 126, ymax = 126, xmin = 4.6, xmax = 4.6) +
+  scale_fill_manual(values = c('gray50',viridis(4))) +
+  scale_x_discrete(expand = c(0,0), name = 'Predictor class', labels = c('climate','geodiversity','human influence')) +
+  scale_y_continuous(expand = c(0,0)) +
+  theme(legend.position = 'bottom', 
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid = element_blank()) +
+  coord_cartesian(clip = 'off') +
+  ggtitle('Top ten models: Birds',
+          'best model at top')
+
+# Create FIA plot data
+fia_plotdat <- fia_sort %>%
+  mutate(column = 125:1) %>%
+  melt(id.vars = c('column','RMSE_mean','r2','LOOIC'), value.name = 'scale', variable.name = 'predictor') %>%
+  mutate(predictor = gsub('_scale','',predictor),
+         deltaLOOIC = LOOIC - min(LOOIC),
+         scale = factor(scale, levels = c('null','1 km','5 km','20 km','100 km')))
+
+# Draw FIA plot
+fia_plotdat %>%
+  filter(column > 115) %>%
+ggplot(aes(x = predictor, y = column, fill = scale)) +
+  geom_tile(color = 'black') +
+  geom_text(aes(label = round(deltaLOOIC, 1), x = 3.6), hjust = 0) +
+  geom_text(aes(label = round(r2, 3), x = 4.1), hjust = 0) +
+  geom_text(aes(label = round(RMSE_mean, 3), x = 4.6), hjust = 0) +
+  geom_text(aes(label = '', x = 5)) + # Dummy column.
+  annotation_custom(grob = l1, ymin = 126, ymax = 126, xmin = 3.6, xmax = 3.6) +
+  annotation_custom(grob = l2, ymin = 126, ymax = 126, xmin = 4.1, xmax = 4.1) +
+  annotation_custom(grob = l3, ymin = 126, ymax = 126, xmin = 4.6, xmax = 4.6) +
+  scale_fill_manual(values = c('gray50',viridis(4))) +
+  scale_x_discrete(expand = c(0,0), name = 'Predictor class', labels = c('climate','geodiversity','human influence')) +
+  scale_y_continuous(expand = c(0,0)) +
+  theme(legend.position = 'bottom', 
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid = element_blank()) +
+  coord_cartesian(clip = 'off') +
+  ggtitle('Top ten models: Trees',
+          'best model at top')
+
+```
+
+\newpage
+
+## More figures comparing model fit statistics
+
+These figures might not be very informative but I made them just to explore the results a bit. For both of these, since we are looking at RMSE and LOOIC, "low is good." Because of that, I flipped the y-axis so that the best model is on top.
+
+### The effect of climate, geodiversity, and human variables on RMSE across all models
+
+```{r, echo = FALSE}
+flip_y <- scale_y_reverse()
+
+ggplot(fitstats, aes(x = climate_scale, y = RMSE_mean)) +
+  facet_wrap(~ taxon) +
+  geom_point() +
+  flip_y +
+  ggtitle('Climate scale\'s effect on RMSE')
+
+ggplot(fitstats, aes(x = geo_scale, y = RMSE_mean)) +
+  facet_wrap(~ taxon) +
+  geom_point() +
+  flip_y +
+  ggtitle('Geodiversity scale\'s effect on RMSE')
+
+ggplot(fitstats, aes(x = human_scale, y = RMSE_mean)) +
+  facet_wrap(~ taxon) +
+  geom_point() +
+  flip_y +
+  ggtitle('Human influence scale\'s effect on RMSE')
+```
+
+### The effect of climate, geodiversity, and human variables on LOOIC across all models
+
+```{r, echo = FALSE}
+ggplot(fitstats, aes(x = climate_scale, y = LOOIC)) +
+  facet_wrap(~ taxon) +
+  geom_point() +
+  flip_y +
+  ggtitle('Climate scale\'s effect on LOOIC')
+
+ggplot(fitstats, aes(x = geo_scale, y = LOOIC)) +
+  facet_wrap(~ taxon) +
+  geom_point() +
+  flip_y +
+  ggtitle('Geodiversity scale\'s effect on LOOIC')
+
+ggplot(fitstats, aes(x = human_scale, y = LOOIC)) +
+  facet_wrap(~ taxon) +
+  geom_point() +
+  flip_y +
+  ggtitle('Human influence scale\'s effect on LOOIC')
+```
