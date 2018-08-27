@@ -1,6 +1,8 @@
 #### New conceptual paper figures (clean version)
 # 07 Dec 2017 QDR
 
+# Modified 27 Aug 2018: formatting changes requested by GEB reviewer. (also note new file paths to use old PNW data)
+
 # To plot:
 # Maps of alpha, beta, gamma, and elevation diversity, one for each of the 5 radii
 # Regressions of alpha, beta and gamma versus elevation diversity, one for each of the 5 radii (show confidence bands)
@@ -8,7 +10,7 @@
 
 # Load data (change file path if loading from HPCC)
 
-fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/fia_unfuzzed'
+fp <- '~/Dropbox/projects/nasabiodiv/fia_unfuzzed/pnw_only'
 #fp <- '/mnt/research/nasabio/data/fia'
 
 # Load the elevational diversity and abg diversity data
@@ -26,19 +28,19 @@ radii <- c(5, 10, 20, 50, 100)
 
 # Combine into a single data frame.
 biogeo <- ed %>%
-  dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, sd) %>%
+  dplyr::select(PLT_CN, radius, sd) %>%
   filter(radius %in% radii) %>%
   rename(elevation_sd = sd) %>%
   left_join(ad %>% 
-              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, richness, shannon) %>% 
+              dplyr::select(PLT_CN, radius, richness, shannon) %>% 
               rename(alpha_richness = richness, alpha_diversity = shannon) %>%
               filter(radius %in% radii)) %>%
   left_join(bd %>% 
-              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, beta_td_pairwise_pa, beta_td_pairwise) %>% 
+              dplyr::select(PLT_CN, radius, beta_td_pairwise_pa, beta_td_pairwise) %>% 
               rename(beta_richness = beta_td_pairwise_pa, beta_diversity = beta_td_pairwise) %>%
               filter(radius %in% radii)) %>%
   left_join(gd %>% 
-              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, richness, shannon) %>% 
+              dplyr::select(PLT_CN, radius, richness, shannon) %>% 
               rename(gamma_richness = richness, gamma_diversity = shannon) %>%
               filter(radius %in% radii))
 
@@ -86,7 +88,7 @@ whitemaptheme <- theme_bw() + theme(panel.grid = element_blank(),
 fia_xs <- scale_x_continuous(breaks = c(-125, -120, -115), labels = c('125° W', '120° W', '115° W'))
 fia_ys <- scale_y_continuous(breaks = c(35,40,45,50), labels = c('35° N', '40° N', '45° N', '50° N'))
 
-fpfig <- 'C:/Users/Q/google_drive/NASABiodiversityWG/Figures/conceptual_paper'
+fpfig <- '~/google_drive/NASABiodiversityWG/Figures/conceptual_paper'
 
 latbds = c(33,50)
 lonbds <- c(-125, -114)
@@ -126,6 +128,9 @@ ptsize <- 0.05 # Points must be very small so that they don't overlap too much.
 # Width of figure must be 169 mm
 fwidth <- 169
 
+westcoast_scalebar <- scalebar_latlong(latmin=33.25, lonmin=-121, h=.2, d=500)
+westcoast_scalebar[[2]] <- transform(westcoast_scalebar[[2]], ylab = ylab + 0.22)
+
 fiamap_bd_facet <- ggplot(bdmapdat_facet, 
                           aes(x = lon, y = lat)) +
   facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km'))) +
@@ -136,12 +141,13 @@ fiamap_bd_facet <- ggplot(bdmapdat_facet,
   coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
   whitemaptheme + colscalebeta + panel_border(colour = 'black') +
   fia_xs + fia_ys +
+  geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
+            show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
+  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 1.5) +
   geom_line(data = data.frame(radius = 100, lon = c(-114.5,-114.5), lat = c(47.6,48.6)), size=0.5, arrow=arrow(length=unit(1, 'mm'), angle=30, type='open')) +
   geom_text(data = data.frame(radius = 100, lon = -114.5, lat = 49.2, lab = 'N'), aes(label=lab), fontface='bold') +
   theme(strip.background = element_blank())
 
-westcoast_scalebar <- scalebar_latlong(latmin=33.25, lonmin=-121, h=.2, d=500)
-westcoast_scalebar[[2]] <- transform(westcoast_scalebar[[2]], ylab = ylab + 0.22)
 
 fiamap_ed_facet <- ggplot(edmapdat_facet, 
                           aes(x = lon, y = lat)) +
@@ -167,7 +173,7 @@ fiamap_ad_facet <- ggplot(admapdat_facet,
   geom_point(aes(color = shannon), size = ptsize) +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
-  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 2.5) +
+  geom_text(data=cbind(westcoast_scalebar[[2]], radius = 100), aes(x=xlab, y=ylab, label=text), inherit.aes=F, show.legend = F, size = 1.5) +
   coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
   whitemaptheme + colscalealpha + panel_border(colour = 'black') +
   fia_xs + fia_ys +
@@ -265,7 +271,7 @@ modified_plot <- coef_plot +
 	labs(x = 'Grain of analysis (radius in km)', y = 'Magnitude of relationship\n(slope coefficient)') +
 	theme(legend.position = 'bottom', legend.text = element_text(size=9), legend.title = element_text(size=9))
 	
-ggsave('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/proposal/modified_coef_plot.png', modified_plot, width = 3, height = 3, dpi = 400)	
+ggsave('~/google_drive/NASABiodiversityWG/Figures/proposal/modified_coef_plot.png', modified_plot, width = 3, height = 3, dpi = 400)	
 
 # Separate coefficient plots for each variable
 coef_plot_1x3 <- ggplot(coef_quant, aes(x = radius)) +
