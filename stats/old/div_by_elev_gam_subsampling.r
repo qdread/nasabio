@@ -1,6 +1,7 @@
 # Conceptual paper model fitting: FIA a,b,g diversity ~ elevation SD
 # edited 10 Nov: add beta-diversity and also add gam fit with no subsample.
 # edited 05 Dec: now elevation stats are correct, beta-diversity is based on pairwise and not multisite Soerensen.
+# edited 28 Aug 2018: add diagnostic statistics as requested by reviewers (also note new file paths)
 
 # Procedure in pseudocode:
 # Load a,b,g diversity data and elevation diversity data
@@ -18,7 +19,7 @@
 # NOTE: All needed CSVs are on the hpcc but I have downloaded them locally because it is faster. 
 # Change file path to the second file path to get files from hpcc.
 
-fp <- 'C:/Users/Q/Dropbox/projects/nasabiodiv/fia_unfuzzed'
+fp <- '~/Dropbox/projects/nasabiodiv/fia_unfuzzed/pnw_only'
 #fp <- '/mnt/research/nasabio/data/fia'
 
 # Load the elevational diversity and abg diversity data
@@ -35,9 +36,9 @@ library(sp)
 library(mgcv)
 
 # Function for iterative search.
-source('~/GitHub/nasabio/stats/SRS_iterative.r')
+source('~/Documents/GitHub/nasabio/stats/SRS_iterative.r')
 # Functions for flagging edge plots
-source('~/GitHub/nasabio/stats/spatial_fns.r')
+source('~/Documents/GitHub/nasabio/stats/spatial_fns.r')
 
 # Combine into a single data frame.
 biogeo <- ed %>%
@@ -58,7 +59,7 @@ biogeo <- ed %>%
               filter(radius %in% radii))
 
 # Add latitude and longitudes from unfuzzed (on local drive only)
-fiacoords <- read.csv('~/FIA/pnw.csv') %>% filter(complete.cases(.))
+fiacoords <- read.csv('~/Documents/FIA/pnw.csv') %>% filter(complete.cases(.))
 
 # Convert to albers
 aea_crs <- '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0'
@@ -175,38 +176,39 @@ radii <- c(5, 10, 20, 50, 100)
 div_names <- c('alpha_diversity','beta_diversity','gamma_diversity')
 
 # x-values for predicted y-values
-xrange <- range(biogeo$elevation_sd, na.rm=TRUE)
+xrange <- c(2, 1211)
 newx <- round(seq(xrange[1], xrange[2], length.out = 50))
 
-fp <- '/mnt/research/nasabio/data/fia/modelfits'
+fp <- '/mnt/research/nasabio/temp/pnwfit'
 
 library(dplyr)
 
 pred_list <- list()
 r2_list <- list()
+slope_list <- list()
+
+fitnames <- dir(fp, pattern='fit_')
 
 for (i in 1:100) {
-  load(file.path(fp, paste0('fit_', i, '.r')))
+  load(file.path(fp, fitnames[i]))
   pred_list[[i]] <- pred_val_lm_array
   r2_list[[i]] <- r2_lm_array
+  slope_list[[i]] <- coef_array
   print(i)
 }
 
 library(abind)
 pred_val_lm_array <- do.call('abind', c(pred_list, along = 3)) # very big.
 r2_lm_array <- do.call('abind', c(r2_list, along = 3))
+coef_array <- do.call('abind', c(slope_list, along=3))
 
 # Convert array to data frame
 library(reshape2)
 
-#dimnames(r2_array) <- list(div_names, radii, NULL)
-#dimnames(pred_val_array) <- list(div_names, radii, NULL, NULL)
-#r2_df <- melt(r2_array, varnames = c('diversity_type', 'radius', 'iteration'))
-#pred_val_df <- melt(pred_val_array, varnames = c('diversity_type', 'radius', 'iteration', 'x'))
-#pred_val_df$x <- newx[pred_val_df$x]
-
 dimnames(r2_lm_array) <- list(div_names, radii, NULL)
 dimnames(pred_val_lm_array) <- list(div_names, radii, NULL, NULL)
+dimnames(coef_array) <- list(div_names, radii, NULL)
+coef_df <- melt(coef_array, varnames = c('diversity_type', 'radius', 'iteration'))
 r2_lm_df <- melt(r2_lm_array, varnames = c('diversity_type', 'radius', 'iteration'))
 pred_val_lm_df <- melt(pred_val_lm_array, varnames = c('diversity_type', 'radius', 'iteration', 'x'))
 pred_val_lm_df$x <- newx[pred_val_lm_df$x]
@@ -233,7 +235,19 @@ r2_lm_quant <-r2_lm_df %>%
             r2_mean = mean(value, na.rm = TRUE)) %>%
   arrange(diversity_type, radius)
 
-save(pred_val_lm_quant, r2_lm_quant, file = file.path(fp, 'fiafitplotdat.R'))
+# Slopes or coefficients
+coef_quant <- coef_df %>%
+  group_by(diversity_type, radius) %>%
+  summarize(coef = quantile(value, probs = 0.5, na.rm = TRUE),
+            coef_q025 = quantile(value, probs = 0.025, na.rm = TRUE),
+            coef_q975 = quantile(value, probs = 0.975, na.rm = TRUE),
+            coef_q25 = quantile(value, probs = 0.25, na.rm = TRUE),
+            coef_q75 = quantile(value, probs = 0.75, na.rm = TRUE),
+            coef_mean = mean(value, na.rm = TRUE)) %>%
+  arrange(diversity_type, radius)
+
+
+save(pred_val_lm_quant, r2_lm_quant, coef_quant, file = file.path(fp, 'fiafitplotdat_pnw.R'))
 
 ###############################
 
@@ -361,3 +375,51 @@ gammaplot <- ggplot(biogeo) +
 ggsave(file.path(fpfig, 'fia_alpha_regressions.png'), alphaplot, height = 4, width = 12, dpi = 300)
 ggsave(file.path(fpfig, 'fia_beta_regressions.png'), betaplot, height = 4, width = 12, dpi = 300)
 ggsave(file.path(fpfig, 'fia_gamma_regressions.png'), gammaplot, height = 4, width = 12, dpi = 300)
+
+
+# Diagnostic stats --------------------------------------------------------
+
+# Look at the diagnostic stats for the residuals, in this case don't do the subsampling. Just use all put together.
+
+# Fit full regressions
+
+fullfits <- biogeo %>%
+  group_by(radius) %>%
+  do(fits = with(., list(alpha = lm(alpha_diversity ~ elevation_sd),
+                         beta = betareg(beta_diversity ~ elevation_sd),
+                         gamma = lm(gamma_diversity ~ elevation_sd))))
+
+# Fit full regressions using GLMs instead.
+
+fullfits_glm <- biogeo %>%
+  group_by(radius) %>%
+  do(fits = with(., list(alpha = glm(alpha_diversity ~ elevation_sd, family = poisson(link = log)),
+                         beta = betareg(beta_diversity ~ elevation_sd, link = 'logit'),
+                         gamma = glm(gamma_diversity ~ elevation_sd, family = poisson(link = log)))))
+
+# Fit full regressions with log transformed response variable
+fullfits_log <- biogeo %>%
+  group_by(radius) %>%
+  do(fits = with(., list(alpha = lm(log(alpha_diversity) ~ elevation_sd),
+                         beta = betareg(beta_diversity ~ elevation_sd),
+                         gamma = lm(log(gamma_diversity) ~ elevation_sd))))
+
+# Examine residuals
+plot(fullfits_log$fits[[1]][[1]])
+
+library(olsrr)
+
+ols_test_breusch_pagan(fullfits$fits[[5]][[3]])
+
+library(purrr)
+library(reshape2)
+library(ggplot2)
+library(r2glmm)
+
+the_coefs <- map_dfr(fullfits_glm$fits, function(l) map(l, function(fit) coef(fit)['elevation_sd']))
+the_coefs$radius <- radii
+
+the_coefs %>%
+  melt(id.vars = 'radius') %>%
+  ggplot(aes(x=radius, y=value, group=variable, color=variable)) +
+  geom_line() + geom_point()
