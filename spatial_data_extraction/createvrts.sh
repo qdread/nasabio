@@ -17,11 +17,8 @@
 module load GDAL/2.0.1
 
 # MODIS LST: MCMURDO Antarctica: 1km (1000m)
-# merging single band rasters into 1 multi band raster
-gdal_merge.py -o /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_MCMURDO.tif -separate *.tif
-
 # build vrt out of all annual rasters
-gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_MCMURDO.vrt MODIS_MOD11A2_LST_MCMURDO.tif  
+gdalbuildvrt -separate /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_MCMURDO.vrt *.tif  
 
 # reprojecting and converting vrt to multi band tiff
 gdalwarp -t_srs '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_MCMURDO.vrt MODIS_MOD11A2_LST_MCMURDO.tif
@@ -31,9 +28,9 @@ gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODI
 
 
 # MODIS LST: USA: 1km (1000m)
-gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA_${i}.tif
+gdalbuildvrt -separate /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt *.tif
 
-gdalwarp -t_srs '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA_*.tif
+gdalwarp -t_srs '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt MODIS_MOD11A2_LST_USA.tif
 
 gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA.tif
 
