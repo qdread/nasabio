@@ -1,0 +1,201 @@
+---
+title: "Supplementary Information"
+author: "Quentin D. Read"
+date: "August 24, 2018"
+header-includes:
+   - \usepackage{caption}
+output: pdf_document
+---
+
+# Supplementary Figures
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/both_5foldrmse_allmodels_2wayfacet.png}}
+\caption*{Figure S1: Model performance assessed with five-fold root mean squared error}
+\end{figure}
+
+**Supplementary Figure 1**: This figure shows the root mean squared error obtained from 5-fold cross-validation, by comparing the observed value with the out-of-sample predicted value on the data points omitted in each fold. A lower value represents better performance of the model predicting biodiversity (the y-axis is reversed so that best-performing models are on top). Error bars are 95% credible intervals. Here, we not only compare taxa but also the four types of model: space only (null), space + climate, space + geodiversity, and space + climate + geodiversity (full model). The out-of-sample cross-validation error is very similar to the in-sample error (Supplementary Table 1), indicating that overfitting is not much of a problem. We see that the inclusion of fixed effects significantly improves the prediction of out-of-sample data points, except for some of the beta-diversity models in which the space-only model without any fixed effects does just as well as the other models. In addition, a combination of geodiversity and climate variables almost always predicts better than climate alone. The same pattern is qualitatively shown by the R-squared values (Supplementary Table 1).
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/both_multivariate_coefvar_sideways.png}}
+\caption*{Figure S2: Spatial variation in geodiversity-biodiversity relationships}
+\end{figure}
+
+**Supplementary Figure 2**: The spatial variability of the relationship between each predictor and each response, by taxon. The spatial variability is defined as the mean pairwise difference of coefficients between pairs of adjacent ecoregions. Higher values represent relationships that vary more spatially.
+
+\newpage
+
+### Supplementary Figures 3-14
+
+The following figures are maps of the coefficient on each climate or geodiversity predictor from the full multivariate models predicting alpha, beta, and gamma diversity for birds and for trees. Each figure shows the coefficients from the alpha, beta, and gamma models for each of the three biodiversity dimensions (taxonomic, phylogenetic, and functional) for one taxonomic group. Figures 3 through 8 show the coefficients for birds separately for each predictor, and figures 9 through 14 show the coefficients for trees.
+
+In figures 3a, 4a, etc. below, the color of each TNC ecoregion is the region-level coefficient estimate from the model (USA-wide fixed-effect slope + random-effect slope from that region). The colors are scaled so that darker red ecoregions have more positive coefficients, and darker blue ecoregions have negative coefficients. White ecoregions have coefficients approximating zero, and dark gray ecoregions have coefficients that could not be estimated. 
+
+In figures 3b, 4b, etc., below, the ecoregions are shaded based on whether the 95% credible interval around the coefficient overlaps zero. Red shaded regions have entirely positive nonzero 95% credible intervals, while blue shaded regions have entirely negative nonzero 95% credible intervals. Dark gray shaded regions have 95% credible intervals that contain zero.
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_temperature_mean.png}}
+\caption*{Figure S3a: Coefficients of mean annual temperature on bird diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_temperature_mean.png}}
+\caption*{Figure S3b: Coefficients of mean annual temperature on bird diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_precip_mean.png}}
+\caption*{Figure S4a: Coefficients of mean annual precipitation on bird diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_precip_mean.png}}
+\caption*{Figure S4b: Coefficients of mean annual precipitation on bird diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_elevation_diversity.png}}
+\caption*{Figure S5a: Coefficients of elevation variability on bird diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_elevation_diversity.png}}
+\caption*{Figure S5b: Coefficients of elevation variability on bird diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_gpp_sd.png}}
+\caption*{Figure S6a: Coefficients of GPP variability on bird diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_gpp_sd.png}}
+\caption*{Figure S6b: Coefficients of GPP variability on bird diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_geol_age_diversity.png}}
+\caption*{Figure S7a: Coefficients of geological age diversity on bird diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_geol_age_diversity.png}}
+\caption*{Figure S7b: Coefficients of geological age diversity on bird diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_soil_diversity.png}}
+\caption*{Figure S8a: Coefficients of soil type diversity on bird diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_soil_diversity.png}}
+\caption*{Figure S8b: Coefficients of soil type diversity on bird diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_temperature_mean.png}}
+\caption*{Figure S9a: Coefficients of mean annual temperature on tree diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_temperature_mean.png}}
+\caption*{Figure S9b: Coefficients of mean annual temperature on tree diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_precip_mean.png}}
+\caption*{Figure S10a: Coefficients of mean annual precipitation on tree diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_precip_mean.png}}
+\caption*{Figure S10b: Coefficients of mean annual precipitation on tree diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_elevation_diversity.png}}
+\caption*{Figure S11a: Coefficients of elevation variability on tree diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_elevation_diversity.png}}
+\caption*{Figure S11b: Coefficients of elevation variability on tree diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_gpp_sd.png}}
+\caption*{Figure S12a: Coefficients of GPP variability on tree diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_gpp_sd.png}}
+\caption*{Figure S12b: Coefficients of GPP variability on tree diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_geol_age_diversity.png}}
+\caption*{Figure S13a: Coefficients of geological age diversity on tree diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_geol_age_diversity.png}}
+\caption*{Figure S13b: Coefficients of geological age diversity on tree diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_soil_diversity.png}}
+\caption*{Figure S14a: Coefficients of soil type diversity on tree diversity, values shown}
+\end{figure}
+
+\begin{figure}[h!]
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_soil_diversity.png}}
+\caption*{Figure S14b: Coefficients of soil type diversity on tree diversity, nonzero regions shown}
+\end{figure}
+
+\newpage
+
+# Supplementary Tables
+
+**Supplementary Table 1**: This table shows model fit statistics for each response variable for each model. The RMSE is the root mean squared error of the model fit with all the data. The 5-fold CV RMSE is the root mean squared error of the holdout data points in 5-fold cross-validation. The $R^2$ is calculated using the method of Gelman *et al.*. For all fit statistics, mean value as well as upper and lower bounds of 95% credible intervals are shown.
+
+```{r, echo = FALSE, message = FALSE}
+library(knitr)
+library(kableExtra)
+fit_stats <- read.csv('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv')
+fit_stats$model <- gsub('+', ' + ', fit_stats$model, fixed = TRUE)
+kable(fit_stats, 'latex', escape = FALSE, longtable = TRUE, booktabs = TRUE,
+             row.names = FALSE,
+             col.names = c('taxon','biodiversity level', 'biodiversity dimension', 'model', 'RMSE', '5-fold CV RMSE', '$R^2$')) %>%
+  kable_styling(latex_options = 'repeat_header') %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(2, width = '6em') %>%
+  column_spec(3, width = '6em') %>%
+  column_spec(4, width = '9em')
+```
