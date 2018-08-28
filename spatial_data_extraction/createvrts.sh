@@ -17,8 +17,11 @@
 module load GDAL/2.0.1
 
 # MODIS LST: MCMURDO Antarctica: 1km (1000m)
+# merging single band rasters into 1 multi band raster
+gdal_merge.py -o /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_MCMURDO.tif -separate *.tif
+
 # build vrt out of all annual rasters
-gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_MCMURDO.vrt *.tif 
+gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_MCMURDO.vrt MODIS_MOD11A2_LST_MCMURDO.tif  
 
 # reprojecting and converting vrt to multi band tiff
 gdalwarp -t_srs '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_MCMURDO.vrt MODIS_MOD11A2_LST_MCMURDO.tif
