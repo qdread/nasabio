@@ -47,7 +47,7 @@ gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODI
 # MODIS LST: PUERTO RICO: 1km (1000m)
 # clip out Puerto Rico
 ls | grep USA | awk -F"_" '{print $5}' | awk -F"." '{print $1}' | while read -r YEAR ; do
-	gdalwarp -te -68 -65 17 19 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_PR_"$YEAR".tif ;
+	gdalwarp -te -68 17 -65 19 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_PR_"$YEAR".tif ;
 done ;
 
 gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_PR.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*PR*tif ;
@@ -61,7 +61,7 @@ gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODI
 # MODIS LST: ALASKA: 1km (1000m)
 # clip out Alaska
 ls | grep USA | awk -F"_" '{print $5}' | awk -F"." '{print $1}' | while read -r YEAR ; do
-	gdalwarp -te -157 -139 61 71 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_AK_"$YEAR".tif ;
+	gdalwarp -te -157 61 -139 71 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_AK_"$YEAR".tif ;
 done ;
 
 gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_AK.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*AK*tif ;
