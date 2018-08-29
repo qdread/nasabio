@@ -42,15 +42,6 @@ gdalwarp -t_srs '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 
 # convert reprojected tif to vrt
 gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_PALMER.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/palmer/MODIS_MOD11A2_LST_PALMER.tif ;
 
-###############################################
-
-# MODIS LST: USA: 1km (1000m)
-gdalbuildvrt -separate /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*USA*tif ;
-
-gdalwarp -t_srs '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA.tif ;
-
-gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/usa/MODIS_MOD11A2_LST_USA.tif ;
-
 ################################################
 
 # MODIS LST: PUERTO RICO: 1km (1000m)
@@ -78,3 +69,12 @@ gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODI
 gdalwarp -t_srs '+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_AK.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_AK_*.tif ;
 
 gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_AK.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_AK.tif
+
+###############################################
+
+# MODIS LST: USA: 1km (1000m)
+gdalbuildvrt -separate /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*USA*tif ;
+
+gdalwarp -t_srs '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA.tif ;
+
+gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_USA.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/usa/MODIS_MOD11A2_LST_USA.tif ;
