@@ -249,6 +249,7 @@ r2_plot <- ggplot(r2_lm_quant, aes(x = radius_plot, group = interaction(radius, 
   geom_point(aes(y = r2), size = 1) +
   scale_color_discrete(name = 'Diversity', labels = c('alpha','beta','gamma')) +
   labs(x = 'Radius (km)', y = expression(R^2)) +
+  scale_x_continuous(breaks = radii) +
   theme(axis.text = element_text(size=7.5), axis.title = element_text(size=9))
 
 ggsave(file.path(fpfig, 'fig2_verybottomrow_r2s.png'), r2_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
@@ -262,6 +263,7 @@ coef_plot <- ggplot(coef_quant, aes(x = radius_plot, group = interaction(radius,
   geom_point(aes(y = coef), size = 1) +
   scale_color_discrete(name = 'Diversity', labels = c('alpha','beta','gamma')) +
   labs(x = 'Radius (km)', y = 'Slope coefficient') +
+  scale_x_continuous(breaks = radii) +
   theme(axis.text = element_text(size=7.5), axis.title = element_text(size=9))
 
 ggsave(file.path(fpfig, 'fig2_verybottomrow_coefs.png'), coef_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
@@ -303,7 +305,7 @@ hextheme <- theme(strip.background = element_blank())
 border <- panel_border(colour = 'black')
 radlabel <- labeller(radius = function(x) paste(as.integer(x), 'km'))
 
-alphaplot <- ggplot(biogeo %>% mutate(alpha_diversity=exp(alpha_diversity))) + 
+alphaplot <- ggplot(biogeo) + 
   facet_grid(~ radius, scales = 'free', labeller = radlabel) +
   geom_hex(aes(x = elevation_sd, y = alpha_diversity)) +
   geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'alpha_diversity'), 
@@ -313,6 +315,8 @@ alphaplot <- ggplot(biogeo %>% mutate(alpha_diversity=exp(alpha_diversity))) +
   geom_text(data = subset(r2_lm_quant, diversity_type == 'alpha_diversity'),
             aes(x = -Inf, y = Inf, label = r2expr),
             parse = TRUE, hjust = -0.5, vjust = 1.5) +
+  scale_y_continuous(breaks = c(0, .5, 1, 1.5), labels = round(exp(c(0, .5, 1, 1.5)),1)) +
+  coord_cartesian(ylim = c(0, 1.5)) +
   hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Alpha-diversity')
 
 betaplot <- ggplot(biogeo) + 
@@ -328,7 +332,7 @@ betaplot <- ggplot(biogeo) +
   scale_x_continuous(labels=seq(0,1200,300), breaks=seq(0,1200,300)) +
   hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Beta-diversity')
 
-gammaplot <- ggplot(biogeo %>% mutate(gamma_diversity = exp(gamma_diversity))) + 
+gammaplot <- ggplot(biogeo) + 
   facet_grid(~ radius, scales = 'free', labeller = radlabel) +
   geom_hex(aes(x = elevation_sd, y = gamma_diversity)) +
   geom_ribbon(data = pred_val_lm_quant %>% filter(diversity_type == 'gamma_diversity'), 
@@ -337,18 +341,22 @@ gammaplot <- ggplot(biogeo %>% mutate(gamma_diversity = exp(gamma_diversity))) +
             aes(x = x, y = pred_y), color = 'red', size = 1) +
   geom_text(data = subset(r2_lm_quant, diversity_type == 'gamma_diversity'),
             aes(x = -Inf, y = Inf, label = r2expr),
-            parse = TRUE, hjust = -0.5, vjust = 1.5) +
+            parse = TRUE, hjust = -0.1, vjust = 1.5) +
   scale_x_continuous(breaks = c(0,500,1000)) +
+  scale_y_continuous(breaks = log(c(1,3,7,20)), labels = c(1, 3, 7, 20)) +
+  coord_cartesian(ylim = c(0, 3)) +
   hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Gamma-diversity')
 
 # Set panel size of bottom row.
-source('~/R/setpanelsize.r') # See https://stackoverflow.com/questions/30571198/how-achieve-identical-facet-sizes-and-scales-in-several-multi-facet-ggplot2-grap/30571289#30571289
+source('~/Documents/R/setpanelsize.r') # See https://stackoverflow.com/questions/30571198/how-achieve-identical-facet-sizes-and-scales-in-several-multi-facet-ggplot2-grap/30571289#30571289
+
+library(grid)
 
 pset <- set_panel_size(p = betaplot + theme(legend.position = 'none', axis.text = element_text(size = 7.5), axis.title = element_text(size=10.5), strip.background = element_blank(), strip.text.x = element_blank()), 
                        margin = unit(2,'mm'),
                        width = unit(26.5,'mm'),
                        height = unit(fwidth * 0.22,'mm'))
-png(file.path(fpfig, 'fig2_bottomrow_fixedsize2.png'), width=fwidth, height=fwidth*0.33, units = 'mm', res = 600)
+png(file.path(fpfig, 'SuppFig_betadiv_fits.png'), width=fwidth, height=fwidth*0.33, units = 'mm', res = 600)
 grid.draw(pset)
 dev.off()
 
