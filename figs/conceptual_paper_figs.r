@@ -283,7 +283,8 @@ coef_plot_1x3 <- ggplot(coef_quant, aes(x = radius)) +
   geom_point(aes(y = coef), size = 1) +
   scale_x_continuous(breaks=radii, labels=radii) +
   labs(x = 'Radius (km)', y = 'Slope coefficient') +
-  theme(axis.text = element_text(size=6), axis.title = element_text(size=9), strip.background = element_blank())
+  theme(axis.text = element_text(size=6), axis.title = element_text(size=9), strip.background = element_blank(),
+        strip.text.x=element_text(margin=margin(b=5)))
 
 ggsave(file.path(fpfig, 'coefs_separate.png'), coef_plot_1x3, width = fwidth * 0.8, height = fwidth * 0.25, units = 'mm', dpi = 600)
 
