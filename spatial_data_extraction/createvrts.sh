@@ -50,7 +50,7 @@ ls | grep USA | awk -F"_" '{print $5}' | awk -F"." '{print $1}' | while read -r 
 	gdalwarp -te -68 17 -65 19 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_PR_"$YEAR".tif ;
 done ;
 
-gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_PR.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*PR*tif ;
+gdalbuildvrt -separate /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_PR.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*PR*tif ;
 
 gdalwarp -t_srs '+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_PR.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_PR.tif ;
 
@@ -64,7 +64,7 @@ ls | grep USA | awk -F"_" '{print $5}' | awk -F"." '{print $1}' | while read -r 
 	gdalwarp -te -157 61 -139 71 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_AK_"$YEAR".tif ;
 done ;
 
-gdalbuildvrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_AK.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*AK*tif ;
+gdalbuildvrt -separate /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_AK.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/*AK*tif ;
 
 gdalwarp -t_srs '+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 1000 1000 /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/vrts/MODIS_MOD11A2_LST_AK.vrt /mnt/research/nasabio/data/modis_lst/modis_lst_annual_usa/MODIS_MOD11A2_LST_AK.tif ;
 
