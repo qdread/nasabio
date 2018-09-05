@@ -129,10 +129,14 @@ gdalbuildvrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MO
 
 # MODIS NDVI: PUERTO RICO: 250m
 
+cd /mnt/scratch/coope378/
+
 # clip out Puerto Rico
 ls | grep USA | awk -F"_" '{print $5}' | awk -F"." '{print $1}' | while read -r YEAR ; do
 	gdalwarp -te -68 17 -65 19 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/scratch/coope378/MODIS_MOD13Q1_NDVI_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/MODIS_MOD13Q1_NDVI_PR_"$YEAR".tif ;
 done ;
+
+cd /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/
 
 # build vrt out of all annual rasters
 gdalbuildvrt -separate /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MODIS_MOD13Q1_NDVI_PR.vrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/*PR*tif ;
@@ -147,10 +151,14 @@ gdalbuildvrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MO
 
 # MODIS NDVI: ALASKA: 250m
 
+cd /mnt/scratch/coope378/
+
 # clip out Alaska
 ls | grep USA | awk -F"_" '{print $5}' | awk -F"." '{print $1}' | while read -r YEAR ; do
-	gdalwarp -te -157 61 -139 71 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/scratch/coope378/oeMODIS_MOD13Q1_NDVI_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/MODIS_MOD13Q1_NDVI_AK_"$YEAR".tif ;
+	gdalwarp -te -157 61 -139 71 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/scratch/coope378/MODIS_MOD13Q1_NDVI_USA_"$YEAR".tif /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/MODIS_MOD13Q1_NDVI_AK_"$YEAR".tif ;
 done ;
+
+cd /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/
 
 # build vrt out of all annual rasters
 gdalbuildvrt -separate /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MODIS_MOD13Q1_NDVI_AK.vrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/*AK*tif ;
@@ -165,12 +173,21 @@ gdalbuildvrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MO
 
 # MODIS NDVI: USA: 250m
 
+cd /mnt/scratch/coope378/
+
+# clip out mainland USA (it's huge otherwise)
+ls | grep USA | awk -F"_" '{print $5}' | awk -F"." '{print $1}' | while read -r YEAR ; do
+	gdalwarp -te -129 24 -60 50 -te_srs '+proj=longlat +ellps=WGS84 +no_defs' /mnt/scratch/coope378/MODIS_MOD13Q1_NDVI_USA_"$YEAR".tif /mnt/scratch/coope378/cut/MODIS_MOD13Q1_NDVI_USA_"$YEAR".tif ;
+done ;
+
+cd /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/
+
 # build vrt out of all annual rasters
-gdalbuildvrt -separate /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MODIS_MOD13Q1_NDVI_USA.vrt /mnt/scratch/coope378/*USA*tif ;
+gdalbuildvrt -separate /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MODIS_MOD13Q1_NDVI_USA.vrt /mnt/scratch/coope378/cut/*USA*tif ;
 
 # reprojecting and converting vrt to multi band tiff
-gdalwarp -t_srs '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 250 250 /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MODIS_MOD13Q1_NDVI_USA.vrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/MODIS_MOD13Q1_NDVI_USA.tif ;
+gdalwarp -t_srs '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m no_defs' -tr 250 250 /mnt/scratch/coope378/cut/MODIS_MOD13Q1_NDVI_USA.vrt /mnt/scratch/coope378/cut/MODIS_MOD13Q1_NDVI_USA.tif ;
 
 # convert reprojected tif to vrt
-gdalbuildvrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/vrts/MODIS_MOD13Q1_NDVI_USA.vrt /mnt/research/nasabio/data/modis_ndvi/modis_ndvi_annual_usa/MODIS_MOD13Q1_NDVI_USA.tif ;
+gdalbuildvrt /mnt/scratch/coope378/cut/MODIS_MOD13Q1_NDVI_USA.vrt /mnt/scratch/coope378/cut/MODIS_MOD13Q1_NDVI_USA.tif ;
 
