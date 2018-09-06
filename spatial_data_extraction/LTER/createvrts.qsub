@@ -1,0 +1,22 @@
+#!/bin/bash
+ 
+### define resources needed:
+### walltime - how long you expect the job to run
+#PBS -l walltime=12:00:00
+ 
+### nodes:ppn - how many nodes & cores per node (ppn) that you require
+#PBS -l nodes=1:ppn=1
+ 
+### mem: amount of memory that the job will need
+#PBS -l mem=12gb
+ 
+### you can give your job a name for easier identification
+#PBS -N lter_createvrt
+
+
+### change to the working directory where your code is located
+cd /mnt/research/nasabio/code/ 
+ 
+./createvrts.sh				        ### call your executable
+ 
+qstat -f $PBS_JOBID 
