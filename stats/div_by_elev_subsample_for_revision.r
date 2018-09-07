@@ -3,6 +3,7 @@
 # edited 05 Dec: now elevation stats are correct, beta-diversity is based on pairwise and not multisite Soerensen.
 # new version created 06 Dec: parallel so that many iterations can be run simultaneously on cluster
 # Modified 28 Aug 2018: To comply with reviewer suggestions, change analysis to GLM with gamma distributions (and reduce sample number by a few)
+# Modified 06 Sep 2018: Use standardized coefficients.
 
 # Procedure in pseudocode:
 # Load a,b,g diversity data and elevation diversity data
@@ -32,6 +33,7 @@ div_names <- c('alpha_diversity','beta_diversity','gamma_diversity')
 library(dplyr)
 library(sp)
 library(mgcv)
+library(reghelper) # For standardized coefficients
 
 # Function for iterative search.
 source('/mnt/research/nasabio/code/SRS_iterative.r')
@@ -137,12 +139,12 @@ for (k in 1:n_iter) {
         betareg_fit <- betareg(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat)
         pred_val_lm_array[i, j, k, ] <- predict(object = betareg_fit, newdata = data.frame(elevation_sd = newx))
         r2_lm_array[i, j, k] <- betareg_fit$pseudo.r.squared
-		    coef_array[i, j, k] <- coef(betareg_fit)[2]
+		    coef_array[i, j, k] <- coef(betareg_fit)[2] * sd(dat$elevation_sd, na.rm = TRUE) # Manually standardized
       } else { 
         lm_fit <- glm(formula(paste(div_names[i], 'elevation_sd', sep = '~')), data = dat, family = Gamma(link = 'log'))
         pred_val_lm_array[i, j, k, ] <- predict.glm(object = lm_fit, newdata = data.frame(elevation_sd = newx))
         r2_lm_array[i, j, k] <- with(summary(lm_fit), 1 - deviance/null.deviance)
-		    coef_array[i, j, k] <- coef(lm_fit)[2]
+		    coef_array[i, j, k] <- coef(reghelper::beta(lm_fit))[2, 1] # Standardized using reghelper::beta()
       }
 
     }
