@@ -33,8 +33,8 @@ source('/mnt/research/nasabio/code/extractfromcircle_stack.r')
 # Load variable table
 vartable <- read.csv('/mnt/research/nasabio/data/geodiv_table_for_gdal_lter.csv', stringsAsFactors = FALSE)
 
-# Get all options from variable table.
-k <- which(vartable$variable.id == geovar)
+# Get all options from variable table (by location (i.e., taxon) and variable).
+k <- which(vartable$variable.id == geovar & vartable$Dataset.name == paste(geovar, taxon, sep = '_'))
 n_layers <- vartable$N.layers[k]
 raster_file_name <- vartable$File.name[k]
 max_radius <- vartable$Max.radius[k]
@@ -43,35 +43,33 @@ categorical <- geovar %in% c('gea','gea_5k','soil')
 # Load coordinates for correct taxon.	
 if (taxon == 'mcmurdo') {
 	n_slices <- vartable$N.slices.mcmurdo[k] # number of points for station
-	coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_site_locations_all.csv')
-	coords <- coords[coords$Site == 'MCM', ]
+	coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+	coords <- coords[coords$site == 'MCM', ] # MAKE THIS ONLY GRAB LAT/LON
 	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }	
 if (taxon == 'palmer') {
 	n_slices <- vartable$N.slices.palmer[k] # number of points for station
-	coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_site_locations_all.csv')
-	coords <- coords[coords$Site == 'PAL', ]
+	coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+	coords <- coords[coords$site == 'PAL', ]
 	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
 if (taxon == 'usa') {
-  n_slices <- vartable$N.slices.usa[k] # number of points for station
-  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_site_locations_all.csv')
-  coords <- coords[coords$Site %in% list('FCE', 'GCE', 'CWT', 'JRN', 'SEV', 'CAP', 
-                                         'CCE', 'SBC', 'AND', 'NTL', 'CDR', 'SGS',
-                                         'VCR', 'BES', 'PIE', 'HBR', 'KBS', 'HFR',
-                                         'CWT', 'NWT', 'KNZ'), ]
+  n_slices <- vartable$N.slices.usa[k] # number of points for station - note: changed 
+  # temporally to test in NTL sites
+  coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+  coords <- coords[!(coords$site %in% list('MCM', 'PAL', 'ARC', 'BNZ', 'LUQ')), ]
   radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
 if (taxon == 'ak') {
   n_slices <- vartable$N.slices.ak[k] # number of points for station
-  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_site_locations_all.csv')
-  coords <- coords[coords$Site %in% list('ARC', 'BNZ') ]
+  coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+  coords <- coords[coords$site %in% list('ARC', 'BNZ') ]
   radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
 if (taxon == 'pr') {
   n_slices <- vartable$N.slices.pr[k] # number of points for station
-  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_site_locations_all.csv')
-  coords <- coords[coords$Site == 'LUQ']
+  coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+  coords <- coords[coords$site == 'LUQ']
   radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
 
@@ -79,7 +77,10 @@ radii <- radii[radii <= max_radius]
 
 # Get row indexes for the slice of coordinate matrix to be extracted.
 rowidx <- round(seq(0, nrow(coords), length.out = n_slices + 1)) # for LTER, set n_slices to length of coords
-rowidxmin <- rowidx[slice] + 1
+# slice is the PBS_JOBARRAY argument from geoextract.sh
+# (1 job per site, run this script the same, so # sites of job array ids)
+# IS THIS NECESSARY IF RUN AS AN ARRAY JOB? CAN WE GET RID OF THE FOR LOOP BELOW?
+rowidxmin <- rowidx[slice] + 1 
 rowidxmax <- rowidx[slice + 1]
 
 stats_by_point <- list()
@@ -112,4 +113,4 @@ for (i in rowidxmin:rowidxmax) {
 	}
 }
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/lter/', taxon, '/', geovar, '_', slice, '.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/', geovar, '_', slice, '.r'))
