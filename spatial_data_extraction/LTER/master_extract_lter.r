@@ -23,7 +23,7 @@ scratch_path <- '/mnt/ffs17/groups/nasabio/VRTs_writable'
 args=(commandArgs(TRUE))
 
 for (i in 1:length(args)) {
-    eval(parse(text = args[[i]]))
+  eval(parse(text = args[[i]]))
 }
 
 # Load functions to do the extraction
@@ -42,33 +42,33 @@ categorical <- geovar %in% c('gea','gea_5k','soil')
 
 # Load coordinates for correct taxon.	
 if (taxon == 'mcmurdo') {
-	n_slices <- vartable$N.slices.mcmurdo[k] # number of points for station
-	coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
-	coords <- coords[coords$site == 'MCM', ] # MAKE THIS ONLY GRAB LAT/LON
-	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
+  n_slices <- vartable$N.slices.mcmurdo[k] # number of points for station
+  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_coordinates.csv')
+  coords <- coords[coords$site == 'MCM', ] 
+  radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }	
 if (taxon == 'palmer') {
-	n_slices <- vartable$N.slices.palmer[k] # number of points for station
-	coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
-	coords <- coords[coords$site == 'PAL', ]
-	radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
+  n_slices <- vartable$N.slices.palmer[k] # number of points for station
+  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_coordinates.csv')
+  coords <- coords[coords$site == 'PAL', ]
+  radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
 if (taxon == 'usa') {
   n_slices <- vartable$N.slices.usa[k] # number of points for station - note: changed 
   # temporally to test in NTL sites
-  coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_coordinates.csv')
   coords <- coords[!(coords$site %in% list('MCM', 'PAL', 'ARC', 'BNZ', 'LUQ')), ]
   radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
 if (taxon == 'ak') {
   n_slices <- vartable$N.slices.ak[k] # number of points for station
-  coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_coordinates.csv')
   coords <- coords[coords$site %in% list('ARC', 'BNZ') ]
   radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
 if (taxon == 'pr') {
   n_slices <- vartable$N.slices.pr[k] # number of points for station
-  coords <- read.csv('/mnt/research/nasabio/data/ltermetacommunities/LTER_coordinates.csv')
+  coords <- read.csv('/mnt/research/nasabio/data/lter/LTER_coordinates.csv')
   coords <- coords[coords$site == 'LUQ']
   radii <- c(5, 10, 20, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500) # km
 }
@@ -80,37 +80,33 @@ rowidx <- round(seq(0, nrow(coords), length.out = n_slices + 1)) # for LTER, set
 # slice is the PBS_JOBARRAY argument from geoextract.sh
 # (1 job per site, run this script the same, so # sites of job array ids)
 # IS THIS NECESSARY IF RUN AS AN ARRAY JOB? CAN WE GET RID OF THE FOR LOOP BELOW?
-rowidxmin <- rowidx[slice] + 1 
-rowidxmax <- rowidx[slice + 1]
 
 stats_by_point <- list()
 
-for (i in rowidxmin:rowidxmax) {
-	print(i)
-	
-	focalpoint <- with(coords, cbind(lon, lat))[i, , drop = FALSE]	
-	
-	extractBox(coords = focalpoint,
-			   raster_file = file.path(scratch_path, raster_file_name),
-			   radius = max_radius,
-			   fp = tmp_path,
-			   filetags = paste(geovar, i, sep = '_'))
-
-	file_i <- paste("\'", tmp_path, "\'", "/bbox_", geovar, "_", i, ".tif", sep = "")
-	
-	stats_by_point[[length(stats_by_point) + 1]] <- 
-		extractFromCircle(coords = focalpoint,
-						  raster_file = file_i,
-						  radii = radii,
-						  fp = tmp_path,
-						  filetag = paste(geovar, i, sep = '_'),
-						  nlayers = n_layers,
-						  is_categorical = categorical,
-						  delete_temp = TRUE)
-						  
-	if (file.exists(paste(tmp_path, "/bbox_", geovar, "_", i, ".tif", sep = ""))) {
-		deleteBox(file_i)
-	}
+i <- slice
+  
+focalpoint <- with(coords, cbind(lon, lat))[i, , drop = FALSE]	
+  
+extractBox(coords = focalpoint,
+            raster_file = file.path(scratch_path, raster_file_name),
+            radius = max_radius,
+            fp = tmp_path,
+            filetags = paste(geovar, i, sep = '_'))
+  
+file_i <- paste("\'", tmp_path, "\'", "/bbox_", geovar, "_", i, ".tif", sep = "")
+  
+stats_by_point[[length(stats_by_point) + 1]] <- 
+  extractFromCircle(coords = focalpoint,
+                    raster_file = file_i,
+                    radii = radii,
+                    fp = tmp_path,
+                    filetag = paste(geovar, i, sep = '_'),
+                    nlayers = n_layers,
+                    is_categorical = categorical,
+                    delete_temp = TRUE)
+  
+if (file.exists(paste(tmp_path, "/bbox_", geovar, "_", i, ".tif", sep = ""))) {
+  deleteBox(file_i)
 }
 
-save(stats_by_point, file = paste0('/mnt/research/nasabio/data/', taxon, '/', geovar, '_', slice, '.r'))
+save(stats_by_point, file = paste0('/mnt/research/nasabio/data/lter/', taxon, '/', geovar, '_', slice, '.r'))
