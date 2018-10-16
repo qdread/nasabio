@@ -20,7 +20,7 @@
 
 # 2. Load community matrix.
 
-bbsspp <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/specieslist.csv', stringsAsFactors = FALSE)
+bbsspp <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/BBS/bird_traits/specieslist.csv', stringsAsFactors = FALSE)
 load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2016.r') # Load fixed bbsmat. (only by route)
 # Quick correction to fix two birds that aren't in the phylogeny. Just get rid of the eastern yellow wagtail since it's probably only in Alaska anyway.
 fixedbbsmat_byroute[, which(sppids == 5739)] <- fixedbbsmat_byroute[, which(sppids == 5738)] + fixedbbsmat_byroute[, which(sppids == 5739)]
@@ -41,7 +41,7 @@ ericdist <- cophenetic(eric_cons_tree)
 
 # 5. Create trait distance matrix (Gower) from bird traits.
 
-birdtrait <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/birdtraitmerged.csv', stringsAsFactors = FALSE)
+birdtrait <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/BBS/bird_traits/birdtraitmerged.csv', stringsAsFactors = FALSE)
 
 library(FD)
 
@@ -101,6 +101,19 @@ fixedbbsmat_byroute <- fixedbbsmat_byroute[has_coords & rs != 0, !(dimnames(fixe
 
 #bbsalbers <- bbsalbers[has_coords & rs != 0, ]
 bbsgrps_byroute <- bbsgrps_byroute[has_coords & rs != 0, ]
+
+##################################
+# Section to keep all the rows, even the ones without midpoints.
+fixedbbsmat_byroute_allrows <- fixedbbsmat_byroute[rs != 0, !(dimnames(fixedbbsmat_byroute)[[2]] %in% nocturnalbirds) & ns != 0]
+
+#bbsalbers <- bbsalbers[has_coords & rs != 0, ]
+bbsgrps_byroute_allrows <- bbsgrps_byroute[rs != 0, ]
+
+# Put together as a matrix.
+bbsmat_allrows <- as.matrix(cbind(bbsgrps_byroute_allrows[,1:2], fixedbbsmat_byroute_allrows))
+save(bbsmat_allrows, file = '~/bbsmatrix_byroute.RData')
+##################################
+
 
 # 6. For the given radius, get pairwise distances among stops and the list of all neighbors.
 
