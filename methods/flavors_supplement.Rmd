@@ -1,7 +1,7 @@
 ---
 title: "Supplementary Information"
 author: "Quentin D. Read"
-date: "August 24, 2018"
+date: "October 31, 2018"
 header-includes:
    - \usepackage{caption}
 output: pdf_document
@@ -23,7 +23,7 @@ output: pdf_document
 \caption*{Figure S2: Spatial variation in geodiversity-biodiversity relationships}
 \end{figure}
 
-**Supplementary Figure 2**: The spatial variability of the relationship between each predictor and each response, by taxon. The spatial variability is defined as the mean pairwise difference of coefficients between pairs of adjacent ecoregions. Higher values represent relationships that vary more spatially.
+**Supplementary Figure 2**: The spatial variability of the relationship between each predictor and each response, by taxon. The spatial variability is measured by the standard deviation of each coefficient value among ecoregions. Error bars represent the 95% credible interval of the standard deviation parameter. Higher values represent relationships that vary more spatially.
 
 \newpage
 

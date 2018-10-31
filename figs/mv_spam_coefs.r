@@ -12,7 +12,7 @@ model_coef <- read.csv(file.path(fp, 'multivariate_spatial_coef.csv'), stringsAs
 model_pred <- read.csv(file.path(fp, 'multivariate_spatial_pred.csv'), stringsAsFactors = FALSE)
 model_rmse <- read.csv(file.path(fp, 'multivariate_spatial_rmse.csv'), stringsAsFactors = FALSE)
 model_r2 <- read.csv(file.path(fp, 'multivariate_spatial_r2.csv'), stringsAsFactors = FALSE)
-model_coef_var <- read.csv(file.path(fp, 'multivariate_spatial_coef_variation.csv'), stringsAsFactors = FALSE)
+model_coef_var <- read.csv(file.path(fp, 'multivariate_spatial_coef_variation_corrected.csv'), stringsAsFactors = FALSE)
 #kfold_pred <- read.csv(file.path(fp, 'multivariate_kfold_pred.csv'), stringsAsFactors = FALSE)
 kfold_rmse <- read.csv(file.path(fp, 'multivariate_kfold_rmse.csv'), stringsAsFactors = FALSE)
 
@@ -57,9 +57,10 @@ all_coef <- model_coef %>%
 # Relabel data frame of spatial variability metrics  
 model_coef_var <- model_coef_var %>%
   mutate(predictor = factor(geo_names[match(parameter, prednames50)], levels = geo_names_order),
-         response = factor(bio_titles[match(response, bio_names)], levels = bio_titles),
+         response = factor(bio_titles[match(response, gsub('_', '', bio_names))], levels = bio_titles),
          flavor = map_chr(strsplit(as.character(response), ' '), 2) %>%
-           factor(levels = c('TD','PD','FD'), labels = c('taxonomic', 'phylogenetic', 'functional')))
+           factor(levels = c('TD','PD','FD'), labels = c('taxonomic', 'phylogenetic', 'functional'))) %>%
+  rename(coef_var = Estimate)
 
 # Coefficient plots -------------------------------------------------
 
@@ -157,15 +158,16 @@ coefvar_plot <- ggplot(model_coef_var %>%
                                 response = map_chr(strsplit(as.character(response), ' '), 1))) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_col(aes(x = predictor, y = coef_var, fill = taxon, group = taxon), position = pd, width = 0.5) +
+  geom_errorbar(aes(x = predictor, ymin = q025, ymax = q975, group = taxon), position = pd, width = 0.15) +
   facet_grid(response ~ flavor) +
   scale_fill_manual(values = c('blue', 'skyblue')) +
   guides(fill = guide_legend(reverse = TRUE)) +
-  scale_y_continuous(name = 'spatial variability of relationship', limits = c(0, 0.7), expand = c(0,0)) +
+  scale_y_continuous(name = 'spatial variability of relationship', limits = c(0, 1.1), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill = NA),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = c(0.91, 0.9))
+        legend.position = c(0.92, 0.92))
 
 coefvar_sideways <- coefvar_plot + 
   coord_flip() +
