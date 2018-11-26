@@ -1,7 +1,10 @@
 # Fixed effect coefficient plots from spatial mixed models (multivariate version)
 # QDR/NASABioxgeo/28 May 2018
 
+### THESE ARE THE ACTUAL PUBLICATION FIGURES FOR THE "FLAVORS" MANUSCRIPT!
+
 # Modified 18 June: Add the new null models.
+# Modified 15 November: Make a few visual changes to figs 5 and 6 for better readability.
 
 # Load and combine data ---------------------------------------------------
 
@@ -120,10 +123,11 @@ ggsave(file.path(fpfig, 'FIA_multivariate_coef_sideways.png'), coef_fia_sideways
 
 
 # Edit 18 June: plot of coefficients with both, to compare.
+# THIS IS FIG 5 IN THE MANUSCRIPT.
 coefdat_both <- all_coef %>%
   filter(model == 'full') %>%
   mutate(nonzero = Q2.5 > 0 | Q97.5 < 0)
-pd <- position_dodge(width = 0.06)
+pd <- position_dodge(width = 0.12)
 coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c('birds','trees')))) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
@@ -132,7 +136,7 @@ coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c
   facet_grid(rv ~ flavor) +
   scale_color_manual(values = c('blue', 'skyblue')) +
   scale_fill_manual(values = c('black', 'red'), guide = FALSE) +
-  scale_size_manual(values = c(1.2, 1.5), guide = FALSE) +
+  scale_size_manual(values = c(1.5, 2), guide = FALSE) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
@@ -303,13 +307,14 @@ kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>%
         legend.text = element_text(size = 8))
 
 # Just compare the predictive power of the full model, putting birds and trees on the same one.
+# THIS IS FIG 6 IN THE MANUSCRIPT
 rmseplot_taxacolor <- all_rmse %>% 
   filter(model == 'space+climate+geodiversity') %>%
   mutate(taxon = factor(taxon,labels=c('birds','trees'))) %>%
   ggplot(aes(x = rv)) +
   facet_grid(. ~ flavor, switch = 'x') +
   geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, color = taxon, group = taxon), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean, color = taxon, group = taxon), position = pd) +
+  geom_point(aes(y = RMSE_mean, color = taxon, group = taxon), position = pd, size = 2) +
   theme_bw() +
   scale_color_manual(values = c('blue', 'skyblue')) +
   scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
