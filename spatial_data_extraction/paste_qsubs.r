@@ -12,7 +12,8 @@ write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_q
 
 n_plots <- 135032
 n_calls <- ceiling(n_plots/1000)
-sb_calls <- paste('sbatch --array=1-', ifelse(1:n_calls < n_calls, 1000, n_plots %% 1000), ' --export=N1000=', 0:(n_calls-1), ' fiabeta.sb')
+sb_calls <- paste('sbatch --array=1-', ifelse(1:n_calls < n_calls, 1000, n_plots %% 1000), ' --export=N1000=', 0:(n_calls-1), ' fiabeta.sb', sep = '')
+write.table(sb_calls, file = '~/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 
 # Elevation GDAL-only qsubs
