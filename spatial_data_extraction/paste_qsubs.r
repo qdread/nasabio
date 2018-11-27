@@ -8,6 +8,12 @@ isbig <- starts >= 100000
 qsub_calls <- paste('qsub fiabd.sh -v isbig=', ifelse(isbig,'yes','no'), ' -t ', ifelse(isbig, as.integer(starts-100000), as.integer(starts)), '-', ifelse(isbig, as.integer(starts-100000+249), as.integer(starts+249)), sep='')
 write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
+# Edited 27 Nov 2018: beta diversity for FIA using SLURM
+
+n_plots <- 135032
+n_calls <- ceiling(n_plots/1000)
+sb_calls <- paste('sbatch --array=1-', ifelse(1:n_calls < n_calls, 1000, n_plots %% 1000), ' --export=N1000=', 0:(n_calls-1), ' fiabeta.sb')
+
 
 # Elevation GDAL-only qsubs
 starts <- seq(1, 10000, by = 250)

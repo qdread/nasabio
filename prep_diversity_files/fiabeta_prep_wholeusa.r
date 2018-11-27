@@ -5,6 +5,8 @@
 # Modified 20 Oct: new coordinates (workspace should now only contain pointers to the true coordinates)
 # New forked version created 13 Dec: do the entire USA.
 # Modified 14 Dec: use spDistsN1() which is faster than dnearneigh()
+# Modified 26 Nov 2018: get rid of anything with TPA_UNADJ identifying it as not being in a subplot.
+# Modified 27 Nov 2018: instead of using TPA_UNADJ to identify trees to remove, use the CSV with distance to plot centers. Also remove the calculation of neighbors here since it is done elsewhere.
 
 fp <- '/mnt/research/nasabio'
 fiaall <- read.csv(file.path(fp, 'data/fia/treedata10nov/finley_trees_continental_US_most_recent_evaluations_nov8_2017.csv'), stringsAsFactors = FALSE)
@@ -17,6 +19,11 @@ fiadist <- cophenetic(fullphylo)
 # Get FIA species code to scientific name lookup table
 fiataxa <- read.csv(file.path(fp, 'data/fia/treedata10nov/lookup_table_allfia.csv'), stringsAsFactors = FALSE)
 allfia_codes <- unique(fiaall$SPCD)
+
+# Modification 26 Nov 2018: here, get rid of the macroplots by filtering on TPA_UNADJ (microplots are okay)
+fiadists <- read.csv(file.path(fp, 'data/fia/finley_pnw_tree_distances_to_subp_center_nov26_2018.csv'))
+trees_in_macroplots <- with(fiadists, TREE_CN[DIST > 24])
+fiaall <- fiaall[!fiaall$TREE_CN %in% trees_in_macroplots, ]
 
 # For all the FIA taxa that are represented by two species codes after trait and phylo QC have been run,
 # assign the single correct species code to them.
@@ -63,7 +70,7 @@ idx <- match(sppids, fiataxa$FIA.Code)
 
 fiacoords <- read.csv('/mnt/home/qdr/data/allfia.csv', stringsAsFactors = FALSE)
 fiacoords <- fiacoords %>%
-	filter(!is.na(ACTUAL_LAT)) %>%
+	filter(!is.na(ACTUAL_LAT), CN %in% fiaall$PLT_CN) %>%
 	rename(PLT_CN = CN, lat = ACTUAL_LAT, lon = ACTUAL_LON)
 
 # The summing and reshaping of area by species takes a lot longer with the full dataset.
@@ -102,24 +109,7 @@ library(FD)
 
 trydist <- gowdis(scale(traits_imputed))
 
-# Fast function to get neighbor distances (use spDistsN1)
-# List of matrices where column 1 is the row index and column 2 is the distance
-# Only include distances up to 500 km.
-max_radius <- 500e3
-
-fianhb_r <- list()
-pb <- txtProgressBar(0, nrow(fiaalbers), style = 3)
-
-for (i in 1:nrow(fiaalbers)) {
-	setTxtProgressBar(pb, i)
-	dists <- spDistsN1(pts = fiaalbers, pt = fiaalbers[i,], longlat = FALSE)
-    dids <- which(dists > 0 & dists <= max_radius)
-    fianhb_r[[i]] <- cbind(dids, dists[dids]) 
-}
-
-close(pb)
-
 # New saved workspace that does not actually contain the coordinates.
-save(fianhb_r, fiadist, trydist, traits_imputed, fullphylo, fiataxa, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa.r')
-save(fiaspatial, fiaalbers, fiacoords, file = '/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa.r')
-write.csv(fiaalbers@data, file = '/mnt/research/nasabio/data/fia/fianocoords_wholeusa.csv', row.names = FALSE)
+save(fiadist, trydist, traits_imputed, fullphylo, fiataxa, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa_2018.r')
+save(fiaspatial, fiaalbers, fiacoords, file = '/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
+write.csv(fiaalbers@data, file = '/mnt/research/nasabio/data/fia/fianocoords_wholeusa_2018.csv', row.names = FALSE)

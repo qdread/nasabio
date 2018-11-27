@@ -6,29 +6,24 @@
 # Edited 18 Jan 2018: Deal with jobs being over 100000.
 # Edited 09 Feb 2018: Update scratch path
 # Edited 21 Mar 2018: another update to scratch path
+# Edited 26 Nov 2018: file paths update
+# Edited 27 Nov 2018: get rid of parsing and update ID for SLURM
 
 # Use precalculated matrix.
 # One FIA plot per slice.
 # First, calculate spatial distances between that plot and all other plots.
-# Identify the plots within 300 km of the target plot.
+# Identify the plots within 200 km of the target plot.
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
-# Boilerplate code to get the arguments passed in
-args=(commandArgs(TRUE))
-
-for (i in 1:length(args)) {
-    eval(parse(text=args[[i]]))
-}
-
-load('/mnt/ffs17/groups/nasabio/fiaworkspace_nospatial_wholeusa.r')
-source('/mnt/research/nasabio/code/loadfiaall.r')
+load('/mnt/ffs17/groups/nasabio/fiaworkspace_nospatial_wholeusa_2018.r')
+load('/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
 
 library(sp)
 library(vegan)
-library(vegetarian)
+library(vegetarian, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
 source('/mnt/research/nasabio/code/fixpicante.r')
 
 nnull <- 99 # Reduce to save time
@@ -36,8 +31,7 @@ nnull <- 99 # Reduce to save time
 trydist <- as.matrix(trydist)
 
 max_radius <- 200 
-p <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-if (isbig == 'yes') p <- p + 100000
+p <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID')) + as.numeric(Sys.getenv('N1000')) * 1000
 print(p)
 
 # Distances between target plot and all other plots.
@@ -73,4 +67,4 @@ dimnames(beta_div)[[2]] <- c('beta_td_pairwise_pa', 'beta_td_sorensen_pa',
 							'beta_fd_pairwise', 'beta_fd_pairwise_z',
 							'beta_fd_nt', 'beta_fd_nt_z')
 
-save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa/beta_', p, '.r'))
+save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/beta_', p, '.r'))

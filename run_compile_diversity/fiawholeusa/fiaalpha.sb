@@ -1,0 +1,18 @@
+#!/bin/bash --login
+#SBATCH --time=1:00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=32G
+#SBATCH --job-name=fia_alpha
+#SBATCH --mail-type=NONE
+#SBATCH --constraint="intel18"
+
+module purge
+module load foss/2018b
+module load R
+
+cp /mnt/research/nasabio/code/fia_allplotsalpha.r ${TMPDIR}/rscript.r
+cd ${TMPDIR}
+
+R CMD BATCH --no-save --no-restore rscript.r /mnt/ffs17/groups/nasabio/routputfiles/alpha_${SLURM_ARRAY_TASK_ID}.txt
+

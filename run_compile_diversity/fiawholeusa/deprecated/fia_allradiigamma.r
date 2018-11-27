@@ -4,8 +4,9 @@
 # Split into 1500 groups.
 # Edited 21 Dec for whole USA
 # Edited 22 Dec not to use precalculated matrices
+# Edited 26 Nov 2018: file paths update
 
-load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa.r')
+load('/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa_2018.r')
 source('/mnt/research/nasabio/code/loadfiaall.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
@@ -63,4 +64,4 @@ close(pb)
 dimnames(gamma_div)[[3]] <- cnames
 dimnames(gamma_div)[[2]] <- paste('r',radii,sep='_')
 
-save(gamma_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa/gamma_', slice, '.r'))
+save(gamma_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/gamma_', slice, '.r'))
