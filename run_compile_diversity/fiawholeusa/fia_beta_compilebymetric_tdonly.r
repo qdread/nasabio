@@ -17,11 +17,11 @@ metric_list <- list()
 fp <- '/mnt/research/nasabio/data/fia/diversity/usa2018'
 
 for (i in 1:n_plot) {
-	load(file.path(fp, paste0('beta_', i, '.r')))
+	load(file.path(fp, paste0('td100beta_', i, '.r')))
 	metric_list[[i]] <- col2sparse(beta_div[,column])
 	if(i%%1000==0) print(i)
 	rm(beta_div) # Remove and do garbage collection.
 	gc()
 }
 
-save(metric_list, file = file.path(fp, paste0('metric_beta_', column, '.r')))
+save(metric_list, file = file.path(fp, paste0('metric_betatd100_', column, '.r')))

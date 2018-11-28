@@ -9,10 +9,14 @@ qsub_calls <- paste('qsub fiabd.sh -v isbig=', ifelse(isbig,'yes','no'), ' -t ',
 write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 # Edited 27 Nov 2018: beta diversity for FIA using SLURM
+# Edited 28 Nov 2018: break into groups of 500 instead of 1000 so that the jobs don't get stuck as easily.
 
 n_plots <- 135032
-n_calls <- ceiling(n_plots/1000)
-sb_calls <- paste('sbatch --array=1-', ifelse(1:n_calls < n_calls, 1000, n_plots %% 1000), ' --export=N1000=', 0:(n_calls-1), ' fiabeta.sb', sep = '')
+n_calls <- ceiling(n_plots/500)
+sb_calls <- rep(c('sbatch --array=1-500', 'sbatch --array=501-1000'), times = floor(n_plots/1000))
+sb_calls <- paste(sb_calls, ' --export=N1000=', rep(0:(floor(n_plots/1000) - 1), each = 2), ' fiabeta.sb', sep = '')
+sb_calls <- c(sb_calls, 'sbatch --array=1-32 --export=N1000=135 fiabeta.sb')
+
 write.table(sb_calls, file = '~/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 

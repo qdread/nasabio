@@ -67,4 +67,4 @@ dimnames(beta_div)[[2]] <- c('beta_td_pairwise_pa', 'beta_td_sorensen_pa',
 							'beta_fd_pairwise', 'beta_fd_pairwise_z',
 							'beta_fd_nt', 'beta_fd_nt_z')
 
-save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/beta_', p, '.r'))
+save(beta_div, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/beta_', as.integer(p), '.r'))

@@ -26,7 +26,7 @@ fpbio <- '/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018'
 # Load the elevational diversity and abg diversity data
 ed <- read.csv(file.path(fpgeo, 'fia_elev_stats_unfuzzed.csv'))
 ad <- read.csv(file.path(fpbio, 'fiausa_natural_alpha.csv'))
-bd <- read.csv(file.path(fpbio, 'fia_beta.csv'))
+bd <- read.csv(file.path(fpbio, 'fiausa_natural_betatd.csv'))
 gd <- read.csv(file.path(fpbio, 'fiausa_natural_gamma.csv'))
 
 radii <- c(5, 10, 20, 50, 100)
