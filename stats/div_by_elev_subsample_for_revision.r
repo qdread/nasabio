@@ -4,6 +4,7 @@
 # new version created 06 Dec: parallel so that many iterations can be run simultaneously on cluster
 # Modified 28 Aug 2018: To comply with reviewer suggestions, change analysis to GLM with gamma distributions (and reduce sample number by a few)
 # Modified 06 Sep 2018: Use standardized coefficients.
+# Modified 28 Nov 2018: New input data (macroplot trees removed). This requires first getting rid of the non-PNW plots.
 
 # Procedure in pseudocode:
 # Load a,b,g diversity data and elevation diversity data
@@ -19,13 +20,14 @@
 # }}}
 
 task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-fp <- '/mnt/research/nasabio/data/fia/pnw_files'
+fpgeo <- '/mnt/research/nasabio/data/fia/pnw_files'
+fpbio <- '/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018'
 
 # Load the elevational diversity and abg diversity data
-ed <- read.csv(file.path(fp, 'fia_elev_stats_unfuzzed.csv'))
-ad <- read.csv(file.path(fp, 'fia_alpha.csv'))
-bd <- read.csv(file.path(fp, 'fia_beta.csv'))
-gd <- read.csv(file.path(fp, 'fia_gammadiv.csv'))
+ed <- read.csv(file.path(fpgeo, 'fia_elev_stats_unfuzzed.csv'))
+ad <- read.csv(file.path(fpbio, 'fiausa_natural_alpha.csv'))
+bd <- read.csv(file.path(fpbio, 'fia_beta.csv'))
+gd <- read.csv(file.path(fpbio, 'fiausa_natural_gamma.csv'))
 
 radii <- c(5, 10, 20, 50, 100)
 div_names <- c('alpha_diversity','beta_diversity','gamma_diversity')
@@ -41,6 +43,7 @@ source('/mnt/research/nasabio/code/SRS_iterative.r')
 source('/mnt/research/nasabio/code/spatial_fns.r')
 
 # Combine into a single data frame.
+# This should also get rid of non-PNW plots in the biodiversity CSVs.
 biogeo <- ed %>%
   dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, sd) %>%
   filter(radius %in% radii) %>%

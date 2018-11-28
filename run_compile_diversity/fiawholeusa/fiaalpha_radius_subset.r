@@ -6,19 +6,32 @@
 # Edited 25 October: Use coordinates of new unfuzzed plots.
 # Edited 31 December: Whole USA unfuzzed.
 # Edited 1 March 2018: get the subset of only "natural" plots.
+# Edited 28 Nov 2018: update all file paths for updated FIA diversity metrics with macroplots removed.
 
-fia_alphadiv <- read.csv('/mnt/research/nasabio/data/fia/fiausa_alphadiv.csv')
+alphadiv_list <- list()
+for (i in 1:1000) {
+	load(paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/alpha_', i, '.r'))
+	alphadiv_list[[i]] <- alpha_div
+}
+
+fia_alphadiv <- do.call('rbind', alphadiv_list)
+names(fia_alphadiv)[1] <- 'PLT_CN'
+
+write.csv(fia_alphadiv, file = '/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018/fiausa_alphadiv.csv', row.names = FALSE)
+
+fia_alphadiv <- read.csv('/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018/fiausa_alphadiv.csv')
 plantation <- read.csv('/mnt/research/nasabio/data/fia/plotcond/plantation.csv')
 fia_alphadiv <- subset(fia_alphadiv, PLT_CN %in% plantation$PLT_CN[!plantation$plantation])
 
-load('~/data/fiaworkspace_spatial_wholeusa.r')
+library(dplyr)
+
+load('~/data/fiaworkspace_spatial_wholeusa_2018.r')
 
 fiacoords <- fiacoords %>% left_join(plantation) %>% filter(!plantation)
 
 radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300)
 
 library(sp)
-library(dplyr)
 
 neighbordiv <- function(x, plot_diversity=fia_alphadiv, plot_metadata = fiacoords) {
   neighbordists <- spDistsN1(pts = cbind(plot_metadata$lon, plot_metadata$lat), pt = c(x$lon, x$lat), longlat = TRUE)
@@ -47,4 +60,4 @@ fia_alpha <- fiacoords %>%
   
 fia_alpha <- cbind(PLT_CN = fiacoords[rep(1:nrow(fiacoords), each = length(radii)), 1, drop = FALSE], fia_alpha)  # Don't include the lat and long.
   
-write.csv(fia_alpha, '/mnt/research/nasabio/data/fia/fiausa_natural_alpha.csv', row.names = FALSE)
+write.csv(fia_alpha, '/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018/fiausa_natural_alpha.csv', row.names = FALSE)

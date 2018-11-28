@@ -1,2 +1,0 @@
-./didjobrun.sh /mnt/research/nasabio/data/fia/betaoutput/sliced betabaselga_200000_ .csv 1 250 ./betapartfia_long.sh
-./didjobrun.sh /mnt/research/nasabio/data/fia/betaoutput/sliced betabaselga_300000_ .csv 1 250 ./betapartfia_long2.sh
