@@ -19,50 +19,64 @@
 #       Get predicted values and save to array
 # }}}
 
-task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
-fpgeo <- '/mnt/research/nasabio/data/fia/pnw_files'
+task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
+fpgeo <- '/mnt/research/nasabio/data/fia/geodiversity_CSVs'
 fpbio <- '/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018'
 
 # Load the elevational diversity and abg diversity data
-ed <- read.csv(file.path(fpgeo, 'fia_elev_stats_unfuzzed.csv'))
+ed <- read.csv(file.path(fpgeo, 'fia_usa_elev_only.csv'))
 ad <- read.csv(file.path(fpbio, 'fiausa_natural_alpha.csv'))
 bd <- read.csv(file.path(fpbio, 'fiausa_natural_betatd.csv'))
 gd <- read.csv(file.path(fpbio, 'fiausa_natural_gamma.csv'))
 
+# Load state codes
+fia_statecodes <- read.csv('/mnt/research/nasabio/data/fia/fiastatecodes.csv')
+
 radii <- c(5, 10, 20, 50, 100)
 div_names <- c('alpha_diversity','beta_diversity','gamma_diversity')
 
+mylib <- '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5'
 library(dplyr)
 library(sp)
 library(mgcv)
-library(reghelper) # For standardized coefficients
+library(reghelper, lib.loc = mylib) # For standardized coefficients
+library(betareg, lib.loc = mylib)
 
 # Function for iterative search.
 source('/mnt/research/nasabio/code/SRS_iterative.r')
 # Functions for flagging edge plots
 source('/mnt/research/nasabio/code/spatial_fns.r')
 
+# Filter ed dataframe by state code to get only the PNW states, and only the non plantation plots.
+pnw_states <- c(6, 41, 53) # Cal, Ore, and Wash.
+ed <- ed %>%
+  filter(PLT_CN %in% ad$PLT_CN) %>%
+  left_join(fia_statecodes) %>%
+  filter(STATECD %in% pnw_states) 
+
 # Combine into a single data frame.
-# This should also get rid of non-PNW plots in the biodiversity CSVs.
 biogeo <- ed %>%
-  dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, sd) %>%
+  dplyr::select(PLT_CN, STATECD, COUNTYCD, radius, sd) %>%
   filter(radius %in% radii) %>%
   rename(elevation_sd = sd) %>%
   left_join(ad %>% 
-              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, richness, shannon) %>% 
+              dplyr::select(PLT_CN, radius, richness, shannon) %>% 
               rename(alpha_richness = richness, alpha_diversity = shannon) %>%
               filter(radius %in% radii)) %>%
   left_join(bd %>% 
-              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, beta_td_pairwise_pa, beta_td_pairwise) %>% 
+              dplyr::select(PLT_CN, radius, beta_td_pairwise_pa, beta_td_pairwise) %>% 
               rename(beta_richness = beta_td_pairwise_pa, beta_diversity = beta_td_pairwise) %>%
               filter(radius %in% radii)) %>%
   left_join(gd %>% 
-              dplyr::select(PLT_CN, STATECD, COUNTYCD, PLOT, radius, richness, shannon) %>% 
+              dplyr::select(PLT_CN, radius, richness, shannon) %>% 
               rename(gamma_richness = richness, gamma_diversity = shannon) %>%
               filter(radius %in% radii))
 
 # Add latitude and longitudes from unfuzzed (on local drive only)
-fiacoords <- read.csv('/mnt/home/qdr/data/pnw.csv') %>% filter(complete.cases(.))
+fiacoords <- read.csv('/mnt/home/qdr/data/allfia.csv') %>% 
+  rename(PLT_CN = CN) %>%
+  left_join(fia_statecodes) %>%
+  filter(STATECD %in% pnw_states)
 
 # Convert to albers
 aea_crs <- '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0'
@@ -74,24 +88,22 @@ fia_coast100 <- flag_coast_plots(focal_points = fia_aea, radius = 100e3, focal_s
 fiacoords <- cbind(fiacoords, fia_coast100)
 
 biogeo <- biogeo %>%
-  left_join(fiacoords %>% dplyr::select(CN, ACTUAL_LAT, ACTUAL_LON, is_edge) %>% rename(PLT_CN = CN, lat = ACTUAL_LAT, lon = ACTUAL_LON)) %>%
+  left_join(fiacoords %>% dplyr::select(PLT_CN, ACTUAL_LAT, ACTUAL_LON, is_edge) %>% rename(lat = ACTUAL_LAT, lon = ACTUAL_LON)) %>%
   filter(!is_edge, complete.cases(.))
   
-fia_aea_noedge <- fia_aea[!fiacoords$is_edge & fiacoords$CN %in% biogeo$PLT_CN]
-fiacoords_noedge <- subset(fiacoords, !is_edge & CN %in% biogeo$PLT_CN)
+fia_aea_noedge <- fia_aea[!fiacoords$is_edge & fiacoords$PLT_CN %in% biogeo$PLT_CN]
+fiacoords_noedge <- subset(fiacoords, !is_edge & PLT_CN %in% biogeo$PLT_CN)
 
 
 # Calculate pairwise distances. (only takes ~1 min with brute force method)
 fia_pnw_dist <- spDists(fia_aea_noedge, longlat = FALSE)
 
-# Subsampling with gams ---------------------------------------------------
+# Subsampling with glms ---------------------------------------------------
 
 n_iter <- 1000 # Per job. Should take less than 4 hours to complete.
 subsample_size <- 20
 n_max <- 50
 n_predict <- 50
-
-library(betareg)
 
 # Get rid of the (very few) places where beta diversity is exactly 1
 biogeo$beta_diversity[biogeo$beta_diversity == 1] <- NA
@@ -123,9 +135,9 @@ for (k in 1:n_iter) {
   
   # If too many are subsampled, take a random subset of the subsample.
   if (length(sample_idx) > subsample_size) {
-    plots_in_sample <- fiacoords_noedge$CN[sample(sample_idx, subsample_size)]
+    plots_in_sample <- fiacoords_noedge$PLT_CN[sample(sample_idx, subsample_size)]
   } else {
-    plots_in_sample <- fiacoords_noedge$CN[sample_idx]
+    plots_in_sample <- fiacoords_noedge$PLT_CN[sample_idx]
   }
   
   for (j in 1:length(radii)) {

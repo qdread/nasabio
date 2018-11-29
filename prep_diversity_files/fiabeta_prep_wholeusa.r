@@ -109,7 +109,11 @@ library(FD)
 
 trydist <- gowdis(scale(traits_imputed))
 
+# Edit 29 Nov 2018: create a table with the state codes for lookup
+fia_statecodes <- fiacoords[, 'PLT_CN', drop = FALSE] %>% left_join(unique(fiaall[, c('PLT_CN', 'STATECD', 'COUNTYCD')]))
+
 # New saved workspace that does not actually contain the coordinates.
 save(fiadist, trydist, traits_imputed, fullphylo, fiataxa, fiasums_plot, sppids, fiaplotmat, file = '/mnt/research/nasabio/data/fia/fiaworkspace_nospatial_wholeusa_2018.r')
 save(fiaspatial, fiaalbers, fiacoords, file = '/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
 write.csv(fiaalbers@data, file = '/mnt/research/nasabio/data/fia/fianocoords_wholeusa_2018.csv', row.names = FALSE)
+write.csv(fia_statecodes, file = '/mnt/research/nasabio/data/fia/fiastatecodes.csv', row.names = FALSE)

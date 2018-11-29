@@ -2,33 +2,42 @@
 # 07 Dec 2017 QDR
 
 # Modified 27 Aug 2018: formatting changes requested by GEB reviewer. (also note new file paths to use old PNW data)
+# Modified 29 Nov 2018: use newer FIA data with macroplots and plantations removed (now we must manually subset the PNW out)
 
 # To plot:
 # Maps of alpha, beta, gamma, and elevation diversity, one for each of the 5 radii
 # Regressions of alpha, beta and gamma versus elevation diversity, one for each of the 5 radii (show confidence bands)
 # Plots showing how the R^2 of the regressions change with radius
 
-# Load data (change file path if loading from HPCC)
-
-fp <- '~/Dropbox/projects/nasabiodiv/fia_unfuzzed/pnw_only'
-#fp <- '/mnt/research/nasabio/data/fia'
+# Load data
+fp <- '~/Dropbox/projects/nasabiodiv/fia_unfuzzed'
 
 # Load the elevational diversity and abg diversity data
-ed <- read.csv(file.path(fp, 'fia_elev_stats_unfuzzed.csv'))
-ad <- read.csv(file.path(fp, 'fia_alpha.csv'))
-bd <- read.csv(file.path(fp, 'fia_beta.csv'))
-gd <- read.csv(file.path(fp, 'fia_gammadiv.csv'))
+ed <- read.csv(file.path(fp, 'fia_usa_elev_only.csv'))
+ad <- read.csv(file.path(fp, 'fiausa_natural_alpha.csv'))
+bd <- read.csv(file.path(fp, 'fiausa_natural_betatd.csv'))
+gd <- read.csv(file.path(fp, 'fiausa_natural_gamma.csv'))
 
 library(dplyr)
 library(cowplot)
 
 load(file.path(fp, 'fiafitplotdat_pnw.R'))
 
+# Load state codes
+fia_statecodes <- read.csv(file.path(fp, 'fiastatecodes.csv'))
+
 radii <- c(5, 10, 20, 50, 100)
+
+# Filter ed dataframe by state code to get only the PNW states, and only the non plantation plots.
+pnw_states <- c(6, 41, 53) # Cal, Ore, and Wash.
+ed <- ed %>%
+  filter(PLT_CN %in% ad$PLT_CN) %>%
+  left_join(fia_statecodes) %>%
+  filter(STATECD %in% pnw_states) 
 
 # Combine into a single data frame.
 biogeo <- ed %>%
-  dplyr::select(PLT_CN, radius, sd) %>%
+  dplyr::select(PLT_CN, STATECD, COUNTYCD, radius, sd) %>%
   filter(radius %in% radii) %>%
   rename(elevation_sd = sd) %>%
   left_join(ad %>% 
@@ -93,34 +102,32 @@ fpfig <- '~/google_drive/NASABiodiversityWG/Figures/conceptual_paper'
 latbds = c(33,50)
 lonbds <- c(-125, -114)
 
-
-
-
 # Add "fuzzed" coordinates.
-fiacoords_fuzzed <- read.csv(file.path(fp, 'fia_pnw_coords_fuzzed.csv')) %>% rename(lon=lonfuzz, lat=latfuzz)
+fiacoords_fuzzed <- read.csv(file.path(fp, 'fia_fuzzed_coords.csv')) %>% rename(lon=lon_fuzzed, lat=lat_fuzzed)
 
-bdmapdat_facet <- bd %>% 
-  filter(!is.na(beta_td_pairwise_pa), radius %in% radii) %>% 
+bdmapdat_facet <- biogeo %>% 
+  filter(!is.na(beta_diversity), radius %in% radii) %>% 
   left_join(fiacoords_fuzzed) %>%
-  arrange(radius, beta_td_pairwise_pa)
-admapdat_facet <- ad %>% 
-  filter(radius %in% radii, !is.na(shannon)) %>% 
-  mutate(shannon = exp(shannon)) %>%
+  rename(beta_td_pairwise = beta_diversity) %>%
+  arrange(radius, beta_td_pairwise)
+admapdat_facet <- biogeo %>% 
+  filter(radius %in% radii, !is.na(alpha_diversity)) %>% 
+  mutate(shannon = exp(alpha_diversity)) %>%
   left_join(fiacoords_fuzzed) %>%
   arrange(radius, shannon)
-edmapdat_facet <- ed %>% 
+edmapdat_facet <- biogeo %>% 
   filter(radius %in% radii, !is.na(sd)) %>% 
   left_join(fiacoords_fuzzed) %>%
   arrange(radius, sd)
-gdmapdat_facet <- gd %>% 
-  filter(radius %in% radii, !is.na(shannon)) %>% 
+gdmapdat_facet <- biogeo %>% 
+  filter(radius %in% radii, !is.na(gamma_diversity)) %>% 
   left_join(fiacoords_fuzzed) %>%
-  mutate(shannon = exp(shannon)) %>%
+  mutate(shannon = exp(gamma_diversity)) %>%
   arrange(radius, shannon)
 
-colscalebeta <- scale_colour_gradientn(name = 'Taxonomic\nbeta-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.2)(9), breaks = c(0,.5,1), limits=c(0,1))
-colscalealpha <- scale_colour_gradientn(name = 'Taxonomic\nalpha-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9))
-colscalegamma <- scale_colour_gradientn(name = 'Taxonomic\ngamma-diversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9))
+colscalebeta <- scale_colour_gradientn(name = 'Beta-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.2)(9), breaks = c(0,.5,1), limits=c(0,1))
+colscalealpha <- scale_colour_gradientn(name = 'Alpha-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 2)(9))
+colscalegamma <- scale_colour_gradientn(name = 'Gamma-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9))
 colscaleelev <- scale_colour_gradientn(name = 'Elevation\nvariability', colours = RColorBrewer::brewer.pal(9, 'YlOrRd'))
 
 ptsize <- 0.05 # Points must be very small so that they don't overlap too much.
@@ -137,7 +144,7 @@ fiamap_bd_facet <- ggplot(bdmapdat_facet,
   borders('world', 'canada', fill = 'gray90') +
   borders('world', 'usa', fill = 'gray90') +
   borders('state') +
-  geom_point(aes(color = beta_td_pairwise_pa), size = ptsize) +
+  geom_point(aes(color = beta_td_pairwise), size = ptsize) +
   coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
   whitemaptheme + colscalebeta + panel_border(colour = 'black') +
   fia_xs + fia_ys +
@@ -214,7 +221,8 @@ nolegtheme <- theme(legend.position = 'none',
 
 legend1 <- g_legend(fiamap_bd_facet + leftlegtheme)
 legend2 <- g_legend(fiamap_ed_facet + leftlegtheme)
-legend3 <- g_legend(fiamap_gd_facet + leftlegtheme + scale_colour_gradientn(name = 'Gamma-\ndiversity', breaks = c(1, 5, 10, 14.9), colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9)))
+#legend3 <- g_legend(fiamap_gd_facet + leftlegtheme + scale_colour_gradientn(name = 'Gamma-\ndiversity', breaks = c(10, 20, 30, 40), colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 2)(9)))
+legend3 <- g_legend(fiamap_gd_facet + leftlegtheme)
 
 library(grid)
 

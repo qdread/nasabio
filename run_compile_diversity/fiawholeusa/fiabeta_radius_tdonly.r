@@ -32,6 +32,7 @@ load('/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
 
 ###############################################
 # subset to keep only the natural plots
+library(dplyr)
 plantation <- read.csv('/mnt/research/nasabio/data/fia/plotcond/plantation.csv')
 fiacoords <- left_join(fiacoords, plantation)
 
@@ -39,7 +40,7 @@ fiacoords <- left_join(fiacoords, plantation)
 
 # Load the correct metric.
 print(metric)
-load(paste0('/mnt/research/nasabio/data/fia/diversity/usa/metric_betatd100_', metric, '.r'))
+load(paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/metric_betatd100_', metric, '.r'))
 
 
 # For each year and route number, get the median beta diversity within each radius.
@@ -72,5 +73,16 @@ fia_beta <- map2(metric_list, split(fiacoords, 1:nrow(fiacoords)), neighbordivfr
 fia_beta <- bind_rows(fia_beta)
 names(fia_beta)[3] <- metric_name
 
-write.csv(fia_beta, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/beta100_metric_', metric, '.csv'), row.names = FALSE)
+write.csv(fia_beta, file = paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/metricdf_betatd100_', metric, '.csv'), row.names = FALSE)
 
+#############################################
+# Combine all metrics into one csv
+
+library(dplyr)
+beta_metrics <- lapply(1:5, function(metric) read.csv(paste0('/mnt/research/nasabio/data/fia/diversity/usa2018/metricdf_betatd100_', metric, '.csv'), stringsAsFactors = FALSE))
+beta_metrics_df <- Reduce(left_join, beta_metrics)
+
+# Load plantation status and get rid of plantation plots before saving final csv.
+plantation <- read.csv('/mnt/research/nasabio/data/fia/plotcond/plantation.csv')
+beta_metrics_df <- subset(beta_metrics_df, PLT_CN %in% plantation$PLT_CN[!plantation$plantation])
+write.csv(beta_metrics_df, file = '/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018/fiausa_natural_betatd.csv', row.names = FALSE)
