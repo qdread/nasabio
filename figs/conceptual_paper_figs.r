@@ -3,6 +3,7 @@
 
 # Modified 27 Aug 2018: formatting changes requested by GEB reviewer. (also note new file paths to use old PNW data)
 # Modified 29 Nov 2018: use newer FIA data with macroplots and plantations removed (now we must manually subset the PNW out)
+# Modified 03 Dec 2018: edit axes and color scales for GEB resubmission.
 
 # To plot:
 # Maps of alpha, beta, gamma, and elevation diversity, one for each of the 5 radii
@@ -116,7 +117,8 @@ admapdat_facet <- biogeo %>%
   left_join(fiacoords_fuzzed) %>%
   arrange(radius, shannon)
 edmapdat_facet <- biogeo %>% 
-  filter(radius %in% radii, !is.na(sd)) %>% 
+  filter(radius %in% radii, !is.na(elevation_sd)) %>% 
+  rename(sd = elevation_sd) %>%
   left_join(fiacoords_fuzzed) %>%
   arrange(radius, sd)
 gdmapdat_facet <- biogeo %>% 
@@ -125,10 +127,11 @@ gdmapdat_facet <- biogeo %>%
   mutate(shannon = exp(gamma_diversity)) %>%
   arrange(radius, shannon)
 
-colscalebeta <- scale_colour_gradientn(name = 'Beta-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.2)(9), breaks = c(0,.5,1), limits=c(0,1))
-colscalealpha <- scale_colour_gradientn(name = 'Alpha-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 2)(9))
-colscalegamma <- scale_colour_gradientn(name = 'Gamma-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9))
-colscaleelev <- scale_colour_gradientn(name = 'Elevation\nvariability', colours = RColorBrewer::brewer.pal(9, 'YlOrRd'))
+colscalebeta <- scale_colour_gradientn(name = 'Beta-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.1)(9), breaks = c(0,.5,1), limits=c(0,1))
+colscalebeta_transf <- scale_colour_gradientn(name = 'Beta-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 0.5)(9), labels = c(0, 0.1, 0.5, 0.9, 1), breaks = qlogis(c(0.00001, 0.1, 0.5, 0.9, 0.99999)), limits=qlogis(c(0.00001, 0.99999)))
+colscalealpha <- scale_colour_gradientn(name = 'Alpha-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 2)(9), breaks = c(1, 2, 4, 6), labels = c(1,2,4,6), limits = c(1, 6))
+colscalegamma <- scale_colour_gradientn(name = 'Gamma-\ndiversity', colours = colorRampPalette(colors=RColorBrewer::brewer.pal(9, 'YlOrRd'), bias = 1)(9), breaks = c(1, 6, 11, 16), labels=c(1,6,11,16), limits = c(1, 16))
+colscaleelev <- scale_colour_gradientn(name = 'Elevation\nvariability', colours = RColorBrewer::brewer.pal(9, 'YlOrRd'), breaks = c(0, 300, 600, 900, 1200), labels = c(0,300,600,900,1200), limits = c(0, 1210))
 
 ptsize <- 0.05 # Points must be very small so that they don't overlap too much.
 
@@ -138,15 +141,17 @@ fwidth <- 169
 westcoast_scalebar <- scalebar_latlong(latmin=33.25, lonmin=-121, h=.2, d=500)
 westcoast_scalebar[[2]] <- transform(westcoast_scalebar[[2]], ylab = ylab + 0.22)
 
-fiamap_bd_facet <- ggplot(bdmapdat_facet, 
+fiamap_bd_facet <- ggplot(bdmapdat_facet %>% filter(beta_td_pairwise <= 0.99999), 
                           aes(x = lon, y = lat)) +
   facet_grid(. ~ radius, labeller = labeller(radius = function(x) paste(x, 'km'))) +
   borders('world', 'canada', fill = 'gray90') +
   borders('world', 'usa', fill = 'gray90') +
   borders('state') +
-  geom_point(aes(color = beta_td_pairwise), size = ptsize) +
+  geom_point(aes(color = qlogis(beta_td_pairwise)), size = ptsize) +
   coord_map(projection = 'albers', lat0=23, lat1=29.5, xlim = lonbds, ylim = latbds) +
-  whitemaptheme + colscalebeta + panel_border(colour = 'black') +
+  whitemaptheme + 
+  colscalebeta_transf + 
+  panel_border(colour = 'black') +
   fia_xs + fia_ys +
   geom_rect(data=cbind(westcoast_scalebar[[1]], radius = 100), aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=z), inherit.aes=F,
             show.legend = F,  color = "black", fill = westcoast_scalebar[[1]]$fill.col) +
@@ -247,6 +252,10 @@ ggsave(file.path(fpfig, 'fig2_toprow3_betamap.png'), fiamap_bd_facet + nolegthem
 ggsave(file.path(fpfig, 'fig2_middlerow3_elevmap.png'), fiamap_ed_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
 ggsave(file.path(fpfig, 'fig2_toprow_gammamap.png'), fiamap_gd_facet + nolegtheme, width = fwidth - 20, height = fwidth * 0.4, units = 'mm', dpi = 600)
 
+# Save plots as pdf too
+ggsave(file.path(fpfig, 'pdfs/SuppFig_alphadiv_maps.pdf'), fiamap_ad_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'pdfs/SuppFig_betadiv_maps.pdf'), fiamap_bd_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'pdfs/SuppFig_gammadiv_maps.pdf'), fiamap_gd_facet + leftlegtheme, width = fwidth, height = fwidth * 0.4, units = 'mm', dpi = 600)
 
 # Plot the r2 values.
 r2_lm_quant$radius_plot <- r2_lm_quant$radius + rep(c(-1,0,1), each = 5)
@@ -261,6 +270,7 @@ r2_plot <- ggplot(r2_lm_quant, aes(x = radius_plot, group = interaction(radius, 
   theme(axis.text = element_text(size=7.5), axis.title = element_text(size=9))
 
 ggsave(file.path(fpfig, 'fig2_verybottomrow_r2s.png'), r2_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
+ggsave(file.path(fpfig, 'pdfs/SuppFig_r2s.pdf'), r2_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
 
 # Plot the slopes too.
 coef_quant$radius_plot <- coef_quant$radius + rep(c(-1,0,1), each = 5)
@@ -324,6 +334,7 @@ alphaplot <- ggplot(biogeo) +
   geom_text(data = subset(r2_lm_quant, diversity_type == 'alpha_diversity'),
             aes(x = -Inf, y = Inf, label = r2expr),
             parse = TRUE, hjust = -0.5, vjust = 1.5) +
+  scale_x_continuous(labels=seq(0,1200,300), breaks=seq(0,1200,300)) +
   scale_y_continuous(breaks = c(0, .5, 1, 1.5), labels = round(exp(c(0, .5, 1, 1.5)),1)) +
   coord_cartesian(ylim = c(0, 1.5)) +
   hexfill + hextheme + border + labs(x = 'Elevation variability (m)', y = 'Alpha-diversity')
@@ -392,4 +403,12 @@ psetg <- set_panel_size(p =  gammaplot + theme(legend.position = 'none', axis.te
                         height = unit(fwidth * 0.23,'mm'))
 png(file.path(fpfig, 'fig2_bottomrow_alternate_gammafits.png'), width=fwidth, height=fwidth*0.34, units = 'mm', res = 600)
 grid.draw(psetg)
+dev.off()
+
+# Write fit plots as pdfs too
+pdf(file.path(fpfig, 'pdfs/SuppFig_betadiv_fits.pdf'), width=fwidth/25.4, height=fwidth*0.33/25.4)
+grid.draw(pset)
+dev.off()
+pdf(file.path(fpfig, 'pdfs/SuppFig_alphadiv_fits.pdf'), width=fwidth/25.4, height=fwidth*0.33/25.4)
+grid.draw(pseta)
 dev.off()
