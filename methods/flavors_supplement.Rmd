@@ -1,11 +1,61 @@
 ---
 title: "Supplementary Information"
 author: "Quentin D. Read"
-date: "October 31, 2018"
+date: "December 4, 2018"
 header-includes:
    - \usepackage{caption}
+   - \usepackage{multirow}
 output: pdf_document
 ---
+
+# Supplementary Tables
+
+**Supplementary Table 1**: Overview of biodiversity metrics by level and by dimension.
+
+\begin{table}[h]
+\begin{tabular}{m{1cm}m{2cm}p{4cm}p{4cm}p{4cm}}
+       &                                                            & \multicolumn{3}{c}{\textit{\textbf{Diversity dimension}}} \\
+       &                                                            & \textbf{Taxonomic}  & \textbf{Phylogenetic}  & \textbf{Functional} 
+\\[4pt]
+\multirow{3}{*}{\rotatebox{90}{\textit{\textbf{Diversity level}}}} 
+      & \begin{tabular}[c]{@{}l@{}}\\\textbf{Alpha}\\\textbf{(local)}\end{tabular}  
+      & Mean richness of local communities within a 50-km radius around the focal plot
+      & Mean pairwise phylogenetic distance score of local communities in the radius, relative to null expectation
+      & Mean pairwise functional distance score of local communities in the radius, relative to null expectation
+\\[4pt]
+      & \begin{tabular}[c]{@{}l@{}}\\\textbf{Beta}\\\textbf{(turnover)}\end{tabular} 
+      & Mean pairwise dissimilarity of local communities in the radius, logit-transformed
+      &  Mean pairwise phylogenetic distance among communities in the radius, relative to null expectation
+      & Mean pairwise functional distance among communities in the radius, relative to null expectation
+\\[4pt]
+      & \begin{tabular}[c]{@{}l@{}}\\\textbf{Gamma}\\\textbf{(regional)}\end{tabular} 
+      &  Richness of all communities in the radius, pooled to a single community
+      &  Mean pairwise phylogenetic distance of all communities in the radius, pooled to a single community, relative to null expectation
+      &  Mean pairwise functional distance of all communities in the radius, pooled to a single community, relative to null expectation
+      
+\end{tabular}
+\end{table}
+
+\newpage
+
+**Supplementary Table 2**: This table shows model fit statistics for each response variable for each model. The RMSE is the root mean squared error of the model fit with all the data. The 5-fold CV RMSE is the root mean squared error of the holdout data points in 5-fold cross-validation. The $R^2$ is calculated using the method of Gelman *et al.*. For all fit statistics, mean value as well as upper and lower bounds of 95% credible intervals are shown.
+
+```{r, echo = FALSE, message = FALSE}
+library(knitr)
+library(kableExtra)
+fit_stats <- read.csv('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv')
+fit_stats$model <- gsub('+', ' + ', fit_stats$model, fixed = TRUE)
+kable(fit_stats, 'latex', escape = FALSE, longtable = TRUE, booktabs = TRUE,
+             row.names = FALSE,
+             col.names = c('taxon','biodiversity level', 'biodiversity dimension', 'model', 'RMSE', '5-fold CV RMSE', '$R^2$')) %>%
+  kable_styling(latex_options = 'repeat_header') %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(2, width = '6em') %>%
+  column_spec(3, width = '6em') %>%
+  column_spec(4, width = '9em')
+```
+
+\newpage
 
 # Supplementary Figures
 
@@ -179,23 +229,3 @@ In figures 3b, 4b, etc., below, the ecoregions are shaded based on whether the 9
 \caption*{Figure S14b: Coefficients of soil type diversity on tree diversity, nonzero regions shown}
 \end{figure}
 
-\newpage
-
-# Supplementary Tables
-
-**Supplementary Table 1**: This table shows model fit statistics for each response variable for each model. The RMSE is the root mean squared error of the model fit with all the data. The 5-fold CV RMSE is the root mean squared error of the holdout data points in 5-fold cross-validation. The $R^2$ is calculated using the method of Gelman *et al.*. For all fit statistics, mean value as well as upper and lower bounds of 95% credible intervals are shown.
-
-```{r, echo = FALSE, message = FALSE}
-library(knitr)
-library(kableExtra)
-fit_stats <- read.csv('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv')
-fit_stats$model <- gsub('+', ' + ', fit_stats$model, fixed = TRUE)
-kable(fit_stats, 'latex', escape = FALSE, longtable = TRUE, booktabs = TRUE,
-             row.names = FALSE,
-             col.names = c('taxon','biodiversity level', 'biodiversity dimension', 'model', 'RMSE', '5-fold CV RMSE', '$R^2$')) %>%
-  kable_styling(latex_options = 'repeat_header') %>%
-  row_spec(0, bold = TRUE) %>%
-  column_spec(2, width = '6em') %>%
-  column_spec(3, width = '6em') %>%
-  column_spec(4, width = '9em')
-```
