@@ -5,12 +5,12 @@
 # Use precalculated matrix.
 # Loop through each BBS plot.
 # First, calculate spatial distances between that plot and all other plots.
-# Identify the plots within 500 km of the target plot.
+# Identify the plots within 100 km of the target plot.
 # Do median alpha, and total gamma, for all the neighbors within each radius.
 # All others outside that radius get NA.
 
 load('/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
-source('~/code/fia/pairwise_beta_focal.r')
+source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance matrices.
 
 # Replace AOU codes in the trait matrix with actual species names.
@@ -19,11 +19,11 @@ library(sp)
 library(vegan)
 source('~/code/fia/fixpicante.r')
 
-nnull <- 99
+nnull <- 999 # Edited 12 Dec 2018
 
 # run through all radii in each task, but split by year and also slice it up some.
-radii <- c(50, 75, 100, 150, 200, 300, 400, 500) 
-task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+radii <- c(50, 75, 100) # edited 12 dec 2018
+task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 r <- radii[task]
 
 # Declare structures to hold data

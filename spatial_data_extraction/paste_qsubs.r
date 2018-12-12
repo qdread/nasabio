@@ -10,14 +10,20 @@ write.table(qsub_calls, file = 'C:/Users/Q/Dropbox/projects/nasabiodiv/code/bd_q
 
 # Edited 27 Nov 2018: beta diversity for FIA using SLURM
 # Edited 28 Nov 2018: break into groups of 500 instead of 1000 so that the jobs don't get stuck as easily.
+# Edited 12 Dec 2018: try 250 instead.
 
-n_plots <- 135032
-n_calls <- ceiling(n_plots/500)
-sb_calls <- rep(c('sbatch --array=1-500', 'sbatch --array=501-1000'), times = floor(n_plots/1000))
-sb_calls <- paste(sb_calls, ' --export=N1000=', rep(0:(floor(n_plots/1000) - 1), each = 2), ' fiabeta.sb', sep = '')
-sb_calls <- c(sb_calls, 'sbatch --array=1-32 --export=N1000=135 fiabeta.sb')
+n_plots <- 119177
+n_calls <- ceiling(n_plots/250)
+sb_calls <- rep(c('sbatch --array=1-250', 'sbatch --array=251-500', 'sbatch --array=501-750', 'sbatch --array=751-1000'), times = floor(n_plots/1000))
+sb_calls <- paste(sb_calls, ' --export=N1000=', rep(0:(floor(n_plots/1000) - 1), each = 4), ' fiabeta.sb', sep = '')
+sb_calls <- c(sb_calls, 'sbatch --array=1-177 --export=N1000=119 fiabeta.sb')
 
 write.table(sb_calls, file = '~/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+# BBS submissions
+bbs_sb_calls <- rep(c('sbatch --array=1-250', 'sbatch --array=251-500', 'sbatch --array=501-750', 'sbatch --array=751-1000'), times = 2)
+bbs_sb_calls <- paste(bbs_sb_calls, rep(c('--export=N1000=1 bbsbeta.sb', '--export=N1000=2 bbsbeta.sb'), each = 4))
+write.table(bbs_sb_calls, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 
 # Elevation GDAL-only qsubs

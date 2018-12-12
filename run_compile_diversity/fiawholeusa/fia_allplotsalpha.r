@@ -9,6 +9,7 @@
 # Edited 21 Dec 2017 to use the whole USA
 # Edited 26 Nov 2018: file paths update, update for slurm
 # Edited 27 Nov 2018: get rid of parsing
+# edited 12 Dec 2018: increase null model iterations
 
 load('/mnt/ffs17/groups/nasabio/fiaworkspace_nospatial_wholeusa_2018.r')
 plotmetadata <- read.csv('/mnt/research/nasabio/data/fia/fianocoords_wholeusa_2018.csv', stringsAsFactors = FALSE)
@@ -19,7 +20,7 @@ library(sp)
 library(vegan)
 source('/mnt/research/nasabio/code/fixpicante.r')
 
-nnull <- 99
+nnull <- 999
 trydist <- as.matrix(trydist)
 
 n_slices <- 1000

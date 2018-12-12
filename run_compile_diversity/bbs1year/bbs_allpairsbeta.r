@@ -9,21 +9,23 @@
 # Do all pairwise taxonomic beta diversity between that plot and all its neighbors.
 # All others outside that radius get NA.
 
+# Modified 12 Dec 2018: edit maximum radius, number of iterations, and don't do pairwise things twice!
+
 load('/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance matrices.
 
 library(sp)
 library(vegan)
-library(vegetarian)
+library(vegetarian, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
 source('/mnt/research/nasabio/code/fixpicante.r')
 
-nnull <- 99 # Reduce to save time
+nnull <- 999 # edited 12dec2018
 
 
-max_radius <- 500 # 500 km
+max_radius <- 100 # edited 12dec2018
 n_slices <- 2000
-slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+slice <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID')) + as.numeric(Sys.getenv('N1000')) * 1000
 
 # Determine row indices for the slice of the matrix to be used.
 rowidx <- round(seq(0,nrow(bbsmat_byroute_oneyear),length.out=n_slices + 1))
@@ -42,7 +44,7 @@ for (p in rowidxmin:rowidxmax) {
 	dist_p <- spDistsN1(pts=with(bbscov_oneyear, cbind(lon, lat)), pt = c(bbscov_oneyear$lon[p], bbscov_oneyear$lat[p]), longlat = TRUE)
 	beta_div_p <- matrix(NA, nrow=nrow(bbsmat_byroute_oneyear), ncol=21)
 		
-	for (p2 in 1:nrow(bbscov_oneyear)) {
+	for (p2 in p:nrow(bbscov_oneyear)) {
 		# Loop through all other FIA plots, check if plot is in radius
 		# If plot is within radius, calculate diversity between that plot and target plot. 
 		if (dist_p[p2] > 0 & dist_p[p2] <= max_radius) {

@@ -8,6 +8,7 @@
 # Edited 21 Mar 2018: another update to scratch path
 # Edited 26 Nov 2018: file paths update
 # Edited 27 Nov 2018: get rid of parsing and update ID for SLURM
+# Edited 12 Dec 2018: make four modifications: 1 - decrease_max radius, 2 - increase nnull, 3 - remove the plantation plots to save more time, 4 - don't do all pairwise twice!
 
 # Use precalculated matrix.
 # One FIA plot per slice.
@@ -21,16 +22,20 @@ load('/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
 source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
 source('/mnt/research/nasabio/code/nofuncspp.r')
 
+# Added 12 Dec 2018: get rid of plantations
+fiacoords <- fiacoords[!fiaplantation$plantation, ]
+fiaplotmat <- fiaplotmat[!fiaplantation$plantation, ]
+
 library(sp)
 library(vegan)
 library(vegetarian, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
 source('/mnt/research/nasabio/code/fixpicante.r')
 
-nnull <- 99 # Reduce to save time
+nnull <- 999 # edited 12dec2018
 
 trydist <- as.matrix(trydist)
 
-max_radius <- 200 
+max_radius <- 100 # edited 12dec2018
 p <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID')) + as.numeric(Sys.getenv('N1000')) * 1000
 print(p)
 
@@ -38,9 +43,9 @@ print(p)
 dist_p <- spDistsN1(pts=with(fiacoords, cbind(lon, lat)), pt = c(fiacoords$lon[p], fiacoords$lat[p]), longlat = TRUE)
 beta_div <- matrix(NA, nrow=nrow(fiaplotmat), ncol=21)
 
-pb <- txtProgressBar(0, nrow(fiaplotmat), style = 3)
+pb <- txtProgressBar(p, nrow(fiaplotmat), style = 3)
 	
-for (p2 in 1:nrow(fiaplotmat)) {
+for (p2 in p:nrow(fiaplotmat)) {
 	setTxtProgressBar(pb, p2)
 	# Loop through all other FIA plots, check if plot is in radius
 	# If plot is within radius, calculate diversity between that plot and target plot. 

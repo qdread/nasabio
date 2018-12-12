@@ -7,6 +7,7 @@
 # New version created on 28 Feb 2018: filter the plots by whether they are plantation or not, in order to calculate the gammas.
 # Edited 26 Nov 2018: file paths update, update for slurm
 # Edited 27 Nov 2018: redo plantation subsetting to fix the mismatched ordering. Better coding practice to not assume the two are both sorted the same way, anyway.
+# Edited 12 Dec 2018: increase nnull and decrease max radius
 
 load('/mnt/ffs17/groups/nasabio/fiaworkspace_nospatial_wholeusa_2018.r')
 load('/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
@@ -17,10 +18,10 @@ library(sp)
 library(vegan)
 source('/mnt/research/nasabio/code/fixpicante.r')
 
-nnull <- 99
+nnull <- 999
 trydist <- as.matrix(trydist)
 
-radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300)
+radii <- c(5, 10, 20, 50, 75, 100)
 n_slices <- 1000
 slice <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 

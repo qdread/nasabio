@@ -4,7 +4,7 @@
 # Modified 11 Dec to include both Sorensen and Jaccard.
 
 # Load bbs beta diversity and route coordinates
-load('/mnt/research/nasabio/data/bbs/bbs_betadivtdpdfd_array_1year.r')
+load('/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_betadivtdpdfd_array_1year.r')
 load('/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
 
 library(dplyr)
