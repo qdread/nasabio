@@ -4,7 +4,7 @@
 ########################################################################
 # Alpha diversity
 
-bbs_alphadiv <- read.csv('/mnt/research/nasabio/data/bbs/bbs_alphadiv_1year.csv', stringsAsFactors = FALSE)
+bbs_alphadiv <- read.csv('/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_alphadiv.csv', stringsAsFactors = FALSE)
 
 library(dplyr)
 
@@ -16,6 +16,7 @@ bbs_alphadiv <- filter(bbs_alphadiv, !is.na(richness))
 
 # For each year and route number, get the median alpha diversity within each radius.
 radii <- c(50, 75, 100, 150, 200, 300, 400, 500) # in km
+radii <- c(50, 75, 100) # Added 13 Dec 2018 because newer version does not need to go above 100 km
 
 library(sp)
 
@@ -33,13 +34,14 @@ bbs_alpha <- bbs_alphadiv %>%
 	rowwise %>%
 	do(neighbordiv(., dat = bbs_alphadiv))
 	
-bbs_alpha <- cbind(bbs_alphadiv[rep(1:nrow(bbs_alphadiv), each=8),c('rteNo','lon','lat','lon_aea','lat_aea')], bbs_alpha)
+bbs_alpha <- cbind(bbs_alphadiv[rep(1:nrow(bbs_alphadiv), each=length(radii)),c('rteNo','lon','lat','lon_aea','lat_aea')], bbs_alpha)
 bbs_alpha <- arrange(bbs_alpha, rteNo, radius)	
-write.csv(bbs_alpha, file = '/mnt/research/nasabio/data/bbs/bbs_alpha_1year.csv', row.names = FALSE)	
+write.csv(bbs_alpha, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_alpha_1year.csv', row.names = FALSE)	
 
 ########################################################################
 # Gamma diversity
 radii <- c(50, 75, 100, 150, 200, 300, 400, 500) # in km
+radii <- c(50, 75, 100) # Added 13 Dec 2018 because newer version does not need to go above 100 km
 
 bbs_gammadiv <- list()
 
@@ -53,7 +55,7 @@ load('/mnt/research/nasabio/data/bbs/bbsworkspace_singleyear.r')
 
 bbs_gamma <- cbind(bbscov_oneyear[rep(1:nrow(bbscov_oneyear), times=length(bbs_gammadiv)),c('rteNo','lon','lat','lon_aea','lat_aea')], do.call('rbind', bbs_gammadiv))
 
-write.csv(bbs_gamma, file = '/mnt/research/nasabio/data/bbs/bbs_gamma_1year.csv', row.names = FALSE)
+write.csv(bbs_gamma, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_gamma_1year.csv', row.names = FALSE)
 
 ########################################################################
 # Beta diversity older method
@@ -68,13 +70,21 @@ for (i in 1:2000) {
 	print(i)
 }
 
-bbs_betadiv <- do.call('c', bbs_betadiv) # Flatten into one list. # All are 3382 rows x 21 columns.
+bbs_betadiv <- do.call('c', bbs_betadiv) # Flatten into one list. # All are 3089 rows x 21 columns.
 
-# Convert this to a 3382 x 3382 x 21 array.
+# Convert this to a 3089 x 3089 x 21 array.
 library(abind)
 bbs_betadiv_array <- abind(bbs_betadiv, along = 0)
 
-save(bbs_betadiv_array, file = '/mnt/research/nasabio/data/bbs/bbs_betadivtdpdfd_array_1year.r')
+# Copy the mirror image of the upper triangle into the lower
+copy_upper <- function(m) {
+    m[lower.tri(m)] <- t(m)[lower.tri(m)]
+    m
+}
+
+for (i in 1:dim(bbs_betadiv_array)[3]) bbs_betadiv_array[, , i] <- copy_upper(bbs_betadiv_array[, , i])
+
+save(bbs_betadiv_array, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_betadivtdpdfd_array_1year.r')
 
 ########################################################################
 # Beta diversity newer method

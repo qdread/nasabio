@@ -17,7 +17,7 @@ load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance mat
 
 library(sp)
 library(vegan)
-source('~/code/fia/fixpicante.r')
+source('/mnt/research/nasabio/code/fixpicante.r')
 
 nnull <- 999 # Edited 12 Dec 2018
 

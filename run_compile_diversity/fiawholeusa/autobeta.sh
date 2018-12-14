@@ -7,7 +7,7 @@ cd /mnt/research/nasabio/code
 # Extract number of jobs currently in queue from the output of squeue.
 active_jobs=$(squeue -hru $USER | wc -l)
 
-if [ "$active_jobs" -le "500" ]; then
+if [ "$active_jobs" -le "750" ]; then
 	# Scan the text file until we find a line not containing the word "DONE"
 	cmd=`awk '$0 !~ /DONE/ { print; exit }' bd_qsub.txt`
 	# Submit that line as a command

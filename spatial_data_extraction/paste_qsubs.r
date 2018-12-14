@@ -22,7 +22,7 @@ write.table(sb_calls, file = '~/Dropbox/projects/nasabiodiv/code/bd_qsub.txt', q
 
 # BBS submissions
 bbs_sb_calls <- rep(c('sbatch --array=1-250', 'sbatch --array=251-500', 'sbatch --array=501-750', 'sbatch --array=751-1000'), times = 2)
-bbs_sb_calls <- paste(bbs_sb_calls, rep(c('--export=N1000=1 bbsbeta.sb', '--export=N1000=2 bbsbeta.sb'), each = 4))
+bbs_sb_calls <- paste(bbs_sb_calls, rep(c('--export=N1000=0 bbsbeta.sb', '--export=N1000=1 bbsbeta.sb'), each = 4))
 write.table(bbs_sb_calls, quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 

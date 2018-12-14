@@ -22,4 +22,4 @@ alpha_div <- diversity_3ways(m = bbsmat_byroute_oneyear, flavor = 'alpha',
                              phylo_spp = NULL, func_problem_spp = NULL, combine = FALSE)
 
 bbs_alphadiv <- cbind(bbscov_oneyear, alpha_div)
-write.csv(bbs_alphadiv, file = '/mnt/research/nasabio/data/bbs/diversity1year/bbs_alphadiv.csv', row.names = FALSE)
+write.csv(bbs_alphadiv, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_alphadiv.csv', row.names = FALSE)

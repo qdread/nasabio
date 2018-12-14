@@ -25,11 +25,12 @@ fia_alphadiv <- subset(fia_alphadiv, PLT_CN %in% plantation$PLT_CN[!plantation$p
 
 library(dplyr)
 
-load('~/data/fiaworkspace_spatial_wholeusa_2018.r')
+load('/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
 
 fiacoords <- fiacoords %>% left_join(plantation) %>% filter(!plantation)
 
 radii <- c(5, 10, 20, 50, 75, 100, 150, 200, 300)
+radii <- c(5, 10, 20, 50, 75, 100) # Edited 13 Dec 2018 because new version does not have to go above 100 km
 
 library(sp)
 

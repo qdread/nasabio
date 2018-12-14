@@ -3,6 +3,7 @@
 # QDR, 07 Mar 2017
 # Project: NASABioXGeo
 
+# Modification 13 Dec 2018: Go back to raw data! Drastically simplify how the species are assigned. Just plain get rid of the hybrids, unknowns, and assign subspecies to "parent" species.
 # Modification 19 Apr 2018: Replace centroid coordinates with midpoints of the segments (gets rid of some routes but is more accurate)
 # Modification 22 Sep 2017: (1) phylo distance matrix based on a single consensus tree of 1000 samples, (2) make single presence-absence for entire time period 2007-2016.
 # Updated on 31 May 2017: new 2016 routes+coordinates.
@@ -18,14 +19,98 @@
 
 # Start with by-stop diversity.
 
-# 2. Load community matrix.
+# 2. Create community matrix.
 
-bbsspp <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/BBS/bird_traits/specieslist.csv', stringsAsFactors = FALSE)
-load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmatconsolidated2016.r') # Load fixed bbsmat. (only by route)
-# Quick correction to fix two birds that aren't in the phylogeny. Just get rid of the eastern yellow wagtail since it's probably only in Alaska anyway.
-fixedbbsmat_byroute[, which(sppids == 5739)] <- fixedbbsmat_byroute[, which(sppids == 5738)] + fixedbbsmat_byroute[, which(sppids == 5739)]
-fixedbbsmat_byroute[, which(sppids == 5738)] <- 0
-fixedbbsmat_byroute[, which(sppids == 6960)] <- 0
+library(dplyr)
+library(reshape2)
+
+bbsspp <- read.csv('/mnt/research/nasabio/data/bbs/bbs_species_lookup_table_modified.csv', stringsAsFactors = FALSE)
+
+fp <- '/mnt/research/aquaxterra/DATA/raw_data/BBS/DataFiles26may2017/50-StopData/1997ToPresent_SurveyWide'
+
+bbsdf <- list()
+
+for (i in 1:10) {
+	bbsdf[[i]] <- read.csv(file.path(fp, paste0('fifty',i,'.csv')))
+}
+
+bbsdf <- do.call('rbind', bbsdf)
+
+# Use only surveys done with the normal protocol.
+bbsdf <- subset(bbsdf, RPID == 101)
+
+# Combine state number and route number into single rteNo
+rteNo <- character(nrow(bbsdf))
+for (i in 1:nrow(bbsdf)) {
+	rteNo[i] <- with(bbsdf, paste(statenum[i], paste(rep('0', 3-nchar(as.character(Route[i]))), collapse=''), Route[i], sep = ''))
+}
+
+bbsdf$rteNo <- rteNo
+
+# Convert to long format
+bbslong <- melt(bbsdf, id.vars = grep('Stop', names(bbsdf), invert=TRUE), variable.name = 'Stop', value.name = 'n')
+bbslong <- bbslong %>% filter(n>0) # Get rid of zero rows.
+
+# Use species lookup table to consolidate the bbs matrix, getting rid of hybrids and unknowns and including subspecies with their parent species
+bbs_aous <- unique(bbslong$AOU)
+table(bbs_aous %in% bbsspp$AOU)
+
+# let's do the following:
+# (1) Anything that is a hybrid, get rid of. (7) This totals a vanishingly tiny percent of the total. (0.0002%)
+# (2) Anything that is a subspecies assign to parent species (15)
+# (3) Anything that is an unknown species within a genus, or an unknown genus, get rid of. They total 0.1% of individuals.
+
+unkaou <- bbsspp$AOU[bbsspp$Type %in% c('unknown_genus', 'unknown_sp')]
+unkaou <- c(unkaou, 6960) # Removes another unknown species only present in Alaska
+unktotal <- sum(bbslong$n[bbslong$AOU %in% unkaou])
+unktotal/sum(bbslong$n)
+hybridaou <- bbsspp$AOU[bbsspp$Type %in% c('hybrid')]
+sum(bbslong$n[bbslong$AOU %in% hybridaou])/sum(bbslong$n)
+
+# Get rid of the ones that need to be gotten rid of.
+aous_exclude <- c(unkaou, hybridaou)
+bbslong_cleaned <- bbslong %>% filter(!AOU %in% aous_exclude)
+
+# Create a mapping of species to their parent taxa. 
+sspaou <- bbsspp$AOU[bbsspp$Type %in% 'subspecies']
+parentaou <- as.numeric(bbsspp$AOU_list[bbsspp$Type %in% 'subspecies'])
+
+# Must include the scrub jays still as a manual correction.
+sspaou <- c(sspaou, 4812, 4813)
+parentaou <- c(parentaou, 4811, 4811)
+
+ssptotal <- sum(bbslong$n[bbslong$AOU %in% sspaou])
+ssptotal/sum(bbslong$n)
+
+
+# Replace subspecies AOUs with the one from their parent species
+bbslong_cleaned$AOU[bbslong_cleaned$AOU %in% sspaou] <- na.omit(parentaou[match(bbslong_cleaned$AOU, sspaou)])
+
+# Do final corrections mapping the species not present in the phylogeny to parent taxa they were recently split from.
+recentlysplitaou <- c(4172, 7222, 16600, 5738)
+recentlysplitparentaou <- c(4171, 7221, 7180, 5739)
+recentlysplittotal <- sum(bbslong$n[bbslong$AOU %in% recentlysplitaou])
+recentlysplittotal/sum(bbslong$n)
+
+# Replace "recently split" AOUs with the one from their related "parent" species
+bbslong_cleaned$AOU[bbslong_cleaned$AOU %in% recentlysplitaou] <- na.omit(recentlysplitparentaou[match(bbslong_cleaned$AOU, recentlysplitaou)])
+
+sppids <- sort(unique(bbslong_cleaned$AOU)) # 631 final species.
+
+# Convert to a site by species matrix (site is a route by year combination)
+get_spp <- function(dat, sppids) {
+  ns <- dat$n
+  idx <- match(dat$AOU, sppids)
+  res <- rep(0, length(sppids))
+  res[idx] <- ns
+  res
+}
+
+bbsmat_byroute <- bbslong_cleaned %>% group_by(year, rteNo) %>% do(s = get_spp(., sppids=sppids))
+bbsgrps_byroute <- select(bbsmat_byroute, year, rteNo)
+bbsmat_byroute <- do.call('rbind', bbsmat_byroute$s)
+
+
 
 # 3. Project lat-long to Albers.
 
@@ -58,8 +143,6 @@ dimnames(birdtraitdist)[[1]] <- dimnames(birdtraitdist)[[2]] <- birdtrait_diurna
 # Remove stops that don't have coordinates from the dataset.
 # Here check why some of the coordinates are missing.
 
-library(dplyr)
-
 bbsgrps_byroute <- bbsgrps_byroute %>% mutate(rteNo=as.numeric(rteNo)) %>% left_join(bbsalbers, by = 'rteNo')
 has_coords <- !is.na(bbsgrps_byroute$lon)
 
@@ -71,7 +154,7 @@ for (i in 1:length(sppids)) {
 	if (length(names_i)>0) dimnames_matrix[i] <- names_i[1]
 }
 
-dimnames(fixedbbsmat_byroute)[[2]] <- dimnames_matrix
+dimnames(bbsmat_byroute)[[2]] <- dimnames_matrix
 
 tlabel1 <- eric_cons_tree$tip.label
 tlabel1 <- gsub('_', ' ', tlabel1)
@@ -91,20 +174,18 @@ for (i in 1:length(tlabelaou)) {
 
 dimnames(ericdist)[[1]] <- dimnames(ericdist)[[2]] <- dimnames_tlabel
 
-save(ericdist, birdtraitdist, file = '/mnt/research/nasabio/data/bbs/bbspdfddist.r')
-
 # Remove nocturnal species, rows without coordinates, and rows and columns with zero sum.
-ns <- colSums(fixedbbsmat_byroute)
-rs <- rowSums(fixedbbsmat_byroute)
+ns <- colSums(bbsmat_byroute)
+rs <- rowSums(bbsmat_byroute)
 nocturnalbirds <- birdtrait$Latin_Name[birdtrait$Nocturnal == 1]
-fixedbbsmat_byroute <- fixedbbsmat_byroute[has_coords & rs != 0, !(dimnames(fixedbbsmat_byroute)[[2]] %in% nocturnalbirds) & ns != 0]
+fixedbbsmat_byroute <- bbsmat_byroute[has_coords & rs != 0, !(dimnames(bbsmat_byroute)[[2]] %in% nocturnalbirds) & ns != 0]
 
 #bbsalbers <- bbsalbers[has_coords & rs != 0, ]
 bbsgrps_byroute <- bbsgrps_byroute[has_coords & rs != 0, ]
 
 ##################################
 # Section to keep all the rows, even the ones without midpoints.
-fixedbbsmat_byroute_allrows <- fixedbbsmat_byroute[rs != 0, !(dimnames(fixedbbsmat_byroute)[[2]] %in% nocturnalbirds) & ns != 0]
+fixedbbsmat_byroute_allrows <- bbsmat_byroute[rs != 0, !(dimnames(bbsmat_byroute)[[2]] %in% nocturnalbirds) & ns != 0]
 
 #bbsalbers <- bbsalbers[has_coords & rs != 0, ]
 bbsgrps_byroute_allrows <- bbsgrps_byroute[rs != 0, ]
@@ -113,6 +194,14 @@ bbsgrps_byroute_allrows <- bbsgrps_byroute[rs != 0, ]
 bbsmat_allrows <- as.matrix(cbind(bbsgrps_byroute_allrows[,1:2], fixedbbsmat_byroute_allrows))
 save(bbsmat_allrows, file = '~/bbsmatrix_byroute.RData')
 ##################################
+
+# Subset the distance matrices by the species that occur in the BBS data
+
+final_spnames <- dimnames(fixedbbsmat_byroute)[[2]]
+ericdist <- ericdist[dimnames(ericdist)[[1]] %in% final_spnames, dimnames(ericdist)[[2]] %in% final_spnames]
+birdtraitdist <- birdtraitdist[dimnames(birdtraitdist)[[1]] %in% final_spnames, dimnames(birdtraitdist)[[2]] %in% final_spnames]
+
+save(ericdist, birdtraitdist, file = '/mnt/research/nasabio/data/bbs/bbspdfddist.r')
 
 
 # 6. For the given radius, get pairwise distances among stops and the list of all neighbors.
