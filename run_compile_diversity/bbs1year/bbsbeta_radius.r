@@ -30,7 +30,7 @@ neighbordivfromtable <- function(x) {
 		
 		neighbors_incircle <- bbs_betadiv_array[neighbordists <= radii[i], focalpointindex, , drop = FALSE]
 		commdat[[i]] <- c(radius = radii[i], 
-						  apply(neighbors_incircle, 3, function(x) median(is.finite(x))))
+						  apply(neighbors_incircle, 3, function(x) median(x[is.finite(x)])))
 	}
 	as.data.frame(do.call('rbind', commdat))
 }
