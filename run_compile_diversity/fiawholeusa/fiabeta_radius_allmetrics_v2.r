@@ -10,6 +10,7 @@
 # Yet another version created 28 Nov 2018: new version with new FIA data (macroplots removed) and slurm IDs
 # Modified 14 Dec 2018: now uses median, not transformed mean.
 # Modified 18 Dec 2018: uses the huge single sparse matrix.
+# Yet another version created 02 Jan 2019: loads each plot and runs code on it
 
 # Load FIA coordinates
 load('/mnt/home/qdr/data/fiaworkspace_spatial_wholeusa_2018.r')
@@ -25,37 +26,48 @@ fiacoords <- filter(fiacoords, !plantation)
 
 ###############################################
 
-# Load the sparse matrix.
-load('/mnt/research/nasabio/data/fia/diversity/usa2018/sparsematrixallbetametrics.r')
-
-
 # For each year and route number, get the median beta diversity within each radius.
 # The pairwise table was constructed to only go up to 100 km, so that is all we will have.
 radii <- c(5, 10, 20, 50, 75, 100) # in km
+n_plot <- 119177
 
 library(sp)
-library(purrr)
+library(foreach)
+library(doParallel)
+registerDoParallel(cores = 24)
 
-# New version 18 Dec to work with the new representation of sparse matrix.
-metric_list <- rbind(metric_list, metric_list[, c(2, 1, 3:ncol(metric_list))])
-metric_list <- lapply(1:nrow(fiacoords), function(i) metric_list[metric_list[,1] == i, ])
+fp <- '/mnt/research/nasabio/data/fia/diversity/usa2018'
+
+allmetrics2sparse <- function(x) {
+	notna <- apply(x, 1, function(z) any(!is.na(z)))
+	cbind(which(notna), x[notna, , drop = FALSE])
+}
+
 
 # Function 
-neighbordivfromsparsematrix <- function(x) {
-	neighbors <- fiacoords[x[,2],]
-	neighbordists <- spDistsN1(pts = cbind(neighbors$lon, neighbors$lat), pt = c(fiacoords$lon[x[1,1]], fiacoords$lat[x[1,1]]), longlat = TRUE)
+neighbordivfromfullmatrix <- function(i) {
+	lon <- fiacoords$lon[i]
+	lat <- fiacoords$lat[i]
+	load(file.path(fp, paste0('beta_', i, '.r')))
+	beta_div <- allmetrics2sparse(beta_div)
+	neighbors <- fiacoords[beta_div[,1], ]
+	neighbordists <- spDistsN1(pts = cbind(neighbors$lon, neighbors$lat), pt = c(lon, lat), longlat = TRUE)
 	commdat <- list()
-	for (i in 1:length(radii)) {
-		beta_incircle <- x[neighbordists <= radii[i] ,-(1:2), drop = FALSE]
+	for (r in 1:length(radii)) {
+		beta_incircle <- beta_div[neighbordists <= radii[r] ,-(1:2), drop = FALSE]
 		beta_median <- apply(beta_incircle, 2, function(z) median(z[is.finite(z)]))
 
-		commdat[[i]] <- c(PLT_CN = y$PLT_CN, radius = radii[i], beta_median)
+		commdat[[r]] <- c(PLT_CN = fiacoords$PLT_CN[i], radius = radii[r], beta_median)
 						  
 	}
 	as.data.frame(do.call('rbind', commdat))
 }
 
-fia_beta <- map(metric_list, neighbordivfromsparsematrix)
+fia_beta <- foreach(i = 1:n_plot) %dopar% {
+	if (i %% 1000 == 0) print(i)
+	neighbordivfromfullmatrix(i)
+}
+
 fia_beta <- bind_rows(fia_beta)
 
 write.csv(fia_beta, file = '/mnt/research/nasabio/data/fia/biodiversity_CSVs/updated_nov2018/fiausa_natural_beta.csv', row.names = FALSE)
