@@ -79,25 +79,25 @@ write.csv(bbsdat, file = file.path(fpdata, 'bbs/geodiversity_CSVs/bbs_allgeo_wid
 
 
 # All biodiversity in a single wide format data frame for BBS.
-bbsalphapt <- read.csv(file.path(fpdata, 'bbs/bbs_alphadiv_1year.csv'), stringsAsFactors = FALSE) %>% 
+bbsalphapt <- read.csv(file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_alphadiv.csv'), stringsAsFactors = FALSE) %>% 
 	select(rteNo, richness, MPD_pa_z, MNTD_pa_z, MPDfunc_pa_z, MNTDfunc_pa_z) %>%
-	setNames(c(names(.)[1:5], paste('alpha', names(.)[-(1:5)], 'point', sep = '_')))
+	setNames(c(names(.)[1], paste('alpha', names(.)[-(1)], 'point', sep = '_')))
 
 library(data.table)
 
 # Radius values
-bbsalpharadius <- read.csv(file.path(fpdata, 'bbs/bbs_alpha_1year.csv'), stringsAsFactors = FALSE) %>% 
+bbsalpharadius <- read.csv(file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_alpha_1year.csv'), stringsAsFactors = FALSE) %>% 
 	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
 	setDT %>%
 	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
 	setNames(c(names(.)[1], paste('alpha', names(.)[-1], sep = '_')))
 
-bbsbetaradius <- read.csv(file.path(fpdata, 'bbs/bbs_betatdpdfd_1year.csv'), stringsAsFactors = FALSE) %>% 
+bbsbetaradius <- read.csv(file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_betatdpdfd_1year.csv'), stringsAsFactors = FALSE) %>% 
 	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
 	setDT %>%
 	dcast(rteNo ~ radius, value.var = c("beta_td_pairwise_pa", "beta_td_sorensen_pa",  "beta_pd_pairwise_pa", "beta_pd_pairwise_pa_z", "beta_pd_nt_pa", "beta_pd_nt_pa_z", "beta_fd_pairwise_pa", "beta_fd_pairwise_pa_z", "beta_fd_nt_pa", "beta_fd_nt_pa_z"))
 	
-bbsgammaradius <- read.csv(file.path(fpdata, 'bbs/bbs_gamma_1year.csv'), stringsAsFactors = FALSE) %>% 
+bbsgammaradius <- read.csv(file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_gamma_1year.csv'), stringsAsFactors = FALSE) %>% 
 	select(-lon, -lat, -lon_aea, -lat_aea) %>% 
 	setDT %>%
 	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
@@ -108,7 +108,7 @@ bbsbiodat <- bbsalphapt %>%
 	left_join(bbsbetaradius) %>%
 	left_join(bbsgammaradius)
 	
-write.csv(bbsbiodat, file = file.path(fpdata, 'bbs/bbs_allbio_wide.csv'), row.names = FALSE)
+write.csv(bbsbiodat, file = file.path(fpdata, 'bbs/biodiversity_CSVs/bbs_allbio_wide.csv'), row.names = FALSE)
 
 #############################################################
 # This section added 24 Apr. 2018
@@ -235,16 +235,17 @@ write.csv(fiadat, file = file.path(fpdata, 'fia/geodiversity_CSVs/fia_allgeo_wid
 ###########################################
 
 # FIA biodiversity
+fpfiabio <- file.path(fpdata, 'fia/biodiversity_CSVs/updated_nov2018')
 
-fiaalphapt <- read.csv(file.path(fpdata, 'fia/fiausa_alphadiv.csv'), stringsAsFactors = FALSE) %>% 
+fiaalphapt <- read.csv(file.path(fpfiabio, 'fiausa_alphadiv.csv'), stringsAsFactors = FALSE) %>% 
 	setNames(c(names(.)[1], paste('alpha', names(.)[-(1)], 'point', sep = '_')))
 
 library(data.table)
 
 # Radius values
-fiaalpharadius <- read.csv(file.path(fpdata, 'fia/fiausa_alpha.csv'), stringsAsFactors = FALSE)
-fiabetaradius <- read.csv(file.path(fpdata, 'fia/fiausa_betatd.csv'), stringsAsFactors = FALSE)
-fiagammaradius <- read.csv(file.path(fpdata, 'fia/fiausa_gamma.csv'), stringsAsFactors = FALSE)
+fiaalpharadius <- read.csv(file.path(fpfiabio, 'fiausa_natural_alpha.csv'), stringsAsFactors = FALSE)
+fiabetaradius <- read.csv(file.path(fpfiabio, 'fiausa_natural_beta.csv'), stringsAsFactors = FALSE)
+fiagammaradius <- read.csv(file.path(fpfiabio, 'fiausa_natural_gamma.csv'), stringsAsFactors = FALSE)
 n_alpha <- names(fiaalpharadius)[-(1:2)]
 n_beta <- names(fiabetaradius)[-(1:2)]
 n_gamma <- names(fiagammaradius)[-(1:2)]
@@ -268,4 +269,4 @@ fiabiodat <- fiaalphapt %>%
 	left_join(fiabetaradius) %>%
 	left_join(fiagammaradius)
 	
-write.csv(fiabiodat, file = file.path(fpdata, 'fia/fia_allbio_wide.csv'), row.names = FALSE)
+write.csv(fiabiodat, file = file.path(fpfiabio, 'fia_allbio_wide.csv'), row.names = FALSE)

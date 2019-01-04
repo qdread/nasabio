@@ -2,6 +2,7 @@
 # QDR NASABioXGeo 14 June 2018
 
 # This new version, on 14 June, uses TRI (topographic ruggedness, mean neighbor pixel difference), instead of SD, for geodiversity.
+# Edited 04 Jan 2019: Change how 0 and 1 values are treated for FIA
 
 # Load biodiversity and geodiversity data ---------------------------------
 
@@ -42,7 +43,7 @@ bbsgeo <- bbsgeo %>%
 # FIA (only needed variables are in these dfs, rest are on server)
 # Refer to makefiadataformm.r for making these reduced data frames from the huge data frames.
 # Use effective species number for Shannon
-fiabio <- read.csv(file.path(fp, 'fia/biodiversity_CSVs/fia_bio_formixedmodels_50k.csv'), stringsAsFactors = FALSE) %>%
+fiabio <- read.csv(file.path(fp, 'fia/biodiversity_CSVs/updated_nov2018/fia_bio_formixedmodels_50k.csv'), stringsAsFactors = FALSE) %>%
   mutate(alpha_shannon = exp(alpha_shannon), gamma_shannon = exp(gamma_shannon)) %>%
   rename(alpha_effspn = alpha_shannon, gamma_effspn = gamma_shannon)
 fiageo <- read.csv(file.path(fp, 'fia/geodiversity_CSVs/fia_geo_formixedmodels_50k.csv'), stringsAsFactors = FALSE)
@@ -84,16 +85,19 @@ fia_aea_noedge <- fia_aea[!fiacoast$is_edge]
 fiasp_noedge <- fiasp[!fiacoast$is_edge, ]
 # Thin FIA plots to minimum 10 km separation
 # Edited 30 May: 20 km instead, to try to equalize with BBS's sample size (ends up being ~ 3000 also)
-set.seed(38182)
+set.seed(111)
 fiasub_radius <- SRS_iterative_N1(fia_aea_noedge, radius = 20e3, n = 3000, point = sample(length(fia_aea_noedge),1), show_progress = TRUE)
 fiaspsub <- fiasp_noedge[fiasub_radius, ]
 fiabio <- subset(fiabio, PLT_CN %in% fiaspsub$CN)
 fiageo <- subset(fiageo, PLT_CN %in% fiaspsub$CN)
 
-# Unfortunately, get rid of the few plots where beta is 0 or 1
+# Added 4 Jan 2019: Instead of getting rid of the 0 and 1 plots, use a correction factor
 fiabio <- fiabio %>%
-  mutate_at(vars(contains('beta_td')), function(x) if_else(x > 0 & x < 1, x, as.numeric(NA)))
-
+  mutate_at(vars(contains('beta_td')), function(x) case_when(
+	x == 0 ~ 0.001,
+	x == 1 ~ 0.999,
+	TRUE ~ x))
+	
 # Save data so that models can be fit in parallel -------------------------
 
 # Filter out the ones that are not in any ecoregion
