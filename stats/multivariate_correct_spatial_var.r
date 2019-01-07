@@ -9,8 +9,7 @@ task_table <- data.frame(taxon = rep(c('fia','bbs'), each = 3),
 
 n_fits <- nrow(task_table)
 
-fp <- '/mnt/research/nasabio/temp/mvspam' # If done remotely
-fp <- '~/Documents/temp' # If done locally
+fp <- '/mnt/research/nasabio/temp/mvspam' 
 
 library(brms)
 library(purrr)
@@ -43,4 +42,4 @@ model_sds <- map(model_sds, function(x) cbind(parse_names(dimnames(x)[[1]]), x))
 model_sds <- cbind(taxon = rep(task_table$taxon[1:6], map_int(model_sds, nrow)),
                    do.call(rbind, model_sds))
 
-write.csv(model_sds, '~/Dropbox/projects/nasabiodiv/modelfits/multivariate_spatial_coef_variation_corrected.csv', row.names = FALSE)
+write.csv(model_sds, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_coef_variation_corrected.csv', row.names = FALSE)

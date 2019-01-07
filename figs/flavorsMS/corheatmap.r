@@ -1,10 +1,12 @@
 # Tables and figures of correlations within predictors and within response variables
 # QDR/NASABioxgeo/30 May 2018
 
+### THIS IS FIGURE 1 IN MS
+
 # Edit 18 Jun: Use new predictor sets
 
-load('C:/Users/Q/Dropbox/projects/nasabiodiv/modelfits/bbs_spatial_mm_dat_50k.RData')
-load('C:/Users/Q/Dropbox/projects/nasabiodiv/modelfits/fia_spatial_mm_dat_50k.RData')
+load('~/Dropbox/projects/nasabiodiv/modelfits/bbs_spatial_mm_dat_50k.RData')
+load('~/Dropbox/projects/nasabiodiv/modelfits/fia_spatial_mm_dat_50k.RData')
 
 prednames50 <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
 geo_names <- c('elevation diversity','temperature mean','geol. age diversity','soil diversity','precip. mean','GPP diversity')
@@ -98,6 +100,6 @@ hmbbs <- cormat_heatmap(bbsbio_cor) + theme(legend.position = 'none') + ggtitle(
 hmgeo <- cormat_heatmap(allgeo_cor) + theme(legend.position = 'none') + ggtitle('geodiversity correlations')
 
 library(gridExtra)
-png('C:/Users/Q/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/corr_heatmaps.png', height = 8, width = 5, res = 400, units = 'in')
+png('~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/corr_heatmaps.png', height = 8, width = 5, res = 400, units = 'in')
   grid.arrange(hmgeo, hmbbs, hmfia, ncol = 1)
 dev.off()

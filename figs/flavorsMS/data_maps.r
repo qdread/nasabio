@@ -1,6 +1,9 @@
 # Maps to show raw data for NASABIOXGEO MS
 # QDR/29 May 2018
 
+### THESE ARE FIGS 2-4 IN MS
+
+# Edit 07 Jan 2019: redo with new bio data
 # Edit 18 Jun 2018: new predictor variables.
 # Edit 4 Jun 2018: change midpoint to gray, change labels
 
@@ -61,8 +64,6 @@ geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','so
 
 # Load data and coordinates
 load('/mnt/research/nasabio/temp/bbs_spatial_mm_dat_50k.RData')
-# Added April 30: Correction for outliers on beta functional
-bbsbio$beta_func_pa[bbsbio$beta_func_pa < -10] <- NA
 load('/mnt/research/nasabio/temp/fia_spatial_mm_dat_50k.RData')
 
 # Load coordinates (fuzzed coordinates are OK for FIA)
@@ -121,7 +122,7 @@ tnc <- SpatialPolygonsDataFrame(tnc, tncdat)
 
 
 # Loop through and make a plot, including both BBS and FIA locations, for the predictor variables @ 50 km
-cols <- c(bg = 'gray80', text = 'black', state = 'gray20', fill = 'white')
+cols <- c(bg = 'white', text = 'black', state = 'gray20', fill = 'white')
 
 # Draw the plots in a single figure with the 7 predictors
 maps_geo <- allgeo_long %>%

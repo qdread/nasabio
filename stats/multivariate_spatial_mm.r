@@ -80,17 +80,17 @@ distrib <- 'gaussian'
 # Priors (added May 29)
 # --------------------
 
-# Edit 04 Jan 2019: temporarily remove all priors
+# Edit 04 Jan 2019: temporarily remove all priors (add some back in on 05 Jan)
 # Edit May 31: Add priors for FIA intercepts and for BBS alpha sdcar
 # Edit June 14: Add sdcar priors and intercept priors on FIA beta, sd car priors on BBS beta
 library(brms, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
 # 1st arg is df, 2nd is mu, 3rd is sigma for student t distribution
 added_priors <- NULL
-# if (task_table$rv[task] == 'alpha' & taxon == 'fia') {
-  # added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alpharichness'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphaphypa'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
-# } 
+if (task_table$rv[task] == 'alpha' & taxon == 'fia') {
+  added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alpharichness'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphaphypa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
+} 
 # if (task_table$rv[task] == 'beta' & taxon == 'fia') {
   # added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
 					# set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
@@ -99,32 +99,37 @@ added_priors <- NULL
 					# set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
 					# set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa') )					
 # }
-# if (task_table$rv[task] == 'gamma' & taxon == 'fia') {
-  # added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammarichness'),
-					# set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammaphypa'),
-					# set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammafuncpa') )
-# } 
-# if (task_table$rv[task] == 'alpha' & taxon == 'bbs') {
-  # added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alpharichness'),
-					# set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphaphypa'),
-					# set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphafuncpa'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alpharichness'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphaphypa'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
-# }
-# if (task_table$rv[task] == 'beta' & taxon == 'bbs') {
-  # added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
-					# set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
-					# set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betatdsorensenpa'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betaphypa'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betafuncpa') )
-# }
-# if (task_table$rv[task] == 'gamma' & taxon == 'bbs') {
-  # added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammarichness'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammaphypa'),
-					# set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammafuncpa') )
-# } 
+if (task_table$rv[task] == 'beta' & taxon == 'fia') {
+  added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa') )					
+}
+if (task_table$rv[task] == 'gamma' & taxon == 'fia') {
+  added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammarichness'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammaphypa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammafuncpa') )
+} 
+if (task_table$rv[task] == 'alpha' & taxon == 'bbs') {
+  added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alpharichness'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphaphypa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'alphafuncpa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alpharichness'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphaphypa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
+}
+if (task_table$rv[task] == 'beta' & taxon == 'bbs') {
+  added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
+					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betatdsorensenpa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betaphypa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betafuncpa') )
+}
+if (task_table$rv[task] == 'gamma' & taxon == 'bbs') {
+  added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammarichness'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammaphypa'),
+					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammafuncpa') )
+} 
 			 
 # --------------------				  
 				  

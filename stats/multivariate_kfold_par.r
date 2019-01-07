@@ -3,24 +3,24 @@
 # Parallel version created 25 May
 # QDR/NASABIOXGEO/25 May 2018
 
+# Modified 05 Jan 2019: update for new OS.
 # Modified 14 June: add more tasks. (again on 1 July)
 # Modified 4 June: save raw predictions with each iteration so that we can put a credible interval on the k-fold RMSE too.
 
 # Total number of tasks is number of models * number of folds per model = 18 * 5 = 90
-task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 taskdf <- expand.grid(fold = 1:5, model = 1:24)
 fit_n <- taskdf$model[task]
 fold_n <- taskdf$fold[task]
 
-# Pass in number of iterations as an argument.
-args <- commandArgs(TRUE)
+# Get arguments specified in sbatch
+NI <- as.numeric(Sys.getenv('NI'))
+NW <- as.numeric(Sys.getenv('NW'))
+delta <- as.numeric(Sys.getenv('delta'))
 
-for (i in 1:length(args)) {
-  eval(parse(text=args[[i]]))
-}
+library(brms, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
 
 onefold <- function(fit, k, ksub, n_chains, n_iter, n_warmup, delta = 0.8, seed = 101) {
-  require(brms)
   require(purrr)
   require(dplyr)
   require(reshape2)

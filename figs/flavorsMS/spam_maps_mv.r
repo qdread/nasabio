@@ -2,10 +2,11 @@
 # This uses the new spatial mixed model coefficients. ***MULTIVARIATE!***
 # QDR NASABIOXGEO 28 May 2018
 
+# Edit 07 Jan 2019: update for new OS
 # Edit 18 June: new predictor sets
 # Edit 04 June: Also make maps of spatial effects only
 
-task <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 
 # Define functions --------------------------------------------------------
 
@@ -62,7 +63,7 @@ arrangeMaps <- function(x, fpfig, prefix, titles, raw_names, text_color = 'white
 # Load coefficients
 fpcoef <- '/mnt/research/nasabio/data/modelfits' # Cluster
 fpregion <- '/mnt/research/nasabio/data/ecoregions'
-fpstate <- '~'
+fpstate <- '/mnt/home/qdr'
 
 
 coef_all <- read.csv(file.path(fpcoef, 'multivariate_spatial_coef.csv'), stringsAsFactors = FALSE)
@@ -137,7 +138,7 @@ bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
 geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','gpp_sd', 'intercept')
 prednames <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
 
-cols <- c(bg = 'gray80', text = 'black', state = 'gray20')
+cols <- c(bg = 'white', text = 'black', state = 'gray20')
 
 # Create list of maps for each predictor by response combo (9 predictors x 8 responses)
 
