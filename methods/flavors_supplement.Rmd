@@ -1,12 +1,14 @@
 ---
 title: "Supplementary Information"
 author: "Quentin D. Read"
-date: "December 4, 2018"
+date: "January 8, 2019"
 header-includes:
    - \usepackage{caption}
    - \usepackage{multirow}
 output: pdf_document
 ---
+
+\newcommand{\fpmap}{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/maps_for_supplement}
 
 # Supplementary Tables
 
@@ -88,144 +90,144 @@ In figures 3b, 4b, etc., below, the ecoregions are shaded based on whether the 9
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_temperature_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_coef_temperature_mean.png}}
 \caption*{Figure S3a: Coefficients of mean annual temperature on bird diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_temperature_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_signif_temperature_mean.png}}
 \caption*{Figure S3b: Coefficients of mean annual temperature on bird diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_precip_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_coef_precip_mean.png}}
 \caption*{Figure S4a: Coefficients of mean annual precipitation on bird diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_precip_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_signif_precip_mean.png}}
 \caption*{Figure S4b: Coefficients of mean annual precipitation on bird diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_elevation_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_coef_elevation_diversity.png}}
 \caption*{Figure S5a: Coefficients of elevation variability on bird diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_elevation_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_signif_elevation_diversity.png}}
 \caption*{Figure S5b: Coefficients of elevation variability on bird diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_gpp_sd.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_coef_gpp_sd.png}}
 \caption*{Figure S6a: Coefficients of GPP variability on bird diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_gpp_sd.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_signif_gpp_sd.png}}
 \caption*{Figure S6b: Coefficients of GPP variability on bird diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_geol_age_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_coef_geol_age_diversity.png}}
 \caption*{Figure S7a: Coefficients of geological age diversity on bird diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_geol_age_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_signif_geol_age_diversity.png}}
 \caption*{Figure S7b: Coefficients of geological age diversity on bird diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_coef_soil_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_coef_soil_diversity.png}}
 \caption*{Figure S8a: Coefficients of soil type diversity on bird diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/bbs_signif_soil_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/bbs_signif_soil_diversity.png}}
 \caption*{Figure S8b: Coefficients of soil type diversity on bird diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_temperature_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_coef_temperature_mean.png}}
 \caption*{Figure S9a: Coefficients of mean annual temperature on tree diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_temperature_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_signif_temperature_mean.png}}
 \caption*{Figure S9b: Coefficients of mean annual temperature on tree diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_precip_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_coef_precip_mean.png}}
 \caption*{Figure S10a: Coefficients of mean annual precipitation on tree diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_precip_mean.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_signif_precip_mean.png}}
 \caption*{Figure S10b: Coefficients of mean annual precipitation on tree diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_elevation_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_coef_elevation_diversity.png}}
 \caption*{Figure S11a: Coefficients of elevation variability on tree diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_elevation_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_signif_elevation_diversity.png}}
 \caption*{Figure S11b: Coefficients of elevation variability on tree diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_gpp_sd.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_coef_gpp_sd.png}}
 \caption*{Figure S12a: Coefficients of GPP variability on tree diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_gpp_sd.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_signif_gpp_sd.png}}
 \caption*{Figure S12b: Coefficients of GPP variability on tree diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_geol_age_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_coef_geol_age_diversity.png}}
 \caption*{Figure S13a: Coefficients of geological age diversity on tree diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_geol_age_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_signif_geol_age_diversity.png}}
 \caption*{Figure S13b: Coefficients of geological age diversity on tree diversity, nonzero regions shown}
 \end{figure}
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_coef_soil_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_coef_soil_diversity.png}}
 \caption*{Figure S14a: Coefficients of soil type diversity on tree diversity, values shown}
 \end{figure}
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/fia_signif_soil_diversity.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{\fpmap/fia_signif_soil_diversity.png}}
 \caption*{Figure S14b: Coefficients of soil type diversity on tree diversity, nonzero regions shown}
 \end{figure}
 

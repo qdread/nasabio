@@ -3,6 +3,7 @@
 
 ### THIS IS FIGURE 1 IN MS
 
+# Edit 08 Jan 2019: panel labels for MS
 # Edit 18 Jun: Use new predictor sets
 
 load('~/Dropbox/projects/nasabiodiv/modelfits/bbs_spatial_mm_dat_50k.RData')
@@ -95,9 +96,11 @@ cormat_heatmap <- function(mat) {
   
 }
 
-hmfia <- cormat_heatmap(fiabio_cor) + ggtitle('tree biodiversity correlations')
-hmbbs <- cormat_heatmap(bbsbio_cor) + theme(legend.position = 'none') + ggtitle('bird biodiversity correlations')
-hmgeo <- cormat_heatmap(allgeo_cor) + theme(legend.position = 'none') + ggtitle('geodiversity correlations')
+lefttitle <- theme(plot.title = element_text(hjust = 0.75))
+
+hmfia <- cormat_heatmap(fiabio_cor) + ggtitle('(c) tree biodiversity correlations') + lefttitle
+hmbbs <- cormat_heatmap(bbsbio_cor) + theme(legend.position = 'none') + ggtitle('(b) bird biodiversity correlations') + lefttitle
+hmgeo <- cormat_heatmap(allgeo_cor) + theme(legend.position = 'none') + ggtitle('(a) geodiversity correlations') + theme(plot.title = element_text(hjust = 1.1))
 
 library(gridExtra)
 png('~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/corr_heatmaps.png', height = 8, width = 5, res = 400, units = 'in')
