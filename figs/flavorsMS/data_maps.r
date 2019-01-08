@@ -49,7 +49,7 @@ library(purrr)
 library(gridExtra)
 
 fpregion <- '/mnt/research/nasabio/data/ecoregions'
-fpstate <- '~'
+fpstate <- '/mnt/home/qdr'
 fpfig <- '/mnt/research/nasabio/figs/descriptivemaps'
 
 rbcol <- scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')))
@@ -136,7 +136,7 @@ geo_names_order <- c('temperature mean', 'precipitation mean', 'elevation divers
 tw <- theme(plot.title = element_text(color = 'black'))
 maps_geo$title <- geo_names_order
 
-png(file.path(fpfig, 'geo_points.png'), height = 9, width = 9, res = 400, units = 'in')
+png(file.path(fpfig, 'geo_points.png'), height = 9, width = 9, res = 400, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(maps_geo$maps, maps_geo$title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()
 
@@ -151,7 +151,7 @@ maps_bbsbio <- bbsbio_long %>%
 tw <- theme(plot.title = element_text(color = 'black'))
 maps_bbsbio$bio_title <- bio_titles[match(maps_bbsbio$variable, bio_names)] # Short title by bio variable
 maps_bbsbio <- maps_bbsbio[match(bio_titles, maps_bbsbio$bio_title),] # Put bio variables in correct order
-png(file.path(fpfig, 'bbs_response_points.png'), height = 9, width = 12, res = 400, units = 'in')
+png(file.path(fpfig, 'bbs_response_points.png'), height = 9, width = 12, res = 400, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(maps_bbsbio$maps, maps_bbsbio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()
 
@@ -164,7 +164,7 @@ maps_fiabio <- fiabio_long %>%
 tw <- theme(plot.title = element_text(color = 'black'))
 maps_fiabio$bio_title <- bio_titles[match(maps_fiabio$variable, bio_names)] # Short title by bio variable
 maps_fiabio <- maps_fiabio[match(bio_titles, maps_fiabio$bio_title),] # Put bio variables in correct order
-png(file.path(fpfig, 'fia_response_points.png'), height = 9, width = 12, res = 400, units = 'in')
+png(file.path(fpfig, 'fia_response_points.png'), height = 9, width = 12, res = 400, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(maps_fiabio$maps, maps_fiabio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()
 

@@ -52,7 +52,7 @@ arrangeMaps <- function(x, fpfig, prefix, titles, raw_names, text_color = 'white
   geo_name <- geo_names[which(prednames %in% x$parameter)] # For file name by geo variable
   x$bio_title <- titles[match(x$response, raw_names)] # Short title by bio variable
   x <- x[match(titles, x$bio_title),] # Put bio variables in correct order
-  png(file.path(fpfig, paste0(prefix, '_', geo_name, '.png')), height = 9, width = 12, res = 400, units = 'in')
+  png(file.path(fpfig, paste0(prefix, '_', geo_name, '.png')), height = 9, width = 12, res = 400, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(x$maps, x$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
   dev.off()
   return('i just made a map :-)')
@@ -135,7 +135,7 @@ bio_titles <- c('alpha taxonomic', 'alpha phylogenetic', 'alpha functional', 'be
 bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
                "beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa",
                "gamma_richness", "gamma_phy_pa", "gamma_func_pa")
-geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','gpp_sd', 'intercept')
+geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','gpp_sd', 'Intercept')
 prednames <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
 
 cols <- c(bg = 'white', text = 'black', state = 'gray20')

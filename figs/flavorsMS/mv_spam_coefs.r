@@ -3,6 +3,7 @@
 
 ### THESE ARE THE ACTUAL PUBLICATION FIGURES FOR THE "FLAVORS" MANUSCRIPT!
 
+# Modified 08 Jan 2019: change the blue color scheme and fix the mismatch in the spatial var color scheme.
 # Modified 18 June: Add the new null models.
 # Modified 15 November: Make a few visual changes to figs 5 and 6 for better readability.
 
@@ -33,6 +34,8 @@ bio_titles <- c('alpha TD', 'beta TD', 'gamma TD', 'alpha PD', 'beta PD', 'gamma
 bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
                "alpha_phy_pa", "beta_phy_pa", "gamma_phy_pa", 
                "alpha_func_pa", "beta_func_pa", "gamma_func_pa")
+
+twocolors <- c('black', 'gray60')
 
 # Combine full-model and k-fold RMSEs.
 # Include RMSE from each fold so we can see variability due to folds.
@@ -129,12 +132,12 @@ coefdat_both <- all_coef %>%
   mutate(nonzero = Q2.5 > 0 | Q97.5 < 0)
 pd <- position_dodge(width = 0.12)
 coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c('birds','trees')))) +
-  geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
+  geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray95') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = taxon, group = taxon), width = 0, position=pd) +
   geom_point(aes(x = predictor, y = Estimate, size = nonzero, color = taxon, fill = nonzero, group = taxon), pch = 21, position=pd, show.legend = FALSE) +
   facet_grid(rv ~ flavor) +
-  scale_color_manual(values = c('blue', 'skyblue')) +
+  scale_color_manual(values = twocolors) +
   scale_fill_manual(values = c('black', 'red'), guide = FALSE) +
   scale_size_manual(values = c(1.5, 2), guide = FALSE) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
@@ -162,9 +165,9 @@ coefvar_plot <- ggplot(model_coef_var %>%
                                 response = map_chr(strsplit(as.character(response), ' '), 1))) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray90') +
   geom_col(aes(x = predictor, y = coef_var, fill = taxon, group = taxon), position = pd, width = 0.5) +
-  geom_errorbar(aes(x = predictor, ymin = q025, ymax = q975, group = taxon), position = pd, width = 0.15) +
+  geom_errorbar(aes(x = predictor, ymin = q025, ymax = q975, group = taxon), position = pd, width = 0.15, color = 'gray20') +
   facet_grid(response ~ flavor) +
-  scale_fill_manual(values = c('blue', 'skyblue')) +
+  scale_fill_manual(values = rev(twocolors)) +
   guides(fill = guide_legend(reverse = TRUE)) +
   scale_y_continuous(name = 'spatial variability of relationship', limits = c(0, 1.1), expand = c(0,0)) +
   theme_bw() +
@@ -316,7 +319,7 @@ rmseplot_taxacolor <- all_rmse %>%
   geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, color = taxon, group = taxon), width = 0, position = pd) +
   geom_point(aes(y = RMSE_mean, color = taxon, group = taxon), position = pd, size = 2) +
   theme_bw() +
-  scale_color_manual(values = c('blue', 'skyblue')) +
+  scale_color_manual(values = twocolors) +
   scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
   scale_x_discrete(name = 'response') +
   theme(strip.background = element_blank(),
