@@ -1,26 +1,27 @@
 # Calculate gamma diversity within route for BBS.
 
-load('/mnt/research/nasabio/data/bbs/bbsworkspace_bystop_20072016.r')
-source('~/code/fia/pairwise_beta_focal.r')
-load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance matrices.
+# Edited 09 Jan 2019: add 1 km
 
-# Replace AOU codes in the trait matrix with actual species names.
+load('/mnt/research/nasabio/data/bbs/bbsworkspace_bystop_20072016.r')
+source('/mnt/research/nasabio/code/pairwise_beta_focal.r')
+load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance matrices.
 
 library(sp)
 library(vegan)
-source('~/code/fia/fixpicante.r')
+source('/mnt/research/nasabio/code/fixpicante.r')
 
-nnull <- 99
+nnull <- 999
 
-stop_bounds <- rbind(c(20,31), c(13,37), c(1,50)) # First and last stops to be used for each radius (approx. 5,10,20 km)
+radii <- c(1, 5, 10, 20)
+stop_bounds <- rbind(c(25,26), c(20,31), c(13,37), c(1,50)) # First and last stops to be used for each radius (approx. 1,5,10,20 km)
 route_ids <- unique(bbscov_oneyear$rteNo)
 
 # Declare structure to hold data
-gamma_div <- replicate(3, matrix(NA, nrow = length(route_ids), ncol = 11), simplify = FALSE)
+gamma_div <- replicate(length(radii), matrix(NA, nrow = length(route_ids), ncol = 11), simplify = FALSE)
 
 # Loop through the three radii (5,10,20) and the unique route IDs.
-for (r in 1:3) {
-	cat('\nRadius: ', c(5,10,20)[r],'\n')
+for (r in 1:length(radii)) {
+	cat('\nRadius: ', radii[r],'\n')
 	pb <- txtProgressBar(1, length(route_ids), style = 3)
 	for (p in 1:length(route_ids)) {
 		setTxtProgressBar(pb, p)
@@ -49,5 +50,5 @@ for (r in 1:3) {
 }
 
 gamma_div <- do.call(rbind, gamma_div)
-gamma_div <- data.frame(rteNo = route_ids, radius = rep(c(5,10,20), each = length(route_ids)), gamma_div)
-write.csv(gamma_div, file = '/mnt/research/nasabio/data/bbs/bbs_withinroute_gamma.csv', row.names = FALSE)
+gamma_div <- data.frame(rteNo = route_ids, radius = radii, each = length(route_ids)), gamma_div)
+write.csv(gamma_div, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/withinroute/bbs_withinroute_gamma.csv', row.names = FALSE)

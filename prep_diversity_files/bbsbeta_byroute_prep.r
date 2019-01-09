@@ -17,7 +17,7 @@
 
 # 1. Define community either as aggregated route or by stop
 
-# Start with by-stop diversity.
+# (Both are done, for flavors MS it's aggregated by route, for scaling MS it's by stop)
 
 # 2. Create community matrix.
 
@@ -110,7 +110,12 @@ bbsmat_byroute <- bbslong_cleaned %>% group_by(year, rteNo) %>% do(s = get_spp(.
 bbsgrps_byroute <- select(bbsmat_byroute, year, rteNo)
 bbsmat_byroute <- do.call('rbind', bbsmat_byroute$s)
 
+# 2b. Create community matrix by stop as well (added 09 Jan 2019)
 
+bbsmat_bystop <- bbslong_cleaned %>% group_by(year, rteNo, Stop) %>% do(s = get_spp(., sppids=sppids)) # Takes 10 minutes on HPCC.
+bbsgrps_bystop <- select(bbsmat_bystop, year, rteNo, Stop)
+bbsmat_bystop <- do.call('rbind', bbsmat_bystop$s)
+save(bbsgrps_bystop, bbsmat_bystop, file = '/mnt/research/nasabio/data/bbs/bbsmat_bystop.RData')
 
 # 3. Project lat-long to Albers.
 

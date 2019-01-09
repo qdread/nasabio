@@ -2,19 +2,15 @@
 # QDR, 17 Apr 2017
 # Project: NASABioXGeo
 
+# Edited 09 Jan 2019: redo this with the newly created matrix (with the improved way of dealing with unidentified or ambiguous individuals) -- changed variable names.
+
 # 1. Load community matrix.
 
-bbsspp <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/specieslist.csv', stringsAsFactors = FALSE)
-load('/mnt/research/aquaxterra/DATA/raw_data/BBS/bbsmat_bystop2016.r') # Load fixed bbsmat. This loads both byroute and bystop.
-# Quick correction to fix two birds that aren't in the phylogeny. Just get rid of the eastern yellow wagtail since it's probably only in Alaska anyway.
-fixedbbsmat[, which(sppids == 5739)] <- fixedbbsmat[, which(sppids == 5738)] + fixedbbsmat[, which(sppids == 5739)]
-fixedbbsmat[, which(sppids == 5738)] <- 0
-fixedbbsmat[, which(sppids == 6960)] <- 0
+bbsspp <- read.csv('/mnt/research/nasabio/data/bbs/bbs_species_lookup_table_modified.csv', stringsAsFactors = FALSE)
+load('/mnt/research/nasabio/data/bbs/bbsmat_bystop.RData') # Load fixed bbsmat. 
+load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # For final species list.
 
 bbscoords <- read.csv('/mnt/research/nasabio/data/bbs/bbs_route_midpoints.csv')
-
-birdtrait <- read.csv('/mnt/research/aquaxterra/DATA/raw_data/bird_traits/birdtraitmerged.csv', stringsAsFactors = FALSE)
-birdtrait[birdtrait == -999] <- NA
 
 library(dplyr)
 
@@ -26,16 +22,16 @@ for (i in 1:length(sppids)) {
 	if (length(names_i)>0) dimnames_matrix[i] <- names_i[1]
 }
 
-dimnames(fixedbbsmat)[[2]] <- dimnames_matrix
+dimnames(bbsmat_bystop)[[2]] <- dimnames_matrix
 
 # Remove nocturnal species, columns with zero sum, and routes that don't have a midpoint.
 # Rows with zero sum will have to be removed later.
-has_coords <- bbsgrps$rteNo %in% bbscoords$rteNo
-ns <- colSums(fixedbbsmat)
-nocturnalbirds <- birdtrait$Latin_Name[birdtrait$Nocturnal == 1]
-fixedbbsmat <- fixedbbsmat[has_coords, !(dimnames(fixedbbsmat)[[2]] %in% nocturnalbirds) & ns != 0]
+has_coords <- bbsgrps_bystop$rteNo %in% bbscoords$rteNo
+ns <- colSums(bbsmat_bystop)
+final_splist <- dimnames(ericdist)[[1]]
+fixedbbsmat <- bbsmat_bystop[has_coords, (dimnames(bbsmat_bystop)[[2]] %in% final_splist) & ns != 0]
 
-bbsgrps <- bbsgrps[has_coords, ]
+bbsgrps <- bbsgrps_bystop[has_coords, ]
 
 bbscov <- bbsgrps %>%
 	left_join(bbscoords %>% mutate(rteNo=as.character(rteNo))) %>%

@@ -1,5 +1,6 @@
 # BBS beta-diversity within routes
 
+# Edited 09 Jan 2019: Update file paths for new OS, add 1 km
 # Edited 15 June 2018: Correct indexing error.
 
 load('/mnt/research/nasabio/data/bbs/bbsworkspace_bystop_20072016.r')
@@ -8,15 +9,15 @@ load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance mat
 
 library(sp)
 library(vegan)
-library(vegetarian)
+library(vegetarian, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
 source('/mnt/research/nasabio/code/fixpicante.r')
 
-nnull <- 99 # Reduce to save time
+nnull <- 999
 
 n_slices <- 1000
-slice <- as.numeric(Sys.getenv('PBS_ARRAYID'))
+slice <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 
-stop_bounds <- rbind(c(20,31), c(13,37), c(1,50)) # First and last stops to be used for each radius (approx. 5,10,20 km)
+stop_bounds <- rbind(c(25,26), c(20,31), c(13,37), c(1,50)) # First and last stops to be used for each radius (approx. 5,10,20 km)
 route_ids <- unique(bbscov_oneyear$rteNo)
 
 # Determine row indices for the slice of the matrix to be used.
@@ -39,7 +40,7 @@ div_names <- c('beta_td_pairwise_pa', 'beta_td_sorensen_pa',
 # Identify which means need to be done on proportion transform.
 prop_vars <- which(div_names %in% c('beta_td_pairwise', 'beta_td_sorensen', 'beta_td_pairwise_pa', 'beta_td_sorensen_pa'))
 
-radii <- c(5, 10, 20)
+radii <- c(1, 5, 10, 20)
 
 # Get pairwise metrics between: stops 1-49, and all stops with a greater number than that.
 # 3 nested loops: rte = route, p = first plot, 1:49, p2 = second plot, (p+1):50
@@ -73,7 +74,7 @@ for (rte in rowidxmin:rowidxmax) {
 	
 # Get mean beta-diversity of the point by applying a function to each 50x50 slice, along the 3rd dimension of beta_div_rte.	
 	commdat <- list()
-	for (r in 1:3) {
+	for (r in 1:length(radii)) {
 		neighbors_incircle <- beta_div_rte[stop_bounds[r,1]:stop_bounds[r,2], stop_bounds[r,1]:stop_bounds[r,2], , drop = FALSE]
 		commdat[[r]] <- c(radius = radii[r], 
 						  apply(neighbors_incircle[, , prop_vars, drop = FALSE], 3, function(x) sin(mean(asin(sqrt(x[is.finite(x)]))))^2),
