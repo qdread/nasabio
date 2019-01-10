@@ -5,6 +5,7 @@
 # Note that BBS must be the within-route biodiversity!
 
 # This follows more or less the same procedure as multivariate_makedata.r
+# Edited 10 Jan 2019: changed file paths to new data.
 
 # Load biodiversity and geodiversity data ---------------------------------
 
@@ -24,7 +25,7 @@ bbsgeo <- left_join(bbsgeo1km, bbsgeo)
 
 # BBS 1 kilometer
 
-bbsalphawithin <- read.csv(file.path(fp, 'bbs/biodiversity_CSVs/bbs_withinroute_alpha_with1km.csv'), stringsAsFactors = FALSE) %>%
+bbsalphawithin <- read.csv(file.path(fp, 'bbs/biodiversity_CSVs/withinroute/bbs_withinroute_alpha_with1km.csv'), stringsAsFactors = FALSE) %>%
 	setDT %>%
 	dcast(rteNo ~ radius, value.var = c("richness", "MPD_pa_z", "MNTD_pa_z", "MPDfunc_pa_z", "MNTDfunc_pa_z")) %>%
 	setNames(c(names(.)[1], paste('alpha', names(.)[-1], sep = '_'))) 
@@ -51,10 +52,15 @@ bbsgeo <- bbsgeo %>%
 # Use effective species number for Shannon
 
 # Read the raw alpha values in for FIA 1 km diversity
-fiabio <- read.csv(file.path(fp, 'fia/biodiversity_CSVs/fiausa_natural_alphadiv.csv'), stringsAsFactors = FALSE) %>%
+fiabio <- read.csv(file.path(fp, 'fia/biodiversity_CSVs/updated_nov2018/fiausa_alphadiv.csv'), stringsAsFactors = FALSE) %>%
   select(PLT_CN, richness, shannon, MPD_pa_z, MPD_z, MPDfunc_pa_z, MPDfunc_z) %>%
   mutate(shannon = exp(shannon)) %>%
   setNames(c('PLT_CN', 'alpha_richness', 'alpha_effspn', 'alpha_phy_pa', 'alpha_phy', 'alpha_func_pa', 'alpha_func'))
+  
+# Remove plantation plots
+plantation <- read.csv(file.path(fp, 'fia/plotcond/plantation.csv'))
+fiabio <- fiabio %>% 
+	filter(PLT_CN %in% plantation$PLT_CN[!plantation$plantation])
 
 fiageo <- read.csv(file.path(fp, 'fia/geodiversity_CSVs/fia_geo_forscalinganalysis.csv'), stringsAsFactors = FALSE)
 fiageo1km <- read.csv(file.path(fp, 'fia/geodiversity_CSVs/fia_allgeo_wide_1kmradius.csv'), stringsAsFactors = FALSE)
@@ -87,6 +93,7 @@ bbscoast <- flag_coast_plots(bbs_aea, radius = 50e3, border_countries = c('Canad
 noedge_rte <- bbssp$rteNo[!bbscoast$is_edge]
 bbsbio <- subset(bbsbio, rteNo %in% noedge_rte)
 bbsgeo <- subset(bbsgeo, rteNo %in% noedge_rte)
+bbsgeo <- fiageo[match(bbsbio$rteNo, bbsgeo$rteNo), ] # Make sure they have the same order
 
 # For FIA, use 10 km thinning and get rid of 50km to Can/Mex. This will reduce dataset to very manageable <10k plots.
 fiasp <- read.csv('~/data/allfia.csv')
@@ -106,6 +113,7 @@ fiasub_radius <- SRS_iterative_N1(fia_aea_noedge, radius = 20e3, n = 3000, point
 fiaspsub <- fiasp_noedge[fiasub_radius, ]
 fiabio <- subset(fiabio, PLT_CN %in% fiaspsub$CN)
 fiageo <- subset(fiageo, PLT_CN %in% fiaspsub$CN)
+fiageo <- fiageo[match(fiabio$PLT_CN, fiageo$PLT_CN), ] # Make sure they have the same order
 
 # Save data so that models can be fit in parallel -------------------------
 

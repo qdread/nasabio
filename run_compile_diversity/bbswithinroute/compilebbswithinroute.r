@@ -5,7 +5,7 @@
 
 # Get alpha averages for the three stop subsets within each route, for BBS
 
-bbs_alphadiv <- read.csv('/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_withinroute_alphabystop.csv', stringsAsFactors = FALSE)
+bbs_alphadiv <- read.csv('/mnt/research/nasabio/data/bbs/biodiversity_CSVs/withinroute/bbs_withinroute_alphabystop.csv', stringsAsFactors = FALSE)
 
 library(dplyr)
 
@@ -26,7 +26,7 @@ for (i in 1:length(radii)) {
 bbs_alpha <- bbs_alpha %>% bind_rows %>% arrange(rteNo, radius)
 
 #write.csv(bbs_alpha, file = '/mnt/research/nasabio/data/bbs/bbs_withinroute_alpha.csv', row.names = FALSE)	
-write.csv(bbs_alpha, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/bbs_withinroute_alpha_with1km.csv', row.names = FALSE)	
+write.csv(bbs_alpha, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/withinroute/bbs_withinroute_alpha_with1km.csv', row.names = FALSE)	
 
 # Compile beta diversity: BBS within route
 # ----------------------------------------
@@ -49,5 +49,6 @@ bbs_beta <- bind_rows(bbs_beta)
 route_ids <- unique(bbscov_oneyear$rteNo)
 
 bbs_beta <- cbind(rteNo = rep(route_ids, each=length(radii)), bbs_beta)
+bbs_beta <- bbs_beta[, apply(bbs_beta, 2, function(x) any(!is.na(x)))]
 
-write.csv(bbs_beta, file = '/mnt/research/nasabio/data/bbs/bbs_withinroute_beta.csv', row.names = FALSE)	
+write.csv(bbs_beta, file = '/mnt/research/nasabio/data/bbs/biodiversity_CSVs/withinroute/bbs_withinroute_beta.csv', row.names = FALSE)	
