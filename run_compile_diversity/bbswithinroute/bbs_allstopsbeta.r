@@ -39,33 +39,35 @@ radii <- c(1, 5, 10, 20)
 
 # Take the averages already within this script, so that we don't need to save the individual pairwise distances.
 
-	# Distances between target plot and all other plots.
-	beta_div_rte <- array(NA, dim=c(50,50,21))
-	
-	# Get indexes of rows that are in the focal route.
-	rte_rows <- which(bbscov_oneyear$rteNo == route_ids[route])
-	
-	for (p1 in 1:49) {
-		for (p2 in (p1+1):50) {
-			# Added 15 June: Catch errors and return NA
-			beta_p1_p2 <- try(  singlepair_beta(p1 = bbsmat_oneyear[rte_rows[p1],], p2 = bbsmat_oneyear[rte_rows[p2],], 
-												td=T, pd=T, fd=T, abundance=F,
-												pddist=ericdist, fddist=birdtraitdist,
-												nnull = nnull,
-												phylo_spp = NULL, func_problem_spp = NULL), TRUE)
-			beta_div_rte[p1, p2, ] <- if (!inherits(beta_p1_p2, 'try-error')) beta_p1_p2 else as.numeric(rep(NA, length(div_names)))
-			
-		}
+# Distances between target plot and all other plots.
+beta_div_rte <- array(NA, dim=c(50,50,21))
+
+# Get indexes of rows that are in the focal route.
+rte_rows <- which(bbscov_oneyear$rteNo == route_ids[route])
+
+for (p1 in 1:49) {
+	message(paste('Stop', p1))
+	for (p2 in (p1+1):50) {
+		
+		# Added 15 June: Catch errors and return NA
+		beta_p1_p2 <- try(  singlepair_beta(p1 = bbsmat_oneyear[rte_rows[p1],], p2 = bbsmat_oneyear[rte_rows[p2],], 
+											td=T, pd=T, fd=T, abundance=F,
+											pddist=ericdist, fddist=birdtraitdist,
+											nnull = nnull,
+											phylo_spp = NULL, func_problem_spp = NULL), TRUE)
+		beta_div_rte[p1, p2, ] <- if (!inherits(beta_p1_p2, 'try-error')) beta_p1_p2 else as.numeric(rep(NA, length(div_names)))
+		
 	}
+}
 	
 # Get mean beta-diversity of the point by applying a function to each 50x50 slice, along the 3rd dimension of beta_div_rte.	
-	beta_div <- list()
-	for (r in 1:length(radii)) {
-		neighbors_incircle <- beta_div_rte[stop_bounds[r,1]:stop_bounds[r,2], stop_bounds[r,1]:stop_bounds[r,2], , drop = FALSE]
-		beta_div[[r]] <- c(radius = radii[r], 
-						  apply(neighbors_incircle, 3, function(x) median(x[is.finite(x)])))
-	}
-	beta_div <- as.data.frame(do.call('rbind', beta_div))
-	names(beta_div) <- c('radius', div_names)
+beta_div <- list()
+for (r in 1:length(radii)) {
+	neighbors_incircle <- beta_div_rte[stop_bounds[r,1]:stop_bounds[r,2], stop_bounds[r,1]:stop_bounds[r,2], , drop = FALSE]
+	beta_div[[r]] <- c(radius = radii[r], 
+					  apply(neighbors_incircle, 3, function(x) median(x[is.finite(x)])))
+}
+beta_div <- as.data.frame(do.call('rbind', beta_div))
+names(beta_div) <- c('radius', div_names)
 
 save(beta_div, file = paste0('/mnt/research/nasabio/data/bbs/diversitywithinroute/beta_', route, '.r'))

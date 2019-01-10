@@ -273,13 +273,15 @@ ggsave(file.path(fpfig, 'fig2_verybottomrow_r2s.png'), r2_plot, width = fwidth *
 ggsave(file.path(fpfig, 'pdfs/SuppFig_r2s.pdf'), r2_plot, width = fwidth * 0.6, height = fwidth * 0.25, units = 'mm', dpi = 600)
 
 # Plot the slopes too.
+# Modified 10 Jan 2019: change the shapes of the symbols so it looks OK in B&W
 coef_quant$radius_plot <- coef_quant$radius + rep(c(-1,0,1), each = 5)
 
 coef_plot <- ggplot(coef_quant, aes(x = radius_plot, group = interaction(radius, diversity_type), color = diversity_type)) +
   geom_line(aes(y = coef, group = diversity_type), size = 0.25) +
   geom_segment(aes(xend = radius_plot, y = coef_q25, yend = coef_q75), size = 0.5) +
-  geom_point(aes(y = coef), size = 1) +
+  geom_point(aes(y = coef, shape = diversity_type), size = 1.25) +
   scale_color_discrete(name = 'Diversity', labels = c('alpha','beta','gamma')) +
+  scale_shape_discrete(name = 'Diversity', labels = c('alpha','beta','gamma')) +
   labs(x = 'Radius (km)', y = 'Slope coefficient') +
   scale_x_continuous(breaks = radii) +
   theme(axis.text = element_text(size=7.5), axis.title = element_text(size=9))
