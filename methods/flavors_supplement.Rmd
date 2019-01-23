@@ -1,18 +1,18 @@
 ---
-title: "Supplementary Information"
-author: "Quentin D. Read"
-date: "January 8, 2019"
+title: "Supplementary Information: Figures and Tables"
 header-includes:
    - \usepackage{caption}
    - \usepackage{multirow}
 output: pdf_document
 ---
 
+Beyond counts and averages: relating geodiversity to dimensions of biodiversity. Quentin D. Read, Phoebe L. Zarnetske, Sydne Record, Kyla M. Dahlin, Andrew O. Finley, John M. Grady, Martina L. Hobi, Sparkle L. Malone, Jennifer K. Costanza, Adam M. Wilson, Andrew M. Latimer, Keith D. Gaddis, Stephanie Pau, Scott V. Ollinger
+
 \newcommand{\fpmap}{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/maps_for_supplement}
 
 # Supplementary Tables
 
-**Supplementary Table 1**: Overview of biodiversity metrics by level and by dimension.
+**Table S1**: Overview of biodiversity metrics by level and by dimension.
 
 \begin{table}[h]
 \begin{tabular}{m{1cm}m{2cm}p{4cm}p{4cm}p{4cm}}
@@ -40,7 +40,7 @@ output: pdf_document
 
 \newpage
 
-**Supplementary Table 2**: This table shows model fit statistics for each response variable for each model. The RMSE is the root mean squared error of the model fit with all the data. The 5-fold CV RMSE is the root mean squared error of the holdout data points in 5-fold cross-validation. The $R^2$ is calculated using the method of Gelman *et al.*. For all fit statistics, mean value as well as upper and lower bounds of 95% credible intervals are shown.
+**Table S2**: This table shows model fit statistics for each response variable for each model. The RMSE is the root mean squared error of the model fit with all the data. The 5-fold CV RMSE is the root mean squared error of the holdout data points in 5-fold cross-validation. The $R^2$ is calculated using the method of Gelman *et al.*. For all fit statistics, mean value as well as upper and lower bounds of 95% credible intervals are shown.
 
 ```{r, echo = FALSE, message = FALSE}
 library(knitr)
@@ -66,7 +66,7 @@ kable(fit_stats, 'latex', escape = FALSE, longtable = TRUE, booktabs = TRUE,
 \caption*{Figure S1: Model performance assessed with five-fold root mean squared error}
 \end{figure}
 
-**Supplementary Figure 1**: This figure shows the root mean squared error obtained from 5-fold cross-validation, by comparing the observed value with the out-of-sample predicted value on the data points omitted in each fold. A lower value represents better performance of the model predicting biodiversity (the y-axis is reversed so that best-performing models are on top). Error bars are 95% credible intervals. Here, we not only compare taxa but also the four types of model: space only (null), space + climate, space + geodiversity, and space + climate + geodiversity (full model). The out-of-sample cross-validation error is very similar to the in-sample error (Supplementary Table 1), indicating that overfitting is not much of a problem. We see that the inclusion of fixed effects significantly improves the prediction of out-of-sample data points, except for some of the beta-diversity models in which the space-only model without any fixed effects does just as well as the other models. In addition, a combination of geodiversity and climate variables almost always predicts better than climate alone. The same pattern is qualitatively shown by the R-squared values (Supplementary Table 1).
+**Figure S1**: This figure shows the root mean squared error obtained from 5-fold cross-validation, by comparing the observed value with the out-of-sample predicted value on the data points omitted in each fold. A lower value represents better performance of the model predicting biodiversity (the y-axis is reversed so that best-performing models are on top). Error bars are 95% credible intervals. Here, we not only compare taxa but also the four types of model: space only (null), space + climate, space + geodiversity, and space + climate + geodiversity (full model). The out-of-sample cross-validation error is very similar to the in-sample error (Supplementary Table 1), indicating that overfitting is not much of a problem. We see that the inclusion of fixed effects significantly improves the prediction of out-of-sample data points, except for some of the beta-diversity models in which the space-only model without any fixed effects does just as well as the other models. In addition, a combination of geodiversity and climate variables almost always predicts better than climate alone. The same pattern is qualitatively shown by the R-squared values (Supplementary Table 1).
 
 \newpage
 
@@ -75,17 +75,17 @@ kable(fit_stats, 'latex', escape = FALSE, longtable = TRUE, booktabs = TRUE,
 \caption*{Figure S2: Spatial variation in geodiversity-biodiversity relationships}
 \end{figure}
 
-**Supplementary Figure 2**: The spatial variability of the relationship between each predictor and each response, by taxon. The spatial variability is measured by the standard deviation of each coefficient value among ecoregions. Error bars represent the 95% credible interval of the standard deviation parameter. Higher values represent relationships that vary more spatially.
+**Figure S2**: The spatial variability of the relationship between each predictor and each response, by taxon. The spatial variability is measured by the standard deviation of each coefficient value among ecoregions. Error bars represent the 95% credible interval of the standard deviation parameter. Higher values represent relationships that vary more spatially.
 
 \newpage
 
-### Supplementary Figures 3-14
+### Supplementary Figures S3-S14
 
 The following figures are maps of the coefficient on each climate or geodiversity predictor from the full multivariate models predicting alpha, beta, and gamma diversity for birds and for trees. Each figure shows the coefficients from the alpha, beta, and gamma models for each of the three biodiversity dimensions (taxonomic, phylogenetic, and functional) for one taxonomic group. Figures 3 through 8 show the coefficients for birds separately for each predictor, and figures 9 through 14 show the coefficients for trees.
 
-In figures 3a, 4a, etc. below, the color of each TNC ecoregion is the region-level coefficient estimate from the model (USA-wide fixed-effect slope + random-effect slope from that region). The colors are scaled so that darker red ecoregions have more positive coefficients, and darker blue ecoregions have negative coefficients. White ecoregions have coefficients approximating zero, and dark gray ecoregions have coefficients that could not be estimated. 
+In figures S3a, S4a, etc. below, the color of each TNC ecoregion is the region-level coefficient estimate from the model (USA-wide fixed-effect slope + random-effect slope from that region). The colors are scaled so that darker red ecoregions have more positive coefficients, and darker blue ecoregions have negative coefficients. White ecoregions have coefficients approximating zero, and dark gray ecoregions have coefficients that could not be estimated. 
 
-In figures 3b, 4b, etc., below, the ecoregions are shaded based on whether the 95% credible interval around the coefficient overlaps zero. Red shaded regions have entirely positive nonzero 95% credible intervals, while blue shaded regions have entirely negative nonzero 95% credible intervals. Dark gray shaded regions have 95% credible intervals that contain zero.
+In figures S3b, S4b, etc., below, the ecoregions are shaded based on whether the 95% credible interval around the coefficient overlaps zero. Red shaded regions have entirely positive nonzero 95% credible intervals, while blue shaded regions have entirely negative nonzero 95% credible intervals. Dark gray shaded regions have 95% credible intervals that contain zero.
 
 \newpage
 
