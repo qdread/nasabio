@@ -140,6 +140,11 @@ png(file.path(fpfig, 'geo_points.png'), height = 9, width = 9, res = 400, units 
   grid.arrange(grobs = map2(maps_geo$maps, maps_geo$title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()
 
+# Added 28 Feb 2019: create version with only the 4 geo variables, and no legend
+png(file.path(fpfig, 'geo_points_nolegend.png'), height = 6, width = 9, res = 400, units = 'in', type = 'cairo')
+  grid.arrange(grobs = map2(maps_geo$maps[3:6], paste0('(',letters[1:4],') ',maps_geo$title[3:6]), function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.position = 'none'))), nrow = 2)
+dev.off()
+
 # Loop through and make a plot of the 9 response variables separately for BBS and for FIA
 
 ### bbs
