@@ -3,40 +3,29 @@
 # Parallel version created 25 May
 # QDR/NASABIOXGEO/25 May 2018
 
+# Modified 08 Apr 2019: change cross-validation scheme to use the preselected region chunks instead of doing stratified sampling. (10 chunks for 10-fold CV)
 # Modified 05 Jan 2019: update for new OS.
 # Modified 14 June: add more tasks. (again on 1 July)
 # Modified 4 June: save raw predictions with each iteration so that we can put a credible interval on the k-fold RMSE too.
 
-# Total number of tasks is number of models * number of folds per model = 18 * 5 = 90
-task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
-taskdf <- expand.grid(fold = 1:5, model = 1:24)
-fit_n <- taskdf$model[task]
-fold_n <- taskdf$fold[task]
-
 # Get arguments specified in sbatch
+K <- as.numeric(Sys.getenv('K'))
 NI <- as.numeric(Sys.getenv('NI'))
 NW <- as.numeric(Sys.getenv('NW'))
 delta <- as.numeric(Sys.getenv('delta'))
 
+# Total number of tasks is number of models * number of folds per model = 24 * 10 = 240 ( or 24 * 8 = 192)
+task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
+taskdf <- expand.grid(fold = 1:K, model = 1:24)
+fit_n <- taskdf$model[task]
+fold_n <- taskdf$fold[task]
+
 library(brms, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
 
-onefold <- function(fit, k, ksub, n_chains, n_iter, n_warmup, delta = 0.8, seed = 101) {
+onefold <- function(fit, k, ksub, n_chains, n_iter, n_warmup, delta = 0.8, mcmc_seed = 101) {
   require(purrr)
   require(dplyr)
   require(reshape2)
-  
-  # The group 'fold' is specified ahead of time.
-  assign_fold <- function(n, k) {
-    sample(rep_len(sample(1:k), n))
-  }
-  
-  set.seed(seed)
-  folds <- fit$data %>% group_by(region) %>% transmute(fold = assign_fold(n(), k))
-  fit$data$fold <- factor(folds$fold)
-  
-  # Create MCMC seed based on time
-  now <- as.numeric(Sys.time())
-  (mcmc_seed <- trunc((now-floor(now))*10000))
   
   # Fit only the specified fold.
   kf <- kfold(fit, Ksub = as.array(ksub), chains = n_chains, cores = n_chains, iter = n_iter, warmup = n_warmup, control = list(adapt_delta = delta), save_fits = TRUE, group = 'fold', seed = mcmc_seed)
@@ -68,6 +57,11 @@ fp <- '/mnt/research/nasabio/temp/mvspam'
 
 load(file.path(fp, paste0('fit', fit_n, '.RData')))
 
-kf <- onefold(fit$model, k = 5, ksub = fold_n, n_chains = 2, n_iter = NI, n_warmup = NW, delta = delta, seed = task + 303)	
+# Join fit data with ecoregion fold ID.
+fold_df <- read.csv('/mnt/research/nasabio/data/ecoregions/ecoregion_folds.csv', stringsAsFactors = FALSE)
+fold_byregion <- fold_df$fold[match(fit$model$data$region, fold_df$TNC)]
+fit$model$data$fold <- factor(fold_byregion) 
+
+kf <- onefold(fit$model, k = K, ksub = fold_n, n_chains = 2, n_iter = NI, n_warmup = NW, delta = delta, mcmc_seed = fit_n + fold_n + 303)	
 	
 save(kf, file = paste0('/mnt/research/nasabio/temp/mvspam/kfold_', fit_n, '_', fold_n, '.RData'))
