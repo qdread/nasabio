@@ -1,17 +1,14 @@
 # Make data needed to fit models for "flavors" analysis
 # QDR NASABioXGeo 14 June 2018
 
-# This new version, on 14 June, uses TRI (topographic ruggedness, mean neighbor pixel difference), instead of SD, for geodiversity.
+# This new version uses TRI (topographic ruggedness, mean neighbor pixel difference), instead of SD, for geodiversity.
 # Edited 04 Jan 2019: Change how 0 and 1 values are treated for FIA
-# Edited 30 Apr 2019: Correct the subsetting by ecoregion at the very end of script
+# New version created 29 Apr 2019: Make a "real" distance matrix so that we can fit a SAR not a CAR.
 
 # Load biodiversity and geodiversity data ---------------------------------
 
 library(dplyr)
 fp <- '/mnt/research/nasabio/data'
-
-# Load adjacency matrices
-load(file.path(fp, 'ecoregions/ecoregion_adjacency.RData'))
 
 # BBS
 bbsbio <- read.csv(file.path(fp, 'bbs/biodiversity_CSVs/bbs_allbio_wide.csv'), stringsAsFactors = FALSE)
@@ -98,20 +95,25 @@ fiabio <- fiabio %>%
 	x == 0 ~ 0.001,
 	x == 1 ~ 0.999,
 	TRUE ~ x))
+
+# Create distance matrix --------------------------------------------------
+
+# This is now needed for the SAR.
+# Make sure that the thinned out locations and the edge locations have been removed
+
+# Subset projected object by the removed points
+bbs_aea_noedge <- bbs_aea[!bbscoast$is_edge]
+bbsdist <- spDists(bbs_aea_noedge)
+
+fia_aea_noedge_thinned <- fia_aea_noedge[fiasub_radius]
+fiadist <- spDists(fia_aea_noedge_thinned)
+
+# Add custom k-fold column to geo data ------------------------------------
+
+# (Don't do this for now. It can be added using the ecoregion groups.)
 	
 # Save data so that models can be fit in parallel -------------------------
 
-# Filter out the ones that are not in any ecoregion
-# Edit 30 May: only do this for TNC
-# Edit 30 Apr 2019: The old subsetting by logical index is wrong, must be done as filter
-fia_in_eco <- unique(fiageo$PLT_CN[fiageo$TNC %in% dimnames(tnc_bin)[[1]]])
-bbs_in_eco <- unique(bbsgeo$rteNo[bbsgeo$TNC %in% dimnames(tnc_bin)[[1]]])
-
-fiageo <- fiageo %>% filter(PLT_CN %in% fia_in_eco)
-fiabio <- fiabio %>% filter(PLT_CN %in% fia_in_eco)
-bbsgeo <- bbsgeo %>% filter(rteNo %in% bbs_in_eco)
-bbsbio <- bbsbio %>% filter(rteNo %in% bbs_in_eco)
-
 # 50 k version
-save(fiageo, fiabio, tnc_bin, file = '/mnt/research/nasabio/temp/fia_spatial_mm_dat_50k.RData')
-save(bbsgeo, bbsbio, tnc_bin, file = '/mnt/research/nasabio/temp/bbs_spatial_mm_dat_50k.RData')
+save(fiageo, fiabio, fiadist, file = '/mnt/research/nasabio/temp/fia_spatial_mm_dat_50k_sar.RData')
+save(bbsgeo, bbsbio, bbsdist, file = '/mnt/research/nasabio/temp/bbs_spatial_mm_dat_50k_sar.RData')
