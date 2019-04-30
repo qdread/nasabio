@@ -10,7 +10,6 @@
 fit_uv_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL,n_iter = 2000, n_warmup = 1000, random_effect_type = 'spatial') {
   require(dplyr)
   require(CARBayes)
-  require(reshape2)
   # Build formula and data
   id_df <- pred_df[, c(id_var, region_var)]
   resp_df <- resp_df[, c(id_var, resp_var)]
@@ -28,8 +27,8 @@ fit_uv_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var,
 	fixed_effects <- paste(pred_var_names, collapse = '+')
 	formula_string <- paste(resp_var, '~', fixed_effects)
 	# Remove the NA covariate rows (not needed to do for response variable)
-		
-	dat <- Reduce(left_join, list(id_df, resp_df, pred_df))
+	pred_df <- pred_df %>% filter(complete.cases(.))	
+	dat <- Reduce(right_join, list(id_df, resp_df, pred_df))
   } else {
 	formula_string <- paste(resp_var, '~', 1)
 	dat <- Reduce(left_join, list(id_df, resp_df))
@@ -52,19 +51,6 @@ fit_uv_mm <- function(pred_df, resp_df, pred_vars, resp_var, id_var, region_var,
   } 
   mm <- S.CARmultilevel(formula = formula_string, family = 'gaussian', data = dat, W = reduced_adj_matrix, ind.area = as.numeric(factor(dat$region)), burnin = NW, n.sample = NW + NI, thin = 1, rho = rho)
   
-  # Extract fixed effects and random effects from the model, to save time later.
-  
-  # Edit 16 Aug: do not extract fixed effects (and combined fixed+random effects) if it is a null model without fixed effects.
-  random_effects <- ranef(mm)
-  random_effects <- cbind(effect = 'random', melt(random_effects$region, varnames = c('region', 'stat', 'parameter'))) %>% mutate(region = as.character(region))
-  if (!force_zero_intercept | length(pred_vars) > 0) {
-	fixed_effects <- fixef(mm)
-    region_effects <- coef(mm)
-	fixed_effects <- cbind(effect = 'fixed', region = as.character(NA), melt(fixed_effects, varnames = c('parameter', 'stat')))
-	region_effects <- cbind(effect = 'coefficient', melt(region_effects$region, varnames = c('region', 'stat', 'parameter'))) %>% mutate(region = as.character(region))
-    mm_coef <- fixed_effects %>% full_join(random_effects) %>% full_join(region_effects)
-  } else {
-	mm_coef <- random_effects
-  }
-  return(list(model = mm, coef = mm_coef))
+  # Do not extract fixed, random, and fixed+random here. Do that in the process output script.
+  return(mm)
 }

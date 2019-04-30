@@ -79,7 +79,7 @@ added_priors <- NULL
 fit <- fit_uv_mm(pred_df = geodat, 
                       resp_df = biodat, 
                       pred_vars = prednames, 
-                      resp_vars = rv, 
+                      resp_var = rv, 
                       id_var = siteid, 
 					  region_var = 'TNC',
                       distribution = distrib, 
