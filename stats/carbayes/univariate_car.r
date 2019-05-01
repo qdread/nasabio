@@ -1,6 +1,7 @@
 # R script to fit univariate CAR models with CARBayes
 # QDR/Nasabioxgeo/30 April 2019
 
+# Modified 01 May 2019: Incorporate k-fold into this script. I think it will run fast enough to do everything at once.
 # Modified 04 Jan 2019: edit file paths and task names for new OS
 # Modified 25 July: tighten prior on intercepts for beta
 # Modified 1 July: Geodiversity only as well as climate only
@@ -40,7 +41,7 @@ if(task_table$model[task] == 'climate') prednames <- climate_prednames
 if(task_table$model[task] == 'geo') prednames <- geo_prednames
 if(task_table$model[task] == 'space') prednames <- character(0)
 
-source('/mnt/research/nasabio/code/carbayes/fit_uv_mm.r')
+source('/mnt/research/nasabio/code/fit_uv_mm.r')
 
 # Fit the model for the given response variable, taxon, and ecoregion
 
@@ -77,17 +78,43 @@ added_priors <- NULL
 # --------------------				  
 				  
 fit <- fit_uv_mm(pred_df = geodat, 
-                      resp_df = biodat, 
-                      pred_vars = prednames, 
-                      resp_var = rv, 
-                      id_var = siteid, 
-					  region_var = 'TNC',
-                      distribution = distrib, 
-                      adj_matrix = tnc_bin,
-					  priors = added_priors,
-                      n_iter = NI,
-                      n_warmup = NW
-					  )
+				 resp_df = biodat, 
+				 pred_vars = prednames, 
+				 resp_var = rv, 
+				 id_var = siteid, 
+				 region_var = 'TNC',
+				 distribution = distrib, 
+				 adj_matrix = tnc_bin,
+				 priors = added_priors,
+				 n_iter = NI,
+				 n_warmup = NW
+				 )
 
+# K-fold cross validation
+fold_df <- read.csv('/mnt/research/nasabio/data/ecoregions/ecoregion_folds.csv', stringsAsFactors = FALSE)
+K <- length(unique(fold_df$fold))
+
+# For each of the 8 fold ID's in the fold dataframe, replace the response variable with NA for all locations in that fold and refit model.
+kfold <- function(i) {
+	biodat_fold <- biodat %>% left_join(geodat[, c(siteid, 'TNC')]) %>% left_join(fold_df)
+	biodat_fold[biodat_fold$fold == i, rv] <- NA
+
+	fit_fold <- fit_uv_mm(pred_df = geodat, 
+						  resp_df = biodat_fold, 
+						  pred_vars = prednames, 
+						  resp_var = rv, 
+						  id_var = siteid, 
+						  region_var = 'TNC',
+						  distribution = distrib, 
+						  adj_matrix = tnc_bin,
+						  priors = added_priors,
+						  n_iter = NI,
+						  n_warmup = NW
+						  )
+	return(fit_fold)
+}
+
+fit_folds <- lapply(1:K, kfold)
+					  
 # Save all fits
-save(fit, file = paste0('/mnt/research/nasabio/temp/mvspam/uvfit',task,'.RData'))
+save(fit, fit_folds, file = paste0('/mnt/research/nasabio/temp/mvspam/uvfit',task,'.RData'))

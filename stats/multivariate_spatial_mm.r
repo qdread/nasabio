@@ -2,6 +2,7 @@
 # New script forked from spatial_mm_parallel.r
 # QDR/Nasabioxgeo/11 May 2018
 
+# Modified 01 May 2019: Include manual k-fold option done by manually removing the holdout values from the dataset but still using them to fit the model.
 # Modified 04 Jan 2019: edit file paths and task names for new OS
 # Modified 25 July: tighten prior on intercepts for beta
 # Modified 1 July: Geodiversity only as well as climate only
@@ -33,13 +34,15 @@ alpha_resp <- c('alpha_richness', 'alpha_phy_pa', 'alpha_func_pa')
 beta_resp <- c('beta_td_sorensen_pa', 'beta_phy_pa', 'beta_func_pa')
 gamma_resp <- c('gamma_richness', 'gamma_phy_pa', 'gamma_func_pa')
 
-task_table <- data.frame(taxon = rep(c('fia','bbs'), each = 3),
+task_table <- expand.grid(taxon = c('fia','bbs'),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
-						 model = rep(c('full','climate','space', 'geo'),each=6),
+						 model = c('full','climate','space', 'geo'),
+						 fold = 0:8,
                          stringsAsFactors = FALSE)
 
 taxon <- task_table$taxon[task]
+fold <- task_table$fold[task]
 if(task_table$rv[task] == 'alpha') rv <- alpha_resp
 if(task_table$rv[task] == 'beta') rv <- beta_resp
 if(task_table$rv[task] == 'gamma') rv <- gamma_resp
@@ -73,6 +76,16 @@ if (taxon == 'bbs') {
   biodat$beta_td_sorensen <- qlogis(biodat$beta_td_sorensen)
 }
 
+# Added 01 May 2019: include the ecoregion folds
+fold_df <- read.csv('/mnt/research/nasabio/data/ecoregions/ecoregion_folds.csv', stringsAsFactors = FALSE)
+
+library(dplyr)
+
+if (fold != 0) {
+	# Join response variable data with the region ID and the fold tag data, then set the appropriate values to NA
+	biodat <- biodat %>% left_join(geodat[, c(siteid, 'TNC')]) %>% left_join(fold_df)
+	biodat$missing <- biodat$fold == fold
+}
 
 # Modified 14 May: model all with Gaussian
 distrib <- 'gaussian'
@@ -83,7 +96,7 @@ distrib <- 'gaussian'
 # Edit 04 Jan 2019: temporarily remove all priors (add some back in on 05 Jan)
 # Edit May 31: Add priors for FIA intercepts and for BBS alpha sdcar
 # Edit June 14: Add sdcar priors and intercept priors on FIA beta, sd car priors on BBS beta
-library(brms, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
+library(brms)
 # 1st arg is df, 2nd is mu, 3rd is sigma for student t distribution
 added_priors <- NULL
 if (task_table$rv[task] == 'alpha' & taxon == 'fia') {
@@ -149,7 +162,8 @@ fit <- fit_mv_mm(pred_df = geodat,
                       n_chains = NC,
                       n_iter = NI,
                       n_warmup = NW,
-					  delta = delta
+					  delta = delta,
+					  missing_data = fold > 0
 					  )
 
 # Save all fits

@@ -3,22 +3,31 @@
 # QDR NASABioXGeo
 # Originally written in April but this source code file created 14 June 2018
 
+# Modified 01 May 2019: add option to exclude some data points and estimate them with a missing data model -- this requires complete overhaul of code to create formula syntax. (and removal of rescor in formula)
 # Modified 15 August 2018: add option to force intercept through zero
 # Modified 18 June 2018: add drop = FALSE to scale so that it does not give weird output if only 1 response variable
 # Modified 15 June 2018: correct scale() function to just return a numeric vector without attributes (also debug this a bit)
 
-fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9, random_effect_type = 'spatial', force_zero_intercept = FALSE) {
+fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9, random_effect_type = 'spatial', force_zero_intercept = FALSE, missing_data = FALSE) {
   require(dplyr)
   require(brms)
   require(reshape2)
   # Build formula and data
+  if (missing_data) {
+	missing_df <- resp_df[,c(id_var, 'missing')]
+  }
   id_df <- pred_df[, c(id_var, region_var)]
   resp_df <- resp_df[, c(id_var, resp_vars)]
   resp_df[,-1] <- scale(resp_df[,-1, drop = FALSE])
   resp_df[,-1] <- lapply(resp_df[,-1, drop = FALSE], as.numeric)
   names(id_df)[2] <- 'region' # Make sure the name of the region is called region so that the random effects will specify correctly.
   region_name <- 'region'
-  resp_var_names <- paste0('cbind(', paste(resp_vars, collapse = ','), ')')
+  
+  if (missing_data) {
+	resp_var_names <- paste(resp_vars, '| mi()')
+  } else {
+	resp_var_names <- resp_vars
+  }
   # below, create full formula string for the model with predictors
   # create much simpler one if there aren't predictors (edited 13 June)
   if (length(pred_vars) > 0) {
@@ -29,18 +38,25 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
 	fixed_effects <- paste(pred_var_names, collapse = '+')
 	intercepts <- if (force_zero_intercept) '0' else paste('(1|', region_name, ')', sep = '')
 	random_effects <- paste(c(intercepts, paste('(', pred_var_names, ' - 1|', region_name, ')', sep = '')), collapse = '+')
-	formula_string <- paste(resp_var_names, '~', fixed_effects, '+', random_effects)
+	formula_string <- mvbf(flist = paste(resp_var_names, '~', fixed_effects, '+', random_effects), rescor = FALSE)
 	dat <- Reduce(left_join, list(id_df, resp_df, pred_df)) %>% filter(complete.cases(.))
   } else {
 	intercepts <- if (force_zero_intercept) '0 +' else ''
-	formula_string <- paste(resp_var_names, '~', intercepts, paste('(1|', region_name, ')', sep = ''))
+	formula_string <- mvbf(flist = paste(resp_var_names, '~', intercepts, paste('(1|', region_name, ')', sep = '')), rescor = FALSE)
 	dat <- Reduce(left_join, list(id_df, resp_df)) %>% filter(complete.cases(.))
   }
-    
-  # Added 2 May: get rid of any region that has less than 5 sites.
+  
+  # Added 1 May 2019: Change any missing data rows to NA
+  if (missing_data) {
+	dat <- dat %>% left_join(missing_df)
+	dat[dat$missing, rv] <- NA
+  }
+	
+  
+  # Added 2 May 2018: get rid of any region that has less than 5 sites.
   dat <- dat %>% group_by(region) %>% filter(n() >= 5)
   
-  # Added 4 May: if any region no longer has a neighbor at this point, get rid of it too.
+  # Added 4 May 2018: if any region no longer has a neighbor at this point, get rid of it too.
   reduced_adj_matrix <- adj_matrix[rownames(adj_matrix) %in% dat$region, rownames(adj_matrix) %in% dat$region]
   nneighb <- rowSums(reduced_adj_matrix)
   keep_regions <- names(nneighb)[nneighb > 0]
