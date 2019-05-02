@@ -1,13 +1,13 @@
 # Extract sds of coefficients to see which ones vary more spatially.
 # This is the correct way of doing it, better than the previous overly complex method.
 
-task_table <- data.frame(taxon = rep(c('fia','bbs'), each = 3),
+task_table <- expand.grid(taxon = c('fia','bbs'),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
-                         model = rep(c('full','climate','space','geo'),each=6),
+						 model = c('full','climate','space', 'geo'),
+						 fold = 0:8,
                          stringsAsFactors = FALSE)
-
-n_fits <- nrow(task_table)
+n_fits <- sum(task_table$fold == 0)
 
 fp <- '/mnt/research/nasabio/temp/mvspam' 
 
@@ -25,6 +25,7 @@ model_sds <- foreach (i = 1:6) %dopar% {
   load(file.path(fp, paste0('fit', i, '.RData')))
   sds <- summary(fit$model)$random$region[,c(1,3,4)]
   dimnames(sds)[[2]] <-  c('Estimate', 'q025', 'q975')
+  message('Job ', i, ' done')
   sds
 }
 

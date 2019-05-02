@@ -112,9 +112,9 @@ model_stats <- foreach (i = 1:n_full_fits) %dopar% {
 
 }
 
-model_coef <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$coef)))
-model_pred <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$pred)))
-model_rmse <- map2_dfr(model_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$rmse)))
+model_coef <- map2_dfr(model_stats, 1:n_full_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$coef)))
+model_pred <- map2_dfr(model_stats, 1:n_full_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$pred)))
+model_rmse <- map2_dfr(model_stats, 1:n_full_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$rmse)))
 model_r2 <- map_dfr(model_stats, 'r2')
 
 write.csv(model_coef, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_coef.csv', row.names = FALSE)
@@ -184,9 +184,11 @@ get_kfold_rmse <- function(fit_ids, K = 8) {
 
 model_kfold_stats <- foreach(i = 1:n_full_fits) %dopar% {
 	fit_ids <- with(task_table, which(taxon == taxon[i] & rv == rv[i] & model == model[i]))
-	get_kfold_rmse(fit_ids, K = 8)
+	kfold_rmse <- get_kfold_rmse(fit_ids, K = 8)
+	message('Job ', i, ' done')
+	kfold_rmse
 }
 
-model_kfold_stats <- map2_dfr(model_kfold_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], x))
+model_kfold_stats <- map2_dfr(model_kfold_stats, 1:n_full_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], x))
 	
 write.csv(model_kfold_stats, '/mnt/research/nasabio/data/modelfits/multivariate_kfold_rmse.csv', row.names = FALSE)
