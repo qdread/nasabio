@@ -83,6 +83,7 @@ model_stats <- foreach (i = 1:n_full_fits) %dopar% {
   load(file.path(fp, paste0('fit', i, '.RData')))
   
   # Get the correct variable names and apply them where needed.
+  raw_resp_names <- fit$model$formula$responses
   resp_names <- get_correct_variable_names(fit)
   
   fit$coef <- fit$coef %>%
@@ -123,21 +124,21 @@ write.csv(model_r2, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_r
 
 # K-fold output -----------------------------------------------------------
 
-model_kfold_pred <- list()
-model_kfold_stats <- list()
-
 # Load data frame with the fold IDs in it, so we can see which to calculate the RMSE for.
 fold_df <- read.csv('/mnt/research/nasabio/data/ecoregions/ecoregion_folds.csv', stringsAsFactors = FALSE)
 
 # For each fit, load each k-fold subset (8) and combine the outputs.
 
 # function to get the k-fold RMSE
-get_kfold_rmse <- function(fit_ids, fold_ids) {
-	fit_folds <- map(fit_ids, function(i) {
+get_kfold_rmse <- function(fit_ids, K = 8) {
+	fit_folds <- map(fit_ids[-1], function(i) {
 		load(file.path(fp, paste0('fit', i, '.RData')))
 		fit
 	})
 	resp_names <- get_correct_variable_names(fit_folds[[1]])
+	
+	# Load full fit so we can get the data out
+	load(file.path(fp, paste0('fit', fit_ids[1], '.RData')))
 	
 	pred_folds_raw <- map(fit_folds, function(x) {
 		preds <- predict(x$model, summary = FALSE)
@@ -145,24 +146,21 @@ get_kfold_rmse <- function(fit_ids, fold_ids) {
 		preds
 	})
 	
-	# change this so it gets only the main data df from the one with no missing values.
-	obs_folds_raw <- map(fit_folds, ~ .x$model$data[, resp_names])
-	
 	# Extract slices of predicted and observed that correspond to the holdout data points for each fold.
-	pred_folds_holdout <- map(1:length(fit_ids), function(i) {
-		holdout_idx <- fit_folds[[i]]$model$data$region %in% fold_df$TNC[fold_df$fold == fold_ids[i]]
+	pred_folds_holdout <- map(1:K, function(i) {
+		holdout_idx <- fit_folds[[i]]$model$data$region %in% fold_df$TNC[fold_df$fold == i]
 		pred_folds_raw[[i]][, holdout_idx, ]
 	})
 	
 	# also change this so it just reorders the main data df to the same order as the holdout
-	obs_folds_holdout <- map(1:length(fit_ids), function(i) {
-		holdout_idx <- fit_folds[[i]]$model$data$region %in% fold_df$TNC[fold_df$fold == fold_ids[i]]
-		obs_folds_raw[[i]][holdout_idx, ]
+	obs_folds_holdout <- map(1:K, function(i) {
+		holdout_idx <- fit$model$data$region %in% fold_df$TNC[fold_df$fold == i]
+		fit$model$data[holdout_idx, c(resp_names)]
 	})
 	
 	# Bind the slices into the proper dimensions 
 	pred_all_holdout <- abind(pred_folds_holdout, along = 2)
-	obs_all_holdout <- ...
+	obs_all_holdout <- do.call('rbind', obs_folds_holdout)
 	
 	# sweep out observed from fitted and calculate RMSE
 	rmse_quantiles <- sweep(pred_all_holdout, 2:3, as.matrix(obs_all_holdout), FUN = '-') %>% # Subtract predicted - observed
@@ -176,7 +174,6 @@ get_kfold_rmse <- function(fit_ids, fold_ids) {
 
 	# Generate ranges of observed data and divide this by the RMSE values to get the relative RMSE values
 	obs_folds_holdout %>%
-		select(-region) %>%
 		melt(variable.name = 'response') %>%
 		group_by(response) %>%
 		summarize(range_obs = diff(range(value))) %>%
@@ -185,12 +182,11 @@ get_kfold_rmse <- function(fit_ids, fold_ids) {
 	
 }	
 
-model_kfold_stats <- foreach(i = 1:n_fits) %dopar% {
-task_table %>%
-	mutate(idx = 1:nrow(.)) %>%
-	filter(fold != 0) %>%
-	group_by(taxon, rv, ecoregion, model) %>% 
-	do(get_kfold_rmse(idx, fold))
+model_kfold_stats <- foreach(i = 1:n_full_fits) %dopar% {
+	fit_ids <- with(task_table, which(taxon == taxon[i] & rv == rv[i] & model == model[i]))
+	get_kfold_rmse(fit_ids, K = 8)
 }
+
+model_kfold_stats <- map2_dfr(model_kfold_stats, 1:n_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], x))
 	
 write.csv(model_kfold_stats, '/mnt/research/nasabio/data/modelfits/multivariate_kfold_rmse.csv', row.names = FALSE)
