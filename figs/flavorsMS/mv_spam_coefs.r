@@ -39,17 +39,16 @@ twocolors <- c('black', 'gray60')
 
 # Combine full-model and k-fold RMSEs.
 # Include RMSE from each fold so we can see variability due to folds.
+# Edited 02 May 2019: correct the data wrangling code because the output of the new k-fold is slightly different.
 
 all_rmse <- kfold_rmse %>%
-  mutate(response = bio_names[match(response,bio_names)]) %>%
-  filter(is.na(fold)) %>%
-  select(-kfoldic, -kfoldic_se, -fold) %>%
+  rename_if(is.numeric, ~ paste0('kfold_', .x)) %>%
   right_join(model_rmse) %>%
-  left_join(model_r2 %>% rename(r2 = Estimate, r2_error = Est.Error, r2_q025 = Q2.5, r2_q975 = Q97.5)) %>%
-  mutate_at(vars(starts_with('kfold_RMSE')), funs(relative = ./range_obs)) %>%
+  left_join(model_r2 %>% select(-fold) %>% rename(r2 = Estimate, r2_error = Est.Error, r2_q025 = Q2.5, r2_q975 = Q97.5)) %>%
   mutate(response = factor(bio_titles[match(response, bio_names)], levels = bio_titles),
          flavor = map_chr(strsplit(as.character(response), ' '), 2) %>%
            factor(levels = c('TD','PD','FD'), labels = c('taxonomic', 'phylogenetic', 'functional')))
+  
 
 # Reshape coefficient plot and relabel it
 all_coef <- model_coef %>%
@@ -169,7 +168,7 @@ coefvar_plot <- ggplot(model_coef_var %>%
   facet_grid(response ~ flavor) +
   scale_fill_manual(values = rev(twocolors)) +
   guides(fill = guide_legend(reverse = TRUE)) +
-  scale_y_continuous(name = 'spatial variability of relationship', limits = c(0, 1.1), expand = c(0,0)) +
+  scale_y_continuous(name = 'spatial variability of relationship', limits = c(0, 1.16), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill = NA),
         panel.grid = element_blank(),
@@ -193,13 +192,13 @@ rmseplot_both <- all_rmse %>%
   filter(model == 'full') %>%
   ggplot(aes(x = response)) +
   facet_grid(. ~ taxon, labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, y = RMSE_mean), width = 0, position = pn1) +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975, y = kfold_RMSE_mean), width = 0, color = 'red', position = pn2) +
-  geom_point(aes(y = RMSE_mean), position = pn1) +
-  geom_point(aes(y = kfold_RMSE_mean), color = 'red', position = pn2) +
+  geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pn1) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, color = 'red', position = pn2) +
+  geom_point(aes(y = RMSE_mean_relative), position = pn1) +
+  geom_point(aes(y = kfold_RMSE_mean_relative), color = 'red', position = pn2) +
   geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 1.3), expand = c(0,0), name = 'root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.75), expand = c(0,0), name = 'relative root mean squared error') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         strip.background = element_rect(fill = NA)) 
 
@@ -253,7 +252,7 @@ kfold_rmseplot_bymodel_bird <- all_rmse %>%
   geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
   geom_point(aes(y = kfold_RMSE_mean), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = '5-fold CV root mean squared error') +
+  scale_y_reverse(limits = c(3, 0.5), expand = c(0,0), name = 'CV root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('birds') +
   theme(strip.background = element_blank(),
@@ -267,7 +266,7 @@ kfold_rmseplot_bymodel_tree <- all_rmse %>%
   geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
   geom_point(aes(y = kfold_RMSE_mean), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = '5-fold CV root mean squared error') +
+  scale_y_reverse(limits = c(3, 0.5), expand = c(0,0), name = 'CV root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('trees') +
   theme(strip.background = element_blank(),

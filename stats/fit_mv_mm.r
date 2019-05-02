@@ -3,12 +3,13 @@
 # QDR NASABioXGeo
 # Originally written in April but this source code file created 14 June 2018
 
+# Modified 02 May 2019: Exclude entire regions explicitly
 # Modified 01 May 2019: add option to exclude some data points and estimate them with a missing data model -- this requires complete overhaul of code to create formula syntax. (and removal of rescor in formula)
 # Modified 15 August 2018: add option to force intercept through zero
 # Modified 18 June 2018: add drop = FALSE to scale so that it does not give weird output if only 1 response variable
 # Modified 15 June 2018: correct scale() function to just return a numeric vector without attributes (also debug this a bit)
 
-fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9, random_effect_type = 'spatial', force_zero_intercept = FALSE, missing_data = FALSE) {
+fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var, adj_matrix, distribution = 'gaussian', priors = NULL, n_chains = 2, n_iter = 2000, n_warmup = 1000, delta = 0.9, random_effect_type = 'spatial', force_zero_intercept = FALSE, missing_data = FALSE, exclude_locations = character(0)) {
   require(dplyr)
   require(brms)
   require(reshape2)
@@ -51,10 +52,14 @@ fit_mv_mm <- function(pred_df, resp_df, pred_vars, resp_vars, id_var, region_var
 	dat <- dat %>% left_join(missing_df)
 	dat[dat$missing, rv] <- NA
   }
-	
   
   # Added 2 May 2018: get rid of any region that has less than 5 sites.
   dat <- dat %>% group_by(region) %>% filter(n() >= 5)
+  
+  # Added 2 May 2019: exclude entire regions explicitly if they are listed in the exclude_locations argument
+  if (length(exclude_locations) > 0) {
+	dat <- dat %>% filter(!grepl(paste(exclude_locations, collapse = '|'), region))
+  }
   
   # Added 4 May 2018: if any region no longer has a neighbor at this point, get rid of it too.
   reduced_adj_matrix <- adj_matrix[rownames(adj_matrix) %in% dat$region, rownames(adj_matrix) %in% dat$region]

@@ -2,21 +2,24 @@
 # This version is for the models where I did the k-fold CV manually, built in to the main model script
 # QDR/NASABIOXGEO/01 May 2019
 
+# Modified 2 May 2019: Change to "leave ONE region out" cross validation -- rationale provided in the Roberts et al. paper
 # Modified 19 June: Get rid of the CV calculation (gives bad results)
 # Modified 14 June: include newer "null" and subset models
 # Modified 4 June: get RMSE for each iteration so we can put a credible interval on it.
+
+K <- 63 # Number of regions with adequate number of data points
 
 task_table <- expand.grid(taxon = c('fia','bbs'),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
 						 model = c('full','climate','space', 'geo'),
-						 fold = 0:8,
+						 fold = 0:K,
                          stringsAsFactors = FALSE)
 
 n_fits <- nrow(task_table)
 n_full_fits <- sum(task_table$fold == 0)
 
-fp <- '/mnt/research/nasabio/temp/mvspam'
+fp <- '/mnt/gs18/scratch/groups/nasabio/modelfits'
 
 library(brms)
 library(purrr)
@@ -126,11 +129,14 @@ write.csv(model_r2, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_r
 
 # Load data frame with the fold IDs in it, so we can see which to calculate the RMSE for.
 fold_df <- read.csv('/mnt/research/nasabio/data/ecoregions/ecoregion_folds.csv', stringsAsFactors = FALSE)
+exclude_regions <- c('NA0801', 'NA0808', 'NA0417', 'NA0514', 'NA1202', 'NA1301')
+region_folds <- fold_df$TNC
+region_folds <- region_folds[!grepl(paste(exclude_locations, collapse = '|'), region_folds)]
 
-# For each fit, load each k-fold subset (8) and combine the outputs.
+# For each fit, load each k-fold subset (K = 63 for the regions) and combine the outputs.
 
 # function to get the k-fold RMSE
-get_kfold_rmse <- function(fit_ids, K = 8) {
+get_kfold_rmse <- function(fit_ids, K) {
 	fit_folds <- map(fit_ids[-1], function(i) {
 		load(file.path(fp, paste0('fit', i, '.RData')))
 		fit
@@ -148,13 +154,13 @@ get_kfold_rmse <- function(fit_ids, K = 8) {
 	
 	# Extract slices of predicted and observed that correspond to the holdout data points for each fold.
 	pred_folds_holdout <- map(1:K, function(i) {
-		holdout_idx <- fit_folds[[i]]$model$data$region %in% fold_df$TNC[fold_df$fold == i]
+		holdout_idx <- fit_folds[[i]]$model$data$region %in% region_folds[i]
 		pred_folds_raw[[i]][, holdout_idx, ]
 	})
 	
 	# also change this so it just reorders the main data df to the same order as the holdout
 	obs_folds_holdout <- map(1:K, function(i) {
-		holdout_idx <- fit$model$data$region %in% fold_df$TNC[fold_df$fold == i]
+		holdout_idx <- fit$model$data$region %in% region_folds[i]
 		fit$model$data[holdout_idx, c(resp_names)]
 	})
 	

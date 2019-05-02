@@ -38,7 +38,7 @@ task_table <- expand.grid(taxon = c('fia','bbs'),
                          rv = c('alpha', 'beta', 'gamma'),
                          ecoregion = 'TNC',
 						 model = c('full','climate','space', 'geo'),
-						 fold = 0:8,
+						 fold = 0:63,
                          stringsAsFactors = FALSE)
 
 taxon <- task_table$taxon[task]
@@ -76,15 +76,25 @@ if (taxon == 'bbs') {
   biodat$beta_td_sorensen <- qlogis(biodat$beta_td_sorensen)
 }
 
-# Added 01 May 2019: include the ecoregion folds
+# The following six ecoregions should not be used in any model fitting because they have too few data points. 
+# They are primarily in Canada or Mexico with only a small portion of area in the USA, once buffer is deducted
+
+exclude_regions <- c('NA0801', 'NA0808', 'NA0417', 'NA0514', 'NA1202', 'NA1301')
+
+# Set data from the holdout set to missing, if task was designated as a k-fold task
+# For "leave one region out" cross-validation, we just need to get rid of a single region for each fold
+
+# Added 02 May 2019: include the ecoregion folds, less the excluded ones
 fold_df <- read.csv('/mnt/research/nasabio/data/ecoregions/ecoregion_folds.csv', stringsAsFactors = FALSE)
+region_folds <- fold_df$TNC
+region_folds <- region_folds[!grepl(paste(exclude_regions, collapse = '|'), region_folds)]
 
 library(dplyr)
 
 if (fold != 0) {
-	# Join response variable data with the region ID and the fold tag data, then set the appropriate values to NA
-	biodat <- biodat %>% left_join(geodat[, c(siteid, 'TNC')]) %>% left_join(fold_df)
-	biodat$missing <- biodat$fold == fold
+	# Join response variable data with the region ID, then set the appropriate values to NA
+	biodat <- biodat %>% left_join(geodat[, c(siteid, 'TNC')])
+	biodat$missing <- biodat$TNC == region_folds[fold]
 }
 
 # Modified 14 May: model all with Gaussian
@@ -164,8 +174,9 @@ fit <- fit_mv_mm(pred_df = geodat,
                       n_iter = NI,
                       n_warmup = NW,
 					  delta = delta,
-					  missing_data = fold > 0
+					  missing_data = fold > 0,
+					  exclude_locations = exclude_regions
 					  )
 
-# Save all fits
-save(fit, file = paste0('/mnt/research/nasabio/temp/mvspam/fit',task,'.RData'))
+# Save all fits -- do in scratch space because so big
+save(fit, file = paste0('/mnt/gs18/scratch/groups/nasabio/modelfits/fit',task,'.RData'))
