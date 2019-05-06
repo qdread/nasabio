@@ -131,7 +131,7 @@ write.csv(model_r2, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_r
 fold_df <- read.csv('/mnt/research/nasabio/data/ecoregions/ecoregion_folds.csv', stringsAsFactors = FALSE)
 exclude_regions <- c('NA0801', 'NA0808', 'NA0417', 'NA0514', 'NA1202', 'NA1301')
 region_folds <- fold_df$TNC
-region_folds <- region_folds[!grepl(paste(exclude_locations, collapse = '|'), region_folds)]
+region_folds <- region_folds[!grepl(paste(exclude_regions, collapse = '|'), region_folds)]
 
 # For each fit, load each k-fold subset (K = 63 for the regions) and combine the outputs.
 
@@ -190,7 +190,7 @@ get_kfold_rmse <- function(fit_ids, K) {
 
 model_kfold_stats <- foreach(i = 1:n_full_fits) %dopar% {
 	fit_ids <- with(task_table, which(taxon == taxon[i] & rv == rv[i] & model == model[i]))
-	kfold_rmse <- get_kfold_rmse(fit_ids, K = 8)
+	kfold_rmse <- get_kfold_rmse(fit_ids, K = 63)
 	message('Job ', i, ' done')
 	kfold_rmse
 }

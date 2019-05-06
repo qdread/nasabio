@@ -115,9 +115,9 @@ if (task_table$rv[task] == 'alpha' & taxon == 'fia') {
 					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
 } 
 if (task_table$rv[task] == 'beta' & taxon == 'fia') {
-  added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
-					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
-					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa') )
+  added_priors <- c(set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betatdsorensenpa'),
+					set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betaphypa'),
+					set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betafuncpa') )
 }
 					# set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
 					# set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
@@ -145,14 +145,14 @@ if (task_table$rv[task] == 'beta' & taxon == 'bbs') {
   added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betatdsorensenpa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betaphypa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'betafuncpa') )
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa') )
 }
 if (task_table$rv[task] == 'gamma' & taxon == 'bbs') {
-  added_priors <- c(set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammarichness'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammaphypa'),
-					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'gammafuncpa') )
+  added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammarichness'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammaphypa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammafuncpa') )
 } 
 			 
 # --------------------				  
