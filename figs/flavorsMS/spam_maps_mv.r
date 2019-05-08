@@ -135,8 +135,8 @@ bio_titles <- c('alpha taxonomic', 'alpha phylogenetic', 'alpha functional', 'be
 bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",
                "beta_td_sorensen_pa", "beta_phy_pa", "beta_func_pa",
                "gamma_richness", "gamma_phy_pa", "gamma_func_pa")
-geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','gpp_sd', 'Intercept')
-prednames <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
+geo_names <- c('elevation_diversity','temperature_mean','geol_age_diversity','soil_diversity','precip_mean','gpp_sd', 'intercept')
+prednames <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean', 'Intercept')
 
 cols <- c(bg = 'white', text = 'black', state = 'gray20')
 
