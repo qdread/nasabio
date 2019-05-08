@@ -125,7 +125,7 @@ tnc <- SpatialPolygonsDataFrame(tnc, tncdat)
 
 # Create all maps ------------------------------------------
 
-rbfill <- scale_fill_gradient2(low = "#4575B4", high = "#D73027", midpoint = 0)
+rbfill <- scale_fill_gradient2(low = "#4575B4", high = "#D73027", midpoint = 0, limits = c(-3.6, 3.6), labels = -3:3, breaks = -3:3)
 signif_fill <- scale_fill_manual(values = c(negative = "#4575B4", positive = "#D73027", zero = 'gray50'))
 
 library(gridExtra)
