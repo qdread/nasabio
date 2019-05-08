@@ -1,0 +1,46 @@
+---
+title: "Update on stats for flavors paper"
+author: "Quentin D. Read"
+date: "May 7, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Description of the reviewer's issue with cross-validation
+
+The reviewer -- actually the handling editor -- of the flavors paper gave us a few major points to address. A few of them can be addressed by adding clarification to the text or just the response letter. For one thing he thought the radius was too big but I think we can justify that in the text. The other is that he wanted more transparency in our variable selection procedure. I guess it's more a matter of what variables we chose to study in the first place being part of our leeway as researchers to choose. I can include a few numbers like variance inflation factors to help justify that. Another comment was that we don't provide a good justification for using remotely sensed surface temperature over interpolated air temperatures. I don't have anything ready at hand for that so a figure or some justification would be helpful if anyone could provide.
+
+The other comment the reviewer made, and the one that I focus on here, has to do with the cross-validation procedure we did. Though the reviewer criticized almost every other decision we made, he was happy that we did cross-validation. However he did not like the way we did it. I will briefly explain the issue: We have a spatial random effect in our model. It is a multilevel model where all ecoregions are modeled as having random slopes and random intercepts. The spatial autocorrelation is modeled using a "conditional autoregressive," or CAR, structure. That means the regions are viewed basically as points and two regions that share a border are neighbors, and the fewer links in the network between two regions, the closer correlated their biodiversity values should be. I fit the models and looked at all their summary stats. So far so good.  
+
+# How I originally did cross-validation
+
+To be sure the models are not overfit and are good at predicting the biodiversity values, I did cross-validation where I randomly held out a certain percentage of the points, fit the mdoel with the other points, and used that model to predict the values at the held-out points. I repeated that for a number of "folds" (subsets of the data) until all the data were accounted for. The problem the reviewer had is that the data points in each "fold" were chosen at random so were evenly spread across the regions. As it turns out, this is a bad method if you have a spatial random effect in your model, since you are basically cheating -- you already know a lot about the holdout points based on the autocorrelation structure. That gives you a little "sneak preview" of the unknown y-values beyond the information you get from the x-values. So the fit statistic calculated from that kind of naive cross-validation would be misleadingly good.
+
+# So what is the correct way to do spatial cross-validation?
+
+What to do? The reviewer gave me a citation of a paper he was co-author on that explains that for spatial cross-validation, for that matter for any type of hierarchical data, you need to remove holdout points in blocks. For spatial models that would mean removing spatially contiguous data points in each fold. That way, you get a higher cross-validation error which is closer to the true error. Specifically, for these type of models with locations nested within regions, they recommend removing all data points from a single region with each fold. I'm calling it leave-one-location-out (LOLO) cross-validation since I thought it was a funny name. For more details see the paper [Roberts et al. 2016, Cross‐validation strategies for data with temporal, spatial, hierarchical, or phylogenetic structure, Ecography](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.02881). 
+
+# New implementation
+
+I had trouble figuring out how to do this because the built in `kfold()` function in the R package `brms` does not support removing entire regions all at once. I had to do a weird workaround where I set the data points as missing and then imputed them with each fold. Since there are 63 ecoregions in the continental USA after getting rid of the buffer area along the Canadian and Mexican borders, that means fitting each model 63 times. I am pretty sure that it worked correctly but I am now having trouble with the new story. 
+
+# Results
+
+## Root mean squared error - full models
+
+![RMSE of full models fit to all data and from cross-validation](/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/07may2019/both_performance_multivariate.png)
+
+Figure 1 shows the Root mean squared error (RMSE) of full models. Black points are RMSE of models fit to all the data, red points and 95% credible intervals are RMSE from the LOLO cross-validation.
+
+Root mean squared error (RMSE) is a value indicating the average deviation of the predicted values from the observed values, so a high value indicates a worse fit. Any RMSE values you see in this document are converted to relative RMSE by dividing by the range of the observed data so that RMSE from different models can be compared. As you can see, the RMSE values from the models fitted to all the data are lower than the ones from the LOLO cross-validation -- this makes sense because in the latter case we are predicting data points that weren't used to fit the model so it will not be as close. An overfit model would have an extremely big discrepancy between the black and red but they seem fairly okay to me. It's interesting to note that the bird data show significantly better cross-validation predictions for the taxonomic diversity variables.
+
+## Root mean squared errors - model selection
+
+![Cross-validation RMSE of full, partial, and null models](/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/07may2019/both_lolormse_allmodels_2wayfacet.png)
+
+While the results from Figure 1 look fine, the problem is Figure 2. In the original manuscript, I did some model selection by fitting models with only the geodiversity predictors, only the climate predictors, climate plus geodiversity, and a null model with only the spatial random effect. Unfortunately, as you can see from Figure 2, the null model does a better job than the other models predicting the holdout data points in the cross validation. It is not a huge difference but it definitely looks bad if the null model is selected as the best model from this procedure. 
+
+At this point I am not sure whether to 

@@ -2,6 +2,7 @@
 # This version is for the models where I did the k-fold CV manually, built in to the main model script
 # QDR/NASABIOXGEO/01 May 2019
 
+# Modified 8 May 2019: add information criteria calculations (WAIC) to model stats
 # Modified 2 May 2019: Change to "leave ONE region out" cross validation -- rationale provided in the Roberts et al. paper
 # Modified 19 June: Get rid of the CV calculation (gives bad results)
 # Modified 14 June: include newer "null" and subset models
@@ -111,7 +112,13 @@ model_stats <- foreach (i = 1:n_full_fits) %dopar% {
   # Bayesian R-squared
   model_r2 <- cbind(task_table[i, ], response = resp_names, bayes_R2(fit$model))
   
-    list(coef = model_coef, pred = model_pred, rmse = model_rmse, r2 = model_r2)
+  # Information criterion (WAIC)
+  model_waic <- waic(fit$model)
+  model_waic <- cbind(task_table[i, ], WAIC = model_waic$estimates['waic','Estimate'], WAIC_SE = model_waic$estimates['waic','SE'])
+  
+    list(coef = model_coef, pred = model_pred, rmse = model_rmse, r2 = model_r2, waic = model_waic)
+	
+  
 
 }
 
@@ -119,11 +126,14 @@ model_coef <- map2_dfr(model_stats, 1:n_full_fits, function(x, y) cbind(taxon = 
 model_pred <- map2_dfr(model_stats, 1:n_full_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$pred)))
 model_rmse <- map2_dfr(model_stats, 1:n_full_fits, function(x, y) cbind(taxon = task_table$taxon[y], rv = task_table$rv[y], ecoregion = task_table$ecoregion[y], model = task_table$model[y], as.data.frame(x$rmse)))
 model_r2 <- map_dfr(model_stats, 'r2')
+model_waic <- map_dfr(model_stats, 'waic')
 
 write.csv(model_coef, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_coef.csv', row.names = FALSE)
 write.csv(model_pred, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_pred.csv', row.names = FALSE)
 write.csv(model_rmse, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_rmse.csv', row.names = FALSE)
 write.csv(model_r2, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_r2.csv', row.names = FALSE)
+write.csv(model_waic, '/mnt/research/nasabio/data/modelfits/multivariate_spatial_waic.csv', row.names = FALSE)
+
 
 # K-fold output -----------------------------------------------------------
 

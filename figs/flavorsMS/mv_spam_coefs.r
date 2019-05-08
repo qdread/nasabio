@@ -3,6 +3,7 @@
 
 ### THESE ARE THE ACTUAL PUBLICATION FIGURES FOR THE "FLAVORS" MANUSCRIPT!
 
+# Modified 08 May 2019: add WAIC to summary stats table
 # Modified 08 Jan 2019: change the blue color scheme and fix the mismatch in the spatial var color scheme.
 # Modified 18 June: Add the new null models.
 # Modified 15 November: Make a few visual changes to figs 5 and 6 for better readability.
@@ -17,7 +18,7 @@ model_pred <- read.csv(file.path(fp, 'multivariate_spatial_pred.csv'), stringsAs
 model_rmse <- read.csv(file.path(fp, 'multivariate_spatial_rmse.csv'), stringsAsFactors = FALSE)
 model_r2 <- read.csv(file.path(fp, 'multivariate_spatial_r2.csv'), stringsAsFactors = FALSE)
 model_coef_var <- read.csv(file.path(fp, 'multivariate_spatial_coef_variation_corrected.csv'), stringsAsFactors = FALSE)
-#kfold_pred <- read.csv(file.path(fp, 'multivariate_kfold_pred.csv'), stringsAsFactors = FALSE)
+model_waic <- read.csv(file.path(fp, 'multivariate_spatial_waic.csv'), stringsAsFactors = FALSE)
 kfold_rmse <- read.csv(file.path(fp, 'multivariate_kfold_rmse.csv'), stringsAsFactors = FALSE)
 
 
@@ -198,7 +199,7 @@ rmseplot_both <- all_rmse %>%
   geom_point(aes(y = kfold_RMSE_mean_relative), color = 'red', position = pn2) +
   geom_text(aes(label = round(r2, 2)), y = -Inf, vjust = -0.2, fontface = 3, size = 3) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 0.75), expand = c(0,0), name = 'relative root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.65), expand = c(0,0), name = 'relative root mean squared error') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         strip.background = element_rect(fill = NA)) 
 
@@ -217,10 +218,10 @@ rmseplot_bymodel_bird <- all_rmse %>%
   filter(taxon == 'bbs') %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(. ~ flavor, switch = 'x') +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.31), expand = c(0,0), name = 'relative root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('birds') +
   theme(strip.background = element_blank(),
@@ -231,10 +232,10 @@ rmseplot_bymodel_tree <- all_rmse %>%
   filter(taxon == 'fia') %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(. ~ flavor, switch = 'x') +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.31), expand = c(0,0), name = 'relative root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('trees') +
   theme(strip.background = element_blank(),
@@ -249,10 +250,10 @@ kfold_rmseplot_bymodel_bird <- all_rmse %>%
   filter(taxon == 'bbs') %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(. ~ flavor, switch = 'x') +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(3, 0.5), expand = c(0,0), name = 'CV root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.7), expand = c(0,0), name = 'CV relative root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('birds') +
   theme(strip.background = element_blank(),
@@ -263,10 +264,10 @@ kfold_rmseplot_bymodel_tree <- all_rmse %>%
   filter(taxon == 'fia') %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(. ~ flavor, switch = 'x') +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(3, 0.5), expand = c(0,0), name = 'CV root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.7), expand = c(0,0), name = 'CV relative root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('trees') +
   theme(strip.background = element_blank(),
@@ -281,10 +282,10 @@ kfold_rmseplot_bymodel_tree <- all_rmse %>%
 rmseplot_bymodel_2wayfacet <- all_rmse %>% 
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(1.34, 0.25), name = 'root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.31), name = 'relative root mean squared error', expand = c(0,0)) +
   scale_x_discrete(name = 'response') +
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
@@ -296,10 +297,10 @@ rmseplot_bymodel_2wayfacet <- all_rmse %>%
 kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>% 
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025, ymax = kfold_RMSE_q975), width = 0, position = pd) +
-  geom_point(aes(y = kfold_RMSE_mean), position = pd) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_reverse(limits = c(1.34, 0.25), name = '5-fold CV root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.7), name = 'CV relative root mean squared error', expand = c(0,0)) +
   scale_x_discrete(name = 'response') +
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
@@ -315,11 +316,11 @@ rmseplot_taxacolor <- all_rmse %>%
   mutate(taxon = factor(taxon,labels=c('birds','trees'))) %>%
   ggplot(aes(x = rv)) +
   facet_grid(. ~ flavor, switch = 'x') +
-  geom_errorbar(aes(ymin = RMSE_q025, ymax = RMSE_q975, color = taxon, group = taxon), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean, color = taxon, group = taxon), position = pd, size = 2) +
+  geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative, color = taxon, group = taxon), width = 0, position = pd) +
+  geom_point(aes(y = RMSE_mean_relative, color = taxon, group = taxon), position = pd, size = 2) +
   theme_bw() +
   scale_color_manual(values = twocolors) +
-  scale_y_reverse(limits = c(1.34, 0.25), expand = c(0,0), name = 'root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.31), expand = c(0,0), name = 'relative root mean squared error') +
   scale_x_discrete(name = 'response') +
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
@@ -333,19 +334,20 @@ png(file.path(fpfig, 'both_fittedrmse_allmodels.png'), height = 8, width = 7, re
   grid.arrange(rmseplot_bymodel_bird, rmseplot_bymodel_tree, nrow = 2)
 dev.off()
 
-png(file.path(fpfig, 'both_5foldrmse_allmodels.png'), height = 8, width = 7, res = 400, units = 'in')
+png(file.path(fpfig, 'both_lolormse_allmodels.png'), height = 8, width = 7, res = 400, units = 'in')
   grid.arrange(kfold_rmseplot_bymodel_bird, kfold_rmseplot_bymodel_tree, nrow = 2)
 dev.off()
 
 ggsave(file.path(fpfig, 'both_fittedrmse_fullonly.png'), rmseplot_taxacolor, height = 4, width = 7, dpi = 400)
 ggsave(file.path(fpfig, 'both_fittedrmse_allmodels_2wayfacet.png'), rmseplot_bymodel_2wayfacet, height = 6, width = 7, dpi = 400)
-ggsave(file.path(fpfig, 'both_5foldrmse_allmodels_2wayfacet.png'), kfold_rmseplot_bymodel_2wayfacet, height = 6, width = 7, dpi = 400)
+ggsave(file.path(fpfig, 'both_lolormse_allmodels_2wayfacet.png'), kfold_rmseplot_bymodel_2wayfacet, height = 6, width = 7, dpi = 400)
 
 
 # Table of fit stats ------------------------------------------------------
 
 # By taxon, diversity level, flavor, model.
 # Include RMSE, kfold RMSE, and R2 (with CIs)
+# Also do a version with relative RMSEs to see if it's any better
 
 fit_table <- all_rmse %>%
   mutate(taxon = factor(taxon, labels = c('birds','trees')),
@@ -356,3 +358,25 @@ fit_table <- all_rmse %>%
   arrange(taxon, rv, flavor, model)
 
 write.csv(fit_table, file = '~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv', row.names = FALSE)
+
+
+fit_table_relative <- all_rmse %>%
+  mutate(taxon = factor(taxon, labels = c('birds','trees')),
+         RMSE = paste0(round(RMSE_mean_relative,2), ' [', round(RMSE_q025_relative,2), ',', round(RMSE_q975_relative,2), ']'),
+         kfold_RMSE = paste0(round(kfold_RMSE_mean_relative,2), ' [', round(kfold_RMSE_q025_relative,2), ',', round(kfold_RMSE_q975_relative,2), ']'),
+         Rsquared = paste0(round(r2,2), ' [', round(r2_q025,2), ',', round(r2_q975,2), ']')) %>%
+  select(taxon, rv, flavor, model, RMSE, kfold_RMSE, Rsquared) %>%
+  arrange(taxon, rv, flavor, model)
+
+write.csv(fit_table_relative, file = '~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats_withrelativeRMSEs.csv', row.names = FALSE)
+
+# WAIC table added 08 May 2019
+waic_table <- model_waic %>%
+  mutate(model = factor(model, levels=c('space','climate','geo','full'), labels=c('space only', 'space+climate','space+geodiversity','space+climate+geodiversity')),
+         taxon = factor(taxon, labels = c('birds', 'trees')),
+         WAIC = round(WAIC, 1),
+         WAIC_SE = round(WAIC_SE, 1)) %>%
+  select(taxon, rv, model, WAIC, WAIC_SE) %>%
+  arrange(taxon, rv, model)
+
+write.csv(waic_table, file = '~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_WAICs.csv', row.names = FALSE)
