@@ -125,7 +125,13 @@ tnc <- SpatialPolygonsDataFrame(tnc, tncdat)
 
 # Create all maps ------------------------------------------
 
-rbfill <- scale_fill_gradient2(low = "#4575B4", high = "#D73027", midpoint = 0, limits = c(-3.6, 3.6), labels = -3:3, breaks = -3:3)
+# function to produce a fill scale with the maximum and minimum evenly divided above and below zero.
+rbfill <- function(x) {
+	xlimit <- max(abs(x))
+	xlimit_roundup <- signif(xlimit + 0.1, 2)
+	xbreaks <- c(-xlimit_roundup, 0, xlimit_roundup)
+	scale_fill_gradient2(low = "#4575B4", high = "#D73027", midpoint = 0, limits = c(-xlimit_roundup, xlimit_roundup), labels = xbreaks, breaks = xbreaks)
+}
 signif_fill <- scale_fill_manual(values = c(negative = "#4575B4", positive = "#D73027", zero = 'gray50'))
 
 library(gridExtra)
@@ -148,7 +154,7 @@ if (task == 1) {
     dplyr::select(response, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(response, parameter) %>%
-    do(maps = model_map(., rbfill, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
+    do(maps = model_map(., rbfill(.$Estimate), tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
   maps_bbs_coef %>%
     group_by(parameter) %>%
     do(foo = arrangeMaps(., fpfig = fpfig, prefix = 'bbs_coef', titles = bio_titles, raw_names = bio_names, text_color = cols['text']))
@@ -160,7 +166,7 @@ if (task == 2) {
     dplyr::select(response, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(response, parameter) %>%
-    do(maps = model_map(., rbfill, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
+    do(maps = model_map(., rbfill(.$Estimate), tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
   maps_fia_coef %>%
     group_by(parameter) %>%
     do(foo = arrangeMaps(., fpfig = fpfig, prefix = 'fia_coef', titles = bio_titles, raw_names = bio_names, text_color = cols['text']))
@@ -196,7 +202,7 @@ if (task == 5) {
     dplyr::select(response, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(response, parameter) %>%
-    do(maps = model_map(., rbfill, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
+    do(maps = model_map(., rbfill(.$Estimate), tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
   maps_bbs_spat %>%
     group_by(parameter) %>%
     do(foo = arrangeMaps(., fpfig = fpfig, prefix = 'bbs_spatial', titles = bio_titles, raw_names = bio_names, text_color = cols['text']))
@@ -208,7 +214,7 @@ if (task == 6) {
     dplyr::select(response, parameter, region, Estimate) %>%
     rename(ECODE_NAME = region) %>%
     group_by(response, parameter) %>%
-    do(maps = model_map(., rbfill, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
+    do(maps = model_map(., rbfill(.$Estimate), tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state']))
   maps_fia_spat %>%
     group_by(parameter) %>%
     do(foo = arrangeMaps(., fpfig = fpfig, prefix = 'fia_spatial', titles = bio_titles, raw_names = bio_names, text_color = cols['text']))
