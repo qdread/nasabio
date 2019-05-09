@@ -40,16 +40,17 @@ Beyond counts and averages: relating geodiversity to dimensions of biodiversity.
 
 \newpage
 
-**Table S2**: This table shows model fit statistics for each response variable for each model. The RMSE is the root mean squared error of the model fit with all the data. The 5-fold CV RMSE is the root mean squared error of the holdout data points in 5-fold cross-validation. The $R^2$ is calculated using the method of Gelman *et al.*. For all fit statistics, mean value as well as upper and lower bounds of 95% credible intervals are shown.
+**Table S2**: This table shows model fit statistics for each response variable for each model. The RMSE is the root mean squared error of the model fit with all the data. The CV RMSE is the root mean squared error of the holdout data points in spatially blocked cross-validation. Both RMSEs are divided by the range of the data to produce a relative RMSE value that is comparable among models. Lower RMSE values indicate better model performance. The $R^2$ is calculated using the method of Gelman *et al.*. For all fit statistics, mean value as well as upper and lower bounds of 95% credible intervals are shown. 
 
 ```{r, echo = FALSE, message = FALSE}
 library(knitr)
 library(kableExtra)
-fit_stats <- read.csv('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats.csv')
+fit_stats <- read.csv('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_fitstats_withrelativeRMSEs.csv')
 fit_stats$model <- gsub('+', ' + ', fit_stats$model, fixed = TRUE)
 kable(fit_stats, 'latex', escape = FALSE, longtable = TRUE, booktabs = TRUE,
+             linesep = c('', '', '', '\\addlinespace'),
              row.names = FALSE,
-             col.names = c('taxon','biodiversity level', 'biodiversity dimension', 'model', 'RMSE', '5-fold CV RMSE', '$R^2$')) %>%
+             col.names = c('taxon','biodiversity level', 'biodiversity dimension', 'model', 'RMSE', 'CV RMSE', '$R^2$')) %>%
   kable_styling(latex_options = 'repeat_header') %>%
   row_spec(0, bold = TRUE) %>%
   column_spec(2, width = '6em') %>%
@@ -59,19 +60,33 @@ kable(fit_stats, 'latex', escape = FALSE, longtable = TRUE, booktabs = TRUE,
 
 \newpage
 
+**Table S3**: This table shows the Widely Available Information Criterion (WAIC) for each model, along with the standard error of the WAIC. Lower WAIC values indicate a more parsimonious fit.
+
+```{r, echo = FALSE, message = FALSE}
+waic_table <- read.csv('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/supptable_WAICs.csv')
+waic_table$model <- gsub('+', ' + ', waic_table$model, fixed = TRUE)
+kable(waic_table, 'latex', escape = FALSE, longtable = FALSE, booktabs = TRUE,
+             linesep = c('', '', '', '\\addlinespace'),
+             row.names = FALSE,
+             col.names = c('taxon','biodiversity level', 'model', 'WAIC', 'standard error of WAIC')) %>%
+  row_spec(0, bold = TRUE) 
+```
+
+\newpage
+
 # Supplementary Figures
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/both_5foldrmse_allmodels_2wayfacet.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/07may2019/both_lolormse_allmodels_2wayfacet.png}}
 \caption*{Figure S1: Model performance assessed with five-fold root mean squared error}
 \end{figure}
 
-**Figure S1**: This figure shows the root mean squared error obtained from 5-fold cross-validation, by comparing the observed value with the out-of-sample predicted value on the data points omitted in each fold. A lower value represents better performance of the model predicting biodiversity (the y-axis is reversed so that best-performing models are on top). Error bars are 95% credible intervals. Here, we not only compare taxa but also the four types of model: space only (null), space + climate, space + geodiversity, and space + climate + geodiversity (full model). The out-of-sample cross-validation error is very similar to the in-sample error (Supplementary Table 1), indicating that overfitting is not much of a problem. We see that the inclusion of fixed effects significantly improves the prediction of out-of-sample data points, except for some of the beta-diversity models in which the space-only model without any fixed effects does just as well as the other models. In addition, a combination of geodiversity and climate variables almost always predicts better than climate alone. The same pattern is qualitatively shown by the R-squared values (Supplementary Table 1).
+**Figure S1**: This figure shows the relative root mean squared errors obtained from spatially blocked leave-one-location-out cross-validation, by comparing the observed value with the out-of-sample predicted value on the data points omitted in each fold. A lower value represents better performance of the model predicting biodiversity. Error bars are 95% credible intervals. Here, we not only compare taxa but also the four types of model: space only (null), space + climate, space + geodiversity, and space + climate + geodiversity (full model). Due to the fact that each cross-validation fold excludes an entire region, the null model including only the spatial random effect tends to predict the held out values as well or better than the models including climate and geodiversity predictors. However, models including geodiversity predictors tend to perform as well or better than the models including climate predictors, especially for phylogenetic and functional diversity.
 
 \newpage
 
 \begin{figure}[h!]
-\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/both_multivariate_coefvar_sideways.png}}
+\centerline{\includegraphics[width=0.75\textwidth]{/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/07may2019/both_multivariate_coefvar_sideways.png}}
 \caption*{Figure S2: Spatial variation in geodiversity-biodiversity relationships}
 \end{figure}
 
