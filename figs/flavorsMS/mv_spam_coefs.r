@@ -70,7 +70,7 @@ model_coef_var <- model_coef_var %>%
 
 # Coefficient plots -------------------------------------------------
 
-fpfig <- '~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs'
+fpfig <- '~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/07may2019' # updated file path to put new figs in a separate location
 
 # Add some color to indicate which ones' credible intervals are not zero
 # Also shade the climate mean region with a gray rectangle
@@ -221,7 +221,7 @@ rmseplot_bymodel_bird <- all_rmse %>%
   geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pd) +
   geom_point(aes(y = RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 0.31), expand = c(0,0), name = 'relative root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.32), expand = c(0,0), name = 'relative root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('birds') +
   theme(strip.background = element_blank(),
@@ -235,7 +235,7 @@ rmseplot_bymodel_tree <- all_rmse %>%
   geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pd) +
   geom_point(aes(y = RMSE_mean_relative), position = pd) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 0.31), expand = c(0,0), name = 'relative root mean squared error') +
+  scale_y_continuous(limits = c(0, 0.32), expand = c(0,0), name = 'relative root mean squared error') +
   scale_x_discrete(name = 'response') +
   ggtitle('trees') +
   theme(strip.background = element_blank(),
@@ -278,14 +278,16 @@ kfold_rmseplot_bymodel_tree <- all_rmse %>%
         legend.text = element_text(size = 6.5))
 
 # RMSE plot as 2-way facet
-
+# Update 20 May 2019: add R-squared.
+# This is fig 6 in the REVISED manuscript.
 rmseplot_bymodel_2wayfacet <- all_rmse %>% 
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
   geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pd) +
   geom_point(aes(y = RMSE_mean_relative), position = pd) +
+  geom_text(aes(y = -Inf, label = round(r2, 2)), data = all_rmse %>% filter(model == 'space+climate+geodiversity'), color = 'black', fontface = 'italic', vjust = -0.2) +
   theme_bw() +
-  scale_y_continuous(limits = c(0, 0.31), name = 'relative root mean squared error', expand = c(0,0)) +
+  scale_y_continuous(limits = c(0, 0.315), name = 'relative root mean squared error', expand = c(0,0)) +
   scale_x_discrete(name = 'response') +
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
@@ -310,7 +312,7 @@ kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>%
         legend.text = element_text(size = 8))
 
 # Just compare the predictive power of the full model, putting birds and trees on the same one.
-# THIS IS FIG 6 IN THE MANUSCRIPT
+# THIS IS FIG 6 IN THE MANUSCRIPT (or it was in the old version)
 rmseplot_taxacolor <- all_rmse %>% 
   filter(model == 'space+climate+geodiversity') %>%
   mutate(taxon = factor(taxon,labels=c('birds','trees'))) %>%
