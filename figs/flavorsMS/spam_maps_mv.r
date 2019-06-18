@@ -2,9 +2,10 @@
 # This uses the new spatial mixed model coefficients. ***MULTIVARIATE!***
 # QDR NASABIOXGEO 28 May 2018
 
+# Edit 13 June 2019: add manual correction so that Black Hills polygon is drawn on top! Sorry Black Hills!
 # Edit 07 Jan 2019: update for new OS
-# Edit 18 June: new predictor sets
-# Edit 04 June: Also make maps of spatial effects only
+# Edit 18 June 2018: new predictor sets
+# Edit 04 June 2018: Also make maps of spatial effects only
 
 task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
 
@@ -40,6 +41,7 @@ model_map <- function(coefs, fill_scale, regions, state_borders, bg_color = 'bla
   
     ggplot(region_fort) +
       geom_polygon(aes(x=long, y=lat, group=group, fill=Estimate)) +
+      geom_polygon(data = region_fort %>% filter(grepl('Black Hills', region)), aes(x=long, y=lat, group=group, fill=Estimate)) +
       geom_path(aes(x=long, y=lat, group=group), color = text_color, size = 0.25) +
       geom_path(data = state_borders, aes(x = long, y = lat, group = group), color = state_color) +
       fill_scale +
@@ -114,13 +116,14 @@ tnc@data <- tnc@data %>%
   mutate(id = rownames(tnc@data), region = as.character(ECODE_NAME))
 
 # Subset out the regions that are outside the US.
-tnc_unique <- unique(coef_all$region[coef_all$ecoregion == 'TNC'])
+tnc_unique <- na.omit(unique(coef_all$region[coef_all$ecoregion == 'TNC']))
 tnc <- subset(tnc, region %in% tnc_unique)
 
 # Clip TNC to US boundaries
 goodusabounds <- gUnaryUnion(states_albers)
 tncdat <- tnc@data
-tnc <- gIntersection(tnc, goodusabounds, byid = TRUE, id = row.names(tnc@data))
+tnc <- gIntersection(tnc, goodusabounds, byid = TRUE, id = tnc$id)
+row.names(tncdat) <- tncdat$id
 tnc <- SpatialPolygonsDataFrame(tnc, tncdat)
 
 # Create all maps ------------------------------------------
