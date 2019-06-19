@@ -161,4 +161,117 @@ cols <- c(bg = 'black', text = 'white', state = 'gray20')
 pwalk(maps_bbs_coef, function(response, parameter, maps) ggsave(file.path(fpfig, paste0('bbs_', response, '_', parameter, '.png')), maps, height = 3, width = 4, dpi = 400))
 pwalk(maps_fia_coef, function(response, parameter, maps) ggsave(file.path(fpfig, paste0('fia_', response, '_', parameter, '.png')), maps, height = 3, width = 4, dpi = 400))
 
-  
+
+# Maps with point biodiv and geodiv values --------------------------------
+
+# Modified from maps put in the 2018 iale presentation
+# Change: get rid of text in legend, make legend numbers bigger
+library(sp)
+library(rgdal)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+fp <- '~/Dropbox/projects/nasabiodiv/'
+fpfig <- '~/google_drive/NASABiodiversityWG/Conferences/ESA2019/talkimgs/maps'
+states <- read.csv('~/Documents/R/states_albers.csv', stringsAsFactors = FALSE)
+bbscoords <- read.csv(file.path(fp,'bbs_correct_route_centroids.csv'))
+
+blktheme <- theme_bw() + 
+  theme(axis.text = element_blank(), 
+        axis.ticks = element_blank(), 
+        axis.title = element_blank(), 
+        panel.grid = element_blank(), 
+        panel.background = element_rect(color = 'black', fill = 'black'), 
+        panel.border = element_blank(), 
+        plot.background = element_rect(fill = 'black'), 
+        legend.position = c(0.13,0.1), 
+        legend.direction = 'horizontal', 
+        legend.title = element_blank())
+
+# BBS
+bbsbio <- read.csv(file.path(fp, 'bbs_allbio_wide.csv'), stringsAsFactors = FALSE)
+bbsgeo <- read.csv(file.path(fp, 'bbs_allgeo_wide.csv'), stringsAsFactors = FALSE)
+
+bbsbio <- bbsbio %>%
+  dplyr::select(rteNo, alpha_richness_50, beta_td_sorensen_pa_50, gamma_richness_50)
+bbsgeo <- bbsgeo %>%
+  dplyr::select(rteNo, elevation_5k_tri_50_mean, geological_age_5k_50_diversity, dhi_gpp_5k_tri_50_mean)
+
+bbscoords <- bbscoords %>% left_join(bbsbio) %>% left_join(bbsgeo)
+cscale <- function(b, n) scale_color_gradientn(name = n, colours = colorRampPalette(RColorBrewer::brewer.pal(9,'YlOrRd'), bias = b)(50))
+biases <- c(1, 2, 0.8, 2, 1, 1)
+legnames <- c('Alpha diversity', 'Beta diversity', 'Gamma diversity', 'Elevation variability', 'Geological age diversity', 'Productivity variability')
+
+for (i in 6:8) {
+  dati <- bbscoords %>% 
+    filter(lat < 50, !is.na(bbscoords[,i]))
+  p <- ggplot() +
+    #geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.75) +
+    geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'white', size = 0.75) +
+    geom_point(data = dati, aes_string(x='lon.1', y='lat.1', color = names(bbscoords)[i]), size = 1) +
+    coord_equal() +
+    blktheme + cscale(biases[i-5], legnames[i-5]) + 
+    theme(legend.text = element_text(color='white'),
+          legend.title = element_blank(),
+          legend.background = element_rect(color = 'black', fill = 'black'),
+          legend.position = c(0.15,0.1), 
+          legend.key.width = unit(0.2, 'inches'),
+          legend.direction = 'horizontal')
+  ggsave(file.path(fpfig, paste0('point_bbs', names(bbscoords)[i], 'map.png')), p, height = 3, width = 4, dpi = 400)
+}
+
+# FIA
+fiacoords <- read.csv(file.path(fp, 'fia_unfuzzed/fia_fuzzed_coords.csv'))
+
+load(file.path(fp, 'modelfits/fia_spatial_mm_dat_50k.RData'))
+
+
+
+fiabio <- fiabio %>%
+  dplyr::select(PLT_CN, alpha_richness, beta_td_sorensen_pa, gamma_richness)
+fiageo <- fiageo %>%
+  dplyr::select(PLT_CN, elevation_5k_tri_50_mean, geological_age_5k_50_diversity, dhi_gpp_5k_tri_50_mean)
+
+# Combine bbs and fia geo
+fiacoordsbio <- fiacoords %>% left_join(fiabio) %>% filter(!is.na(alpha_richness))
+allgeocoords <- fiacoords %>% left_join(fiageo) %>% bind_rows(bbscoords) %>% filter(!is.na(elevation_5k_tri_50_mean))
+
+biases2 <- c(1, 1, 0.8, 2, 1, 1)
+
+for (i in 6:8) {
+  dati <- fiacoordsbio %>% 
+    filter(lat_fuzzed < 50, !is.na(fiacoordsbio[,i]))
+  p <- ggplot() +
+    #geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.75) +
+    geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'white', size = 0.75) +
+    geom_point(data = dati, aes_string(x='lon_aea_fuzzed', y='lat_aea_fuzzed', color = names(fiacoordsbio)[i]), size = 1) +
+    coord_equal() +
+    blktheme + cscale(biases2[i-5], legnames[i-5]) + 
+    theme(legend.text = element_text(color='white'),
+          legend.title = element_blank(),
+          legend.background = element_rect(color = 'black', fill = 'black'),
+          legend.position = c(0.15,0.1), 
+          legend.key.width = unit(0.2, 'inches'),
+          legend.direction = 'horizontal')
+  ggsave(file.path(fpfig, paste0('point_fia', names(fiacoordsbio)[i], 'map.png')), p, height = 3, width = 4, dpi = 400)
+}
+
+for (i in 6:8) {
+  dati <- allgeocoords %>% 
+    filter(lat < 50 | lat_fuzzed < 50, !is.na(allgeocoords[,i])) %>%
+    mutate(lonaea = pmin(lon_aea_fuzzed, lon.1, na.rm=T),
+           lataea = pmin(lat_aea_fuzzed, lat.1, na.rm=T))
+  p <- ggplot() +
+    #geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.75) +
+    geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'white', size = 0.75) +
+    geom_point(data = dati, aes_string(x='lonaea', y='lataea', color = names(allgeocoords)[i]), size = 1) +
+    coord_equal() +
+    blktheme + cscale(biases[i-2], legnames[i-2]) + 
+    theme(legend.text = element_text(color='white'),
+          legend.title = element_blank(),
+          legend.background = element_rect(color = 'black', fill = 'black'),
+          legend.position = c(0.15,0.1), 
+          legend.key.width = unit(0.2, 'inches'),
+          legend.direction = 'horizontal')
+  ggsave(file.path(fpfig, paste0('point_geo', names(allgeocoords)[i], 'map.png')), p, height = 3, width = 4, dpi = 400)
+}
