@@ -1,6 +1,8 @@
 # Black and white figures for ESA 2019 powerpoint
 # QDR/NASABioxgeo/5 June 2019
 
+# Modified 19 June 2019: make the points and lines bigger and/or thicker.
+
 # Load and combine data ---------------------------------------------------
 
 fp <- '~/Dropbox/projects/nasabiodiv/modelfits' # Local
@@ -75,12 +77,12 @@ coefdat_bbs <- all_coef %>%
 coefplot_bbs <- ggplot(coefdat_bbs %>% filter(model=='full')) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray50', alpha = 0.05) +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
+  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0, size = 1) +
   geom_point(aes(x = predictor, y = Estimate, color = nonzero, size = nonzero)) +
   facet_grid(. ~ rv, labeller = label_parsed) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   scale_color_manual(values = c('white', 'red')) +
-  scale_size_manual(values = c(1, 2)) +
+  scale_size_manual(values = c(2, 3)) +
   theme_black() +
   theme(strip.background = element_rect(fill=NA, color = 'white'),
         panel.grid = element_blank(),
@@ -94,12 +96,12 @@ coefdat_fia <- all_coef %>%
 coefplot_fia <- ggplot(coefdat_fia %>% filter(model=='full')) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray50', alpha = 0.05) +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0) +
+  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = nonzero), width = 0, size = 1) +
   geom_point(aes(x = predictor, y = Estimate, color = nonzero, size = nonzero)) +
   facet_grid(. ~ rv, labeller = label_parsed) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   scale_color_manual(values = c('white', 'red')) +
-  scale_size_manual(values = c(1, 2)) +
+  scale_size_manual(values = c(2, 3)) +
   theme_black() +
   theme(strip.background = element_rect(fill=NA, color = 'white'),
         panel.grid = element_blank(),
@@ -114,8 +116,8 @@ coef_fia_sideways <- coefplot_fia +
   coord_flip() +
   theme(axis.text.x = element_text(angle=0, hjust=0.5)) 
 
-ggsave(file.path(fpfig, 'BBS_coef.png'), coef_bbs_sideways, height = 5, width = 10, dpi = 300)
-ggsave(file.path(fpfig, 'FIA_coef.png'), coef_fia_sideways, height = 5, width = 10, dpi = 300)
+ggsave(file.path(fpfig, 'BBS_coef.png'), coef_bbs_sideways, height = 5*.8, width = 10*.8, dpi = 300)
+ggsave(file.path(fpfig, 'FIA_coef.png'), coef_fia_sideways, height = 5*.8, width = 10*.8, dpi = 300)
 
 
 # Plot showing RMSEs --------------------------------------------------------
@@ -128,9 +130,9 @@ pn2 <- position_nudge(x = 0.06, y = 0)
 # Edit 08 Aug: add geodiversity-only to this
 
 all_rmse <- all_rmse %>%
-  mutate(model = factor(model, levels=c('space','climate','geo','full'), labels=c('space only', 'space+climate','space+geodiversity','space+climate+geodiversity')))
+  mutate(model = factor(model, levels=c('space','climate','geo','full'), labels=c('space only', 'climate','geodiversity','climate +\ngeodiversity')))
 
-pd <- position_dodge(width = 0.05)
+pd <- position_dodge(width = 0.08)
 
 
 
@@ -171,8 +173,8 @@ kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>%
   filter(!model %in% 'space only') %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
-  geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, position = pd) +
-  geom_point(aes(y = kfold_RMSE_mean_relative), position = pd) +
+  geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, position = pd, size = 1) +
+  geom_point(aes(y = kfold_RMSE_mean_relative), position = pd, size = 2.5) +
   theme_bw() +
   scale_y_continuous(limits = c(0, 0.7), name = 'CV relative root mean squared error', expand = c(0,0)) +
   scale_x_discrete(name = 'response') +
@@ -180,14 +182,14 @@ kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>%
   theme(strip.background = element_blank(),
         strip.placement = 'outside',
         panel.spacing = unit(0, 'lines'),
-        legend.position = 'bottom',
+        legend.position = 'right',
         legend.background = element_rect(color = 'black'),
-        legend.direction = 'horizontal',
+        legend.direction = 'vertical',
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         legend.text = element_text(size = 8))
 
-ggsave(file.path(fpfig, 'both_lolormse_allmodels_2wayfacet.png'), kfold_rmseplot_bymodel_2wayfacet, height = 6, width = 8, dpi = 400)
+ggsave(file.path(fpfig, 'both_lolormse_allmodels_2wayfacet.png'), kfold_rmseplot_bymodel_2wayfacet, height = 6*.8, width = 9*.8, dpi = 400)
 
 
 # Map of tnc regions ------------------------------------------------------
