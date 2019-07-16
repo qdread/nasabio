@@ -1,0 +1,29 @@
+---
+title: "Test image display"
+author: "Quentin D. Read"
+date: "July 16, 2019"
+output: 
+  pdf_document:
+header-includes:
+- \usepackage{caption}
+- \captionsetup[figure]{labelformat=empty}
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+suppressMessages(library(knitr))
+suppressMessages(library(png))
+opts_chunk$set(echo = FALSE)
+opts_chunk$set(fig.lp = '')
+```
+
+Here is a figure called Figure S1.
+
+```{r, out.width = '75%', fig.cap = 'Figure S1: Cool fig.', fig.align = 'center'}
+fpmap <- '/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/maps_for_supplement'
+include_graphics(file.path(fpmap, 'bbs_coef_temperature_mean.png'), dpi = 100)
+```
+
+```{r, out.width = '75%', fig.cap = 'Figure S2: Cooler fig.', fig.align = 'center'}
+fpmap <- '/Users/qread/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/maps_for_supplement'
+include_graphics(file.path(fpmap, 'bbs_signif_temperature_mean.png'), dpi = 100)
+```

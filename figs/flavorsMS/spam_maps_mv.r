@@ -2,12 +2,15 @@
 # This uses the new spatial mixed model coefficients. ***MULTIVARIATE!***
 # QDR NASABIOXGEO 28 May 2018
 
+# Edit 16 July 2019: reduce resolution of maps.
 # Edit 13 June 2019: add manual correction so that Black Hills polygon is drawn on top! Sorry Black Hills!
 # Edit 07 Jan 2019: update for new OS
 # Edit 18 June 2018: new predictor sets
 # Edit 04 June 2018: Also make maps of spatial effects only
 
 task <- as.numeric(Sys.getenv('SLURM_ARRAY_TASK_ID'))
+resolution <- 200
+fpfig <- '/mnt/research/nasabio/figs/mv_coefficient_maps/reduced_resolution'
 
 # Define functions --------------------------------------------------------
 
@@ -54,7 +57,7 @@ arrangeMaps <- function(x, fpfig, prefix, titles, raw_names, text_color = 'white
   geo_name <- geo_names[which(prednames %in% x$parameter)] # For file name by geo variable
   x$bio_title <- titles[match(x$response, raw_names)] # Short title by bio variable
   x <- x[match(titles, x$bio_title),] # Put bio variables in correct order
-  png(file.path(fpfig, paste0(prefix, '_', geo_name, '.png')), height = 9, width = 12, res = 400, units = 'in', type = 'cairo')
+  png(file.path(fpfig, paste0(prefix, '_', geo_name, '.png')), height = 9, width = 12, res = resolution, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(x$maps, x$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
   dev.off()
   return('i just made a map :-)')
@@ -138,7 +141,6 @@ rbfill <- function(x) {
 signif_fill <- scale_fill_manual(values = c(negative = "#4575B4", positive = "#D73027", zero = 'gray50'))
 
 library(gridExtra)
-fpfig <- '/mnt/research/nasabio/figs/mv_coefficient_maps'
 
 bio_titles <- c('alpha taxonomic', 'alpha phylogenetic', 'alpha functional', 'beta taxonomic', 'beta phylogenetic', 'beta functional', 'gamma taxonomic', 'gamma phylogenetic', 'gamma functional')
 bio_names <- c("alpha_richness", "alpha_phy_pa", "alpha_func_pa",

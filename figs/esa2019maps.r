@@ -192,6 +192,9 @@ blktheme <- theme_bw() +
 bbsbio <- read.csv(file.path(fp, 'bbs_allbio_wide.csv'), stringsAsFactors = FALSE)
 bbsgeo <- read.csv(file.path(fp, 'bbs_allgeo_wide.csv'), stringsAsFactors = FALSE)
 
+bbsgeomeans <- bbsgeo %>%
+  dplyr::select(rteNo, elevation_5k_50_mean, geological_age_5k_50_mode, dhi_gpp_5k_50_mean)
+
 bbsbio <- bbsbio %>%
   dplyr::select(rteNo, alpha_richness_50, beta_td_sorensen_pa_50, gamma_richness_50)
 bbsgeo <- bbsgeo %>%
@@ -225,7 +228,8 @@ fiacoords <- read.csv(file.path(fp, 'fia_unfuzzed/fia_fuzzed_coords.csv'))
 
 load(file.path(fp, 'modelfits/fia_spatial_mm_dat_50k.RData'))
 
-
+fiageomeans <- fiageo %>%
+    dplyr::select(PLT_CN, elevation_5k_50_mean,  dhi_gpp_5k_50_mean)
 
 fiabio <- fiabio %>%
   dplyr::select(PLT_CN, alpha_richness, beta_td_sorensen_pa, gamma_richness)
@@ -235,6 +239,10 @@ fiageo <- fiageo %>%
 # Combine bbs and fia geo
 fiacoordsbio <- fiacoords %>% left_join(fiabio) %>% filter(!is.na(alpha_richness))
 allgeocoords <- fiacoords %>% left_join(fiageo) %>% bind_rows(bbscoords) %>% filter(!is.na(elevation_5k_tri_50_mean))
+
+# Combine bbs and gia geo means
+bbsgeomeans <- bbscoords %>% left_join(bbsgeomeans)
+allgeomeans <- fiacoords %>% left_join(fiageomeans) %>% bind_rows(bbsgeomeans) %>% filter(!is.na(elevation_5k_50_mean))
 
 biases2 <- c(1, 1, 0.8, 2, 1, 1)
 
@@ -275,3 +283,46 @@ for (i in 6:8) {
           legend.direction = 'horizontal')
   ggsave(file.path(fpfig, paste0('point_geo', names(allgeocoords)[i], 'map.png')), p, height = 3, width = 4, dpi = 400)
 }
+
+brks <- list(c(1000,2000,3000), c(10000, 20000))
+cscale2 <- function(b, n, brks) scale_color_gradientn(name = n, breaks = brks, colours = colorRampPalette(RColorBrewer::brewer.pal(9,'YlOrRd'), bias = b)(50))
+
+ # Maps with means
+for (i in c(6,7)) {
+  dati <- allgeomeans %>% 
+    filter(lat < 50 | lat_fuzzed < 50, !is.na(allgeomeans[,i])) %>%
+    mutate(lonaea = pmin(lon_aea_fuzzed, lon.1, na.rm=T),
+           lataea = pmin(lat_aea_fuzzed, lat.1, na.rm=T))
+  p <- ggplot() +
+    #geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.75) +
+    geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'white', size = 0.75) +
+    geom_point(data = dati, aes_string(x='lonaea', y='lataea', color = names(allgeomeans)[i]), size = 1) +
+    coord_equal() +
+    blktheme + cscale2(1, legnames[i-2], brks[[i-5]]) + 
+    theme(legend.text = element_text(color='white'),
+          legend.title = element_blank(),
+          legend.background = element_rect(color = 'black', fill = 'black'),
+          legend.position = c(0.15,0.1), 
+          legend.key.width = unit(0.2, 'inches'),
+          legend.direction = 'horizontal')
+  ggsave(file.path(fpfig, paste0('pointmean_geo', names(allgeomeans)[i], 'map.png')), p, height = 3, width = 4, dpi = 400)
+}
+
+# Mode of geological age
+dati <- allgeomeans %>% 
+  filter(lat < 50 | lat_fuzzed < 50, !is.na(geological_age_5k_50_mode)) %>%
+  mutate(lonaea = pmin(lon_aea_fuzzed, lon.1, na.rm=T),
+         lataea = pmin(lat_aea_fuzzed, lat.1, na.rm=T))
+p <- ggplot() +
+  #geom_path(aes(x=long, y=lat, group=group), color = 'white', size = 0.75) +
+  geom_path(data = states %>% filter(!region %in% c('alaska','hawaii')), aes(x = long, y = lat, group = group), color = 'white', size = 0.75) +
+  geom_point(data = dati, aes(x=lonaea, y=lataea, color = factor(geological_age_5k_50_mode)), size = 1) +
+  coord_equal() +
+  blktheme + 
+  theme(legend.text = element_text(color='white'),
+        legend.title = element_blank(),
+        legend.background = element_rect(color = 'black', fill = 'black'),
+        legend.position = 'none', 
+        legend.key.width = unit(0.2, 'inches'),
+        legend.direction = 'horizontal')
+ggsave(file.path(fpfig, 'modegeoage.png'), p, height = 3, width = 4, dpi = 400)
