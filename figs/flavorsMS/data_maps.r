@@ -136,6 +136,10 @@ geo_names_order <- c('temperature mean', 'precipitation mean', 'elevation divers
 tw <- theme(plot.title = element_text(color = 'black'))
 maps_geo$title <- geo_names_order
 
+# Edit 17 July 2019: reduce the number of ticks on precip mean scale
+maps_geo$maps[[which(maps_geo$title == 'precipitation mean')]] <- maps_geo$maps[[which(maps_geo$title == 'precipitation mean')]] + 
+	scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')), breaks = c(500, 1500, 2500))
+
 png(file.path(fpfig, 'geo_points.png'), height = 9, width = 9, res = 400, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(maps_geo$maps, maps_geo$title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()

@@ -124,7 +124,7 @@ coef_fia_sideways <- coefplot_fia +
 ggsave(file.path(fpfig, 'BBS_multivariate_coef_sideways.png'), coef_bbs_sideways, height = 8, width = 8, dpi = 300)
 ggsave(file.path(fpfig, 'FIA_multivariate_coef_sideways.png'), coef_fia_sideways, height = 8, width = 8, dpi = 300)
 
-
+# Edit 25 July 2019: change legend position, add scale shape, resize so things are bigger
 # Edit 18 June: plot of coefficients with both, to compare.
 # THIS IS FIG 5 IN THE MANUSCRIPT.
 coefdat_both <- all_coef %>%
@@ -135,11 +135,12 @@ coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray95') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
   geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = taxon, group = taxon), width = 0, position=pd) +
-  geom_point(aes(x = predictor, y = Estimate, size = nonzero, color = taxon, fill = nonzero, group = taxon), pch = 21, position=pd, show.legend = FALSE) +
+  geom_point(aes(x = predictor, y = Estimate, size = nonzero, color = taxon, fill = nonzero, group = taxon, shape = taxon), position=pd) +
   facet_grid(rv ~ flavor) +
   scale_color_manual(values = twocolors) +
-  scale_fill_manual(values = c('black', 'red'), guide = FALSE) +
-  scale_size_manual(values = c(1.5, 2), guide = FALSE) +
+  scale_fill_manual(values = c('black', 'red')) +
+  scale_size_manual(values = c(1.5, 2)) +
+  scale_shape_manual(values = c(24, 21)) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
@@ -151,7 +152,11 @@ coef_both_sideways <- coefplot_both +
   coord_flip() +
   theme(axis.text.x = element_text(angle=0, hjust=0.5), 
         legend.background = element_rect(color = 'black'),
-        legend.position = c(0.92,0.93))
+        legend.position = c(0.92,0.93)) +
+  guides(shape = guide_legend(override.aes = list(fill = twocolors)), fill = 'none', size = 'none')
+
+
+
 
 ggsave(file.path(fpfig, 'both_multivariate_coef_sideways.png'), coef_both_sideways, height = 8, width = 8, dpi = 300)
 
@@ -280,11 +285,14 @@ kfold_rmseplot_bymodel_tree <- all_rmse %>%
 # RMSE plot as 2-way facet
 # Update 20 May 2019: add R-squared.
 # This is fig 6 in the REVISED manuscript.
+# Edit 25 July 2019: include higher jitter and make points bigger
+pd <- position_dodge(width = 0.15)
+
 rmseplot_bymodel_2wayfacet <- all_rmse %>% 
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
   geom_errorbar(aes(ymin = RMSE_q025_relative, ymax = RMSE_q975_relative), width = 0, position = pd) +
-  geom_point(aes(y = RMSE_mean_relative), position = pd) +
+  geom_point(aes(y = RMSE_mean_relative), position = pd, size = 2) +
   geom_text(aes(y = -Inf, label = round(r2, 2)), data = all_rmse %>% filter(model == 'space+climate+geodiversity'), color = 'black', fontface = 'italic', vjust = -0.2) +
   theme_bw() +
   scale_y_continuous(limits = c(0, 0.315), name = 'relative root mean squared error', expand = c(0,0)) +
@@ -300,7 +308,7 @@ kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>%
   ggplot(aes(x = rv, color = model, group = model)) +
   facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
   geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, position = pd) +
-  geom_point(aes(y = kfold_RMSE_mean_relative), position = pd) +
+  geom_point(aes(y = kfold_RMSE_mean_relative), position = pd, size = 2) +
   theme_bw() +
   scale_y_continuous(limits = c(0, 0.7), name = 'CV relative root mean squared error', expand = c(0,0)) +
   scale_x_discrete(name = 'response') +
