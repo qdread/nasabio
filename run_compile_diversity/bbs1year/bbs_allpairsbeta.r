@@ -17,7 +17,7 @@ load('/mnt/research/nasabio/data/bbs/bbspdfddist.r') # Phy and Func distance mat
 
 library(sp)
 library(vegan)
-library(vegetarian, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.5')
+library(vegetarian, lib.loc = '/mnt/home/qdr/R/x86_64-pc-linux-gnu-library/3.6')
 source('/mnt/research/nasabio/code/fixpicante.r')
 
 nnull <- 999 # edited 12dec2018
