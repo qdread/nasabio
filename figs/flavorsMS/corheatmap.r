@@ -3,6 +3,7 @@
 
 ### THIS IS FIGURE 1 IN MS
 
+# Edit 16 Sep 2019: change heading of panel A
 # Edit 08 Jan 2019: panel labels for MS
 # Edit 18 Jun: Use new predictor sets
 
@@ -19,6 +20,7 @@ bio_names <- c("alpha_richness", "beta_td_sorensen_pa", "gamma_richness",
                "alpha_func_pa", "beta_func_pa", "gamma_func_pa")
 
 library(dplyr)
+library(ggplot2)
 
 fiabio <- fiabio %>%
   select(PLT_CN, !!!bio_names) %>%
@@ -100,7 +102,7 @@ lefttitle <- theme(plot.title = element_text(hjust = 0.75))
 
 hmfia <- cormat_heatmap(fiabio_cor) + ggtitle('(c) tree biodiversity correlations') + lefttitle
 hmbbs <- cormat_heatmap(bbsbio_cor) + theme(legend.position = 'none') + ggtitle('(b) bird biodiversity correlations') + lefttitle
-hmgeo <- cormat_heatmap(allgeo_cor) + theme(legend.position = 'none') + ggtitle('(a) geodiversity correlations') + theme(plot.title = element_text(hjust = 1.1))
+hmgeo <- cormat_heatmap(allgeo_cor) + theme(legend.position = 'none') + ggtitle('(a) environmental correlations') + theme(plot.title = element_text(hjust = 1.1))
 
 library(gridExtra)
 png('~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/corr_heatmaps.png', height = 8, width = 5, res = 400, units = 'in')

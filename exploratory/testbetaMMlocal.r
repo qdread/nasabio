@@ -220,3 +220,43 @@ ggplot(model_fixef_all %>% filter(!parameter %in% 'Intercept', grepl('td', respo
   theme_bw() +
   scale_color_manual(values = c('black', 'red')) +
   theme(legend.position = 'none')
+
+
+# same plots for fia ------------------------------------------------------
+
+
+model_coef <- read.csv('~/Dropbox/projects/nasabiodiv/additivefiacoef.csv', stringsAsFactors = FALSE)
+
+model_fixef <- model_coef %>% 
+  filter(effect %in% 'fixed') %>%
+  select(response, parameter, stat, value) %>%
+  group_by(response, parameter) %>%
+  spread(stat, value)
+
+
+# Load the non additive one
+model_coef_orig <- read.csv('~/Dropbox/projects/nasabiodiv/modelfits/multivariate_spatial_coef.csv', stringsAsFactors = FALSE)
+
+model_fixef_orig <- model_coef_orig %>%
+  filter(effect %in% 'fixed', model %in% 'full', taxon %in% 'fia', rv %in% 'beta') %>%
+  select(response, parameter, stat, value) %>%
+  group_by(response, parameter) %>%
+  spread(stat, value)
+
+model_fixef_all <- rbind(data.frame(model = 'old', model_fixef_orig), data.frame(model = 'new', model_fixef)) %>%
+  mutate(schnignificant = (Q2.5>0 & Q97.5>0) | (Q2.5<0 & Q97.5<0))
+
+# Make a slightly nicer figure so that it can be shown to the co-authors
+param_labels <- c('climate: temp mean', 'climate: precip mean', 'geodiv: GPP', 'geodiv: elevation', 'geodiv: geological age', 'geodiv: soil type')
+# Only show the taxonomic result since it's the only one that changes between the two.
+beta_labels2 <- c('beta_td_additive' = 'Taxonomic beta\nADDITIVE (new model)', 'beta_td_sorensen_pa' = 'Taxonomic beta\nPAIRWISE DISTANCE (old model)')
+ggplot(model_fixef_all %>% filter(!parameter %in% 'Intercept', grepl('td', response)), aes(x = parameter, y = Estimate, ymin = Q2.5, ymax = Q97.5)) +
+  facet_grid(~ response, labeller = labeller(response = beta_labels2)) +
+  geom_pointrange(aes(color = schnignificant)) +
+  geom_hline(yintercept = 0, linetype = 'dotted', color = 'blue') +
+  scale_x_discrete(labels = param_labels) +
+  coord_flip() +
+  theme_bw() +
+  scale_color_manual(values = c('black', 'red')) +
+  theme(legend.position = 'none')
+
