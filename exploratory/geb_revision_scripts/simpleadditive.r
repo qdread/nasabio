@@ -23,3 +23,12 @@ bbsadditive <- bbsadditive %>% left_join(bbsb %>% filter(radius == 50) %>% selec
 
 library(GGally)
 ggpairs(bbsadditive[, 5:8])
+
+# Do the same with FIA.
+load(file.path(fp, 'modelfits/fia_spatial_mm_dat_50k.RData'))
+
+fiaadditive <- fiabio %>% 
+  select(PLT_CN, alpha_richness, beta_td_sorensen_pa, gamma_richness) %>%
+  mutate(beta_richness = gamma_richness - alpha_richness)
+
+ggpairs(fiaadditive[,-1])
