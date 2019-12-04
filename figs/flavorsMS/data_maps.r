@@ -3,6 +3,7 @@
 
 ### THESE ARE FIGS 2-4 IN MS
 
+# Edit 04 Dec 2019: reduce number of legend labels and make them bigger.
 # Edit 07 Jan 2019: redo with new bio data
 # Edit 18 Jun 2018: new predictor variables.
 # Edit 4 Jun 2018: change midpoint to gray, change labels
@@ -128,19 +129,19 @@ cols <- c(bg = 'white', text = 'black', state = 'gray20', fill = 'white')
 maps_geo <- allgeo_long %>%
   filter(!is.na(value)) %>%
   group_by(variable) %>%
-  do(maps = point_map(., rbcol, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state'], fill_color = cols['fill'], show_legend = TRUE))
+  do(maps = point_map(., scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')), limits = range(.$value), breaks = range(.$value), labels = signif(range(.$value), 2)),
+     tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state'], fill_color = cols['fill'], show_legend = TRUE))
 
 # Correct order of plots
 geo_names_order <- c('temperature mean', 'precipitation mean', 'elevation diversity', 'soil diversity', 'geological age diversity', 'GPP diversity')
 
-tw <- theme(plot.title = element_text(color = 'black'))
+tw <- theme(plot.title = element_text(color = 'black'),
+            legend.key.width = unit(0.15, 'inches'),
+			legend.key.height = unit(0.08, 'inches'),
+			legend.text = element_text(size = 12))
 maps_geo$title <- geo_names_order
 
-# Edit 17 July 2019: reduce the number of ticks on precip mean scale
-maps_geo$maps[[which(maps_geo$title == 'precipitation mean')]] <- maps_geo$maps[[which(maps_geo$title == 'precipitation mean')]] + 
-	scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')), breaks = c(500, 1500, 2500))
-
-png(file.path(fpfig, 'geo_points.png'), height = 9, width = 9, res = 400, units = 'in', type = 'cairo')
+png(file.path(fpfig, 'geo_points.png'), height = 7, width = 7, res = 400, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(maps_geo$maps, maps_geo$title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()
 
@@ -155,25 +156,25 @@ dev.off()
 maps_bbsbio <- bbsbio_long %>%
   filter(!is.na(value)) %>%
   group_by(variable) %>%
-  do(maps = point_map(., rbcol, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state'], fill_color = cols['fill'], show_legend = TRUE))
+  do(maps = point_map(., scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')), limits = range(.$value), breaks = range(.$value), labels = signif(range(.$value), 2)),
+     tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state'], fill_color = cols['fill'], show_legend = TRUE))
 
-tw <- theme(plot.title = element_text(color = 'black'))
 maps_bbsbio$bio_title <- bio_titles[match(maps_bbsbio$variable, bio_names)] # Short title by bio variable
 maps_bbsbio <- maps_bbsbio[match(bio_titles, maps_bbsbio$bio_title),] # Put bio variables in correct order
-png(file.path(fpfig, 'bbs_response_points.png'), height = 9, width = 12, res = 400, units = 'in', type = 'cairo')
-  grid.arrange(grobs = map2(maps_bbsbio$maps, maps_bbsbio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
+png(file.path(fpfig, 'bbs_response_points.png'), height = 7, width = 12*7/9, res = 400, units = 'in', type = 'cairo')
+  grid.arrange(grobs = map2(maps_bbsbio$maps, maps_bbsbio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.text = element_text(size = 11)))), nrow = 3)
 dev.off()
 
 ### fia
 maps_fiabio <- fiabio_long %>%
   filter(!is.na(value)) %>%
   group_by(variable) %>%
-  do(maps = point_map(., rbcol, tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state'], fill_color = cols['fill'], show_legend = TRUE))
+  do(maps = point_map(., scale_color_gradientn(colours = rev(RColorBrewer::brewer.pal(9,'RdYlBu')), limits = range(.$value), breaks = range(.$value), labels = signif(range(.$value), 2)),
+     tnc, states, bg_color=cols['bg'], text_color=cols['text'], state_color=cols['state'], fill_color = cols['fill'], show_legend = TRUE))
 
-tw <- theme(plot.title = element_text(color = 'black'))
 maps_fiabio$bio_title <- bio_titles[match(maps_fiabio$variable, bio_names)] # Short title by bio variable
 maps_fiabio <- maps_fiabio[match(bio_titles, maps_fiabio$bio_title),] # Put bio variables in correct order
-png(file.path(fpfig, 'fia_response_points.png'), height = 9, width = 12, res = 400, units = 'in', type = 'cairo')
-  grid.arrange(grobs = map2(maps_fiabio$maps, maps_fiabio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
+png(file.path(fpfig, 'fia_response_points.png'), height = 7, width = 12*7/9, res = 400, units = 'in', type = 'cairo')
+  grid.arrange(grobs = map2(maps_fiabio$maps, maps_fiabio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.text = element_text(size = 11)))), nrow = 3)
 dev.off()
 
