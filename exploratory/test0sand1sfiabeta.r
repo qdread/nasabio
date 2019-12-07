@@ -1,16 +1,16 @@
-# Script to locally run BBs beta-diversity model fits with additive partition beta, to compare to non-additive.
+# Script to locally run FIA beta-diversity model fits where zeroes and ones are simply removed, rather than adjusted as is done in the MS.
 
 
 NC <- 2
-NI <- 3000
-NW <- 2000
+NI <- 5000
+NW <- 3000
 delta <- 0.8
 
 prednames <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
 climate_prednames <- c('bio1_5k_50_mean', 'bio12_5k_50_mean')
 geo_prednames <- c('elevation_5k_tri_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'dhi_gpp_5k_tri_50_mean')
 alpha_resp <- c('alpha_richness', 'alpha_phy_pa', 'alpha_func_pa')
-beta_resp <- c('beta_td_additive_scaled', 'beta_phy_pa', 'beta_func_pa') # changed to ADDITIVE. (add 6 dec 2019 additive scale)
+beta_resp <- c('beta_td_sorensen_pa', 'beta_phy_pa', 'beta_func_pa') 
 gamma_resp <- c('gamma_richness', 'gamma_phy_pa', 'gamma_func_pa')
 
 task_table <- expand.grid(taxon = c('fia','bbs'),
@@ -20,7 +20,7 @@ task_table <- expand.grid(taxon = c('fia','bbs'),
                           fold = 0:63,
                           stringsAsFactors = FALSE)
 
-taxon <- 'bbs'
+taxon <- 'fia'
 fold <- 0
 rv <- beta_resp
 # if(task_table$model[task] == 'climate') prednames <- climate_prednames
@@ -34,28 +34,28 @@ source('~/Documents/GitHub/nasabio/stats/fit_mv_mm.r')
 # Fit the model for the given response variable, taxon, and ecoregion
 options(mc.cores = 3)
 
-if (taxon == 'bbs') {
-  load('~/Dropbox/projects/nasabiodiv/modelfits/bbs_spatial_mm_dat_50k.RData')
-  geodat <- bbsgeo
-  biodat <- bbsbio
-  siteid <- 'rteNo'
-
-  # Added 14 May: logit transform beta td.
-  biodat$beta_td_sorensen_pa <- qlogis(biodat$beta_td_sorensen_pa)
-  biodat$beta_td_additive <- biodat$gamma_richness - biodat$alpha_richness
-  biodat$beta_td_additive_scaled <- (biodat$gamma_richness - biodat$alpha_richness) / biodat$gamma_richness
-  
-  # Get the additive beta diversity by just subtracting gamma - alpha. Easy as that.
-
-} else {
-  load('/mnt/research/nasabio/temp/fia_spatial_mm_dat_50k.RData')
+  load('~/Dropbox/projects/nasabiodiv/modelfits/fia_spatial_mm_dat_50k.RData')
   geodat <- fiageo
   biodat <- fiabio
   siteid <- 'PLT_CN'
+  
+  ### THIS IS THE MODIFIED PART FOR THIS EXPLORATORY ANALYSIS ###
+  # Remove the (already converted to 0.001 and 0.999) values.
+  biodat$beta_td_sorensen_pa[biodat$beta_td_sorensen_pa %in% range(biodat$beta_td_sorensen_pa, na.rm = TRUE)] <- NA
+  
+  # check how many are zeroes
+  table(fiabio$beta_td_sorensen_pa == 0.001)
+  table(fiabio$beta_td_sorensen_pa == 0.999)
+  
+  ### END MODIFICATION ###
+  
+  
   # Added 14 May: logit transform beta td.
   biodat$beta_td_sorensen_pa <- qlogis(biodat$beta_td_sorensen_pa)
   biodat$beta_td_sorensen <- qlogis(biodat$beta_td_sorensen)
-}
+
+  
+  
 
 # The following six ecoregions should not be used in any model fitting because they have too few data points. 
 # They are primarily in Canada or Mexico with only a small portion of area in the USA, once buffer is deducted
@@ -96,12 +96,12 @@ added_priors <- NULL
 # 					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
 # } 
 # if (task_table$rv[task] == 'beta' & taxon == 'fia') {
-#   added_priors <- c(set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betatdsorensenpa'),
-# 					set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betaphypa'),
-# 					set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betafuncpa'),
-# 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
-# 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
-# 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa')					)
+  added_priors <- c(set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betatdsorensenpa'),
+					set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betaphypa'),
+					set_prior('lognormal(1, 2)', class = 'sdcar', resp = 'betafuncpa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
+					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa')					)
 # }
 # if (task_table$rv[task] == 'beta' & taxon == 'fia') {
 #   added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
@@ -121,14 +121,14 @@ added_priors <- NULL
 # 					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphaphypa'),
 # 					set_prior('student_t(5, 0, 2)', class = 'Intercept', resp = 'alphafuncpa') )
 # }
-#if (task_table$rv[task] == 'beta' & taxon == 'bbs') {
-  added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdadditivescaled'),
-					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
-					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa'),
-					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdadditivescaled'),
-					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
-					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa') )
-#}
+# if (task_table$rv[task] == 'beta' & taxon == 'bbs') {
+#   added_priors <- c(set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betatdsorensenpa'),
+# 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betaphypa'),
+# 					set_prior('lognormal(1, 1)', class = 'sdcar', resp = 'betafuncpa'),
+# 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betatdsorensenpa'),
+# 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betaphypa'),
+# 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'betafuncpa') )
+# }
 # if (task_table$rv[task] == 'gamma' & taxon == 'bbs') {
 #   added_priors <- c(set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammarichness'),
 # 					set_prior('student_t(10, 0, 1)', class = 'Intercept', resp = 'gammaphypa'),
@@ -150,8 +150,8 @@ fit <- fit_mv_mm(pred_df = geodat,
                  distribution = distrib, 
                  adj_matrix = eco_mat,
                  priors = added_priors,
-                 n_chains = 2,
-                 n_iter = 4000,
+                 n_chains = 3,
+                 n_iter = 5000,
                  n_warmup = 3000,
                  delta = delta,
                  missing_data = fold > 0,
@@ -159,16 +159,21 @@ fit <- fit_mv_mm(pred_df = geodat,
 )
 
 # Save all fits -- do in scratch space because so big
- save(fit, file = '~/Dropbox/projects/nasabiodiv/modelfits/testscalingadditivebetafit.RData')
+# save(fit, file = paste0('/mnt/gs18/scratch/groups/nasabio/modelfits/fit',task,'.RData'))
 
+# Save the fit temporarily.
+save(fit, file = '~/Dropbox/projects/nasabiodiv/modelfits/testfiafitremove0and1.RData')
 
+# Extract fixed effect coefficients from model fit.
 
-# Load remotely run fit and get output ------------------------------------
+library(tidyr)
+library(ggplot2)
 
-model_coef <- read.csv('~/Dropbox/projects/nasabiodiv/additivebbscoef.csv', stringsAsFactors = FALSE)
+model_coef <- fit$coef
 
 model_fixef <- model_coef %>% 
   filter(effect %in% 'fixed') %>%
+  separate(parameter, into = c('response', 'parameter'), sep= '_', extra = 'merge') %>%
   select(response, parameter, stat, value) %>%
   group_by(response, parameter) %>%
   spread(stat, value)
@@ -183,6 +188,7 @@ model_coef_orig <- read.csv('~/Dropbox/projects/nasabiodiv/modelfits/multivariat
 
 model_fixef_orig <- model_coef_orig %>%
   filter(effect %in% 'fixed', model %in% 'full', taxon %in% 'bbs', rv %in% 'beta') %>%
+  mutate(response = gsub('_', '', response)) %>%
   select(response, parameter, stat, value) %>%
   group_by(response, parameter) %>%
   spread(stat, value)
@@ -199,65 +205,14 @@ ggplot(model_fixef_all %>% filter(!parameter %in% 'Intercept'), aes(x = paramete
 
 # Make a slightly nicer figure so that it can be shown to the co-authors
 param_labels <- c('climate: temp mean', 'climate: precip mean', 'geodiv: GPP', 'geodiv: elevation', 'geodiv: geological age', 'geodiv: soil type')
-beta_labels <- c('beta_func_pa' = 'Functional beta', 'beta_phy_pa' = 'Phylogenetic beta', 'beta_td_additive' = 'Taxonomic beta\nADDITIVE', 'beta_td_sorensen_pa' = 'Taxonomic beta\nPAIRWISE DISTANCE')
+beta_labels <- c('betafuncpa' = 'Functional beta', 'betaphypa' = 'Phylogenetic beta', 'betatdsorensenpa' = 'Taxonomic beta')
+
 ggplot(model_fixef_all %>% filter(!parameter %in% 'Intercept'), aes(x = parameter, y = Estimate, ymin = Q2.5, ymax = Q97.5)) +
-  facet_grid(model ~ response, labeller = labeller(response = beta_labels)) +
-  geom_pointrange(aes(color = schnignificant)) +
+  facet_wrap(~ response, labeller = labeller(response = beta_labels)) +
+  geom_pointrange(aes(color = model)) +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'blue') +
   scale_x_discrete(labels = param_labels) +
   coord_flip() +
   theme_bw() +
-  scale_color_manual(values = c('black', 'red')) +
-  theme(legend.position = 'none')
-
-# Only show the taxonomic result since it's the only one that changes between the two.
-beta_labels2 <- c('beta_td_additive' = 'Taxonomic beta\nADDITIVE (new model)', 'beta_td_sorensen_pa' = 'Taxonomic beta\nPAIRWISE DISTANCE (old model)')
-ggplot(model_fixef_all %>% filter(!parameter %in% 'Intercept', grepl('td', response)), aes(x = parameter, y = Estimate, ymin = Q2.5, ymax = Q97.5)) +
-  facet_grid(~ response, labeller = labeller(response = beta_labels2)) +
-  geom_pointrange(aes(color = schnignificant)) +
-  geom_hline(yintercept = 0, linetype = 'dotted', color = 'blue') +
-  scale_x_discrete(labels = param_labels) +
-  coord_flip() +
-  theme_bw() +
-  scale_color_manual(values = c('black', 'red')) +
-  theme(legend.position = 'none')
-
-
-# same plots for fia ------------------------------------------------------
-
-
-model_coef <- read.csv('~/Dropbox/projects/nasabiodiv/additivefiacoef.csv', stringsAsFactors = FALSE)
-
-model_fixef <- model_coef %>% 
-  filter(effect %in% 'fixed') %>%
-  select(response, parameter, stat, value) %>%
-  group_by(response, parameter) %>%
-  spread(stat, value)
-
-
-# Load the non additive one
-model_coef_orig <- read.csv('~/Dropbox/projects/nasabiodiv/modelfits/multivariate_spatial_coef.csv', stringsAsFactors = FALSE)
-
-model_fixef_orig <- model_coef_orig %>%
-  filter(effect %in% 'fixed', model %in% 'full', taxon %in% 'fia', rv %in% 'beta') %>%
-  select(response, parameter, stat, value) %>%
-  group_by(response, parameter) %>%
-  spread(stat, value)
-
-model_fixef_all <- rbind(data.frame(model = 'old', model_fixef_orig), data.frame(model = 'new', model_fixef)) %>%
-  mutate(schnignificant = (Q2.5>0 & Q97.5>0) | (Q2.5<0 & Q97.5<0))
-
-# Make a slightly nicer figure so that it can be shown to the co-authors
-param_labels <- c('climate: temp mean', 'climate: precip mean', 'geodiv: GPP', 'geodiv: elevation', 'geodiv: geological age', 'geodiv: soil type')
-# Only show the taxonomic result since it's the only one that changes between the two.
-beta_labels2 <- c('beta_td_additive' = 'Taxonomic beta\nADDITIVE (new model)', 'beta_td_sorensen_pa' = 'Taxonomic beta\nPAIRWISE DISTANCE (old model)')
-ggplot(model_fixef_all %>% filter(!parameter %in% 'Intercept', grepl('td', response)), aes(x = parameter, y = Estimate, ymin = Q2.5, ymax = Q97.5)) +
-  facet_grid(~ response, labeller = labeller(response = beta_labels2)) +
-  geom_pointrange(aes(color = schnignificant)) +
-  geom_hline(yintercept = 0, linetype = 'dotted', color = 'blue') +
-  scale_x_discrete(labels = param_labels) +
-  coord_flip() +
-  theme_bw() +
-  scale_color_manual(values = c('black', 'red')) +
-  theme(legend.position = 'none')
-
+  scale_color_manual(values = c('blue', 'red'), labels = c('0 and 1 adjusted\n(used in MS)', '0 and 1 removed')) +
+  theme(legend.position = 'bottom')
