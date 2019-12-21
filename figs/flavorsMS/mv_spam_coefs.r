@@ -3,6 +3,7 @@
 
 ### THESE ARE THE ACTUAL PUBLICATION FIGURES FOR THE "FLAVORS" MANUSCRIPT!
 
+# Modified 20 Dec 2019: also output PDFs
 # Modified 08 May 2019: add WAIC to summary stats table
 # Modified 08 Jan 2019: change the blue color scheme and fix the mismatch in the spatial var color scheme.
 # Modified 18 June: Add the new null models.
@@ -11,7 +12,7 @@
 # Load and combine data ---------------------------------------------------
 
 
-fp <- '~/Dropbox/projects/nasabiodiv/modelfits' # Local
+fp <- '~/Dropbox/Q/projects/nasabiodiv/modelfits' # Local
 
 model_coef <- read.csv(file.path(fp, 'multivariate_spatial_coef.csv'), stringsAsFactors = FALSE)
 model_pred <- read.csv(file.path(fp, 'multivariate_spatial_pred.csv'), stringsAsFactors = FALSE)
@@ -157,7 +158,7 @@ coef_both_sideways <- coefplot_both +
 
 
 
-
+ggsave('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/figures_pdf/fig5.pdf', coef_both_sideways, height = 8, width = 8)
 ggsave(file.path(fpfig, 'both_multivariate_coef_sideways.png'), coef_both_sideways, height = 8, width = 8, dpi = 300)
 
 
@@ -352,6 +353,7 @@ ggsave(file.path(fpfig, 'both_fittedrmse_fullonly.png'), rmseplot_taxacolor, hei
 ggsave(file.path(fpfig, 'both_fittedrmse_allmodels_2wayfacet.png'), rmseplot_bymodel_2wayfacet, height = 6, width = 7, dpi = 400)
 ggsave(file.path(fpfig, 'both_lolormse_allmodels_2wayfacet.png'), kfold_rmseplot_bymodel_2wayfacet, height = 6, width = 7, dpi = 400)
 
+ggsave('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/figures_pdf/fig6.pdf', kfold_rmseplot_bymodel_2wayfacet, height = 6, width = 7)
 
 # Table of fit stats ------------------------------------------------------
 

@@ -1,11 +1,12 @@
 ---
-title: "Supplementary Information: Tables and Figures"
-header-includes:
-   - \usepackage{caption}
-   - \usepackage{multirow}
-output: 
+title: 'Supplementary Information: Tables and Figures'
+output:
+  word_document: default
   pdf_document:
     dev: png
+header-includes:
+- \usepackage{caption}
+- \usepackage{multirow}
 ---
 
 Beyond counts and averages: relating geodiversity to dimensions of biodiversity. Quentin D. Read, Phoebe L. Zarnetske, Sydne Record, Kyla M. Dahlin, Andrew O. Finley, John M. Grady, Martina L. Hobi, Sparkle L. Malone, Jennifer K. Costanza, Adam M. Wilson, Andrew M. Latimer, Keith D. Gaddis, Stephanie Pau, Scott V. Ollinger

@@ -3,12 +3,13 @@
 
 ### THIS IS FIGURE 1 IN MS
 
+# Edit 21 Dec 2019: include pdf output
 # Edit 16 Sep 2019: change heading of panel A
 # Edit 08 Jan 2019: panel labels for MS
 # Edit 18 Jun: Use new predictor sets
 
-load('~/Dropbox/projects/nasabiodiv/modelfits/bbs_spatial_mm_dat_50k.RData')
-load('~/Dropbox/projects/nasabiodiv/modelfits/fia_spatial_mm_dat_50k.RData')
+load('~/Dropbox/Q/projects/nasabiodiv/modelfits/bbs_spatial_mm_dat_50k.RData')
+load('~/Dropbox/Q/projects/nasabiodiv/modelfits/fia_spatial_mm_dat_50k.RData')
 
 prednames50 <- c('elevation_5k_tri_50_mean', 'bio1_5k_50_mean', 'geological_age_5k_50_diversity', 'soil_type_5k_50_diversity', 'bio12_5k_50_mean', 'dhi_gpp_5k_tri_50_mean')
 geo_names <- c('elevation diversity','temperature mean','geol. age diversity','soil diversity','precip. mean','GPP diversity')
@@ -107,4 +108,8 @@ hmgeo <- cormat_heatmap(allgeo_cor) + theme(legend.position = 'none') + ggtitle(
 library(gridExtra)
 png('~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/corr_heatmaps.png', height = 8, width = 5, res = 400, units = 'in')
   grid.arrange(hmgeo, hmbbs, hmfia, ncol = 1)
+dev.off()
+
+pdf('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/figures_pdf/fig1.pdf', height = 8, width = 5)
+grid.arrange(hmgeo, hmbbs, hmfia, ncol = 1)
 dev.off()

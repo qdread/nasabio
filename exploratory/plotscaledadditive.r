@@ -22,10 +22,10 @@ model_fixef_all <- rbind(data.frame(model = 'scaled additive', scaled_fixef), da
 param_labels <- c('climate: temp mean', 'climate: precip mean', 'geodiv: GPP', 'geodiv: elevation', 'geodiv: geological age', 'geodiv: soil type')
 
 ggplot(model_fixef_all %>% filter(!parameter %in% 'Intercept', response %in% 'taxonomic', !model %in% 'unscaled additive'), aes(x = parameter, y = Estimate, ymin = Q2.5, ymax = Q97.5)) +
-  geom_pointrange(aes(color = model)) +
+  geom_pointrange(aes(color = model), position = position_dodge(width = 0.2)) +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'blue') +
   scale_x_discrete(labels = param_labels) +
   coord_flip() +
   theme_bw() +
-  #scale_color_manual(values = c('blue', 'red'), labels = c('0 and 1 adjusted\n(used in MS)', '0 and 1 removed')) +
+  scale_color_manual(values = c('slateblue', 'indianred'), name = 'beta-diversity type', labels = c('scaled additive', 'dissimilarity')) +
   theme(legend.position = 'bottom')

@@ -3,6 +3,7 @@
 
 ### THESE ARE FIGS 2-4 IN MS
 
+# Edit 21 Dec 2019: include PDF output
 # Edit 04 Dec 2019: reduce number of legend labels and make them bigger.
 # Edit 07 Jan 2019: redo with new bio data
 # Edit 18 Jun 2018: new predictor variables.
@@ -145,6 +146,11 @@ png(file.path(fpfig, 'geo_points.png'), height = 7, width = 7, res = 400, units 
   grid.arrange(grobs = map2(maps_geo$maps, maps_geo$title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
 dev.off()
 
+pdf(file.path(fpfig, 'fig2.pdf'), height = 7, width = 7)
+  grid.arrange(grobs = map2(maps_geo$maps, maps_geo$title, function(p, name) ggplotGrob(p + ggtitle(name) + tw)), nrow = 3)
+dev.off()
+
+
 # Added 28 Feb 2019: create version with only the 4 geo variables, and no legend
 png(file.path(fpfig, 'geo_points_nolegend.png'), height = 6, width = 9, res = 400, units = 'in', type = 'cairo')
   grid.arrange(grobs = map2(maps_geo$maps[3:6], paste0('(',letters[1:4],') ',maps_geo$title[3:6]), function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.position = 'none'))), nrow = 2)
@@ -165,6 +171,10 @@ png(file.path(fpfig, 'bbs_response_points.png'), height = 7, width = 12*7/9, res
   grid.arrange(grobs = map2(maps_bbsbio$maps, maps_bbsbio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.text = element_text(size = 11)))), nrow = 3)
 dev.off()
 
+pdf(file.path(fpfig, 'fig3.pdf'), height = 7, width = 12*7/9)
+  grid.arrange(grobs = map2(maps_bbsbio$maps, maps_bbsbio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.text = element_text(size = 11)))), nrow = 3)
+dev.off()
+
 ### fia
 maps_fiabio <- fiabio_long %>%
   filter(!is.na(value)) %>%
@@ -178,3 +188,6 @@ png(file.path(fpfig, 'fia_response_points.png'), height = 7, width = 12*7/9, res
   grid.arrange(grobs = map2(maps_fiabio$maps, maps_fiabio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.text = element_text(size = 11)))), nrow = 3)
 dev.off()
 
+pdf(file.path(fpfig, 'fig4.pdf'), height = 7, width = 12*7/9)
+  grid.arrange(grobs = map2(maps_fiabio$maps, maps_fiabio$bio_title, function(p, name) ggplotGrob(p + ggtitle(name) + tw + theme(legend.text = element_text(size = 11)))), nrow = 3)
+dev.off()
