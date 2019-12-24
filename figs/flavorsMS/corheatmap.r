@@ -110,6 +110,8 @@ png('~/google_drive/NASABiodiversityWG/Figures/multivariate_maps_figs/corr_heatm
   grid.arrange(hmgeo, hmbbs, hmfia, ncol = 1)
 dev.off()
 
+noleg <- theme(legend.position = 'none')
+
 pdf('~/google_drive/NASABiodiversityWG/FlavorsOfDiversityPaper/figures_pdf/fig1.pdf', height = 8, width = 5)
-grid.arrange(hmgeo, hmbbs, hmfia, ncol = 1)
+grid.arrange(hmgeo, hmbbs, hmfia + noleg, ncol = 1)
 dev.off()

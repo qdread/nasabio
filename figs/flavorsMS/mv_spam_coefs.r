@@ -3,6 +3,7 @@
 
 ### THESE ARE THE ACTUAL PUBLICATION FIGURES FOR THE "FLAVORS" MANUSCRIPT!
 
+# Modified 24 Dec 2019: make figures legible in grayscale.
 # Modified 20 Dec 2019: also output PDFs
 # Modified 08 May 2019: add WAIC to summary stats table
 # Modified 08 Jan 2019: change the blue color scheme and fix the mismatch in the spatial var color scheme.
@@ -139,7 +140,7 @@ coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c
   geom_point(aes(x = predictor, y = Estimate, size = nonzero, color = taxon, fill = nonzero, group = taxon, shape = taxon), position=pd) +
   facet_grid(rv ~ flavor) +
   scale_color_manual(values = twocolors) +
-  scale_fill_manual(values = c('black', 'red')) +
+  scale_fill_manual(values = c('black', 'indianred1')) +
   scale_size_manual(values = c(1.5, 2)) +
   scale_shape_manual(values = c(24, 21)) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
@@ -306,11 +307,12 @@ rmseplot_bymodel_2wayfacet <- all_rmse %>%
         legend.text = element_text(size = 8))
 
 kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>% 
-  ggplot(aes(x = rv, color = model, group = model)) +
+  ggplot(aes(x = rv, color = model, group = model, shape = model)) +
   facet_grid(taxon ~ flavor, switch = 'x', labeller = labeller(taxon = c(bbs = 'birds', fia = 'trees'))) +
   geom_errorbar(aes(ymin = kfold_RMSE_q025_relative, ymax = kfold_RMSE_q975_relative), width = 0, position = pd) +
   geom_point(aes(y = kfold_RMSE_mean_relative), position = pd, size = 2) +
   theme_bw() +
+  scale_shape_manual(values = 21:24) +
   scale_y_continuous(limits = c(0, 0.7), name = 'CV relative root mean squared error', expand = c(0,0)) +
   scale_x_discrete(name = 'response') +
   theme(strip.background = element_blank(),
@@ -318,7 +320,8 @@ kfold_rmseplot_bymodel_2wayfacet <- all_rmse %>%
         panel.spacing = unit(0, 'lines'),
         legend.position = 'bottom',
         legend.background = element_rect(color = 'black'),
-        legend.text = element_text(size = 8))
+        legend.text = element_text(size = 8),
+        panel.grid.major.x = element_blank())
 
 # Just compare the predictive power of the full model, putting birds and trees on the same one.
 # THIS IS FIG 6 IN THE MANUSCRIPT (or it was in the old version)
