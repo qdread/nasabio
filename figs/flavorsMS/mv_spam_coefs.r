@@ -136,13 +136,14 @@ pd <- position_dodge(width = 0.12)
 coefplot_both <- ggplot(coefdat_both %>% mutate(taxon = factor(taxon, labels = c('birds','trees')))) +
   geom_rect(xmin=0, xmax=2.5, ymin=-Inf, ymax=Inf, fill = 'gray95') +
   geom_hline(yintercept = 0, linetype = 'dotted', color = 'slateblue', size = 1) +
-  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = taxon, group = taxon), width = 0, position=pd) +
+  geom_errorbar(aes(x = predictor, ymin = Q2.5, ymax = Q97.5, color = taxon, group = taxon, linetype = nonzero), width = 0, position=pd) +
   geom_point(aes(x = predictor, y = Estimate, size = nonzero, color = taxon, fill = nonzero, group = taxon, shape = taxon), position=pd) +
   facet_grid(rv ~ flavor) +
   scale_color_manual(values = twocolors) +
   scale_fill_manual(values = c('black', 'indianred1')) +
   scale_size_manual(values = c(1.5, 2)) +
   scale_shape_manual(values = c(24, 21)) +
+  scale_linetype_manual(values = c(3, 1)) +
   scale_y_continuous(name = 'coefficient estimate', limits = c(-0.73, 0.73), expand = c(0,0)) +
   theme_bw() +
   theme(strip.background = element_rect(fill=NA),
@@ -155,7 +156,7 @@ coef_both_sideways <- coefplot_both +
   theme(axis.text.x = element_text(angle=0, hjust=0.5), 
         legend.background = element_rect(color = 'black'),
         legend.position = c(0.92,0.93)) +
-  guides(shape = guide_legend(override.aes = list(fill = twocolors)), fill = 'none', size = 'none')
+  guides(shape = guide_legend(override.aes = list(fill = twocolors)), fill = 'none', size = 'none', linetype = 'none')
 
 
 
